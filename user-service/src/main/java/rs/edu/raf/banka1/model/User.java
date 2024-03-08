@@ -19,21 +19,29 @@ public class User {
     private Long userId;
 
     @Column(unique = true)
-    @NotBlank(message = "Username is mandatory")
-    private String username;
+    @NotBlank(message = "Email is mandatory")
+    private String email;
 
     @Column
     @NotBlank(message = "Password is mandatory")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @Column(unique = true)
-    @NotBlank(message = "Email is mandatory")
-    private String email;
-
     @Column
     private String firstName;
 
     @Column
     private String lastName;
+
+    @Column(unique = true)
+    private String jmbg;
+
+    @Column
+    private String position;
+
+    @Column
+    private String phoneNumber;
+
+    @Column
+    private Boolean active;
 }
