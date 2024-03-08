@@ -2,6 +2,9 @@ package rs.edu.raf.banka1.responses;
 
 import lombok.Getter;
 import lombok.Setter;
+import rs.edu.raf.banka1.model.Permission;
+
+import java.util.Set;
 
 @Getter
 @Setter
@@ -15,5 +18,6 @@ public class UserResponse {
     private String position;
     private String phoneNumber;
     private Boolean active;
+    private Set<Permission> permissions;
 }
 

@@ -16,6 +16,7 @@ public class UserMapper {
         userResponse.setPhoneNumber(user.getPhoneNumber());
         userResponse.setPosition(user.getPosition());
         userResponse.setActive(user.getActive());
+        userResponse.setPermissions(user.getPermissions());
         return userResponse;
     }
 
@@ -28,6 +29,7 @@ public class UserMapper {
         user.setPhoneNumber(userResponse.getPhoneNumber());
         user.setPosition(userResponse.getPosition());
         user.setActive(userResponse.getActive());
+        user.setPermissions(userResponse.getPermissions());
         return user;
     }
 }

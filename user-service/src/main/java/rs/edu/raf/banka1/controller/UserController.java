@@ -36,10 +36,10 @@ public class UserController {
     }
 
     // A method that returns a JSON string with type UserResponse
-    @GetMapping(value= "/get/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get user by username", description = "Returns user by username")
-    public ResponseEntity<UserResponse> readUser(@PathVariable String username) {
-        return new ResponseEntity<>(this.userService.findByUsername(username), HttpStatus.OK);
+    @GetMapping(value= "/get/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get user by email", description = "Returns user by email")
+    public ResponseEntity<UserResponse> readUser(@PathVariable String email) {
+        return new ResponseEntity<>(this.userService.findByEmail(email), HttpStatus.OK);
     }
 
 }
