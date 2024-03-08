@@ -20,8 +20,8 @@ public class UserServiceImpl implements UserService {
         this.userMapper = userMapper;
     }
 
-    public UserResponse findByUsername(String username) {
-        return this.userRepository.findByUsername(username).map(userMapper::userToUserResponse).orElse(null);
+    public UserResponse findByEmail(String email) {
+        return this.userRepository.findByEmail(email).map(userMapper::userToUserResponse).orElse(null);
     }
 
     @Override
