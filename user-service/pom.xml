@@ -194,10 +194,6 @@
 					<failOnViolation>true</failOnViolation>
 					<includeTestSourceDirectory>true</includeTestSourceDirectory>
 					<logViolationsToConsole>true</logViolationsToConsole>
-					<format>html</format>
-<!--					<excludes>-->
-<!--						com/omernaci/checkstyleexample/CheckstyleExampleApplication.java-->
-<!--					</excludes>-->
 				</configuration>
 				<dependencies>
 					<dependency>
