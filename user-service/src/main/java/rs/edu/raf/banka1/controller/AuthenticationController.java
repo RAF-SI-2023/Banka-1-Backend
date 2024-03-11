@@ -3,10 +3,7 @@ package rs.edu.raf.banka1.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.requests.LoginRequest;
@@ -29,8 +26,15 @@ public class AuthenticationController {
         this.jwtUtil = jwtUtil;
     }
 
+    @GetMapping("/test")
+    public boolean test() {
+        System.out.println(authenticationManager.toString());
+        return true;
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
+        System.out.println("Usao u login");
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         } catch (Exception   e){

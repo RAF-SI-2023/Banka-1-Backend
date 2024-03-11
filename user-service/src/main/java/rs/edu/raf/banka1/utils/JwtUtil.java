@@ -18,8 +18,9 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
-    @Value("${oauth.jwt.secret}")
-    private String secretKey;
+//    @Value("${oauth.jwt.secret}")
+//    private String secretKey;
+    private String secretKey = "MY SECRET KEY";
 
     public Claims extractAllClaims(String token) {
         Claims claims = null;

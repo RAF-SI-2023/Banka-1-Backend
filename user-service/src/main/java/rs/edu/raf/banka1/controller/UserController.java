@@ -21,7 +21,8 @@ import java.util.List;
 @RequestMapping("/user")
 @Tag(name = "User", description = "User API")
 //@SecurityRequirement() TODO
-@SecurityRequirement(name = "basicScheme")
+//cemu ovo
+//@SecurityRequirement(name = "basicScheme")
 @CrossOrigin
 public class UserController {
 
