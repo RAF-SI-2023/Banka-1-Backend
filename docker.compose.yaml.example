@@ -1,0 +1,48 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:latest
+    restart: always
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    healthcheck:
+      # set myusername and mypassword to desired username and password
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "myusername", "-pmypassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  user-service:
+    build:
+      context: user-service/
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: user-service/target/*.jar
+        CACHEBUST: ${CI_COMMIT_SHA}  # Use a unique value to bust the cache
+    image: user-service
+    container_name: user-service-container
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  market-service:
+    build:
+      context: market-service/
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: market-service/target/*.jar
+        CACHEBUST: ${CI_COMMIT_SHA}  # Use a unique value to bust the cache
+    image: market-service
+    container_name: market-service-container
+    restart: always
+    ports:
+      - "8081:8081"  # Adjust the port as needed
+    depends_on:
+      mysql:
+        condition: service_healthy
