@@ -46,10 +46,8 @@ jobs:
           host: ${{secrets.PRODUCTION_HOST_IP}}
           username: ${{secrets.PRODUCTION_SERVER_USER}}
           key: ${{secrets.PRODUCTION_SERVER_SSH}}
-          source: |
-            ./docker.compose.yaml
-            ./init.sql
-          target: /root
+          source: ./docker.compose.yaml
+          target: /root/
           debug: true
 
       - name: SSH into PROD
