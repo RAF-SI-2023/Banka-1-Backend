@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.User;
 
@@ -30,12 +31,16 @@ public class JwtUtil {
         return claims;
     }
 
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         Claims claims = extractAllClaims(token);
         if (claims == null) {
             return null;
         }
         return claims.getSubject();
+    }
+
+    public boolean isTokenExpired(String token){
+        return extractAllClaims(token).getExpiration().before(new Date());
     }
 
     public String generateToken(String email, String permissions){
@@ -48,19 +53,8 @@ public class JwtUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
                 .signWith(SignatureAlgorithm.HS512, secretKey).compact();
     }
-    public List<String> extractRoles(String token) {
-        return null;
-    }
 
-    public boolean isTokenExpired(String token) {
-        return true;
-    }
-
-    public boolean validateToken(String token, User user) {
-        return false;
-    }
-
-    public String generateToken(User user) {
-        return null;
+    public boolean validateToken(String token, UserDetails user) {
+        return (user.getUsername().equals(extractEmail(token)) && !isTokenExpired(token));
     }
 }
