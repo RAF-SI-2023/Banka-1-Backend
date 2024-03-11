@@ -1,17 +1,34 @@
 package rs.edu.raf.banka1.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.model.ListingHistoryModel;
 import rs.edu.raf.banka1.model.ListingModel;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 import rs.edu.raf.banka1.repositories.ListingRepository;
+import rs.edu.raf.banka1.utils.Constants;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ListingServiceImpl implements ListingService{
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    public ListingServiceImpl() {
+        // we don't need all fields from response, so we can ignore them
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
+
     @Autowired
     private ListingRepository listingRepository;
     @Autowired
@@ -19,19 +36,50 @@ public class ListingServiceImpl implements ListingService{
 
     @Override
     public List<ListingModel> fetchListings() {
-        System.out.println("Fetching data...");
-        ListingModel listingModel = new ListingModel();
-        listingModel.setTicker("AAPL");
-        listingModel.setName("Apple Inc.");
-        listingModel.setExchange("NASDAQ");
-        listingModel.setPrice(125.0);
-        listingModel.setAsk(125.1);
-        listingModel.setBid(124.9);
-        listingModel.setChanged(0.5);
-        listingModel.setVolume(1000000);
-        listingModel.setLastRefresh(java.time.LocalDateTime.now());
+        try {
+            List<String> sectors = List.of("Electronic", "Technology");
+            String sectorsEncoded = String.join("%20", sectors);
 
-        return List.of(listingModel, listingModel);
+            String urlStr = "https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=" + sectorsEncoded + "&token=" + Constants.listingAPItoken;
+
+            URL url = new URL(urlStr);
+
+            // Open a connection to the URL
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            // Set the request method to GET
+            connection.setRequestMethod("GET");
+
+            // Set request headers if needed
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            // Get the response code
+            int responseCode = connection.getResponseCode();
+            System.out.println("Response Code: " + responseCode);
+
+            // Read the response body
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            // Close the connection
+            connection.disconnect();
+
+            // Convert JSON response to list of ListingModel objects
+            List<ListingModel> listings = objectMapper.readValue(response.toString(), new TypeReference<List<ListingModel>>() {});
+            System.out.println("Data size: " + listings.size());
+
+            // for every listing, we should set lastRefreshed to current time
+            listings.forEach(listingModel -> listingModel.setLastRefresh(java.time.LocalDateTime.now()));
+            return listings;
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     @Override
