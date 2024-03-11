@@ -1,0 +1,34 @@
+name: Deploy backend service to DigitalOcean
+
+on:
+  push:
+    branches:
+      - sprint-1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+
+      - name: Build with Maven
+        run: mvn -B clean package -DskipTests=false
+    
+      - name: Build Docker image
+        run: docker build -t duckkecach/banka-1-backend:latest ./user-service
+
+      - name: Push Docker image to Docker hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{secrets.DOCKER_USERNAME}}
+          password: ${{secrets.DOCKER_PASSWORD}}
+
+      - name: Push Docker image
+        run: docker push ${{secrets.DOCKER_USERNAME}}/banka-1-backend:latest
