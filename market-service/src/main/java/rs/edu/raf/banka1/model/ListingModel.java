@@ -1,14 +1,16 @@
 package rs.edu.raf.banka1.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+
 
 @Entity
 @Getter
@@ -16,14 +18,31 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ListingModel {
     @Id
+    @JsonProperty("symbol")
     private String ticker;
+
+    @JsonProperty("companyName")
     private String name;
+
+    @JsonProperty("primaryExchange")
     private String exchange;
+
+    @JsonIgnore
     private LocalDateTime lastRefresh;
+
+    @JsonProperty("latestPrice")
     private double price;
+
+    @JsonProperty("high")
     private double ask;
+
+    @JsonProperty("low")
     private double bid;
+
+    @JsonProperty("change")
     private double changed;
+
+    @JsonProperty("volume")
     private int volume;
 
 }

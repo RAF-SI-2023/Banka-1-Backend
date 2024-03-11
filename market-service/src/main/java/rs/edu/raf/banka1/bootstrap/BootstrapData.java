@@ -24,11 +24,10 @@ public class BootstrapData implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         System.out.println("Loading Data...");
-        System.out.println(listingService.fetchListings().size());
-        listingService.updateAllListings(listingService.fetchListings());
-        List<ListingHistoryModel> lst = List.of(listingMapper.listingModelToListongHistoryModel(listingService.fetchListings().get(0)), listingMapper.listingModelToListongHistoryModel(listingService.fetchListings().get(0)));
-        int res = listingService.addAllListingsToHistory(lst);
-        System.out.println(res + " new listings added to history!");
+        List<ListingModel> listinfList = listingService.fetchListings();
+        listingService.updateAllListings(listinfList);
+        listingService.updateAllListings(listinfList);
+
         System.out.println("Data loaded!");
     }
 }
