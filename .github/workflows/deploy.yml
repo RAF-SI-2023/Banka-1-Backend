@@ -45,7 +45,7 @@ jobs:
         with:
           host: ${{secrets.PRODUCTION_HOST_IP}}
           username: ${{secrets.PRODUCTION_SERVER_USER}}
-          ssh_private_key: ${{secrets.PRODUCTION_SERVER_SSH}}
+          key: ${{secrets.PRODUCTION_SERVER_SSH}}
           source: |
             ./docker.compose.yaml.example
             ./init.sql.example
