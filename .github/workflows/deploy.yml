@@ -22,8 +22,11 @@ jobs:
       - name: Build with Maven
         run: mvn -B clean package -DskipTests=true
     
-      - name: Build Docker image
-        run: docker build -t duckkecach/banka-1-backend:latest ./user-service
+      - name: Build Docker image for user service
+        run: docker build -t ${{secrets.DOCKER_USERNAME}}/user-service:latest ./user-service
+
+      - name: Build Docker image for market service
+        run: docker build -t ${{secrets.DOCKER_USERNAME}}/market-service:latest ./market-service
 
       - name: Push Docker image to Docker hub
         uses: docker/login-action@v2
@@ -31,5 +34,30 @@ jobs:
           username: ${{secrets.DOCKER_USERNAME}}
           password: ${{secrets.DOCKER_PASSWORD}}
 
-      - name: Push Docker image
-        run: docker push ${{secrets.DOCKER_USERNAME}}/banka-1-backend:latest
+      - name: Push Docker image - user service
+        run: docker push ${{secrets.DOCKER_USERNAME}}/user-service:latest
+
+      - name: Push Docker image - market service
+        run: docker push ${{secrets.DOCKER_USERNAME}}/market-service:latest
+
+      - name: SCP Docker Compose and init.sql to PROD
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{secrets.PRODUCTION_HOST_IP}}
+          username: ${{secrets.PRODUCTION_SERVER_USER}}
+          ssh_private_key: ${{secrets.PRODUCTION_SERVER_SSH}}
+          source: |
+            ./docker.compose.yaml.example
+            ./init.sql.example
+          target: /root/
+
+      - name: SSH into PROD
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.PRODUCTION_HOST_IP}}
+          username: ${{secrets.PRODUCTION_SERVER_USER}}
+          ssh_private_key: ${{secrets.PRODUCTION_SERVER_SSH}}
+          script: |
+            docker-compose -f /path/to/docker-compose.yml pull
+            docker-compose -f /path/to/docker-compose.yml up -d
+          
