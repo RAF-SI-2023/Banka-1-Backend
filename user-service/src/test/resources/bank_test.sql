@@ -12,3 +12,4 @@ INSERT INTO `user` (`user_id`, `active`, `email`, `first_name`, `jmbg`, `last_na
 INSERT INTO `user_permissions` (`user_id`, `permission_id`) VALUES
     (1, 1);
 
+COMMIT;
