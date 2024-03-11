@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.cucumber.controller;
 
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ public class UserControllerSteps {
 
     private ResponseEntity<UserResponse> lastReadUserResponse;
     private ResponseEntity<List<UserResponse>> lastReadAllUsersResponse;
+    private String email;
     private UserMapper userMapper = new UserMapper();
 
 
@@ -37,13 +39,16 @@ public class UserControllerSteps {
     public void iSendAGETRequestTo(String path) {
         if(path.equals("/user/getAll"))
             lastReadAllUsersResponse = new RestTemplate().exchange(url + port + path, org.springframework.http.HttpMethod.GET, null,  new ParameterizedTypeReference<List<UserResponse>>() {});
-        else if(path.startsWith("user/get"))
+        else if(path.startsWith("/user/get/")) {
             lastReadUserResponse = new RestTemplate().exchange(url + port + path, org.springframework.http.HttpMethod.GET, null, UserResponse.class);
+            String[] split = path.split("/");
+            email = split[split.length - 1];
+        }
     }
 
     @Then("Response status is {string}")
     public void theResponseStatusShouldBe(String code) {
-        // Write code here that turns the phrase above into concrete actions
+
         assertThat(lastReadAllUsersResponse.getStatusCode().toString()).isEqualTo(code);
     }
 
@@ -52,5 +57,13 @@ public class UserControllerSteps {
         List<UserResponse> userResponses = new ArrayList<>();
         userRepository.findAll().forEach(user -> userResponses.add(userMapper.userToUserResponse(user)));
         assertThat(lastReadAllUsersResponse.getBody()).hasSameElementsAs(userResponses);
+    }
+
+    @Then("Response body is the correct user JSON")
+    public void responseBodyIsTheCorrectUserJSON() {
+        //TODO: throw appropriate exception?
+        System.out.println(email);
+        UserResponse userResponse = userMapper.userToUserResponse(userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("User not found")));
+        assertThat(lastReadUserResponse.getBody()).isEqualTo(userResponse);
     }
 }
