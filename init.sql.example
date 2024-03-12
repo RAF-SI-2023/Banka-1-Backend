@@ -1,0 +1,8 @@
+# set myusername and mypassword to your desired username and password
+
+CREATE DATABASE IF NOT EXISTS bank_marketservice;
+CREATE DATABASE IF NOT EXISTS bank_userservice;
+
+CREATE USER 'myusername'@'%' IDENTIFIED BY 'mypassword';
+GRANT ALL PRIVILEGES ON bank_marketservice.* TO 'myusername'@'%';
+GRANT ALL PRIVILEGES ON bank_userservice.* TO 'myusername'@'%';
