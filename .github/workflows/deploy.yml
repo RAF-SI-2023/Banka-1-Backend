@@ -45,6 +45,7 @@ jobs:
         with:
           host: ${{secrets.PRODUCTION_HOST_IP}}
           username: ${{secrets.PRODUCTION_SERVER_USER}}
+          passphrase: ${{secrets.KEY_PASSPHRASE}}
           key: ${{secrets.PRODUCTION_SERVER_SSH}}
           source: "./docker.compose.yaml"
           target: "/root/docker.compose.yaml"
