@@ -2,7 +2,10 @@ package rs.edu.raf.banka1.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.model.ListingHistoryModel;
@@ -12,6 +15,7 @@ import rs.edu.raf.banka1.repositories.ListingRepository;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -34,8 +38,10 @@ public class ListingServiceImpl implements ListingService{
     @Autowired
     private ListingHistoryRepository listingHistoryRepository;
 
+
+//    TODO: see what to do with this, as API isn't free also
     @Override
-    public List<ListingModel> fetchListings() {
+    public void initializeListings() {
         try {
             List<String> sectors = List.of("Electronic", "Technology");
             String sectorsEncoded = String.join("%20", sectors);
@@ -55,7 +61,7 @@ public class ListingServiceImpl implements ListingService{
 
             // Get the response code
             int responseCode = connection.getResponseCode();
-            System.out.println("Response Code: " + responseCode);
+//            System.out.println("Response Code: " + responseCode);
 
             // Read the response body
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -69,13 +75,86 @@ public class ListingServiceImpl implements ListingService{
             // Close the connection
             connection.disconnect();
 
-            // Convert JSON response to list of ListingModel objects
-            List<ListingModel> listings = objectMapper.readValue(response.toString(), new TypeReference<List<ListingModel>>() {});
-            System.out.println("Data size: " + listings.size());
+            // Create ObjectMapper instance
+            ObjectMapper objectMapper = new ObjectMapper();
 
-            // for every listing, we should set lastRefreshed to current time
-            listings.forEach(listingModel -> listingModel.setLastRefresh(java.time.LocalDateTime.now()));
-            return listings;
+            // Parse the JSON array string
+            JsonNode jsonArray = objectMapper.readTree(response.toString());
+
+            // Create a new JSON array to store selected fields
+            ArrayNode newArray = objectMapper.createArrayNode();
+
+            // Iterate through the JSON array
+            for (JsonNode jsonNode : jsonArray) {
+                // Extract selected fields
+                String symbol = jsonNode.get("symbol").asText();
+                String companyName = jsonNode.get("companyName").asText();
+                // if primaryExchange is null, we should skip it
+                if (jsonNode.get("primaryExchange") == null) {
+                    continue;
+                }
+
+                String primaryExchange = jsonNode.get("primaryExchange").asText();
+
+                // Create a new JSON object with selected fields
+                ObjectNode newObj = objectMapper.createObjectNode();
+                newObj.put("symbol", symbol);
+                newObj.put("companyName", companyName);
+                newObj.put("primaryExchange", primaryExchange);
+
+                // Add the new object to the new JSON array
+                newArray.add(newObj);
+
+            }
+                // Save the new JSON array to a file
+                File f = new File("./market-service/src/main/resources/listings.json");
+                objectMapper.writeValue(f, newArray);
+                System.out.println(f.getAbsolutePath());
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public List<ListingModel> fetchListings() {
+        try {
+            List<String> sectors = List.of("Electronic", "Technology");
+            String sectorsEncoded = String.join("%20", sectors);
+
+            String urlStr = "https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=" + sectorsEncoded + "&token=" + Constants.listingAPItoken;
+
+            URL url = new URL(urlStr);
+
+            // Open a connection to the URL
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            // Set the request method to GET
+            connection.setRequestMethod("GET");
+
+            // Set request headers if needed
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            // Read the response body
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            // Close the connection
+            connection.disconnect();
+
+        // Convert JSON response to list of ListingModel objects
+        List<ListingModel> listings = objectMapper.readValue(response.toString(), new TypeReference<List<ListingModel>>() {});
+
+        // set lastRefresh to current time
+        listings.forEach(listing -> listing.setLastRefresh(java.time.LocalDateTime.now()));
+
+        return listings;
         }catch (Exception e){
             e.printStackTrace();
             return new ArrayList<>();
@@ -107,6 +186,7 @@ public class ListingServiceImpl implements ListingService{
         }
     }
 
+//    call it at the end of the day (to save API calls, but other than that, you can call it whenever you want)
     @Override
     public int addAllListingsToHistory(List<ListingHistoryModel> listingHistoryModels) {
 

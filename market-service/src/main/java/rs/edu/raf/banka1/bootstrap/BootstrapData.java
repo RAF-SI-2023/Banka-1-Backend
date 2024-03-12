@@ -26,8 +26,8 @@ public class BootstrapData implements CommandLineRunner {
         System.out.println("Loading Data...");
         List<ListingModel> listinfList = listingService.fetchListings();
         listingService.updateAllListings(listinfList);
-        listingService.updateAllListings(listinfList);
-
+//        listingService.updateAllListings(listinfList);
+//        listingService.initializeListings();
         System.out.println("Data loaded!");
     }
 }
