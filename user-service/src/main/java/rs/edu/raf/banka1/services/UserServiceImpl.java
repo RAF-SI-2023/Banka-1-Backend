@@ -35,6 +35,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll().stream().map(userMapper::userToUserResponse).toList();
     }
 
+    //necessary for authentication
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> myUser = this.userRepository.findByEmail(username);
@@ -43,6 +44,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = myUser.get();
+        //convert permissions to list of simple granted authorities used by @PreAuthorize
         List<SimpleGrantedAuthority> authorities = user.getPermissions().stream()
                 .map((permission -> new SimpleGrantedAuthority(permission.getName())))
                 .collect(Collectors.toList());

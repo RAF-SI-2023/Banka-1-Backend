@@ -26,33 +26,25 @@ public class AuthenticationController {
         this.jwtUtil = jwtUtil;
     }
 
-    @GetMapping("/test")
-    public boolean test() {
-        System.out.println(authenticationManager.toString());
-        return true;
-    }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
-        System.out.println("Usao u login");
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         } catch (Exception   e){
-//            e.printStackTrace();
             return ResponseEntity.status(401).build();
         }
 
         UserResponse user = this.userService.findByEmail(loginRequest.getEmail());
         StringBuilder permissions = new StringBuilder();
 
+        //packs permissions into json list
+        // [perm1, perm2...]
         if (user.getPermissions() != null && !user.getPermissions().isEmpty()) {
             permissions.append("[");
-
             user.getPermissions().stream().forEach((permission -> permissions.append(permission.getName()).append(", ")));
             permissions.replace(permissions.lastIndexOf(","), permissions.length(), "");
             permissions.append("]");
         }
-
 
         return ResponseEntity.ok(
                 new LoginResponse(
