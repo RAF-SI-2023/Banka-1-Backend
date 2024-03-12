@@ -1,6 +1,5 @@
 package rs.edu.raf.banka1.services;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.mapper.ListingMapper;
 import rs.edu.raf.banka1.model.ListingHistoryModel;
 import rs.edu.raf.banka1.model.ListingModel;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
@@ -19,13 +19,21 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 public class ListingServiceImpl implements ListingService{
     private ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
+    private ListingMapper listingMapper;
+
+    @Autowired
+    private ListingRepository listingRepository;
+
+    @Autowired
+    private ListingHistoryRepository listingHistoryRepository;
 
     public ListingServiceImpl() {
         // we don't need all fields from response, so we can ignore them
@@ -33,19 +41,12 @@ public class ListingServiceImpl implements ListingService{
     }
 
 
-    @Autowired
-    private ListingRepository listingRepository;
-    @Autowired
-    private ListingHistoryRepository listingHistoryRepository;
-
-
 //    NOTE: see what to do with this, as API isn't free (almost nothing from this API changes so it is okay to do it once and store it into json file)
 //    NOTE: Maybe name/description of the company changes, so we should update it from time to time
     @Override
     public void initializeListings() {
         try {
-            List<String> sectors = List.of("Electronic", "Technology");
-            String sectorsEncoded = String.join("%20", sectors);
+            String sectorsEncoded = String.join("%20", Constants.sectors);
 
             String urlStr = "https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=" + sectorsEncoded + "&token=" + Constants.listingAPItoken;
 
@@ -120,7 +121,6 @@ public class ListingServiceImpl implements ListingService{
     @Override
     public List<ListingModel> fetchListings() {
         List<ListingModel> listingModels = fetchListingsName();
-
         for (ListingModel listingModel : listingModels)
             updateValuesForListing(listingModel);
 
@@ -156,7 +156,7 @@ public class ListingServiceImpl implements ListingService{
         }
     }
 
-    private ListingModel updateValuesForListing(ListingModel listingModel){
+    private void updateValuesForListing(ListingModel listingModel){
         try{
             // URL of the alphavantage API endpoint
             String symbol = listingModel.getTicker();
@@ -182,13 +182,12 @@ public class ListingServiceImpl implements ListingService{
             listingModel.setChanged(change);
             listingModel.setVolume(volume);
 
-            return listingModel;
         }catch (Exception e){
             e.printStackTrace();
             System.out.println(listingModel.getTicker() + " has failed updating");
-            return listingModel;
         }
     }
+
 
     @Override
 //    updates all listings with new data into database
@@ -196,7 +195,69 @@ public class ListingServiceImpl implements ListingService{
         listingRepository.saveAll(listings);
     }
 
-//    if we want to add listing to history for certain day, if we already have saved it, we should just update it
+    @Override
+    public List<ListingHistoryModel> fetchAllListingsHistory() {
+        try{
+            List<ListingModel> listingModels = fetchListingsName();
+            List<ListingHistoryModel> listingHistoryModels = new ArrayList<>();
+            for (ListingModel lmodel : listingModels)
+                listingHistoryModels.addAll(fetchSingleListingHistory(lmodel.getTicker()));
+
+            return listingHistoryModels;
+        }catch (Exception e) {
+            e.printStackTrace();
+
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<ListingHistoryModel> fetchSingleListingHistory(String ticker){
+        try {
+
+            String apiUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + ticker + "&apikey=" + Constants.alphaVantageAPIToken;
+            JsonNode rootNode = objectMapper.readTree(new URL(apiUrl));
+
+            List<ListingHistoryModel> listingHistoryModels = new ArrayList<>();
+            // Get the "Time Series (Daily)" node
+            JsonNode timeSeriesNode = rootNode.get("Time Series (Daily)");
+            if (timeSeriesNode != null) {
+                Iterator<Map.Entry<String, JsonNode>> fields = timeSeriesNode.fields();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = fields.next();
+                    String date = entry.getKey();
+                    JsonNode dataNode = entry.getValue();
+
+                    // Get specific fields from each data node
+                    double open = dataNode.get("1. open").asDouble();
+                    double high = dataNode.get("2. high").asDouble();
+                    double low = dataNode.get("3. low").asDouble();
+                    double close = dataNode.get("4. close").asDouble();
+                    int volume = dataNode.get("5. volume").asInt();
+
+                    // make a new ListingHistoryModel
+                    ListingHistoryModel listingHistoryModel = new ListingHistoryModel();
+                    listingHistoryModel.setTicker(ticker);
+                    listingHistoryModel.setDate(java.time.LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                    listingHistoryModel.setPrice(close);
+                    listingHistoryModel.setAsk(high);
+                    listingHistoryModel.setBid(low);
+                    listingHistoryModel.setChanged(close - open);
+                    listingHistoryModel.setVolume(volume);
+
+
+                    listingHistoryModels.add(listingHistoryModel);
+                }
+            }
+            return listingHistoryModels;
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+
+    //    if we want to add listing to history for certain day, if we already have saved it, we should just update it
     @Override
     public int addListingToHistory(ListingHistoryModel listingHistoryModel) {
         Optional<ListingHistoryModel> listingHistoryModelOptional = listingHistoryRepository.findByTickerAndDate(listingHistoryModel.getTicker(), listingHistoryModel.getDate());
