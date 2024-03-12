@@ -88,4 +88,44 @@ public class SearchAndFilterTests {
         List<UserResponse> userResponses = userService.search("", "", "", "");
         assertEquals(3, userResponses.size());
     }
+
+    @Test
+    void allParametersOneOutput(){
+        when(userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(Optional.of(Arrays.asList(
+                        this.user1
+                )));
+
+        List<UserResponse> userResponses = userService.search("user", "user", "useric1", "position1");
+        assertEquals(1, userResponses.size());
+
+    }
+
+    @Test
+    void allParametersNoOutput(){
+        when(userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(Optional.of(Arrays.asList(
+                )));
+
+        List<UserResponse> userResponses = userService.search("admin", "user", "useric1", "position1");
+        assertEquals(0, userResponses.size());
+
+    }
+    @Test
+    void allParametersTwoOutputs(){
+        when(userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(Optional.of(Arrays.asList(
+                        this.user1,
+                        this.user2
+                )));
+
+        List<UserResponse> userResponses = userService.search("user", "user", "useric", "position");
+        assertEquals(2, userResponses.size());
+
+    }
+
+
+
 }
+
+
