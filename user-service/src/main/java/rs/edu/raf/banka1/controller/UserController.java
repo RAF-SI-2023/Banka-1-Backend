@@ -52,9 +52,10 @@ public class UserController {
     @Operation(summary = "Search and filter users", description = "Returns users by e-mail, last name and/or position.")
     public ResponseEntity<List<UserResponse>> searchUsers(
         @RequestParam(name = "email", required = false) String email,
+        @RequestParam(name = "fistName", required = false) String firstName,
         @RequestParam(name = "lastName", required = false) String lastName,
         @RequestParam(name = "position", required = false) String position
     ){
-        return new ResponseEntity<>(userService.search(email, lastName, position), HttpStatus.OK);
+        return new ResponseEntity<>(userService.search(email,firstName, lastName, position), HttpStatus.OK);
     }
 }

@@ -37,8 +37,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserResponse> search(String email, String lastName, String position) {
-        return userRepository.searchUsersByEmailAndLastNameAndPosition(email, lastName, position)
+    public List<UserResponse> search(String email, String firstName, String lastName, String position) {
+        return userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(email, firstName, lastName, position)
                 .map(users -> users.stream().map(userMapper::userToUserResponse).collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
     }
