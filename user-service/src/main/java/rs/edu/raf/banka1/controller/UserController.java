@@ -35,6 +35,7 @@ public class UserController {
     }
 
     // A method that returns a JSON string with array of type UserResponse
+//    @PreAuthorize("hasAuthority('test_permission')")
     @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all users", description = "Returns all users")
     public ResponseEntity<List<UserResponse>> readAllUsers() {
