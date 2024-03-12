@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.cucumber.controller;
 
 import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ public class UserControllerSteps {
 
 
     private UserRepository userRepository;
+    private List<UserResponse> userResponses = new ArrayList<>();
 
     private final String url = "http://localhost:";
 
@@ -37,13 +39,46 @@ public class UserControllerSteps {
 
     @When("User calls get on {string}")
     public void iSendAGETRequestTo(String path) {
-        if(path.equals("/user/getAll"))
-            lastReadAllUsersResponse = new RestTemplate().exchange(url + port + path, org.springframework.http.HttpMethod.GET, null,  new ParameterizedTypeReference<List<UserResponse>>() {});
+        userResponses.clear();
+        if(path.equals("/user/getAll")) {
+            lastReadAllUsersResponse = new RestTemplate().exchange(url + port + path, org.springframework.http.HttpMethod.GET, null, new ParameterizedTypeReference<List<UserResponse>>() {
+            });
+            userRepository.findAll().forEach(user -> userResponses.add(userMapper.userToUserResponse(user)));
+        }
         else if(path.startsWith("/user/get/")) {
             lastReadUserResponse = new RestTemplate().exchange(url + port + path, org.springframework.http.HttpMethod.GET, null, UserResponse.class);
             String[] split = path.split("/");
             email = split[split.length - 1];
         }
+        else if(path.equals("/user/search")) {
+            lastReadAllUsersResponse = new RestTemplate().exchange(url + port + path, org.springframework.http.HttpMethod.GET, null, new ParameterizedTypeReference<List<UserResponse>>() {
+            });
+            userRepository.findAll().forEach(user -> userResponses.add(userMapper.userToUserResponse(user)));
+        }
+    }
+
+    @Given("user provides email {string}")
+    public void userProvidesEmail(String email) {
+        //remove everyone that doesnt have given email
+        userResponses.removeIf(userResponse -> !userResponse.getEmail().equals(email));
+    }
+
+    @Given("user provides first name {string}")
+    public void userProvidesFirstName(String firstName) {
+        //remove everyone that doesnt have given first name
+        userResponses.removeIf(userResponse -> !userResponse.getFirstName().equals(firstName));
+    }
+
+    @Given("user provides last name {string}")
+    public void userProvidesLastName(String lastName) {
+        //remove everyone that doesnt have given last name
+        userResponses.removeIf(userResponse -> !userResponse.getLastName().equals(lastName));
+    }
+
+    @Given("user provides position {string}")
+    public void userProvidesPosition(String position) {
+        //remove everyone that doesnt have given position
+        userResponses.removeIf(userResponse -> !userResponse.getPosition().equals(position));
     }
 
     @Then("Response status is {string}")
@@ -54,15 +89,12 @@ public class UserControllerSteps {
 
     @Then("Response body is the correct JSON list of users")
     public void theResponseBodyShouldBeAListOfUsers() {
-        List<UserResponse> userResponses = new ArrayList<>();
-        userRepository.findAll().forEach(user -> userResponses.add(userMapper.userToUserResponse(user)));
         assertThat(lastReadAllUsersResponse.getBody()).hasSameElementsAs(userResponses);
     }
 
     @Then("Response body is the correct user JSON")
     public void responseBodyIsTheCorrectUserJSON() {
         //TODO: throw appropriate exception?
-        System.out.println(email);
         UserResponse userResponse = userMapper.userToUserResponse(userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("User not found")));
         assertThat(lastReadUserResponse.getBody()).isEqualTo(userResponse);
     }
