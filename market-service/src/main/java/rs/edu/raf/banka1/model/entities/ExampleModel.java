@@ -1,4 +1,4 @@
-package rs.edu.raf.banka1.model;
+package rs.edu.raf.banka1.model.entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
