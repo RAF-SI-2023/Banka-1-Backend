@@ -35,9 +35,6 @@ public class UserServiceImpl implements UserService {
     }
 
     //necessary for authentication
-
-    //write unit test for this method
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> myUser = this.userRepository.findByEmail(username);
