@@ -68,24 +68,24 @@ public class SearchAndFilterTests {
     @Test
     void noParametersNull() {
         // Mock the userRepository to return no user data
-        when(userRepository.searchUsersByEmailAndLastNameAndPosition(anyString(), anyString(), anyString()))
+        when(userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
             .thenReturn(Optional.empty());
 
-        List<UserResponse> userResponses = userService.search(null, null, null);
+        List<UserResponse> userResponses = userService.search(null, null, null, null);
         assertEquals(0, userResponses.size());
     }
 
     @Test
     void noParametersEmptyString() {
         // Mock the userRepository to return no user data
-        when(userRepository.searchUsersByEmailAndLastNameAndPosition(anyString(), anyString(), anyString()))
+        when(userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Optional.of(Arrays.asList(
                         this.admin,
                         this.user1,
                         this.user2
                 )));
 
-        List<UserResponse> userResponses = userService.search("", "", "");
+        List<UserResponse> userResponses = userService.search("", "", "", "");
         assertEquals(3, userResponses.size());
     }
 }
