@@ -61,6 +61,5 @@ jobs:
           key: ${{secrets.PRODUCTION_SERVER_SSH}}
           passphrase: ${{secrets.KEY_PASSPHRASE}}
           script: |
-            docker compose -f /root/docker.compose.yaml.example pull
             docker compose -f /root/docker.compose.yaml.example up -d
           
