@@ -15,14 +15,8 @@ services:
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  user-service:
-    build:
-      context: user-service/
-      dockerfile: Dockerfile
-      args:
-        JAR_FILE: user-service/target/*.jar
-        CACHEBUST: ${CI_COMMIT_SHA}  # Use a unique value to bust the cache
-    image: user-service
+  user-service: 
+    image: duckkecach/user-service:latest
     container_name: user-service-container
     restart: always
     ports:
@@ -31,14 +25,8 @@ services:
       mysql:
         condition: service_healthy
 
-  market-service:
-    build:
-      context: market-service/
-      dockerfile: Dockerfile
-      args:
-        JAR_FILE: market-service/target/*.jar
-        CACHEBUST: ${CI_COMMIT_SHA}  # Use a unique value to bust the cache
-    image: market-service
+  market-service: 
+    image: duckkecach/market-service:latest
     container_name: market-service-container
     restart: always
     ports:
