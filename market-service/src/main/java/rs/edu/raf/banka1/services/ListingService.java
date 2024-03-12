@@ -10,7 +10,9 @@ public interface ListingService {
     void initializeListings();
 
     List<ListingModel> fetchListings();
-    void updateAllListings(List<ListingModel> listings);
+
+//    updated listing in the database
+    void updateAllListingsDatabase(List<ListingModel> listings);
 
 //    return 1 if it's a new listing, 0 if it's just an update
     int addListingToHistory(ListingHistoryModel listingHistoryModel);
