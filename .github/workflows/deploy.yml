@@ -48,7 +48,7 @@ jobs:
           username: ${{secrets.PRODUCTION_SERVER_USER}}
           passphrase: ${{secrets.KEY_PASSPHRASE}}
           key: ${{secrets.PRODUCTION_SERVER_SSH}}
-          source: "./docker.compose.yaml.example,./init.sql.example"
+          source: "./docker.compose.yaml.example.prod,./init.sql.example"
           target: "/root/"
           debug: true
 
@@ -61,5 +61,5 @@ jobs:
           key: ${{secrets.PRODUCTION_SERVER_SSH}}
           passphrase: ${{secrets.KEY_PASSPHRASE}}
           script: |
-            docker compose -f /root/docker.compose.yaml.example up -d
+            docker compose -f /root/docker.compose.yaml.example.prod up -d
           
