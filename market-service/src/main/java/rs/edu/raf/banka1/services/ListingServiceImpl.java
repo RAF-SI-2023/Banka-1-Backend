@@ -39,7 +39,8 @@ public class ListingServiceImpl implements ListingService{
     private ListingHistoryRepository listingHistoryRepository;
 
 
-//    TODO: see what to do with this, as API isn't free also
+//    NOTE: see what to do with this, as API isn't free (almost nothing from this API changes so it is okay to do it once and store it into json file)
+//    NOTE: Maybe name/description of the company changes, so we should update it from time to time
     @Override
     public void initializeListings() {
         try {
@@ -61,7 +62,6 @@ public class ListingServiceImpl implements ListingService{
 
             // Get the response code
             int responseCode = connection.getResponseCode();
-//            System.out.println("Response Code: " + responseCode);
 
             // Read the response body
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -107,9 +107,8 @@ public class ListingServiceImpl implements ListingService{
 
             }
                 // Save the new JSON array to a file
-                File f = new File("./market-service/src/main/resources/listings.json");
-                objectMapper.writeValue(f, newArray);
-                System.out.println(f.getAbsolutePath());
+                File file = new File(Constants.listingsFilePath);
+                objectMapper.writeValue(file, newArray);
 
         }catch (Exception e){
             e.printStackTrace();
@@ -117,52 +116,83 @@ public class ListingServiceImpl implements ListingService{
 
     }
 
+//    loads listings from json file and updates them with trending data
     @Override
     public List<ListingModel> fetchListings() {
+        List<ListingModel> listingModels = fetchListingsName();
+
+        for (ListingModel listingModel : listingModels)
+            updateValuesForListing(listingModel);
+
+        return listingModels;
+    }
+
+    private List<ListingModel> fetchListingsName(){
         try {
-            List<String> sectors = List.of("Electronic", "Technology");
-            String sectorsEncoded = String.join("%20", sectors);
+            File file = new File(Constants.listingsFilePath);
 
-            String urlStr = "https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=" + sectorsEncoded + "&token=" + Constants.listingAPItoken;
+            // Read JSON data from the file
+            JsonNode rootNode = objectMapper.readTree(file);
 
-            URL url = new URL(urlStr);
+            List<ListingModel> listings = new ArrayList<>();
 
-            // Open a connection to the URL
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            // Iterate over each element in the JSON array
+            for (JsonNode node : rootNode) {
+                ListingModel listingModel = new ListingModel();
+                listingModel.setTicker(node.path("symbol").asText());
+                listingModel.setName(node.path("companyName").asText());
+                listingModel.setExchange(node.path("primaryExchange").asText());
 
-            // Set the request method to GET
-            connection.setRequestMethod("GET");
+                listingModel.setLastRefresh(java.time.LocalDateTime.now());
 
-            // Set request headers if needed
-            connection.setRequestProperty("Content-Type", "application/json");
-
-            // Read the response body
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
+                // Add the ListingModel object to the list
+                listings.add(listingModel);
             }
-            in.close();
 
-            // Close the connection
-            connection.disconnect();
-
-        // Convert JSON response to list of ListingModel objects
-        List<ListingModel> listings = objectMapper.readValue(response.toString(), new TypeReference<List<ListingModel>>() {});
-
-        // set lastRefresh to current time
-        listings.forEach(listing -> listing.setLastRefresh(java.time.LocalDateTime.now()));
-
-        return listings;
+            return listings;
         }catch (Exception e){
             e.printStackTrace();
             return new ArrayList<>();
         }
     }
 
+    private ListingModel updateValuesForListing(ListingModel listingModel){
+        try{
+            // URL of the alphavantage API endpoint
+            String symbol = listingModel.getTicker();
+            String apiUrl = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=" + Constants.alphaVantageAPIToken;
+
+            // Fetch JSON data from the API
+            JsonNode rootNode = objectMapper.readTree(new URL(apiUrl));
+
+            // Get the "Global Quote" node
+            JsonNode globalQuoteNode = rootNode.get("Global Quote");
+
+
+            // Parse data from the "Global Quote" node
+            double high = globalQuoteNode.get("03. high").asDouble();
+            double low = globalQuoteNode.get("04. low").asDouble();
+            double price = globalQuoteNode.get("05. price").asDouble();
+            int volume = globalQuoteNode.get("06. volume").asInt();
+            double change = globalQuoteNode.get("09. change").asDouble();
+
+            listingModel.setPrice(price);
+            listingModel.setAsk(high);
+            listingModel.setBid(low);
+            listingModel.setChanged(change);
+            listingModel.setVolume(volume);
+
+            return listingModel;
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println(listingModel.getTicker() + " has failed updating");
+            return listingModel;
+        }
+    }
+
     @Override
-    public void updateAllListings(List<ListingModel> listings) {
+//    updates all listings with new data into database
+    public void updateAllListingsDatabase(List<ListingModel> listings) {
         listingRepository.saveAll(listings);
     }
 
