@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.ListingMapper;
 import rs.edu.raf.banka1.model.ListingHistoryModel;
@@ -35,6 +36,12 @@ public class ListingServiceImpl implements ListingService{
     @Autowired
     private ListingHistoryRepository listingHistoryRepository;
 
+    @Value("${listingAPItoken}")
+    private String listingAPItoken;
+
+    @Value("${alphaVantageAPIToken}")
+    private String alphaVantageAPIToken;
+
     public ListingServiceImpl() {
         // we don't need all fields from response, so we can ignore them
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -48,7 +55,7 @@ public class ListingServiceImpl implements ListingService{
         try {
             String sectorsEncoded = String.join("%20", Constants.sectors);
 
-            String urlStr = "https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=" + sectorsEncoded + "&token=" + Constants.listingAPItoken;
+            String urlStr = "https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=" + sectorsEncoded + "&token=" + listingAPItoken;
 
             URL url = new URL(urlStr);
 
@@ -160,7 +167,7 @@ public class ListingServiceImpl implements ListingService{
         try{
             // URL of the alphavantage API endpoint
             String symbol = listingModel.getTicker();
-            String apiUrl = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=" + Constants.alphaVantageAPIToken;
+            String apiUrl = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=" + alphaVantageAPIToken;
 
             // Fetch JSON data from the API
             JsonNode rootNode = objectMapper.readTree(new URL(apiUrl));
@@ -215,7 +222,7 @@ public class ListingServiceImpl implements ListingService{
     public List<ListingHistoryModel> fetchSingleListingHistory(String ticker){
         try {
 
-            String apiUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + ticker + "&apikey=" + Constants.alphaVantageAPIToken;
+            String apiUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + ticker + "&apikey=" + alphaVantageAPIToken;
             JsonNode rootNode = objectMapper.readTree(new URL(apiUrl));
 
             List<ListingHistoryModel> listingHistoryModels = new ArrayList<>();
