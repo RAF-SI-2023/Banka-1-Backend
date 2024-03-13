@@ -1,0 +1,55 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:latest
+    restart: always
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    healthcheck:
+      # set myusername and mypassword to desired username and password
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "myusername", "-pmypassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  user-service:
+    image: duckkecach/user-service:latest
+    container_name: user-service-container
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.datasource.url": "jdbc:mysql://mysql:3306/bank_userservice",
+        "spring.datasource.username": "myusername",
+        "spring.datasource.password": "mypassword",
+        "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL8Dialect",
+        "spring.jpa.hibernate.ddl-auto" : "update",
+        "oauth.jwt.secret": "my_secret"
+      }'
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  market-service:
+    image: duckkecach/market-service:latest
+    container_name: market-service-container
+    restart: always
+    ports:
+      - "8081:8081"  # Adjust the port as needed
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.datasource.url": "jdbc:mysql://mysql:3306/bank_marketservice",
+        "spring.datasource.username": "myusername",
+        "spring.datasource.password": "mypassword",
+        "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL8Dialect",
+        "spring.jpa.hibernate.ddl-auto" : "update",
+        "oauth.jwt.secret": "my_secret"
+      }'
+    depends_on:
+      mysql:
+        condition: service_healthy
