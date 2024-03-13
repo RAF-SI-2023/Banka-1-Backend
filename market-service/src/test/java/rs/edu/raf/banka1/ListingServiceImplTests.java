@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import rs.edu.raf.banka1.mapper.ListingMapper;
 import rs.edu.raf.banka1.model.ListingHistoryModel;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 import rs.edu.raf.banka1.services.ListingServiceImpl;
@@ -24,7 +25,8 @@ public class ListingServiceImplTests {
 
     @Mock
     private ListingHistoryRepository listingHistoryRepository;
-
+    @Mock
+    private ListingMapper listingMapper;
 
     @InjectMocks
     private ListingServiceImpl listingService;

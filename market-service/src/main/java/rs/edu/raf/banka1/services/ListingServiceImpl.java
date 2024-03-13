@@ -65,66 +65,13 @@ public class ListingServiceImpl implements ListingService{
 
             String urlStr = listingNameApiUrl + sectorsEncoded + "&token=" + listingAPItoken;
 
-            URL url = new URL(urlStr);
+            String response = sendRequest(urlStr);
 
-            // Open a connection to the URL
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            ArrayNode jsonArray = reformatNamesToJSON(response);
 
-            // Set the request method to GET
-            connection.setRequestMethod("GET");
-
-            // Set request headers if needed
-            connection.setRequestProperty("Content-Type", "application/json");
-
-            // Get the response code
-            int responseCode = connection.getResponseCode();
-
-            // Read the response body
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            }
-            in.close();
-
-            // Close the connection
-            connection.disconnect();
-
-            // Create ObjectMapper instance
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            // Parse the JSON array string
-            JsonNode jsonArray = objectMapper.readTree(response.toString());
-
-            // Create a new JSON array to store selected fields
-            ArrayNode newArray = objectMapper.createArrayNode();
-
-            // Iterate through the JSON array
-            for (JsonNode jsonNode : jsonArray) {
-                // Extract selected fields
-                String symbol = jsonNode.get("symbol").asText();
-                String companyName = jsonNode.get("companyName").asText();
-                // if primaryExchange is null, we should skip it
-                if (jsonNode.get("primaryExchange") == null) {
-                    continue;
-                }
-
-                String primaryExchange = jsonNode.get("primaryExchange").asText();
-
-                // Create a new JSON object with selected fields
-                ObjectNode newObj = objectMapper.createObjectNode();
-                newObj.put("symbol", symbol);
-                newObj.put("companyName", companyName);
-                newObj.put("primaryExchange", primaryExchange);
-
-                // Add the new object to the new JSON array
-                newArray.add(newObj);
-
-            }
             // Save the new JSON array to a file
             File file = new File(Constants.listingsFilePath);
-            objectMapper.writeValue(file, newArray);
+            objectMapper.writeValue(file, jsonArray);
 
         }catch (Exception e){
             e.printStackTrace();
@@ -180,23 +127,7 @@ public class ListingServiceImpl implements ListingService{
             // Fetch JSON data from the API
             JsonNode rootNode = objectMapper.readTree(new URL(apiUrl));
 
-            // Get the "Global Quote" node
-            JsonNode globalQuoteNode = rootNode.get("Global Quote");
-
-
-            // Parse data from the "Global Quote" node
-            double high = globalQuoteNode.get("03. high").asDouble();
-            double low = globalQuoteNode.get("04. low").asDouble();
-            double price = globalQuoteNode.get("05. price").asDouble();
-            int volume = globalQuoteNode.get("06. volume").asInt();
-            double change = globalQuoteNode.get("09. change").asDouble();
-
-            listingModel.setPrice(price);
-            listingModel.setAsk(high);
-            listingModel.setBid(low);
-            listingModel.setChanged(change);
-            listingModel.setVolume(volume);
-            listingModel.setLastRefresh((int) (System.currentTimeMillis() / 1000));
+            updatelistingModelFields(listingModel, rootNode);
 
         }catch (Exception e){
             e.printStackTrace();
@@ -241,29 +172,14 @@ public class ListingServiceImpl implements ListingService{
                 Iterator<Map.Entry<String, JsonNode>> fields = timeSeriesNode.fields();
                 while (fields.hasNext()) {
                     Map.Entry<String, JsonNode> entry = fields.next();
+
                     String dateStr = entry.getKey();
                     LocalDate date = LocalDate.parse(dateStr); // Parse the date string to LocalDate
                     int unixTimestamp = (int) date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli() / 1000;
 
                     JsonNode dataNode = entry.getValue();
 
-                    // Get specific fields from each data node
-                    double open = dataNode.get("1. open").asDouble();
-                    double high = dataNode.get("2. high").asDouble();
-                    double low = dataNode.get("3. low").asDouble();
-                    double close = dataNode.get("4. close").asDouble();
-                    int volume = dataNode.get("5. volume").asInt();
-
-                    // make a new ListingHistoryModel
-                    ListingHistoryModel listingHistoryModel = new ListingHistoryModel();
-                    listingHistoryModel.setTicker(ticker);
-                    listingHistoryModel.setDate(unixTimestamp);
-                    listingHistoryModel.setPrice(close);
-                    listingHistoryModel.setAsk(high);
-                    listingHistoryModel.setBid(low);
-                    listingHistoryModel.setChanged(close - open);
-                    listingHistoryModel.setVolume(volume);
-
+                    ListingHistoryModel listingHistoryModel = createListingHistoryModelFromJson(dataNode, ticker, unixTimestamp);
 
                     listingHistoryModels.add(listingHistoryModel);
                 }
@@ -281,14 +197,8 @@ public class ListingServiceImpl implements ListingService{
     public int addListingToHistory(ListingHistoryModel listingHistoryModel) {
         Optional<ListingHistoryModel> listingHistoryModelOptional = listingHistoryRepository.findByTickerAndDate(listingHistoryModel.getTicker(), listingHistoryModel.getDate());
         if (listingHistoryModelOptional.isPresent()) {
-            ListingHistoryModel listingHistoryModel1 = listingHistoryModelOptional.get();
-            listingHistoryModel1.setPrice(listingHistoryModel.getPrice());
-            listingHistoryModel1.setAsk(listingHistoryModel.getAsk());
-            listingHistoryModel1.setBid(listingHistoryModel.getBid());
-            listingHistoryModel1.setChanged(listingHistoryModel.getChanged());
-            listingHistoryModel1.setVolume(listingHistoryModel.getVolume());
-
-            listingHistoryRepository.save(listingHistoryModel1);
+            ListingHistoryModel lhm = listingMapper.updateHistoryListingWithNewData(listingHistoryModelOptional.get(), listingHistoryModel);
+            listingHistoryRepository.save(lhm);
             return 0;
         }else{
             listingHistoryRepository.save(listingHistoryModel);
@@ -303,5 +213,94 @@ public class ListingServiceImpl implements ListingService{
         return listingHistoryModels.stream().mapToInt(this::addListingToHistory).sum();
     }
 
+    private String sendRequest(String urlStr) throws Exception{
+        URL url = new URL(urlStr);
+
+        // Open a connection to the URL
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        // Set the request method to GET
+        connection.setRequestMethod("GET");
+
+        // Set request headers if needed
+        connection.setRequestProperty("Content-Type", "application/json");
+
+        // Get the response code
+        int responseCode = connection.getResponseCode();
+
+        // Read the response body
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+
+        // Close the connection
+        connection.disconnect();
+
+        return response.toString();
+    }
+
+    private ArrayNode reformatNamesToJSON(String response) throws Exception{
+        // Parse the JSON array string
+        JsonNode jsonArray = objectMapper.readTree(response.toString());
+
+        // Create a new JSON array to store selected fields
+        ArrayNode newArray = objectMapper.createArrayNode();
+
+        // Iterate through the JSON array
+        for (JsonNode jsonNode : jsonArray) {
+            // Extract selected fields
+            String symbol = jsonNode.get("symbol").asText();
+            String companyName = jsonNode.get("companyName").asText();
+            // if primaryExchange is null, we should skip it
+            if (jsonNode.get("primaryExchange") == null) {
+                continue;
+            }
+
+            String primaryExchange = jsonNode.get("primaryExchange").asText();
+
+            // Create a new JSON object with selected fields
+            ObjectNode newObj = objectMapper.createObjectNode();
+            newObj.put("symbol", symbol);
+            newObj.put("companyName", companyName);
+            newObj.put("primaryExchange", primaryExchange);
+
+            // Add the new object to the new JSON array
+            newArray.add(newObj);
+
+        }
+        return newArray;
+    }
+
+    private void updatelistingModelFields(ListingModel listingModel, JsonNode rootNode){
+        // Get the "Global Quote" node
+        JsonNode globalQuoteNode = rootNode.get("Global Quote");
+
+        // Parse data from the "Global Quote" node
+        double high = globalQuoteNode.get("03. high").asDouble();
+        double low = globalQuoteNode.get("04. low").asDouble();
+        double price = globalQuoteNode.get("05. price").asDouble();
+        int volume = globalQuoteNode.get("06. volume").asInt();
+        double change = globalQuoteNode.get("09. change").asDouble();
+
+        listingMapper.listingModelUpdate(listingModel, price, high, low, change, volume);
+    }
+
+    private ListingHistoryModel createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp){
+        // Get specific fields from each data node
+        double open = dataNode.get("1. open").asDouble();
+        double high = dataNode.get("2. high").asDouble();
+        double low = dataNode.get("3. low").asDouble();
+        double close = dataNode.get("4. close").asDouble();
+        int volume = dataNode.get("5. volume").asInt();
+
+        // make a new ListingHistoryModel
+        ListingHistoryModel listingHistoryModel = listingMapper.createListingHistoryModel(ticker, unixTimestamp, close, high, low, close - open, volume);
+
+        return listingHistoryModel;
+    }
 
 }

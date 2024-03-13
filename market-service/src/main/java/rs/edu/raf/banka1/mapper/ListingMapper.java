@@ -32,6 +32,37 @@ public class ListingMapper {
         return listingHistoryModel;
     }
 
+    public void listingModelUpdate(ListingModel listingModel, double price, double high, double low, double change, int volume) {
+        listingModel.setPrice(price);
+        listingModel.setAsk(high);
+        listingModel.setBid(low);
+        listingModel.setChanged(change);
+        listingModel.setVolume(volume);
+        listingModel.setLastRefresh((int) (System.currentTimeMillis() / 1000));
+    }
+
+    public ListingHistoryModel createListingHistoryModel(String ticker, long date, double price, double ask, double bid, double changed, int volume) {
+        ListingHistoryModel listingHistoryModel = new ListingHistoryModel();
+        listingHistoryModel.setTicker(ticker);
+        listingHistoryModel.setDate(date);
+        listingHistoryModel.setPrice(price);
+        listingHistoryModel.setAsk(ask);
+        listingHistoryModel.setBid(bid);
+        listingHistoryModel.setChanged(changed);
+        listingHistoryModel.setVolume(volume);
+        return listingHistoryModel;
+    }
+
+    public ListingHistoryModel updateHistoryListingWithNewData(ListingHistoryModel oldModel, ListingHistoryModel newModel) {
+        oldModel.setPrice(newModel.getPrice());
+        oldModel.setAsk(newModel.getAsk());
+        oldModel.setBid(newModel.getBid());
+        oldModel.setChanged(newModel.getChanged());
+        oldModel.setVolume(newModel.getVolume());
+
+        return oldModel;
+    }
+
 
 
 }
