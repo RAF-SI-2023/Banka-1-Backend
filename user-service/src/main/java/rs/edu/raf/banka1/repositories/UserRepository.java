@@ -23,5 +23,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                                                   @Param("lastName") String lastName,
                                                                   @Param("position") String position);
     Optional<User> findByEmail(String username);
+    Optional<User> findByActivationToken(String activationToken);
 }
 

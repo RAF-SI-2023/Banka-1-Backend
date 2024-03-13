@@ -9,6 +9,7 @@ import java.util.Set;
 @Getter
 @Setter
 public class UserResponse {
+    private String UserId;
     private String username;
     private String password;
     private String email;

@@ -8,27 +8,34 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.requests.ActivateAccountRequest;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
+import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
+import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.UserService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/user")
 @Tag(name = "User", description = "User API")
 //@SecurityRequirement() TODO
 @SecurityRequirement(name = "basicScheme")
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:8099")
 public class UserController {
 
     private UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // A method that returns a JSON string with array of type UserResponse
@@ -73,7 +80,16 @@ public class UserController {
         String position = createUserRequest.getEmail();
         String phoneNumber = createUserRequest.getPhoneNumber();
         boolean isActive = createUserRequest.isActive();
-        return new ResponseEntity<>(userService.createUser(email, firstName, lastName, jmbg, position, phoneNumber, isActive), HttpStatus.OK);
+        String password = UUID.randomUUID().toString();
+        String activationToken = UUID.randomUUID().toString();
+        return new ResponseEntity<>(userService.createUser(email, passwordEncoder.encode(password), firstName, lastName, jmbg, position, phoneNumber, isActive, activationToken), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/activate/{token}")
+    @Operation(summary = "Activate account", description = "Activate an account by assigning a password")
+    public ResponseEntity<ActivateAccountResponse> activateAccount(@PathVariable String token, @RequestBody ActivateAccountRequest activateAccountRequest) {
+        String password = activateAccountRequest.getPassword();
+        return new ResponseEntity<>(userService.activateAccount(token, password), HttpStatus.OK);
     }
 }
 /*

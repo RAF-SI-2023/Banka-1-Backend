@@ -7,6 +7,7 @@ import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.responses.UserResponse;
+import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.UserService;
 import rs.edu.raf.banka1.services.UserServiceImpl;
 
@@ -24,6 +25,7 @@ public class SearchAndFilterTests {
     private UserService userService;
     private UserRepository userRepository;
     private UserMapper userMapper;
+    private EmailService emailService;
 
     private User admin;
     private User user1;
@@ -33,7 +35,8 @@ public class SearchAndFilterTests {
     public void setUp() {
         userRepository = mock(UserRepository.class);
         userMapper = new UserMapper();
-        userService = new UserServiceImpl(userRepository, userMapper);
+        emailService = mock(EmailService.class);
+        userService = new UserServiceImpl(userRepository, userMapper, emailService);
 
         this.admin = new User();
         admin.setActive(true);

@@ -3,10 +3,10 @@ package rs.edu.raf.banka1.responses;
 import lombok.Data;
 
 @Data
-public class CreateUserResponse {
+public class ActivateAccountResponse {
     private Long userId;
 
-    public CreateUserResponse(Long userId) {
+    public ActivateAccountResponse(Long userId) {
         this.userId = userId;
     }
 }
