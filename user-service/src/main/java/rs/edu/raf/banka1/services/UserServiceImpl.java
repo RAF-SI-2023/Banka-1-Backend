@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.repositories.UserRepository;
+import rs.edu.raf.banka1.responses.CreateUserResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 
 import java.util.Collections;
@@ -41,5 +42,10 @@ public class UserServiceImpl implements UserService {
         return userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(email, firstName, lastName, position)
                 .map(users -> users.stream().map(userMapper::userToUserResponse).collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
+    }
+
+    @Override
+    public CreateUserResponse createUser(String email, String firstName, String lastName, String jmbg, String position, String phoneNumber, boolean isActive) {
+        return null;
     }
 }

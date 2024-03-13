@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.requests.CreateUserRequest;
+import rs.edu.raf.banka1.responses.CreateUserResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.UserService;
 
@@ -57,6 +60,20 @@ public class UserController {
         @RequestParam(name = "position", required = false) String position
     ){
         return new ResponseEntity<>(userService.search(email,firstName, lastName, position), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/createUser")
+    @Operation(summary = "Admin create user", description = "Creates a new user with the specified params, and forwards an activation mail to the user.")
+    @PreAuthorize("hasAuthority('can_manage_users')")
+    public ResponseEntity<CreateUserResponse> createUser(@RequestBody CreateUserRequest createUserRequest) {
+        String email = createUserRequest.getEmail();
+        String firstName = createUserRequest.getFirstName();
+        String lastName = createUserRequest.getLastName();
+        String jmbg = createUserRequest.getJmbg();
+        String position = createUserRequest.getEmail();
+        String phoneNumber = createUserRequest.getPhoneNumber();
+        boolean isActive = createUserRequest.isActive();
+        return new ResponseEntity<>(userService.createUser(email, firstName, lastName, jmbg, position, phoneNumber, isActive), HttpStatus.OK);
     }
 }
 /*
