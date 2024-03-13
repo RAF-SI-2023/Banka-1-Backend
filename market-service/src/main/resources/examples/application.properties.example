@@ -23,3 +23,7 @@ oauth.jwt.secret=secret_key
 listingAPItoken=pk_f87286e075c94cc484405da70691c030
 # professor will provide the token later
 alphaVantageAPIToken = "IGY3BL4OCU3UX8IE"
+
+# API URLs:
+listingNameApiUrl=https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=
+updateListingApiUrl=https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=

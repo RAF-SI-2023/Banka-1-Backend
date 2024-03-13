@@ -26,7 +26,7 @@ import java.util.*;
 
 @Service
 public class ListingServiceImpl implements ListingService{
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper;
 
     @Autowired
     private ListingMapper listingMapper;
@@ -43,7 +43,14 @@ public class ListingServiceImpl implements ListingService{
     @Value("${alphaVantageAPIToken}")
     private String alphaVantageAPIToken;
 
+    @Value("${listingNameApiUrl}")
+    private String listingNameApiUrl;
+
+    @Value("${updateListingApiUrl}")
+    private String updateListingApiUrl;
+
     public ListingServiceImpl() {
+        objectMapper = new ObjectMapper();
         // we don't need all fields from response, so we can ignore them
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
@@ -56,7 +63,7 @@ public class ListingServiceImpl implements ListingService{
         try {
             String sectorsEncoded = String.join("%20", Constants.sectors);
 
-            String urlStr = "https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=" + sectorsEncoded + "&token=" + listingAPItoken;
+            String urlStr = listingNameApiUrl + sectorsEncoded + "&token=" + listingAPItoken;
 
             URL url = new URL(urlStr);
 
@@ -168,7 +175,7 @@ public class ListingServiceImpl implements ListingService{
         try{
             // URL of the alphavantage API endpoint
             String symbol = listingModel.getTicker();
-            String apiUrl = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=" + alphaVantageAPIToken;
+            String apiUrl = updateListingApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;
 
             // Fetch JSON data from the API
             JsonNode rootNode = objectMapper.readTree(new URL(apiUrl));
