@@ -9,9 +9,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.UserService;
 
@@ -46,4 +47,20 @@ public class UserController {
         return new ResponseEntity<>(this.userService.findByEmail(email), HttpStatus.OK);
     }
 
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get user by id", description = "Returns user by id")
+    public ResponseEntity<UserResponse> readUser(@PathVariable Long id) {
+        return new ResponseEntity<>(this.userService.findById(id), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/search")
+    @Operation(summary = "Search and filter users", description = "Returns users by e-mail, last name and/or position.")
+    public ResponseEntity<List<UserResponse>> searchUsers(
+        @RequestParam(name = "email", required = false) String email,
+        @RequestParam(name = "firstName", required = false) String firstName,
+        @RequestParam(name = "lastName", required = false) String lastName,
+        @RequestParam(name = "position", required = false) String position
+    ) {
+        return new ResponseEntity<>(userService.search(email, firstName, lastName, position), HttpStatus.OK);
+    }
 }
