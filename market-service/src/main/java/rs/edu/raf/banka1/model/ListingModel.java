@@ -28,7 +28,7 @@ public class ListingModel {
     private String exchange;
 
     @JsonIgnore
-    private LocalDateTime lastRefresh;
+    private long lastRefresh;
 
     @JsonProperty("latestPrice")
     private double price;

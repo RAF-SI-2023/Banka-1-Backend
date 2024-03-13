@@ -20,7 +20,8 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @Service
@@ -150,7 +151,7 @@ public class ListingServiceImpl implements ListingService{
                 listingModel.setName(node.path("companyName").asText());
                 listingModel.setExchange(node.path("primaryExchange").asText());
 
-                listingModel.setLastRefresh(java.time.LocalDateTime.now());
+                listingModel.setLastRefresh((int) (System.currentTimeMillis() / 1000));
 
                 // Add the ListingModel object to the list
                 listings.add(listingModel);
@@ -188,6 +189,7 @@ public class ListingServiceImpl implements ListingService{
             listingModel.setBid(low);
             listingModel.setChanged(change);
             listingModel.setVolume(volume);
+            listingModel.setLastRefresh((int) (System.currentTimeMillis() / 1000));
 
         }catch (Exception e){
             e.printStackTrace();
@@ -232,7 +234,10 @@ public class ListingServiceImpl implements ListingService{
                 Iterator<Map.Entry<String, JsonNode>> fields = timeSeriesNode.fields();
                 while (fields.hasNext()) {
                     Map.Entry<String, JsonNode> entry = fields.next();
-                    String date = entry.getKey();
+                    String dateStr = entry.getKey();
+                    LocalDate date = LocalDate.parse(dateStr); // Parse the date string to LocalDate
+                    int unixTimestamp = (int) date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli() / 1000;
+
                     JsonNode dataNode = entry.getValue();
 
                     // Get specific fields from each data node
@@ -245,7 +250,7 @@ public class ListingServiceImpl implements ListingService{
                     // make a new ListingHistoryModel
                     ListingHistoryModel listingHistoryModel = new ListingHistoryModel();
                     listingHistoryModel.setTicker(ticker);
-                    listingHistoryModel.setDate(java.time.LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                    listingHistoryModel.setDate(unixTimestamp);
                     listingHistoryModel.setPrice(close);
                     listingHistoryModel.setAsk(high);
                     listingHistoryModel.setBid(low);

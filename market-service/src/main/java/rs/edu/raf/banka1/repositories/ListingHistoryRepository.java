@@ -7,5 +7,5 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public interface ListingHistoryRepository extends JpaRepository<ListingHistoryModel, Long> {
-    Optional<ListingHistoryModel> findByTickerAndDate(String ticker, LocalDate date);
+    Optional<ListingHistoryModel> findByTickerAndDate(String ticker, long date);
 }

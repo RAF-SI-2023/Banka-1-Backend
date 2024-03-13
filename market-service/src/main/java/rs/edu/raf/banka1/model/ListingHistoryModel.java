@@ -21,7 +21,7 @@ public class ListingHistoryModel {
     private Long id;
 
     private String ticker;
-    private LocalDate date;
+    private long date;
     private double price;
     private double ask;
     private double bid;
