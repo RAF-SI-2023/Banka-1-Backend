@@ -23,7 +23,6 @@ public class UserServiceImpl implements UserService {
 
     private UserMapper userMapper;
     private UserRepository userRepository;
-
     private PermissionRepository permissionRepository;
     private EmailService emailService;
 
@@ -88,7 +87,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ActivateAccountResponse activateAccount(String token, String password) {
-        // TODO fix optional get
         User user = userRepository.findByActivationToken(token).get();
         user.setActivationToken(null);
         user.setPassword(password);
@@ -98,7 +96,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public EditUserResponse editUser(String email, String password, String firstName, String lastName, String jmbg, String position, String phoneNumber, boolean isActive, Set<String> permissions) {
-        // TODO fix optional get
         User user = userRepository.findByEmail(email).get();
         user.setPassword(password);
         user.setFirstName(firstName);
@@ -107,7 +104,6 @@ public class UserServiceImpl implements UserService {
         user.setPosition(position);
         user.setPhoneNumber(phoneNumber);
         user.setActive(isActive);
-        // TODO fix optional get
         user.setPermissions(permissions.stream().map(perm -> permissionRepository.findByName(perm).get()).collect(Collectors.toSet()));
         userRepository.save(user);
         return new EditUserResponse(user.getUserId());
