@@ -8,7 +8,6 @@ import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
-import rs.edu.raf.banka1.services.UserService;
 
 import java.util.HashSet;
 import java.util.Set;
