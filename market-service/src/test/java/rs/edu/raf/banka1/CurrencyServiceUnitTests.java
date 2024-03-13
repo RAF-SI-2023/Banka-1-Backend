@@ -7,12 +7,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rs.edu.raf.banka1.model.entities.Currency;
+import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.repositories.CurrencyRepository;
 import rs.edu.raf.banka1.services.CurrencyService;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -28,12 +27,12 @@ public class CurrencyServiceUnitTests {
 
     @Test
     public void addCurrenciesSuccessfully(){
-        Map<String, String> map = new HashMap<>();
-        map.put("AED", "United Arab Emirates Dirham");
-        map.put("AFN", "Afghan Afghani");
-        map.put("ALL", "Albanian Lek");
+        List<CurrencyDto> currencyList = new ArrayList<>();
+        currencyList.add(new CurrencyDto("AED", "United Arab Emirates Dirham"));
+        currencyList.add(new CurrencyDto("AFN", "Afghan Afghani"));
+        currencyList.add(new CurrencyDto("ALL", "Albanian Lek"));
 
-        currencyService.addCurrencies(map);
+        currencyService.addCurrencies(currencyList);
 
         verify(currencyRepository, times(1)).saveAll((Mockito.anyCollection()));
         verifyNoMoreInteractions(currencyRepository);

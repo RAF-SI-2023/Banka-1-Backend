@@ -4,6 +4,8 @@ import lombok.*;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -26,4 +28,7 @@ public class Currency{
 
     @Column
     private String polity;
+
+    @OneToMany(mappedBy = "currency")
+    private List<Inflation> inflations;
 }

@@ -3,13 +3,14 @@ package rs.edu.raf.banka1.bootstrap;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.services.CurrencyService;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @AllArgsConstructor
@@ -21,16 +22,15 @@ public class BootstrapData implements CommandLineRunner {
     public void run(String... args) {
         System.out.println("Loading Data...");
 
-        Map<String, String> currencyMap = loadCurrencies();
-        currencyService.addCurrencies(currencyMap);
+        List<CurrencyDto> currencyList = loadCurrencies();
+        currencyService.addCurrencies(currencyList);
         System.out.println("Currency Data Loaded!");
 
         System.out.println("All Data loaded!");
     }
 
-    public Map<String, String> loadCurrencies() {
-        Map<String, String> currencyMap = new HashMap<>();
-
+    public List<CurrencyDto> loadCurrencies() {
+        List<CurrencyDto> currencyList = new ArrayList<>();
         String csvFile = "market-service/src/main/resources/physical_currency_list.csv";
         String line = "";
         String csvSplitBy = ",";
@@ -43,13 +43,13 @@ public class BootstrapData implements CommandLineRunner {
                 if (currencyData.length == 2) {
                     String code = currencyData[0].trim();
                     String name = currencyData[1].trim();
-                    currencyMap.put(code, name);
+                    currencyList.add(new CurrencyDto(name, code));
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return currencyMap;
+        return currencyList;
     }
 }
