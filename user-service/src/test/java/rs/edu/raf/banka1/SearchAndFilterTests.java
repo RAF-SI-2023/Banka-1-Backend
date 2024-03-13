@@ -95,7 +95,7 @@ public class SearchAndFilterTests {
     }
 
     @Test
-    void allParametersOneOutput(){
+    void allParametersOneOutput() {
         when(userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Optional.of(Arrays.asList(
                         this.user1
@@ -107,7 +107,7 @@ public class SearchAndFilterTests {
     }
 
     @Test
-    void allParametersNoOutput(){
+    void allParametersNoOutput() {
         when(userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Optional.of(Arrays.asList(
                 )));
@@ -117,7 +117,7 @@ public class SearchAndFilterTests {
 
     }
     @Test
-    void allParametersTwoOutputs(){
+    void allParametersTwoOutputs() {
         when(userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Optional.of(Arrays.asList(
                         this.user1,

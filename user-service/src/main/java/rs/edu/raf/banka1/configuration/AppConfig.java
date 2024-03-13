@@ -12,6 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableMethodSecurity
+@EnableScheduling
+@EnableAsync
+@EnableAspectJAutoProxy
 public class AppConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {

@@ -17,6 +17,12 @@ import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
 import rs.edu.raf.banka1.responses.EditUserResponse;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.UserService;
@@ -30,7 +36,7 @@ import java.util.UUID;
 @Tag(name = "User", description = "User API")
 //@SecurityRequirement() TODO
 @SecurityRequirement(name = "basicScheme")
-@CrossOrigin(origins = "http://localhost:8099")
+@CrossOrigin
 public class UserController {
 
     private UserService userService;
@@ -69,8 +75,8 @@ public class UserController {
         @RequestParam(name = "firstName", required = false) String firstName,
         @RequestParam(name = "lastName", required = false) String lastName,
         @RequestParam(name = "position", required = false) String position
-    ){
-        return new ResponseEntity<>(userService.search(email,firstName, lastName, position), HttpStatus.OK);
+    ) {
+        return new ResponseEntity<>(userService.search(email, firstName, lastName, position), HttpStatus.OK);
     }
 
     @PostMapping(value = "/createUser")
@@ -112,8 +118,3 @@ public class UserController {
         return new ResponseEntity<>(userService.editUser(email, password, firstName, lastName, jmbg, position, phoneNumber, isActive, permissions), HttpStatus.OK);
     }
 }
-/*
-
-
-
- */
