@@ -48,7 +48,7 @@ public class ListingServiceImpl implements ListingService{
     }
 
 
-//    NOTE: see what to do with this, as API isn't free (almost nothing from this API changes so it is okay to do it once and store it into json file)
+    //    NOTE: see what to do with this, as API isn't free (almost nothing from this API changes so it is okay to do it once and store it into json file)
 //    NOTE: Maybe name/description of the company changes, so we should update it from time to time
     @Override
     public void initializeListings() {
@@ -114,9 +114,9 @@ public class ListingServiceImpl implements ListingService{
                 newArray.add(newObj);
 
             }
-                // Save the new JSON array to a file
-                File file = new File(Constants.listingsFilePath);
-                objectMapper.writeValue(file, newArray);
+            // Save the new JSON array to a file
+            File file = new File(Constants.listingsFilePath);
+            objectMapper.writeValue(file, newArray);
 
         }catch (Exception e){
             e.printStackTrace();
@@ -124,7 +124,7 @@ public class ListingServiceImpl implements ListingService{
 
     }
 
-//    loads listings from json file and updates them with trending data
+    //    loads listings from json file and updates them with trending data
     @Override
     public List<ListingModel> fetchListings() {
         List<ListingModel> listingModels = fetchListingsName();
@@ -284,7 +284,7 @@ public class ListingServiceImpl implements ListingService{
         }
     }
 
-//    call it at the end of the day (to save API calls, but other than that, you can call it whenever you want)
+    //    call it at the end of the day (to save API calls, but other than that, you can call it whenever you want)
     @Override
     public int addAllListingsToHistory(List<ListingHistoryModel> listingHistoryModels) {
 
