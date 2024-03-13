@@ -25,7 +25,7 @@ ADD . $HOME
 # - "-Drevision=$VERSION" - prosledjuje verziju koju smo definisali gore, ignorisati
 # - "-Dmaven.test.skip" - iskljucuje pokretanje testova prilikom buildovanja image-a
 # - "-f $HOME/pom.xml" - putanja do pom.xml fajla
-RUN --mount=type=cache,target=/root/.m2 mvn -DfinalName=app -Dmaven.test.skip -f $HOME/pom.xml clean package
+RUN --mount=type=cache,target=/root/.m2 mvn -DfinalName=app -Dmaven.test.skip -Dcheckstyle.skip=true -f $HOME/pom.xml clean package
 
 # Ovo je drugi stage gde dobijamo rezultirajuci image.
 # Ovde kopiramo .jar fajl napravljen u prethodnom, tj. prvom stage-u.
