@@ -10,15 +10,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.requests.ActivateAccountRequest;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
+import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
+import rs.edu.raf.banka1.responses.EditUserResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.UserService;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -90,6 +94,22 @@ public class UserController {
     public ResponseEntity<ActivateAccountResponse> activateAccount(@PathVariable String token, @RequestBody ActivateAccountRequest activateAccountRequest) {
         String password = activateAccountRequest.getPassword();
         return new ResponseEntity<>(userService.activateAccount(token, password), HttpStatus.OK);
+    }
+
+    @PutMapping()
+    @Operation(summary = "Admin edit user", description = "Admin can edit a user's info")
+    @PreAuthorize("hasAuthority('can_manage_users')")
+    public ResponseEntity<EditUserResponse> editUser(@RequestBody EditUserRequest editUserRequest) {
+        String email = editUserRequest.getEmail();
+        String password = editUserRequest.getPassword();
+        String firstName = editUserRequest.getFirstName();
+        String lastName = editUserRequest.getLastName();
+        String jmbg = editUserRequest.getJmbg();
+        String position = editUserRequest.getPosition();
+        String phoneNumber = editUserRequest.getPhoneNumber();
+        boolean isActive = editUserRequest.getIsActive();
+        Set<String> permissions = editUserRequest.getPermissions();
+        return new ResponseEntity<>(userService.editUser(email, password, firstName, lastName, jmbg, position, phoneNumber, isActive, permissions), HttpStatus.OK);
     }
 }
 /*

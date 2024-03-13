@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.EmailService;
@@ -26,6 +27,7 @@ public class SearchAndFilterTests {
     private UserRepository userRepository;
     private UserMapper userMapper;
     private EmailService emailService;
+    private PermissionRepository permissionRepository;
 
     private User admin;
     private User user1;
@@ -36,7 +38,7 @@ public class SearchAndFilterTests {
         userRepository = mock(UserRepository.class);
         userMapper = new UserMapper();
         emailService = mock(EmailService.class);
-        userService = new UserServiceImpl(userRepository, userMapper, emailService);
+        userService = new UserServiceImpl(userRepository, userMapper, emailService, permissionRepository);
 
         this.admin = new User();
         admin.setActive(true);

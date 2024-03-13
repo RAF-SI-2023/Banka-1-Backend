@@ -4,14 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.UserMapper;
+import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
+import rs.edu.raf.banka1.responses.EditUserResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,13 +24,15 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
     private UserRepository userRepository;
 
+    private PermissionRepository permissionRepository;
     private EmailService emailService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, EmailService emailService) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, EmailService emailService, PermissionRepository permissionRepository) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.emailService = emailService;
+        this.permissionRepository = permissionRepository;
     }
 
     public UserResponse findByEmail(String email) {
@@ -82,10 +88,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ActivateAccountResponse activateAccount(String token, String password) {
+        // TODO fix optional get
         User user = userRepository.findByActivationToken(token).get();
         user.setActivationToken(null);
         user.setPassword(password);
         userRepository.save(user);
         return new ActivateAccountResponse(user.getUserId());
+    }
+
+    @Override
+    public EditUserResponse editUser(String email, String password, String firstName, String lastName, String jmbg, String position, String phoneNumber, boolean isActive, Set<String> permissions) {
+        // TODO fix optional get
+        User user = userRepository.findByEmail(email).get();
+        user.setPassword(password);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setJmbg(jmbg);
+        user.setPosition(position);
+        user.setPhoneNumber(phoneNumber);
+        user.setActive(isActive);
+        // TODO fix optional get
+        user.setPermissions(permissions.stream().map(perm -> permissionRepository.findByName(perm).get()).collect(Collectors.toSet()));
+        userRepository.save(user);
+        return new EditUserResponse(user.getUserId());
     }
 }

@@ -21,7 +21,6 @@ public class EmailServiceImpl implements EmailService {
         message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
-        System.out.println("lintac");
 
         javaMailSender.send(message);
     }
