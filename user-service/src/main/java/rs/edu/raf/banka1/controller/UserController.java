@@ -24,12 +24,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
 import rs.edu.raf.banka1.responses.UserResponse;
-import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.UserService;
 
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/user")
