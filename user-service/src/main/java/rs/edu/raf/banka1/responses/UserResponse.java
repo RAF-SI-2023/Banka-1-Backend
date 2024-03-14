@@ -2,9 +2,10 @@ package rs.edu.raf.banka1.responses;
 
 import lombok.Getter;
 import lombok.Setter;
+import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.model.Permission;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -20,19 +21,6 @@ public class UserResponse {
     private String position;
     private String phoneNumber;
     private Boolean active;
-    private Set<Permission> permissions;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UserResponse that = (UserResponse) o;
-        return Objects.equals(username, that.username) && Objects.equals(email, that.email) && Objects.equals(jmbg, that.jmbg);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(username, email, jmbg);
-    }
+    private List<PermissionDto> permissions;
 }
 
