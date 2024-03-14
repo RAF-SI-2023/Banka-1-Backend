@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 
-@CucumberOptions(features = "src/test/resources", glue = "rs.edu.raf.banka1.cucumber")
+@CucumberOptions(features = "src/test/resources", glue = "rs.edu.raf.banka1.cucumber", tags = "not @Ignore")
 @RunWith(Cucumber.class)
 public class CucumberIntegrationTest {
 }
