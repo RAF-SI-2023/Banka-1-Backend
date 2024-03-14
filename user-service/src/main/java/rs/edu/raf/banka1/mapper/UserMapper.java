@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @Component
 public class UserMapper {
 
-    PermissionMapper permissionMapper;
+    private PermissionMapper permissionMapper;
 
     public UserMapper(PermissionMapper permissionMapper) {
         this.permissionMapper = permissionMapper;

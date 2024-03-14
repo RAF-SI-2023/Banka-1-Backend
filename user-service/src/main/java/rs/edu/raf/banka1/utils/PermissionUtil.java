@@ -1,10 +1,7 @@
 package rs.edu.raf.banka1.utils;
 
 import rs.edu.raf.banka1.dtos.PermissionDto;
-import rs.edu.raf.banka1.model.Permission;
-
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PermissionUtil {
 

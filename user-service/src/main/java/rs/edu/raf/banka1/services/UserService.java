@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import rs.edu.raf.banka1.responses.UserResponse;
 
 import java.util.List;
-import java.util.Set;
 
 public interface UserService extends UserDetailsService {
     UserResponse findByEmail(String email);

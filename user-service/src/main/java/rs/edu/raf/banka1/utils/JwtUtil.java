@@ -6,11 +6,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import rs.edu.raf.banka1.model.User;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -39,18 +37,18 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
-    public boolean isTokenExpired(String token){
+    public boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());
     }
 
-    public String generateToken(String email, String permissions){
+    public String generateToken(String email, String permissions) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", permissions);
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .setExpiration(new Date(System.currentTimeMillis() + Constants.JWT_EXPIRATION_LENGTH))
                 .signWith(SignatureAlgorithm.HS512, secretKey).compact();
     }
 
