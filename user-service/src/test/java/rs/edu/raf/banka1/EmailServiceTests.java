@@ -15,6 +15,7 @@ public class EmailServiceTests {
     public void setUp() {
     }
 
+    // End to end (sends email)
     @Test
     void sendActivationEmail() {
         emailService.sendActivationEmail("noreply.rafbanka1@gmail.com", "Account activation", "Please use the following link to activate your email: {URL}");

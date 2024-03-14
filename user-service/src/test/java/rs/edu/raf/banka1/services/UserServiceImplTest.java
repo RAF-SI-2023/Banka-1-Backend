@@ -17,6 +17,8 @@ import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
+import rs.edu.raf.banka1.requests.CreateUserRequest;
+import rs.edu.raf.banka1.requests.EditUserRequest;
 
 import java.util.*;
 
@@ -24,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-
 @SpringBootTest(classes = {UserServiceImpl.class})
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -112,18 +113,19 @@ public class UserServiceImplTest {
 
     @Test
     void createUser() {
-        String email = "noreply.rafbanka1@gmail.com";
-        String firstName = "asdf";
-        String lastName = "asdf";
-        String jmbg = "1234";
-        String position = "asdf";
-        String phoneNumber = "1234";
-        boolean isActive = true;
-        String password = "1234";
-        String activationToken = UUID.randomUUID().toString();
-        userService.createUser(email, password, firstName, lastName, jmbg, position, phoneNumber, isActive, activationToken);
+        when(userMapper.createUserRequestToUser(any()))
+                .thenReturn(mockUser);
+        CreateUserRequest createUserRequest = new CreateUserRequest();
+        createUserRequest.setEmail("noreply.rafbanka1@gmail.com");
+        createUserRequest.setFirstName("asdf");
+        createUserRequest.setLastName("asdf");
+        createUserRequest.setJmbg("1234");
+        createUserRequest.setPosition("asdf");
+        createUserRequest.setPhoneNumber("1234");
+        createUserRequest.setActive(true);
+        userService.createUser(createUserRequest);
 
-        verify(emailService, times(1)).sendActivationEmail(eq(email), any(), any());
+        verify(emailService, times(1)).sendActivationEmail(eq(createUserRequest.getEmail()), any(), any());
         verify(userRepository, times(1)).save(any());
     }
 
@@ -145,25 +147,37 @@ public class UserServiceImplTest {
                 .thenReturn(Optional.of(mockUser));
         when(permissionRepository.findByName(any()))
                 .thenReturn(Optional.of(mockPermission));
+        when(userMapper.createUserRequestToUser(any()))
+                .thenReturn(mockUser);
+        when(userMapper.editUserRequestToUser(any(), any()))
+                .thenReturn(mockUser);
 
-        String email = "noreply.rafbanka1@gmail.com";
-        String firstName = "asdf";
-        String lastName = "asdf";
-        String jmbg = "1234";
-        String position = "asdf";
-        String phoneNumber = "1234";
-        boolean isActive = true;
-        String password = "1234";
+        CreateUserRequest createUserRequest = new CreateUserRequest();
+        createUserRequest.setEmail("noreply.rafbanka1@gmail.com");
+        createUserRequest.setFirstName("asdf");
+        createUserRequest.setLastName("asdf");
+        createUserRequest.setJmbg("1234");
+        createUserRequest.setPosition("asdf");
+        createUserRequest.setPhoneNumber("1234");
+        createUserRequest.setActive(true);
+        userService.createUser(createUserRequest);
+
+        EditUserRequest editUserRequest = new EditUserRequest();
+        editUserRequest.setEmail("noreply.rafbanka1@gmail.com");
+        editUserRequest.setFirstName("asdf");
+        editUserRequest.setLastName("asdf");
+        editUserRequest.setJmbg("1234");
+        editUserRequest.setPosition("asdf");
+        editUserRequest.setPhoneNumber("1234");
+        editUserRequest.setActive(false);
         String perm = "can_manage_users";
         Set<String> permissions = new HashSet<>();
         permissions.add(perm);
-        userService.createUser(email, password, firstName, lastName, jmbg, position, phoneNumber, isActive);
-
-        isActive = false;
-        userService.editUser(email, password, firstName, lastName, jmbg, position, phoneNumber, isActive, permissions);
+        editUserRequest.setPermissions(permissions);
+        userService.editUser(editUserRequest);
 
         verify(userRepository, times(2)).save(any());
-        verify(userRepository, times(1)).findByEmail(email);
+        verify(userRepository, times(1)).findByEmail(editUserRequest.getEmail());
     }
 
 }

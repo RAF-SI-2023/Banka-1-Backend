@@ -83,16 +83,7 @@ public class UserController {
     @Operation(summary = "Admin create user", description = "Creates a new user with the specified params, and forwards an activation mail to the user.")
     @PreAuthorize("hasAuthority('can_manage_users')")
     public ResponseEntity<CreateUserResponse> createUser(@RequestBody CreateUserRequest createUserRequest) {
-        String email = createUserRequest.getEmail();
-        String firstName = createUserRequest.getFirstName();
-        String lastName = createUserRequest.getLastName();
-        String jmbg = createUserRequest.getJmbg();
-        String position = createUserRequest.getEmail();
-        String phoneNumber = createUserRequest.getPhoneNumber();
-        boolean isActive = createUserRequest.isActive();
-        String password = UUID.randomUUID().toString();
-        String activationToken = UUID.randomUUID().toString();
-        return new ResponseEntity<>(userService.createUser(email, passwordEncoder.encode(password), firstName, lastName, jmbg, position, phoneNumber, isActive, activationToken), HttpStatus.OK);
+        return new ResponseEntity<>(userService.createUser(createUserRequest), HttpStatus.OK);
     }
 
     @PostMapping(value = "/activate/{token}")
@@ -106,15 +97,6 @@ public class UserController {
     @Operation(summary = "Admin edit user", description = "Admin can edit a user's info")
     @PreAuthorize("hasAuthority('can_manage_users')")
     public ResponseEntity<EditUserResponse> editUser(@RequestBody EditUserRequest editUserRequest) {
-        String email = editUserRequest.getEmail();
-        String password = editUserRequest.getPassword();
-        String firstName = editUserRequest.getFirstName();
-        String lastName = editUserRequest.getLastName();
-        String jmbg = editUserRequest.getJmbg();
-        String position = editUserRequest.getPosition();
-        String phoneNumber = editUserRequest.getPhoneNumber();
-        boolean isActive = editUserRequest.getIsActive();
-        Set<String> permissions = editUserRequest.getPermissions();
-        return new ResponseEntity<>(userService.editUser(email, password, firstName, lastName, jmbg, position, phoneNumber, isActive, permissions), HttpStatus.OK);
+        return new ResponseEntity<>(userService.editUser(editUserRequest), HttpStatus.OK);
     }
 }

@@ -15,6 +15,6 @@ public class EditUserRequest {
     private String jmbg;
     private String position;
     private String phoneNumber;
-    private Boolean isActive;
+    private boolean isActive;
     private Set<String> permissions;
 }

@@ -12,15 +12,14 @@ import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.UserRepository;
+import rs.edu.raf.banka1.requests.CreateUserRequest;
+import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
 import rs.edu.raf.banka1.responses.EditUserResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,33 +59,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public CreateUserResponse createUser(String email, String password, String firstName, String lastName, String jmbg, String position, String phoneNumber, boolean isActive) {
-        User user = populateUser(email, password, firstName, lastName, jmbg, position, phoneNumber, isActive);
-        userRepository.save(user);
-        return new CreateUserResponse(user.getUserId());
-    }
-
-
-    @Override
-    public CreateUserResponse createUser(String email, String password, String firstName, String lastName, String jmbg, String position, String phoneNumber, boolean isActive, String activationToken) {
-        User user = populateUser(email, password, firstName, lastName, jmbg, position, phoneNumber, isActive);
+    public CreateUserResponse createUser(CreateUserRequest createUserRequest) {
+        User user = userMapper.createUserRequestToUser(createUserRequest);
+        String activationToken = UUID.randomUUID().toString();
         user.setActivationToken(activationToken);
         userRepository.save(user);
-        emailService.sendActivationEmail(email, "RAF Banka - User activation", "Visit this URL to activate your account: http://localhost:8080/user/activate/" + activationToken);
+        emailService.sendActivationEmail(createUserRequest.getEmail(), "RAF Banka - User activation", "Visit this URL to activate your account: http://localhost:8080/user/activate/" + activationToken);
         return new CreateUserResponse(user.getUserId());
-    }
-
-    private User populateUser(String email, String password, String firstName, String lastName, String jmbg, String position, String phoneNumber, boolean isActive) {
-        User user = new User();
-        user.setEmail(email);
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setJmbg(jmbg);
-        user.setPosition(position);
-        user.setPhoneNumber(phoneNumber);
-        user.setActive(isActive);
-        user.setPassword(password);
-        return user;
     }
 
     @Override
@@ -99,16 +78,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EditUserResponse editUser(String email, String password, String firstName, String lastName, String jmbg, String position, String phoneNumber, boolean isActive, Set<String> permissions) {
-        User user = userRepository.findByEmail(email).get();
-        user.setPassword(password);
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setJmbg(jmbg);
-        user.setPosition(position);
-        user.setPhoneNumber(phoneNumber);
-        user.setActive(isActive);
-        user.setPermissions(permissions.stream().map(perm -> permissionRepository.findByName(perm).get()).collect(Collectors.toSet()));
+    public EditUserResponse editUser(EditUserRequest editUserRequest) {
+        User user = userRepository.findByEmail(editUserRequest.getEmail()).get();
+        user = userMapper.editUserRequestToUser(user, editUserRequest);
+        user.setPermissions(editUserRequest.getPermissions().stream().map(perm -> permissionRepository.findByName(perm).get()).collect(Collectors.toSet()));
         userRepository.save(user);
         return new EditUserResponse(user.getUserId());
     }
