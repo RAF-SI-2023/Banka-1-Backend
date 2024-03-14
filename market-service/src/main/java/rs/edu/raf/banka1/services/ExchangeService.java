@@ -29,8 +29,8 @@ public class ExchangeService {
     @Autowired
     public ExchangeService(ExchangeRepository exchangeRepository) {
         this.exchangeRepository = exchangeRepository;
-        parseExchangeCSV();
         initTimes();
+        parseExchangeCSV();
     }
 
     private void parseExchangeCSV() {
@@ -46,8 +46,8 @@ public class ExchangeService {
                 exchange.setCurrency(nextRecord[6]); // Market Category Code
                 exchange.setTimeZone(nextRecord[15]); // Time Zone
 
-                exchange.setOpenTime(containsCountryCode(marketOpenTimes, exchange.getCountry()));
-                exchange.setCloseTime(containsCountryCode(marketCloseTimes, exchange.getCountry()));
+                exchange.setOpenTime(marketOpenTimes.get(exchange.getCountry()));
+                exchange.setCloseTime(marketCloseTimes.get(exchange.getCountry()));
                 exchanges.add(exchange);
             }
             if (!exchanges.isEmpty()) {
@@ -58,78 +58,61 @@ public class ExchangeService {
         }
     }
 
-    // Method to check if a country ISO code or its partial representation is contained in the map
-    private String containsCountryCode(Map<String, String> map, String code) {
-        for (String key : map.keySet()) {
-            if (key.contains(code)) {
-                return map.get(key);
-            }
-        }
-        return "N/A";
-    }
-
-    //TODO dodati praznike za berze
-
     private void setTime(String country, String openTime, String closeTime) {
         marketOpenTimes.put(country, openTime);
         marketCloseTimes.put(country, closeTime);
     }
 
     private void initTimes() {
-        setTime("NYSE", "09:30", "16:00");
-        setTime("TSX", "09:30", "16:00");
-        setTime("LSE", "08:00", "16:00");
-        setTime("PSE-PRAGUE", "09:00", "16:20");
-        setTime("FSX", "08:00", "20:00");
-        setTime("XETRA", "09:00", "17:30");
-        setTime("EUREX", "08:00", "22:00");
-        setTime("CSE", "09:00", "17:00");
-        setTime("OMXH", "10:00", "18:30");
-        setTime("EPA", "09:00", "17:30");
-        setTime("ISE", "08:00", "16:30");
-        setTime("MTE", "09:00", "17:25");
-        setTime("LuxSE", "09:00", "17:35");
-        setTime("OSE", "09:00", "16:30");
-        setTime("OMX", "09:00", "17:30");
-        setTime("BME", "09:00", "17:30");
-        setTime("SIX", "09:00", "17:30");
-        setTime("BX", "09:00", "16:30");
-        setTime("UX", "10:00", "17:30");
-        setTime("WBAH", "08:55", "17:35");
-        setTime("BSE-BULGARIA", "10:10", "16:55");
-        setTime("ASE-ATHENS", "10:15", "17:20");
-        setTime("WSE", "09:00", "17:35");
-        setTime("BVB", "10:00", "17:45");
-        setTime("MNSE", "09:30", "14:00");
-        setTime("BSE-BUDAPEST", "09:00", "17:00");
-        setTime("ZSE", "09:30", "15:55");
+        setTime("US", "09:30", "16:00");
+        setTime("CA", "09:30", "16:00");
+        setTime("GB", "08:00", "16:00");
+        setTime("CZ", "09:00", "16:20");
+        setTime("DE", "08:00", "20:00");
+        setTime("DE", "09:00", "17:30");
+        setTime("DE", "08:00", "22:00");
+        setTime("DK", "09:00", "17:00");
+        setTime("FI", "10:00", "18:30");
+        setTime("FR", "09:00", "17:30");
+        setTime("IE", "08:00", "16:30");
+        setTime("IT", "09:00", "17:25");
+        setTime("LU", "09:00", "17:35");
+        setTime("NO", "09:00", "16:30");
+        setTime("SE", "09:00", "17:30");
+        setTime("ES", "09:00", "17:30");
+        setTime("CH", "09:00", "17:30");
+        setTime("UA", "10:00", "17:30");
+        setTime("AT", "08:55", "17:35");
+        setTime("BG", "10:10", "16:55");
+        setTime("GR", "10:15", "17:20");
+        setTime("PL", "09:00", "17:35");
+        setTime("RO", "10:00", "17:45");
+        setTime("ME", "09:30", "14:00");
+        setTime("HU", "09:00", "17:00");
+        setTime("HR", "09:30", "15:55");
 
-        setTime("ASX", "10:00", "16:00");
-        setTime("SZSE", "09:30", "15:00");
-        setTime("SSE", "09:30", "15:00");
-        setTime("HKEX", "09:20", "16:00");
-        setTime("NSE", "09:15", "15:30");
-        setTime("BSE-BOMBAY", "09:15", "15:30");
-        setTime("TSE", "09:00", "15:00");
-        setTime("KRX", "09:00", "15:00");
-        setTime("MYX", "09:00", "17:00");
-        setTime("NZX", "10:00", "17:00");
-        setTime("NZX", "10:00", "17:00");
-        setTime("PSE-PHILIPPINE", "09:30", "15:30");
-        setTime("SGX", "09:00", "17:00");
-        setTime("SET", "10:00", "16:30");
-        setTime("TWSE", "09:30", "13:30");
-        setTime("IDX", "09:00", "15:00");
-        setTime("BIST", "09:00", "17:30");
-        setTime("HOSE", "09:15", "14:30");
-        setTime("HNX", "09:00", "15:30");
-        setTime("CSE-COLOMBO", "10:30", "14:30");
+        setTime("AU", "10:00", "16:00");
+        setTime("CH", "09:30", "15:00");
+        setTime("HK", "09:20", "16:00");
+        setTime("IN", "09:15", "15:30");
+        setTime("JP", "09:00", "15:00");
+        setTime("KR", "09:00", "15:00");
+        setTime("MY", "09:00", "17:00");
+        setTime("NZ", "10:00", "17:00");
+        setTime("PH", "09:30", "15:30");
+        setTime("SG", "09:00", "17:00");
+        setTime("TH", "10:00", "16:30");
+        setTime("TW", "09:30", "13:30");
+        setTime("ID", "09:00", "15:00");
+        setTime("TR", "09:00", "17:30");
+        setTime("VN", "09:15", "14:30");
+        setTime("LK", "10:30", "14:30");
 
-        setTime("BM&F", "10:00", "17:30");
-        setTime("BVS", "09:30", "16:30");
-        setTime("BVPA", "10:00", "15:00");
-        setTime("BCBA", "11:00", "17:00");
-        setTime("BVL", "08:30", "15:00");
-        setTime("BVC", "09:30", "15:55");
+        setTime("BR", "10:00", "17:30");
+        setTime("CL", "09:30", "16:30");
+        setTime("PA", "10:00", "15:00");
+        setTime("AR", "11:00", "17:00");
+        setTime("PE", "08:30", "15:00");
+        setTime("CO", "09:30", "15:55");
     }
 }

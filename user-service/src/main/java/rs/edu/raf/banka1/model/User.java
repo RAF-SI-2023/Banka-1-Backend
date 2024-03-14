@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,6 +22,9 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "userId")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,6 +56,9 @@ public class User {
 
     @Column
     private Boolean active;
+
+    @Column
+    private String activationToken;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
