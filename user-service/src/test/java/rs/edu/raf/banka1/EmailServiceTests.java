@@ -1,17 +1,13 @@
 package rs.edu.raf.banka1;
 
 import io.cucumber.java.Before;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.EmailServiceImpl;
 
 import static org.mockito.Mockito.verify;
@@ -33,7 +29,7 @@ public class EmailServiceTests {
     }
 
     @Test
-    public void sendActivationEmail_shouldPrepareEmailCorrectly() {
+    public void sendActivationEmailShouldPrepareEmailCorrectly() {
         String to = "noreply.rafbanka1@gmail.com";
         String subject = "Account activation";
         String body = "Please use the following link to activate your email: {URL}";

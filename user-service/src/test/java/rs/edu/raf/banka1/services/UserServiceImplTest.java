@@ -10,7 +10,6 @@ import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.Permission;
@@ -20,12 +19,17 @@ import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
 
-import java.util.*;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 @SpringBootTest(classes = {UserServiceImpl.class})
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -69,10 +73,10 @@ public class UserServiceImplTest {
 
         when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.of(user));
 
-        UserDetails userDetails =userService.loadUserByUsername(email);
-        assertEquals(userDetails.getUsername(),email);
-        assertEquals(userDetails.getPassword(),user.getPassword());
-        assertEquals(userDetails.getAuthorities().size(),0);
+        UserDetails userDetails = userService.loadUserByUsername(email);
+        assertEquals(userDetails.getUsername(), email);
+        assertEquals(userDetails.getPassword(), user.getPassword());
+        assertEquals(userDetails.getAuthorities().size(), 0);
 
     }
 
@@ -95,10 +99,10 @@ public class UserServiceImplTest {
 
         when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.of(user));
 
-        UserDetails userDetails =userService.loadUserByUsername(email);
-        assertEquals(userDetails.getUsername(),email);
-        assertEquals(userDetails.getPassword(),user.getPassword());
-        assertEquals(userDetails.getAuthorities().size(),2);
+        UserDetails userDetails = userService.loadUserByUsername(email);
+        assertEquals(userDetails.getUsername(), email);
+        assertEquals(userDetails.getPassword(), user.getPassword());
+        assertEquals(userDetails.getAuthorities().size(), 2);
 
     }
 
