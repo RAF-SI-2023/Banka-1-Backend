@@ -1,6 +1,10 @@
 package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,8 +66,26 @@ public class UserController {
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get user by id", description = "Returns user by id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = { @Content(schema = @Schema(implementation = UserResponse.class), mediaType = "application/json") }),
+            @ApiResponse(responseCode = "404", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", content = { @Content(schema = @Schema()) }) })
+//    @GetMapping("/tutorials/{id}")
     public ResponseEntity<UserResponse> readUser(@PathVariable Long id) {
         return new ResponseEntity<>(this.userService.findById(id), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getUser", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get user by jwt", description = "Returns user by jwt")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = { @Content(schema = @Schema(implementation = UserResponse.class), mediaType = "application/json") }),
+            @ApiResponse(responseCode = "404", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", content = { @Content(schema = @Schema()) }) })
+    public ResponseEntity<UserResponse> readUserFromJwt() {
+        UserResponse userResponse = this.userService.findByJwt();
+        if(userResponse == null)
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
     @GetMapping(value = "/search")

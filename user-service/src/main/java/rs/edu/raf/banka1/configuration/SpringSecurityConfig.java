@@ -17,10 +17,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 import rs.edu.raf.banka1.filters.JwtFilter;
 import rs.edu.raf.banka1.services.UserService;
 
-import static org.springframework.security.config.Customizer.withDefaults;
+import java.util.Arrays;
+
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 @EnableWebSecurity
@@ -36,17 +38,27 @@ public class SpringSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests((authz) ->
-                    authz
-                    .requestMatchers(antMatcher("/auth/**")).permitAll()
-                    .anyRequest().authenticated()
-            )
-            .cors(withDefaults())
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement((session) ->
-                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .addFilterBefore(this.jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .authorizeHttpRequests((authz) ->
+                                authz
+//                            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                        .requestMatchers(antMatcher("/auth/**")).permitAll()
+                                        .anyRequest().authenticated()
+                )
+//                .cors().configurationSource(corsConfigurationSource())
+
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedOrigins(Arrays.asList("*"));
+                    configuration.setAllowedMethods(Arrays.asList("*"));
+                    configuration.setAllowedHeaders(Arrays.asList("*"));
+                    return configuration;
+                }))
+                .csrf(AbstractHttpConfigurer::disable)
+//            .csrf()
+                .sessionManagement((session) ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .addFilterBefore(this.jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

@@ -58,7 +58,7 @@ public class BootstrapData implements CommandLineRunner {
 
     public List<CurrencyDto> loadCurrencies() {
         List<CurrencyDto> currencyList = new ArrayList<>();
-        String csvFile = "market-service/src/main/resources/physical_currency_list.csv";
+        String csvFile = "src/main/resources/physical_currency_list.csv";
         String line = "";
         String csvSplitBy = ",";
 

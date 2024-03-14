@@ -16,10 +16,12 @@ public interface UserService extends UserDetailsService {
     UserResponse findByEmail(String email);
     List<UserResponse> findAll();
     UserResponse findById(Long id);
+    UserResponse findByJwt();
     List<UserResponse> search(String email, String firstName, String lastName, String position);
     CreateUserResponse createUser(CreateUserRequest createUserRequest);
     ActivateAccountResponse activateAccount(String token, String password);
     EditUserResponse editUser(EditUserRequest editUserRequest);
+
 
 
 
