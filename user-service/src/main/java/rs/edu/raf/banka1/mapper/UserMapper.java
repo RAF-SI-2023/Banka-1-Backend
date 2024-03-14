@@ -21,6 +21,8 @@ public class UserMapper {
         userResponse.setPosition(user.getPosition());
         userResponse.setActive(user.getActive());
         userResponse.setPermissions(user.getPermissions());
+        userResponse.setUserId(user.getUserId());
+        userResponse.setPassword(user.getPassword());
         return userResponse;
     }
 
