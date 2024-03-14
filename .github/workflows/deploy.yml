@@ -20,7 +20,7 @@ jobs:
           java-version: '21'
 
       - name: Build with Maven
-        run: mvn -B clean package -Dcheckstyle.skip=true -DskipTests=true
+        run: mvn -B clean package -Dcheckstyle.skip=true -DskipTests=false
     
       - name: Build Docker image for user service
         run: docker build -t ${{secrets.DOCKER_USERNAME}}/user-service:latest ./user-service

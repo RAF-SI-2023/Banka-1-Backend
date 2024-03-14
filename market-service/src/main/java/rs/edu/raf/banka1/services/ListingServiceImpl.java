@@ -130,8 +130,7 @@ public class ListingServiceImpl implements ListingService{
             updatelistingModelFields(listingModel, rootNode);
 
         }catch (Exception e){
-            e.printStackTrace();
-            System.out.println(listingModel.getTicker() + " has failed updating");
+            System.out.println(listingModel.getTicker() + " not found on alphavantage");
         }
     }
 
@@ -250,15 +249,24 @@ public class ListingServiceImpl implements ListingService{
         // Create a new JSON array to store selected fields
         ArrayNode newArray = objectMapper.createArrayNode();
 
+        int i = 0;
+
         // Iterate through the JSON array
         for (JsonNode jsonNode : jsonArray) {
             // Extract selected fields
             String symbol = jsonNode.get("symbol").asText();
             String companyName = jsonNode.get("companyName").asText();
             // if primaryExchange is null, we should skip it
-            if (jsonNode.get("primaryExchange") == null) {
+            if (jsonNode.get("primaryExchange") == null ) {
                 continue;
             }
+
+            // we need to skip those symbols because alphavantage doesn't support them
+            if(symbol.contains("-"))
+                continue;
+
+            if(Constants.ListingsToIgnore.contains(symbol))
+                continue;
 
             String primaryExchange = jsonNode.get("primaryExchange").asText();
 
@@ -271,6 +279,8 @@ public class ListingServiceImpl implements ListingService{
             // Add the new object to the new JSON array
             newArray.add(newObj);
 
+            if(i++ >= Constants.maxListings)
+                break;
         }
         return newArray;
     }

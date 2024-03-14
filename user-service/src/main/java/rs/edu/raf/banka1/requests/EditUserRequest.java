@@ -1,7 +1,6 @@
 package rs.edu.raf.banka1.requests;
 
 import lombok.Data;
-import rs.edu.raf.banka1.model.Permission;
 
 import java.util.Set;
 

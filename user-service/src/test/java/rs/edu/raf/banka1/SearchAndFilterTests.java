@@ -2,7 +2,7 @@ package rs.edu.raf.banka1;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+
 public class SearchAndFilterTests {
     private UserService userService;
     private UserRepository userRepository;
@@ -36,7 +36,7 @@ public class SearchAndFilterTests {
     @BeforeEach
     public void setUp() {
         userRepository = mock(UserRepository.class);
-        userMapper = new UserMapper();
+        userMapper = new UserMapper(new PermissionMapper());
         emailService = mock(EmailService.class);
         userService = new UserServiceImpl(userRepository, userMapper, emailService, permissionRepository);
 
@@ -82,6 +82,7 @@ public class SearchAndFilterTests {
 
     @Test
     void noParametersEmptyString() {
+        final Integer testCount = 3;
         // Mock the userRepository to return no user data
         when(userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Optional.of(Arrays.asList(
@@ -91,18 +92,19 @@ public class SearchAndFilterTests {
                 )));
 
         List<UserResponse> userResponses = userService.search("", "", "", "");
-        assertEquals(3, userResponses.size());
+        assertEquals(testCount, userResponses.size());
     }
 
     @Test
     void allParametersOneOutput() {
+        final Integer testCount = 1;
         when(userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Optional.of(Arrays.asList(
                         this.user1
                 )));
 
         List<UserResponse> userResponses = userService.search("user", "user", "useric1", "position1");
-        assertEquals(1, userResponses.size());
+        assertEquals(testCount, userResponses.size());
 
     }
 
@@ -118,6 +120,7 @@ public class SearchAndFilterTests {
     }
     @Test
     void allParametersTwoOutputs() {
+        final Integer testCount = 2;
         when(userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Optional.of(Arrays.asList(
                         this.user1,
@@ -125,7 +128,7 @@ public class SearchAndFilterTests {
                 )));
 
         List<UserResponse> userResponses = userService.search("user", "user", "useric", "position");
-        assertEquals(2, userResponses.size());
+        assertEquals(testCount, userResponses.size());
 
     }
 

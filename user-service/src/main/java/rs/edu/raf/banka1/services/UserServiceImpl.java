@@ -1,16 +1,13 @@
 package rs.edu.raf.banka1.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.UserMapper;
-import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
-import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
@@ -19,8 +16,11 @@ import rs.edu.raf.banka1.responses.CreateUserResponse;
 import rs.edu.raf.banka1.responses.EditUserResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -64,7 +64,8 @@ public class UserServiceImpl implements UserService {
         String activationToken = UUID.randomUUID().toString();
         user.setActivationToken(activationToken);
         userRepository.save(user);
-        emailService.sendActivationEmail(createUserRequest.getEmail(), "RAF Banka - User activation", "Visit this URL to activate your account: http://localhost:8080/user/activate/" + activationToken);
+        emailService.sendActivationEmail(createUserRequest.getEmail(), "RAF Banka - User activation",
+                "Visit this URL to activate your account: http://localhost:8080/user/activate/" + activationToken);
         return new CreateUserResponse(user.getUserId());
     }
 
@@ -90,7 +91,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> myUser = this.userRepository.findByEmail(username);
-        if(myUser.isEmpty()) {
+        if (myUser.isEmpty()) {
             throw new UsernameNotFoundException("User name " + username + " not found");
         }
 
