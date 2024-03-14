@@ -57,6 +57,9 @@ public class User {
     @Column
     private Boolean active;
 
+    @Column
+    private String activationToken;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_permissions",
