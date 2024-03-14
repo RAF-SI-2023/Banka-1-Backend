@@ -27,7 +27,6 @@ public class BootstrapData implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-
         System.out.println("Loading Data...");
 
         Permission testPermission = new Permission();

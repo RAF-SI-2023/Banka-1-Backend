@@ -1,24 +1,20 @@
-package rs.edu.raf.banka1.responses;
+package rs.edu.raf.banka1.requests;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import rs.edu.raf.banka1.model.Permission;
 
 import java.util.Set;
 
-@Getter
-@Setter
-public class UserResponse {
+@Data
+public class EditUserRequest {
     private Long userId;
-    private String username;
-    private String password;
     private String email;
+    private String password;
     private String firstName;
     private String lastName;
     private String jmbg;
     private String position;
     private String phoneNumber;
-    private Boolean active;
-    private Set<Permission> permissions;
+    private boolean isActive;
+    private Set<String> permissions;
 }
-
