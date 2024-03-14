@@ -6,10 +6,17 @@ import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.responses.UserResponse;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
 public class UserMapper {
+
+    PermissionMapper permissionMapper;
+
+    public UserMapper(PermissionMapper permissionMapper) {
+        this.permissionMapper = permissionMapper;
+    }
 
     public UserResponse userToUserResponse(User user) {
         UserResponse userResponse = new UserResponse();
@@ -20,7 +27,8 @@ public class UserMapper {
         userResponse.setPhoneNumber(user.getPhoneNumber());
         userResponse.setPosition(user.getPosition());
         userResponse.setActive(user.getActive());
-        userResponse.setPermissions(user.getPermissions());
+        userResponse.setPermissions(user.getPermissions().stream().map(permissionMapper::permissionToPermissionDto).
+                collect(Collectors.toList()));
         return userResponse;
     }
 
@@ -33,7 +41,8 @@ public class UserMapper {
         user.setPhoneNumber(userResponse.getPhoneNumber());
         user.setPosition(userResponse.getPosition());
         user.setActive(userResponse.getActive());
-        user.setPermissions(userResponse.getPermissions());
+        user.setPermissions(userResponse.getPermissions().stream().map(permissionMapper::permissionDtoToPermission).
+                collect(Collectors.toSet()));
         return user;
     }
 
@@ -46,6 +55,7 @@ public class UserMapper {
         user.setPhoneNumber(createUserRequest.getPhoneNumber());
         user.setPosition(createUserRequest.getPosition());
         user.setActive(createUserRequest.isActive());
+        user.setPassword(UUID.randomUUID().toString());
         return user;
     }
 

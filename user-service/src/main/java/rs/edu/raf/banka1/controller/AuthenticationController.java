@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.requests.LoginRequest;
 import rs.edu.raf.banka1.responses.LoginResponse;
@@ -48,15 +49,14 @@ public class AuthenticationController {
             return ResponseEntity.status(401).build();
         }
         if (user.getPermissions() != null && !user.getPermissions().isEmpty()) {
-            //packs permissions into json list
-            // [perm1, perm2...]
-            permissions= (packPermissions(new ArrayList<>(user.getPermissions())));
+
+            permissions = (packPermissions(user.getPermissions()));
          }
 
         return ResponseEntity.ok(
                 new LoginResponse(
                         jwtUtil.generateToken(loginRequest.getEmail(), permissions),
-                        user.getPermissions().stream().map(Permission::getName).collect(Collectors.toList())
+                        user.getPermissions().stream().map(PermissionDto::getName).collect(Collectors.toList())
                 )
         );
     }
