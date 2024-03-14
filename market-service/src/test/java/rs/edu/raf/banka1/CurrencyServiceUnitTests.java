@@ -11,7 +11,10 @@ import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.repositories.CurrencyRepository;
 import rs.edu.raf.banka1.services.CurrencyService;
 
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -26,7 +29,7 @@ public class CurrencyServiceUnitTests {
     private CurrencyService currencyService;
 
     @Test
-    public void addCurrenciesSuccessfully(){
+    public void addCurrenciesSuccessfully() {
         List<CurrencyDto> currencyList = new ArrayList<>();
         currencyList.add(new CurrencyDto("AED", "United Arab Emirates Dirham"));
         currencyList.add(new CurrencyDto("AFN", "Afghan Afghani"));
@@ -39,7 +42,7 @@ public class CurrencyServiceUnitTests {
     }
 
     @Test
-    void findCurrencyByCurrencyNameSuccessfully(){
+    void findCurrencyByCurrencyNameSuccessfully() {
         var currency = new Currency();
         currency.setId(1L);
         currency.setCurrencyCode("AED");
@@ -57,7 +60,7 @@ public class CurrencyServiceUnitTests {
     }
 
     @Test
-    void findCurrencyByCurrencyCodeSuccessfully(){
+    void findCurrencyByCurrencyCodeSuccessfully() {
         var currency = new Currency();
         currency.setId(1L);
         currency.setCurrencyCode("AED");

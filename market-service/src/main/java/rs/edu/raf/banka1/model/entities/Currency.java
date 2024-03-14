@@ -1,17 +1,18 @@
 package rs.edu.raf.banka1.model.entities;
 
-import lombok.*;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Entity
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Currency{
+public class Currency {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,6 +1,9 @@
 package rs.edu.raf.banka1.model.dtos;
 
-import lombok.*;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor

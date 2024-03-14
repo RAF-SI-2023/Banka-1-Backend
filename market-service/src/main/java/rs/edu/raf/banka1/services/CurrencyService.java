@@ -28,7 +28,7 @@ public class CurrencyService {
         List<Currency> currenciesToSave = new ArrayList<>();
         List<Inflation> inflations = new ArrayList<>();
 
-        for(CurrencyDto currencyDto: currencyList) {
+        for (CurrencyDto currencyDto: currencyList) {
             Currency myCurrency = new Currency();
 
             myCurrency.setCurrencyCode(currencyDto.getCurrencyCode());
@@ -38,9 +38,9 @@ public class CurrencyService {
 
             try {
                 currency = java.util.Currency.getInstance(myCurrency.getCurrencyCode());
-                if (currency != null)
+                if (currency != null) {
                     myCurrency.setCurrencySymbol(currency.getSymbol(Locale.US));
-
+                }
                 assert currency != null;
                 Locale locale = new Locale("", currency.getCurrencyCode().substring(0, 2));
                 myCurrency.setPolity(locale.getDisplayCountry(Locale.US));
