@@ -7,6 +7,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import lombok.Data;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
@@ -34,6 +36,7 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -53,12 +56,22 @@ public class UserControllerSteps {
     private CreateUserResponse lastCreateUserResponse;
     private CreateUserRequest createUserRequest = new CreateUserRequest();
     private String email;
-    private UserMapper userMapper = new UserMapper();
+    private UserMapper userMapper = new UserMapper(new PermissionMapper());
 
     private UserRepository userRepository;
     private List<UserResponse> userResponses = new ArrayList<>();
     private final String url = "http://localhost:";
     private Long lastid;
+
+    @Data
+    class SearchFilter{
+        private String email;
+        private String firstName;
+        private String lastName;
+        private String position;
+    }
+
+    private SearchFilter searchFilter = new SearchFilter();
 
     @MockBean
     private EmailService emailService;
@@ -182,7 +195,14 @@ public class UserControllerSteps {
                 e.printStackTrace();
                 fail("Failed to parse response body");
             }
-            userRepository.findAll().forEach(user -> userResponses.add(userMapper.userToUserResponse(user)));
+            userRepository.findAll().forEach(user -> {
+                if(searchFilter.getEmail() != null && !user.getEmail().equals(searchFilter.getEmail())) return;
+                if(searchFilter.getFirstName() != null && !user.getFirstName().equalsIgnoreCase(searchFilter.getFirstName())) return;
+                if(searchFilter.getLastName() != null && !user.getLastName().equalsIgnoreCase(searchFilter.getLastName())) return;
+                if(searchFilter.getPosition() != null && !user.getPosition().equalsIgnoreCase(searchFilter.getPosition())) return;
+                userResponses.add(userMapper.userToUserResponse(user));
+            });
+            System.out.println("testic");
         }
         else if(path.startsWith("/user/")) {
             try {
@@ -224,26 +244,22 @@ public class UserControllerSteps {
 
     @Given("user provides email {string}")
     public void userProvidesEmail(String email) {
-        //remove everyone that doesnt have given email
-        userResponses.removeIf(userResponse -> !userResponse.getEmail().equals(email));
+        searchFilter.setEmail(email);
     }
 
     @Given("user provides first name {string}")
     public void userProvidesFirstName(String firstName) {
-        //remove everyone that doesnt have given first name
-        userResponses.removeIf(userResponse -> !userResponse.getFirstName().equals(firstName));
+        searchFilter.setFirstName(firstName);
     }
 
     @Given("user provides last name {string}")
     public void userProvidesLastName(String lastName) {
-        //remove everyone that doesnt have given last name
-        userResponses.removeIf(userResponse -> !userResponse.getLastName().equals(lastName));
+        searchFilter.setLastName(lastName);
     }
 
     @Given("user provides position {string}")
     public void userProvidesPosition(String position) {
-        //remove everyone that doesnt have given position
-        userResponses.removeIf(userResponse -> !userResponse.getPosition().equals(position));
+        searchFilter.setPosition(position);
     }
 
 //    @Then("Response status is {string}")
