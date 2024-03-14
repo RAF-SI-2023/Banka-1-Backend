@@ -1,10 +1,22 @@
 package rs.edu.raf.banka1.bootstrap;
 
+import lombok.AllArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import rs.edu.raf.banka1.model.dtos.CurrencyDto;
+import rs.edu.raf.banka1.services.CurrencyService;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
+@AllArgsConstructor
 public class BootstrapData implements CommandLineRunner {
+
+    private final CurrencyService currencyService;
 
     @Override
     public void run(String... args) throws Exception {
