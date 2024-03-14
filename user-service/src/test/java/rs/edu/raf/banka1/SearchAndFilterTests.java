@@ -5,8 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.responses.UserResponse;
+import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.UserService;
 import rs.edu.raf.banka1.services.UserServiceImpl;
 
@@ -24,6 +26,8 @@ public class SearchAndFilterTests {
     private UserService userService;
     private UserRepository userRepository;
     private UserMapper userMapper;
+    private EmailService emailService;
+    private PermissionRepository permissionRepository;
 
     private User admin;
     private User user1;
@@ -33,7 +37,8 @@ public class SearchAndFilterTests {
     public void setUp() {
         userRepository = mock(UserRepository.class);
         userMapper = new UserMapper();
-        userService = new UserServiceImpl(userRepository, userMapper);
+        emailService = mock(EmailService.class);
+        userService = new UserServiceImpl(userRepository, userMapper, emailService, permissionRepository);
 
         this.admin = new User();
         admin.setActive(true);
@@ -90,7 +95,7 @@ public class SearchAndFilterTests {
     }
 
     @Test
-    void allParametersOneOutput(){
+    void allParametersOneOutput() {
         when(userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Optional.of(Arrays.asList(
                         this.user1
@@ -102,7 +107,7 @@ public class SearchAndFilterTests {
     }
 
     @Test
-    void allParametersNoOutput(){
+    void allParametersNoOutput() {
         when(userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Optional.of(Arrays.asList(
                 )));
@@ -112,7 +117,7 @@ public class SearchAndFilterTests {
 
     }
     @Test
-    void allParametersTwoOutputs(){
+    void allParametersTwoOutputs() {
         when(userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Optional.of(Arrays.asList(
                         this.user1,
