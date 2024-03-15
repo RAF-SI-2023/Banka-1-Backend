@@ -30,7 +30,7 @@ public class BootstrapData implements CommandLineRunner {
         System.out.println("Loading Data...");
 
         Permission testPermission = new Permission();
-        testPermission.setName("test_permission");
+        testPermission.setName("can_manage_users");
         permissionRepository.save(testPermission);
         Set<Permission> permissions1 = new HashSet<>();
         permissions1.add(testPermission);

@@ -10,5 +10,5 @@ public class CreateUserRequest {
     private String jmbg;
     private String position;
     private String phoneNumber;
-    private boolean active;
+    private Boolean active;
 }

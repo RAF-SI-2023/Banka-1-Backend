@@ -1,16 +1,16 @@
 package rs.edu.raf.banka1.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.configuration.SpringSecurityConfig;
 import rs.edu.raf.banka1.mapper.UserMapper;
-import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
-import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
@@ -18,9 +18,13 @@ import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
 import rs.edu.raf.banka1.responses.EditUserResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
+import rs.edu.raf.banka1.utils.JwtUtil;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -29,12 +33,15 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     private PermissionRepository permissionRepository;
     private EmailService emailService;
+    private JwtUtil jwtUtil;
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, EmailService emailService, PermissionRepository permissionRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, EmailService emailService,
+                           PermissionRepository permissionRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.emailService = emailService;
         this.permissionRepository = permissionRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     public UserResponse findByEmail(String email) {
@@ -52,6 +59,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponse findByJwt() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Check if the user is authenticated
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            // Assuming your UserDetails implementation has the email field
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String email = userDetails.getUsername();
+            return findByEmail(email);
+        }
+
+        return null;
+    }
+
+    @Override
     public List<UserResponse> search(String email, String firstName, String lastName, String position) {
         return userRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(email, firstName, lastName, position)
                 .map(users -> users.stream().map(userMapper::userToUserResponse).collect(Collectors.toList()))
@@ -64,7 +87,8 @@ public class UserServiceImpl implements UserService {
         String activationToken = UUID.randomUUID().toString();
         user.setActivationToken(activationToken);
         userRepository.save(user);
-        emailService.sendActivationEmail(createUserRequest.getEmail(), "RAF Banka - User activation", "Visit this URL to activate your account: http://localhost:8080/user/activate/" + activationToken);
+        emailService.sendActivationEmail(createUserRequest.getEmail(), "RAF Banka - User activation",
+                "Visit this URL to activate your account: http://localhost:8080/user/activate/" + activationToken);
         return new CreateUserResponse(user.getUserId());
     }
 
@@ -86,11 +110,21 @@ public class UserServiceImpl implements UserService {
         return new EditUserResponse(user.getUserId());
     }
 
+    @Override
+    public boolean deleteUser(Long id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
     //necessary for authentication
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> myUser = this.userRepository.findByEmail(username);
-        if(myUser.isEmpty()) {
+        if (myUser.isEmpty()) {
             throw new UsernameNotFoundException("User name " + username + " not found");
         }
 

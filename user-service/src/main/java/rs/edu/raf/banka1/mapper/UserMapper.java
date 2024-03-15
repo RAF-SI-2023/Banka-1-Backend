@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @Component
 public class UserMapper {
 
-    PermissionMapper permissionMapper;
+    private PermissionMapper permissionMapper;
 
     public UserMapper(PermissionMapper permissionMapper) {
         this.permissionMapper = permissionMapper;
@@ -54,7 +54,7 @@ public class UserMapper {
         user.setJmbg(createUserRequest.getJmbg());
         user.setPhoneNumber(createUserRequest.getPhoneNumber());
         user.setPosition(createUserRequest.getPosition());
-        user.setActive(createUserRequest.isActive());
+        user.setActive(createUserRequest.getActive());
         user.setPassword(UUID.randomUUID().toString());
         return user;
     }

@@ -11,16 +11,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import rs.edu.raf.banka1.responses.UserResponse;
 
 import java.util.List;
-import java.util.Set;
 
 public interface UserService extends UserDetailsService {
     UserResponse findByEmail(String email);
     List<UserResponse> findAll();
     UserResponse findById(Long id);
+    UserResponse findByJwt();
     List<UserResponse> search(String email, String firstName, String lastName, String position);
     CreateUserResponse createUser(CreateUserRequest createUserRequest);
     ActivateAccountResponse activateAccount(String token, String password);
     EditUserResponse editUser(EditUserRequest editUserRequest);
+    boolean deleteUser(Long id);
+
 
 
 
