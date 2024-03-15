@@ -54,7 +54,7 @@ public class UserMapper {
         user.setJmbg(createUserRequest.getJmbg());
         user.setPhoneNumber(createUserRequest.getPhoneNumber());
         user.setPosition(createUserRequest.getPosition());
-        user.setActive(createUserRequest.isActive());
+        user.setActive(createUserRequest.getActive());
         user.setPassword(UUID.randomUUID().toString());
         return user;
     }
