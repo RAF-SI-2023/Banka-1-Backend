@@ -42,16 +42,28 @@ public class UserController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // A method that returns a JSON string with array of type UserResponse
     @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all users", description = "Returns all users")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {UserResponse.class}))}),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<List<UserResponse>> readAllUsers() {
         return new ResponseEntity<>(this.userService.findAll(), HttpStatus.OK);
     }
 
-    // A method that returns a JSON string with type UserResponse
     @GetMapping(value = "/get/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get user by email", description = "Returns user by email")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<UserResponse> readUser(@PathVariable String email) {
         return new ResponseEntity<>(this.userService.findByEmail(email), HttpStatus.OK);
     }
@@ -59,10 +71,12 @@ public class UserController {
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get user by id", description = "Returns user by id")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = { @Content(schema = @Schema(implementation = UserResponse.class), mediaType = "application/json") }),
-            @ApiResponse(responseCode = "404", content = { @Content(schema = @Schema()) }),
-            @ApiResponse(responseCode = "500", content = { @Content(schema = @Schema()) }) })
-//    @GetMapping("/tutorials/{id}")
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<UserResponse> readUser(@PathVariable Long id) {
         return new ResponseEntity<>(this.userService.findById(id), HttpStatus.OK);
     }
@@ -70,9 +84,12 @@ public class UserController {
     @GetMapping(value = "/getUser", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get user by jwt", description = "Returns user by jwt")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = { @Content(schema = @Schema(implementation = UserResponse.class), mediaType = "application/json") }),
-            @ApiResponse(responseCode = "404", content = { @Content(schema = @Schema()) }),
-            @ApiResponse(responseCode = "500", content = { @Content(schema = @Schema()) }) })
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<UserResponse> readUserFromJwt() {
         UserResponse userResponse = this.userService.findByJwt();
         if(userResponse == null)
@@ -82,11 +99,18 @@ public class UserController {
 
     @GetMapping(value = "/search")
     @Operation(summary = "Search and filter users", description = "Returns users by e-mail, last name and/or position.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {UserResponse.class}))}),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<List<UserResponse>> searchUsers(
-        @RequestParam(name = "email", required = false) String email,
-        @RequestParam(name = "firstName", required = false) String firstName,
-        @RequestParam(name = "lastName", required = false) String lastName,
-        @RequestParam(name = "position", required = false) String position
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "firstName", required = false) String firstName,
+            @RequestParam(name = "lastName", required = false) String lastName,
+            @RequestParam(name = "position", required = false) String position
     ) {
         return new ResponseEntity<>(userService.search(email, firstName, lastName, position), HttpStatus.OK);
     }
@@ -94,12 +118,25 @@ public class UserController {
     @PostMapping(value = "/createUser")
     @Operation(summary = "Admin create user", description = "Creates a new user with the specified params, and forwards an activation mail to the user.")
     @PreAuthorize("hasAuthority('can_manage_users')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User created successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CreateUserResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<CreateUserResponse> createUser(@RequestBody CreateUserRequest createUserRequest) {
         return new ResponseEntity<>(userService.createUser(createUserRequest), HttpStatus.OK);
     }
 
     @PostMapping(value = "/activate/{token}")
     @Operation(summary = "Activate account", description = "Activate an account by assigning a password")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Account activated successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ActivateAccountResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid token"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<ActivateAccountResponse> activateAccount(@PathVariable String token, @RequestBody ActivateAccountRequest activateAccountRequest) {
         String password = activateAccountRequest.getPassword();
         return new ResponseEntity<>(userService.activateAccount(token, password), HttpStatus.OK);
@@ -108,6 +145,13 @@ public class UserController {
     @PutMapping()
     @Operation(summary = "Admin edit user", description = "Admin can edit a user's info")
     @PreAuthorize("hasAuthority('can_manage_users')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User edited successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = EditUserResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<EditUserResponse> editUser(@RequestBody EditUserRequest editUserRequest) {
         return new ResponseEntity<>(userService.editUser(editUserRequest), HttpStatus.OK);
     }
@@ -115,6 +159,13 @@ public class UserController {
     @DeleteMapping(value = "/delete/{id}")
     @Operation(summary = "Admin delete user", description = "Admin can delete a user")
     @PreAuthorize("hasAuthority('can_manage_users')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User deleted successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))}),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<Boolean> deleteUser(@PathVariable Long id) {
         return new ResponseEntity<>(userService.deleteUser(id), HttpStatus.OK);
     }
