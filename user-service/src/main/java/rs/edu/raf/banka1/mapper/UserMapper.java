@@ -69,4 +69,19 @@ public class UserMapper {
         user.setActive(editUserRequest.isActive());
         return user;
     }
+
+    public EditUserRequest userToEditUserRequest(User user) {
+        EditUserRequest editUserRequest = new EditUserRequest();
+        editUserRequest.setFirstName(user.getFirstName());
+        editUserRequest.setLastName(user.getLastName());
+        editUserRequest.setEmail(user.getEmail());
+        editUserRequest.setJmbg(user.getJmbg());
+        editUserRequest.setPhoneNumber(user.getPhoneNumber());
+        editUserRequest.setPosition(user.getPosition());
+        editUserRequest.setActive(user.getActive());
+        editUserRequest.setPermissions(user.getPermissions().stream().map(permission -> permission.getName()).collect(Collectors.toSet()));
+        editUserRequest.setUserId(user.getUserId());
+        editUserRequest.setPassword(user.getPassword());
+        return editUserRequest;
+    }
 }
