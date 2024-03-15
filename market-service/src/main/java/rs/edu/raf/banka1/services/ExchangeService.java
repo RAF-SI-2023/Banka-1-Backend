@@ -2,61 +2,77 @@ package rs.edu.raf.banka1.services;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Getter;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.model.ExchangeModel;
 import rs.edu.raf.banka1.repositories.ExchangeRepository;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.*;
 
 @Service
+@Getter
 public class ExchangeService {
     private final String EXCHANGE_CSV_PATH = "market-service/src/main/resources/csv/mic.csv";
 
-    private Map<String, String> marketOpenTimes = new HashMap<>();
-    private Map<String, String> marketCloseTimes = new HashMap<>();
+    private final Map<String, String> marketOpenTimes;
+    private final Map<String, String> marketCloseTimes;
 
-    private ExchangeRepository exchangeRepository;
+    private final ExchangeRepository exchangeRepository;
 
-    private List<ExchangeModel> exchanges = new ArrayList<>();
+    private final List<ExchangeModel> exchanges;
 
     public ExchangeService(ExchangeRepository exchangeRepository) {
         this.exchangeRepository = exchangeRepository;
+        exchanges = new ArrayList<>();
+        marketOpenTimes = new HashMap<>();
+        marketCloseTimes = new HashMap<>();
         initTimes();
-        parseExchangeCSV();
+        parseExchangeCSV(null);
     }
 
-    private void parseExchangeCSV() {
-        try (InputStream inputStream = getClass().getResourceAsStream("/csv/mic.csv");
-             Reader reader = new InputStreamReader(inputStream);
-             CSVReader csvReader = new CSVReader(reader)) {
+    public void parseExchangeCSV(String inputString) {
+        List<ExchangeModel> exchanges = parseCSV(inputString);
+        exchangeRepository.saveAll(exchanges);
+    }
 
-            String[] nextRecord;
-            while ((nextRecord = csvReader.readNext()) != null) {
-                ExchangeModel exchange = new ExchangeModel();
-                exchange.setMicCode(nextRecord[0]);  // MIC
-                exchange.setExchangeName(nextRecord[3]); // Market Name
-                exchange.setExchangeAcronym(nextRecord[7]); // Acronym
-                exchange.setCountry(nextRecord[8]); // ISO Country Code
-                exchange.setCurrency(nextRecord[6]); // Market Category Code
-                exchange.setTimeZone(nextRecord[15]); // Time Zone
-
-                exchange.setOpenTime(marketOpenTimes.get(exchange.getCountry()));
-                exchange.setCloseTime(marketCloseTimes.get(exchange.getCountry()));
-                exchanges.add(exchange);
+    private List<ExchangeModel> parseCSV(String inputString) {
+        List<ExchangeModel> exchanges = new ArrayList<>();
+        try {
+            Reader reader;
+            if (inputString != null) {
+                reader = new StringReader(inputString);  // Parse inputString directly
+            } else {
+                InputStream inputStream = getClass().getResourceAsStream("/csv/mic.csv");
+                if (inputStream == null) {
+                    throw new FileNotFoundException("CSV file not found");
+                }
+                reader = new InputStreamReader(inputStream);
             }
-            if (!exchanges.isEmpty()) {
-                exchangeRepository.saveAll(exchanges);
+
+            try (CSVReader csvReader = new CSVReader(reader)) {
+                String[] nextRecord;
+                while ((nextRecord = csvReader.readNext()) != null) {
+                    ExchangeModel exchange = new ExchangeModel();
+                    exchange.setMicCode(nextRecord[0]);  // MIC
+                    exchange.setExchangeName(nextRecord[3]); // Market Name
+                    exchange.setExchangeAcronym(nextRecord[7]); // Acronym
+                    exchange.setCountry(nextRecord[8]); // ISO Country Code
+                    exchange.setCurrency(nextRecord[6]); // Market Category Code
+                    exchange.setTimeZone(nextRecord[15]); // Time Zone
+
+                    if (exchange.getMicCode().equals("MIC")) continue; // Headers
+
+                    exchange.setOpenTime(marketOpenTimes.get(exchange.getCountry()));
+                    exchange.setCloseTime(marketCloseTimes.get(exchange.getCountry()));
+                    exchanges.add(exchange);
+                }
             }
         } catch (IOException | CsvValidationException e) {
             e.printStackTrace();
         }
+        return exchanges;
     }
-
 
     //TODO dodati praznike za berze
 
@@ -65,7 +81,7 @@ public class ExchangeService {
         marketCloseTimes.put(country, closeTime);
     }
 
-    private void initTimes() {
+    public void initTimes() {
         setTime("US", "09:30", "16:00");
         setTime("CA", "09:30", "16:00");
         setTime("GB", "08:00", "16:00");
@@ -116,5 +132,10 @@ public class ExchangeService {
         setTime("AR", "11:00", "17:00");
         setTime("PE", "08:30", "15:00");
         setTime("CO", "09:30", "15:55");
+    }
+
+    // Used for testing only
+    public void saveExchangeModel(ExchangeModel exchangeModel) {
+        this.exchangeRepository.save(exchangeModel);
     }
 }
