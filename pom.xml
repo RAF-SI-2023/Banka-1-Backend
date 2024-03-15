@@ -25,6 +25,7 @@
 
     <modules>
         <module>user-service</module>
+        <module>market-service</module>
     </modules>
 
     <build>
