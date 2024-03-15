@@ -1,10 +1,13 @@
 package rs.edu.raf.banka1.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.configuration.SpringSecurityConfig;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
@@ -15,6 +18,7 @@ import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
 import rs.edu.raf.banka1.responses.EditUserResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
+import rs.edu.raf.banka1.utils.JwtUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,12 +33,15 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     private PermissionRepository permissionRepository;
     private EmailService emailService;
+    private JwtUtil jwtUtil;
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, EmailService emailService, PermissionRepository permissionRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, EmailService emailService,
+                           PermissionRepository permissionRepository, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.emailService = emailService;
         this.permissionRepository = permissionRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     public UserResponse findByEmail(String email) {
@@ -49,6 +56,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse findById(Long id) {
         return userRepository.findById(id).map(userMapper::userToUserResponse).orElse(null);
+    }
+
+    @Override
+    public UserResponse findByJwt() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Check if the user is authenticated
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            // Assuming your UserDetails implementation has the email field
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String email = userDetails.getUsername();
+            return findByEmail(email);
+        }
+
+        return null;
     }
 
     @Override
@@ -85,6 +108,16 @@ public class UserServiceImpl implements UserService {
         user.setPermissions(editUserRequest.getPermissions().stream().map(perm -> permissionRepository.findByName(perm).get()).collect(Collectors.toSet()));
         userRepository.save(user);
         return new EditUserResponse(user.getUserId());
+    }
+
+    @Override
+    public boolean deleteUser(Long id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     //necessary for authentication

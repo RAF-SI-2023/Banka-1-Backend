@@ -11,6 +11,7 @@ import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.UserService;
 import rs.edu.raf.banka1.services.UserServiceImpl;
+import rs.edu.raf.banka1.utils.JwtUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +29,7 @@ public class SearchAndFilterTests {
     private UserMapper userMapper;
     private EmailService emailService;
     private PermissionRepository permissionRepository;
+    private JwtUtil jwtUtil;
 
     private User admin;
     private User user1;
@@ -38,7 +40,9 @@ public class SearchAndFilterTests {
         userRepository = mock(UserRepository.class);
         userMapper = new UserMapper(new PermissionMapper());
         emailService = mock(EmailService.class);
-        userService = new UserServiceImpl(userRepository, userMapper, emailService, permissionRepository);
+        jwtUtil = mock(JwtUtil.class);
+
+        userService = new UserServiceImpl(userRepository, userMapper, emailService, permissionRepository, jwtUtil);
 
         this.admin = new User();
         admin.setActive(true);
