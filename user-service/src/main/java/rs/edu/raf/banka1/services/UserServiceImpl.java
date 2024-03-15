@@ -110,6 +110,16 @@ public class UserServiceImpl implements UserService {
         return new EditUserResponse(user.getUserId());
     }
 
+    @Override
+    public boolean deleteUser(Long id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
     //necessary for authentication
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

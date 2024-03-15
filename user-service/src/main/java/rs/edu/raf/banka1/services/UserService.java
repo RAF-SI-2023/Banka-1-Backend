@@ -21,6 +21,7 @@ public interface UserService extends UserDetailsService {
     CreateUserResponse createUser(CreateUserRequest createUserRequest);
     ActivateAccountResponse activateAccount(String token, String password);
     EditUserResponse editUser(EditUserRequest editUserRequest);
+    boolean deleteUser(Long id);
 
 
 

@@ -13,15 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.requests.ActivateAccountRequest;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
@@ -118,5 +110,12 @@ public class UserController {
     @PreAuthorize("hasAuthority('can_manage_users')")
     public ResponseEntity<EditUserResponse> editUser(@RequestBody EditUserRequest editUserRequest) {
         return new ResponseEntity<>(userService.editUser(editUserRequest), HttpStatus.OK);
+    }
+
+    @DeleteMapping(value = "/delete/{id}")
+    @Operation(summary = "Admin delete user", description = "Admin can delete a user")
+    @PreAuthorize("hasAuthority('can_manage_users')")
+    public ResponseEntity<Boolean> deleteUser(@PathVariable Long id) {
+        return new ResponseEntity<>(userService.deleteUser(id), HttpStatus.OK);
     }
 }
