@@ -42,6 +42,7 @@ public class SpringSecurityConfig {
                                 authz
 //                            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                         .requestMatchers(antMatcher("/auth/**")).permitAll()
+                                        .requestMatchers(antMatcher("/user/activate/**")).permitAll()
                                         .anyRequest().authenticated()
                 )
 //                .cors().configurationSource(corsConfigurationSource())
