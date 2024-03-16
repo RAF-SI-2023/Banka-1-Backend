@@ -10,6 +10,7 @@ import rs.edu.raf.banka1.model.ListingModel;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.services.CurrencyService;
 import rs.edu.raf.banka1.services.ListingService;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -57,12 +58,13 @@ public class BootstrapData implements CommandLineRunner {
     }
 
     public List<CurrencyDto> loadCurrencies() {
+//        print working directory
+        System.out.println("Working Directory = " + System.getProperty("user.dir"));
         List<CurrencyDto> currencyList = new ArrayList<>();
-        String csvFile = "src/main/resources/physical_currency_list.csv";
         String line = "";
         String csvSplitBy = ",";
 
-        try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(Constants.currencyFilePath))) {
             br.readLine();
 
             while ((line = br.readLine()) != null) {

@@ -242,7 +242,7 @@ public class ListingServiceImpl implements ListingService{
         return response.toString();
     }
 
-    private ArrayNode reformatNamesToJSON(String response) throws Exception{
+    public ArrayNode reformatNamesToJSON(String response) throws Exception{
         // Parse the JSON array string
         JsonNode jsonArray = objectMapper.readTree(response.toString());
 
@@ -285,7 +285,7 @@ public class ListingServiceImpl implements ListingService{
         return newArray;
     }
 
-    private void updatelistingModelFields(ListingModel listingModel, JsonNode rootNode){
+    public void updatelistingModelFields(ListingModel listingModel, JsonNode rootNode){
         // Get the "Global Quote" node
         JsonNode globalQuoteNode = rootNode.get("Global Quote");
 
@@ -299,7 +299,7 @@ public class ListingServiceImpl implements ListingService{
         listingMapper.listingModelUpdate(listingModel, price, high, low, change, volume);
     }
 
-    private ListingHistoryModel createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp){
+    public ListingHistoryModel createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp){
         // Get specific fields from each data node
         double open = dataNode.get("1. open").asDouble();
         double high = dataNode.get("2. high").asDouble();
