@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,9 +16,7 @@ import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 import rs.edu.raf.banka1.repositories.ListingRepository;
 import rs.edu.raf.banka1.utils.Constants;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
@@ -61,17 +60,27 @@ public class ListingServiceImpl implements ListingService{
     @Override
     public void initializeListings() {
         try {
-            String sectorsEncoded = String.join("%20", Constants.sectors);
+            StringBuilder responses = new StringBuilder();
+            for (String sector : Constants.sectors) {
+                String sectorsEncoded = String.join("%20", sector.split(" "));
 
-            String urlStr = listingNameApiUrl + sectorsEncoded + "&token=" + listingAPItoken;
+                String urlStr = listingNameApiUrl + sectorsEncoded + "&token=" + listingAPItoken;
 
-            String response = sendRequest(urlStr);
+                String response = sendRequest(urlStr);
+                responses.append(response);
+            }
+            ArrayNode jsonArray = reformatNamesToJSON(responses.toString());
 
-            ArrayNode jsonArray = reformatNamesToJSON(response);
-
-            // Save the new JSON array to a file
             File file = new File(Constants.listingsFilePath);
-            objectMapper.writeValue(file, jsonArray);
+            try (FileWriter fileWriter = new FileWriter(file)) {
+                // Convert jsonArray to JSON string
+                String jsonString = jsonArray.toString();
+
+                // Append JSON string to the file
+                fileWriter.write(jsonString);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
         }catch (Exception e){
             e.printStackTrace();

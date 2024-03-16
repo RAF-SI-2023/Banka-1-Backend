@@ -41,7 +41,7 @@ public class BootstrapData implements CommandLineRunner {
 //        fetchiing and bootstrapping listing data
 
 //        call it only from time to time to update json because api isn't free and we need it only once
-//        listingService.initializeListings();
+        listingService.initializeListings();
 //        loading data from json and fetches data from other API (professor will give us API token for this one)
         List<ListingModel> listingModels = listingService.fetchListings();
 //        use this to update or initialize database with fresh data
@@ -58,7 +58,7 @@ public class BootstrapData implements CommandLineRunner {
 
     public List<CurrencyDto> loadCurrencies() {
         List<CurrencyDto> currencyList = new ArrayList<>();
-        String csvFile = "src/main/resources/physical_currency_list.csv";
+        String csvFile = "market-service/src/main/resources/physical_currency_list.csv";
         String line = "";
         String csvSplitBy = ",";
 
