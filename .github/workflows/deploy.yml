@@ -66,11 +66,11 @@ jobs:
             docker compose -f /root/docker.compose.yaml.example.prod up -d
 
       - name: Send notify to Discord
-        if: always()
-        uses: distributhor/action-discord@v2
-        with:
+        env:
           webhook-url: ${{secrets.DISCORD_WEBHOOK_URL}}
-          message: |
-            Deploy je prosao na grani [${{github.ref}}](https://github.com/RAF-SI-2023/Banka-1-Backend/tree/${{github.ref}})!
+        uses: Ilshidur/action-discord@master
+        with:
+        args: |
+            'Deploy je prosao na grani [${{github.ref}}](https://github.com/RAF-SI-2023/Banka-1-Backend/tree/${{github.ref}})!
             User service se nalazi [ovde](http://161.35.78.6:8080/use).
-            Market service se nalazi [ovde](http://161.35.78.6:8081/).
+            Market service se nalazi [ovde](http://161.35.78.6:8081/).'
