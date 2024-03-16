@@ -68,6 +68,7 @@ jobs:
       - name: Send notify to Discord
         env:
           DISCORD_WEBHOOK: ${{secrets.DISCORD_WEBHOOK_URL}}
+          DISCORD_USERNAME: 'zed's.chopper'
         uses: Ilshidur/action-discord@master
         with:
           args: 'Deploy je prosao na grani [${{github.ref}}](https://github.com/RAF-SI-2023/Banka-1-Backend/tree/${{github.ref}})! User service se nalazi [ovde](http://161.35.78.6:8080/use). Market service se nalazi [ovde](http://161.35.78.6:8081/).'
