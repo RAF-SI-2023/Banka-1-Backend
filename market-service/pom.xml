@@ -77,6 +77,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.7.1</version>
+        </dependency>
+
         <!-- OpenAPI Specification i Swagger dependencies -->
         <!-- Obavezno dodati ove dependencies u vase projekte, tj. u svaki mikroservis -->
         <dependency>
