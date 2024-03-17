@@ -9,6 +9,8 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.model.dtos.BusinessHoursDto;
+import rs.edu.raf.banka1.model.dtos.CountryTimezoneDto;
 import rs.edu.raf.banka1.model.entities.Country;
 import rs.edu.raf.banka1.model.entities.Exchange;
 import rs.edu.raf.banka1.model.entities.Holiday;
@@ -120,11 +122,11 @@ public class ExchangeServiceImpl implements ExchangeService {
     private Map<String, Country> getCountryMap(CountryTimezoneDto[] countryTimezones) {
         Map<String, Country> countryIsoToCountryMap = new HashMap<>();
         for(CountryTimezoneDto ct : countryTimezones) {
-            if (!countryIsoToCountryMap.containsKey(ct.countryCode)) {
+            if (!countryIsoToCountryMap.containsKey(ct.getCountryCode())) {
                 Country country = new Country();
-                country.setISOCode(ct.countryCode);
-                country.setTimezoneOffset(ct.gmtOffset);
-                countryIsoToCountryMap.put(ct.countryCode, country);
+                country.setISOCode(ct.getCountryCode());
+                country.setTimezoneOffset(ct.getGmtOffset());
+                countryIsoToCountryMap.put(ct.getCountryCode(), country);
             }
         }
         return countryIsoToCountryMap;
@@ -157,22 +159,5 @@ public class ExchangeServiceImpl implements ExchangeService {
         }
 
         return resultMap;
-    }
-
-    @Getter
-    @Setter
-    @ToString
-    private static class BusinessHoursDto {
-        private String open;
-        private String close;
-        private List<String> holidays;
-    }
-
-    @Getter
-    @Setter
-    @ToString
-    private static class CountryTimezoneDto {
-        private String countryCode;
-        private Integer gmtOffset;
     }
 }
