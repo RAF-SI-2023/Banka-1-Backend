@@ -59,7 +59,7 @@ services:
         "listingAPItoken": "pk_f87286e075c94cc484405da70691c030",
         "alphaVantageAPIToken":"OF6BVKZOCXWHD9NS",
         "listingNameApiUrl":"https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=",
-        "updateListingApiUrl":"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=",
+        "updateListingApiUrl":"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol="
       }'
     depends_on:
       mysql:
