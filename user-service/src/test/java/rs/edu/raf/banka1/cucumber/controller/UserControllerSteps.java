@@ -2,29 +2,21 @@ package rs.edu.raf.banka1.cucumber.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.Data;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.User;
-import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.ActivateAccountRequest;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
@@ -32,23 +24,19 @@ import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.requests.LoginRequest;
 import rs.edu.raf.banka1.responses.*;
 import rs.edu.raf.banka1.services.EmailService;
-import rs.edu.raf.banka1.services.UserServiceImpl;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerSteps {
@@ -118,9 +106,7 @@ public class UserControllerSteps {
 
     @Given("i have email {string}")
     public void iHaveEmail(String email123) {
-        System.out.println("IN 1");
         createUserRequest.mysetEmail(email123);
-        System.out.println("IN 2");
     }
 
     @Given("i have firstName {string}")
@@ -180,38 +166,6 @@ public class UserControllerSteps {
         }
     }
 
-//    private String post(String path, Object objectToPost){
-//
-//        try {
-//            if(!jwt.equals("")){
-//                System.out.println(new ObjectMapper().writeValueAsString(objectToPost));
-//                System.out.println(jwt);
-//                System.out.println(path);
-//                java.net.http.HttpRequest httpRequest = java.net.http.HttpRequest.newBuilder()
-//                        .uri(URI.create(path))
-//                       // .header("Content-Type", "application/json")
-//                        .header("Authorization", "Bearer " + jwt)
-//                        .method("POST", java.net.http.HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(objectToPost)))
-//                        .build();
-//                HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
-//                return httpResponse.body();
-//            }
-//            else{
-//                java.net.http.HttpRequest httpRequest = java.net.http.HttpRequest.newBuilder()
-//                        .uri(URI.create(path))
-//                        .method("POST", java.net.http.HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(objectToPost)))
-//                        .build();
-//                HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
-//                return httpResponse.body();
-//            }
-//        }
-//        catch (Exception e){
-//            e.printStackTrace();
-//            fail("Http GET request error");
-//            return "";
-//        }
-//    }
-
     private String post(String path, Object objectToPost) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
 
@@ -225,23 +179,6 @@ public class UserControllerSteps {
 
     }
 
-//    private String put(String path, Object objectToPut){
-//        try {
-//            java.net.http.HttpRequest httpRequest = java.net.http.HttpRequest.newBuilder()
-//                    .uri(URI.create(path))
-//                    // .header("Content-Type", "application/json")
-//                    .header("Authorization", "Bearer " + jwt)
-//                    .method("PUT", java.net.http.HttpRequest.BodyPublishers.ofString(new ObjectMapper().writeValueAsString(objectToPut)))
-//                    .build();
-//            HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
-//            return httpResponse.body();
-//        }
-//        catch (Exception e){
-//            e.printStackTrace();
-//            fail("Http GET request error");
-//            return "";
-//        }
-//    }
 
     private String put(String path, Object objectToPut) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
@@ -251,10 +188,6 @@ public class UserControllerSteps {
         headers.setBearerAuth(jwt);
         HttpEntity<Object> request = new HttpEntity<>(objectToPut, headers);
 
-        System.out.println(new ObjectMapper().writeValueAsString(objectToPut));
-        System.out.println(path);
-        System.out.println(jwt);
-        System.out.println();
         ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.PUT, request, String.class);
         return response.getBody();
     }
@@ -353,7 +286,6 @@ public class UserControllerSteps {
          editUserRequest.setFirstName(firstName);
     }
 
-    //TODO: treba put da bude
     @When("i send PUT request to {string}")
     public void whenISendPUTRequestTo(String path) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -395,12 +327,6 @@ public class UserControllerSteps {
         searchFilter.setPosition(position);
     }
 
-//    @Then("Response status is {string}")
-//    public void theResponseStatusShouldBe(String code) {
-
-//        assertThat(lastReadAllUsersResponse.getStatusCode().toString()).isEqualTo(code);
-//    }
-//
     @Then("Response body is the correct JSON list of users")
     public void theResponseBodyShouldBeAListOfUsers() {
         assertThat(lastReadAllUsersResponse).hasSameElementsAs(userResponses);
@@ -408,7 +334,6 @@ public class UserControllerSteps {
 
     @Then("Response body is the correct user JSON")
     public void responseBodyIsTheCorrectUserJSON() {
-        //TODO: throw appropriate exception?
         if(email!=null) {
             UserResponse userResponse = userMapper.userToUserResponse(userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found")));
             assertThat(lastReadUserResponse).isEqualTo(userResponse);
