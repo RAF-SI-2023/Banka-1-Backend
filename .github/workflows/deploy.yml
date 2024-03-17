@@ -71,4 +71,4 @@ jobs:
           DISCORD_USERNAME: ${{secrets.DISCORD_BOT_USERNAME}}
         uses: Ilshidur/action-discord@master
         with:
-          args: 'Deploy je prosao na grani [${{github.ref}}](https://github.com/RAF-SI-2023/Banka-1-Backend/tree/${{github.ref}})! User service se nalazi [ovde](http://161.35.78.6:8080/use). Market service se nalazi [ovde](http://161.35.78.6:8081/).'
+          args: 'Deploy je prosao na grani [${{github.ref}}](https://github.com/RAF-SI-2023/Banka-1-Backend/tree/${{github.ref}})! User service se nalazi [ovde](http://161.35.78.6:8080/user). Market service se nalazi [ovde](http://161.35.78.6:8081/).'
