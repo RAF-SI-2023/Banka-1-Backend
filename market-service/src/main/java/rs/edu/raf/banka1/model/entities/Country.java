@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Data
@@ -17,11 +16,17 @@ public class Country {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String ISOCode;
+    private int timezoneOffset;
+
+    @Temporal(TemporalType.TIME)
+    private Date openTime;
+
+    @Temporal(TemporalType.TIME)
+    private Date closeTime;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "country")
-    private List<Holiday> holidays;
+    private Set<Holiday> holidays = new HashSet<>();
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "country")
-    private List<Exchange> exchanges;
-
+    private List<Exchange> exchanges = new ArrayList<>();
 }

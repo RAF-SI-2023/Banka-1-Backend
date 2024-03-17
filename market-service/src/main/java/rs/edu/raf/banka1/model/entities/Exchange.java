@@ -22,5 +22,4 @@ public class Exchange {
     private Country country;
 
     private String currency; //todo: should this be FK to Currency table
-    private int timeZoneOffset;
 }
