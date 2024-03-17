@@ -23,7 +23,6 @@ public class UserMapper {
         userResponse.setFirstName(user.getFirstName());
         userResponse.setLastName(user.getLastName());
         userResponse.setEmail(user.getEmail());
-        userResponse.setJmbg(user.getJmbg());
         userResponse.setPhoneNumber(user.getPhoneNumber());
         userResponse.setPosition(user.getPosition());
         userResponse.setActive(user.getActive());
@@ -37,7 +36,6 @@ public class UserMapper {
         user.setFirstName(userResponse.getFirstName());
         user.setLastName(userResponse.getLastName());
         user.setEmail(userResponse.getEmail());
-        user.setJmbg(userResponse.getJmbg());
         user.setPhoneNumber(userResponse.getPhoneNumber());
         user.setPosition(userResponse.getPosition());
         user.setActive(userResponse.getActive());
