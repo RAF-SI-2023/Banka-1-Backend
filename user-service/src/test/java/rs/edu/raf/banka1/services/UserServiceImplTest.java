@@ -177,7 +177,7 @@ public class UserServiceImplTest {
         String perm = "can_manage_users";
         Set<String> permissions = new HashSet<>();
         permissions.add(perm);
-        editUserRequest.setPermissions(permissions);
+        editUserRequest.setPermissions(permissions.stream().toList());
         userService.editUser(editUserRequest);
 
         verify(userRepository, times(2)).save(any());

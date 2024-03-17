@@ -1,6 +1,6 @@
 package rs.edu.raf.banka1.requests;
 
-import lombok.Data;
+import lombok.*;
 
 @Data
 public class CreateUserRequest {
@@ -11,4 +11,8 @@ public class CreateUserRequest {
     private String position;
     private String phoneNumber;
     private Boolean active;
+
+    public void mysetEmail(String email) {
+        this.email = email;
+    }
 }
