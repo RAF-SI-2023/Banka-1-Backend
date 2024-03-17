@@ -3,9 +3,7 @@ name: Deploy backend service to DigitalOcean
 on:
   push:
     branches:
-      - sprint-1
       - sprint-2
-      - main
 
 jobs:
   build:
