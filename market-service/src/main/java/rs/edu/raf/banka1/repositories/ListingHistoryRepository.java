@@ -1,11 +1,10 @@
 package rs.edu.raf.banka1.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import rs.edu.raf.banka1.model.ListingHistoryModel;
+import rs.edu.raf.banka1.model.ListingHistory;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
-public interface ListingHistoryRepository extends JpaRepository<ListingHistoryModel, Long> {
-    Optional<ListingHistoryModel> findByTickerAndDate(String ticker, long date);
+public interface ListingHistoryRepository extends JpaRepository<ListingHistory, Long> {
+    Optional<ListingHistory> findByTickerAndDate(String ticker, long date);
 }

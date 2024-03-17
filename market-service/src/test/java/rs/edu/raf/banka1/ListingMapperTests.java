@@ -4,8 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import rs.edu.raf.banka1.mapper.ListingMapper;
-import rs.edu.raf.banka1.model.ListingHistoryModel;
-import rs.edu.raf.banka1.model.ListingModel;
+import rs.edu.raf.banka1.model.Listing;
+import rs.edu.raf.banka1.model.ListingHistory;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -27,7 +27,7 @@ public class ListingMapperTests {
     @Test
     public void listingModelUpdateTest() {
         // Mock necessary objects
-        ListingModel listingModel = mock(ListingModel.class);
+        Listing listing = mock(Listing.class);
 
         // Call the method
         double price = 75.0;
@@ -36,18 +36,18 @@ public class ListingMapperTests {
         double change = 25.0;
         int volume = 1000;
 
-        listingMapper.listingModelUpdate(listingModel, price, high, low, change, volume);
+        listingMapper.listingModelUpdate(listing, price, high, low, change, volume);
 
-        // Verify method calls on listingModel and check if the fields are set correctly
-        verify(listingModel).setPrice(price);
-        verify(listingModel).setAsk(high); // Assuming setAsk corresponds to setting the high value
-        verify(listingModel).setBid(low); // Assuming setBid corresponds to setting the low value
-        verify(listingModel).setChanged(change);
-        verify(listingModel).setVolume(volume);
+        // Verify method calls on listing and check if the fields are set correctly
+        verify(listing).setPrice(price);
+        verify(listing).setAsk(high); // Assuming setAsk corresponds to setting the high value
+        verify(listing).setBid(low); // Assuming setBid corresponds to setting the low value
+        verify(listing).setChanged(change);
+        verify(listing).setVolume(volume);
 
         // Verify that lastRefresh is set to current timestamp
         int currentTime = (int) (System.currentTimeMillis() / 1000);
-        verify(listingModel).setLastRefresh(currentTime);
+        verify(listing).setLastRefresh(currentTime);
 
     }
 
@@ -65,7 +65,7 @@ public class ListingMapperTests {
         double changed = 25.0;
         int volume = 1000;
 
-        ListingHistoryModel result = listingMapper.createListingHistoryModel(ticker, date, price, ask, bid, changed, volume);
+        ListingHistory result = listingMapper.createListingHistoryModel(ticker, date, price, ask, bid, changed, volume);
 
         // Assert the values set in the created ListingHistoryModel
         assertEquals(ticker, result.getTicker());
@@ -80,8 +80,8 @@ public class ListingMapperTests {
     @Test
     public void updateHistoryListingWithNewDataTest(){
         // Mock necessary objects
-        ListingHistoryModel oldModel = mock(ListingHistoryModel.class);
-        ListingHistoryModel newModel = mock(ListingHistoryModel.class);
+        ListingHistory oldModel = mock(ListingHistory.class);
+        ListingHistory newModel = mock(ListingHistory.class);
         ListingMapper listingMapper = new ListingMapper();
 
         // Set up stubbed behavior for newModel
@@ -98,7 +98,7 @@ public class ListingMapperTests {
         when(newModel.getVolume()).thenReturn(newVolume);
 
         // Call the method
-        ListingHistoryModel result = listingMapper.updateHistoryListingWithNewData(oldModel, newModel);
+        ListingHistory result = listingMapper.updateHistoryListingWithNewData(oldModel, newModel);
 
         // Verify method calls on oldModel and check if the fields are set correctly
         verify(oldModel).setPrice(newPrice);
@@ -114,9 +114,9 @@ public class ListingMapperTests {
     @Test
     public void listingModelToListongHistoryModelTest() {
         // Mock necessary objects
-        ListingModel listingModel = mock(ListingModel.class);
+        Listing listing = mock(Listing.class);
 
-        // Set up stubbed behavior for listingModel
+        // Set up stubbed behavior for listing
         String ticker = "XYZ";
         double price = 75.0;
         double ask = 100.0;
@@ -125,16 +125,16 @@ public class ListingMapperTests {
         int volume = 1000;
         long lastRefresh = 1647433200; // Example Unix timestamp, adjust as needed
 
-        when(listingModel.getTicker()).thenReturn(ticker);
-        when(listingModel.getLastRefresh()).thenReturn(lastRefresh);
-        when(listingModel.getPrice()).thenReturn(price);
-        when(listingModel.getAsk()).thenReturn(ask);
-        when(listingModel.getBid()).thenReturn(bid);
-        when(listingModel.getChanged()).thenReturn(changed);
-        when(listingModel.getVolume()).thenReturn(volume);
+        when(listing.getTicker()).thenReturn(ticker);
+        when(listing.getLastRefresh()).thenReturn(lastRefresh);
+        when(listing.getPrice()).thenReturn(price);
+        when(listing.getAsk()).thenReturn(ask);
+        when(listing.getBid()).thenReturn(bid);
+        when(listing.getChanged()).thenReturn(changed);
+        when(listing.getVolume()).thenReturn(volume);
 
         // Call the method
-        ListingHistoryModel result = listingMapper.listingModelToListongHistoryModel(listingModel);
+        ListingHistory result = listingMapper.listingModelToListongHistoryModel(listing);
 
         // Verify the fields set in the created ListingHistoryModel
         assertEquals(ticker, result.getTicker());

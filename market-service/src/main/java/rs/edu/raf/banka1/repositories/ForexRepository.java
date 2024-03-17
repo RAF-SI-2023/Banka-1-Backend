@@ -2,11 +2,11 @@ package rs.edu.raf.banka1.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import rs.edu.raf.banka1.model.Listing;
+import rs.edu.raf.banka1.model.Forex;
 
 import java.util.Optional;
 
 @Repository
-public interface ListingRepository extends JpaRepository<Listing, Long> {
-    Optional<Listing> findByTicker(String ticker);
+public interface ForexRepository extends JpaRepository<Forex, Long> {
+    boolean existsBySymbol(String symbol);
 }

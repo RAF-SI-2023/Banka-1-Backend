@@ -1,10 +1,11 @@
 package rs.edu.raf.banka1.utils;
 
-import java.io.File;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Constants {
-    public static String listingsFilePath = "market-service/src/main/resources/listings.json";
+    public static String listingsFilePath = "src/main/resources/listings.json";
     public static List<String> sectors = List.of("Technology");
     public static int maxListings = 700;
     public static List<String> ListingsToIgnore = List.of(
@@ -20,5 +21,5 @@ public class Constants {
             "ATMQF",
             "FLUXF");
 
-    public static String currencyFilePath = "market-service/src/main/resources/physical_currency_list.csv";
+    public static String currencyFilePath = "src/main/resources/physical_currency_list.csv";
 }

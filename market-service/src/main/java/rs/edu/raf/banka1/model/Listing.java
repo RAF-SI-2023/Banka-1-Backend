@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
@@ -16,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ListingModel {
+public class Listing {
     @Id
     @JsonProperty("symbol")
     private String ticker;

@@ -9,11 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.ListingMapper;
-import rs.edu.raf.banka1.model.ListingHistoryModel;
-import rs.edu.raf.banka1.model.ListingModel;
+import rs.edu.raf.banka1.model.Listing;
+import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 import rs.edu.raf.banka1.repositories.ListingRepository;
 import rs.edu.raf.banka1.utils.Constants;
+import rs.edu.raf.banka1.utils.Requests;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -56,7 +57,7 @@ public class ListingServiceImpl implements ListingService{
     }
 
 
-    //    NOTE: see what to do with this, as API isn't free (almost nothing from this API changes so it is okay to do it once and store it into json file)
+//    NOTE: see what to do with this, as API isn't free (almost nothing from this API changes so it is okay to do it once and store it into json file)
 //    NOTE: Maybe name/description of the company changes, so we should update it from time to time
     @Override
     public void initializeListings() {
@@ -65,7 +66,7 @@ public class ListingServiceImpl implements ListingService{
 
             String urlStr = listingNameApiUrl + sectorsEncoded + "&token=" + listingAPItoken;
 
-            String response = sendRequest(urlStr);
+            String response = Requests.sendRequest(urlStr);
 
             ArrayNode jsonArray = reformatNamesToJSON(response);
 
@@ -81,34 +82,34 @@ public class ListingServiceImpl implements ListingService{
 
     //    loads listings from json file and updates them with trending data
     @Override
-    public List<ListingModel> fetchListings() {
-        List<ListingModel> listingModels = fetchListingsName();
-        for (ListingModel listingModel : listingModels)
-            updateValuesForListing(listingModel);
+    public List<Listing> fetchListings() {
+        List<Listing> listings = fetchListingsName();
+        for (Listing listing : listings)
+            updateValuesForListing(listing);
 
-        return listingModels;
+        return listings;
     }
 
-    private List<ListingModel> fetchListingsName(){
+    private List<Listing> fetchListingsName(){
         try {
             File file = new File(Constants.listingsFilePath);
 
             // Read JSON data from the file
             JsonNode rootNode = objectMapper.readTree(file);
 
-            List<ListingModel> listings = new ArrayList<>();
+            List<Listing> listings = new ArrayList<>();
 
             // Iterate over each element in the JSON array
             for (JsonNode node : rootNode) {
-                ListingModel listingModel = new ListingModel();
-                listingModel.setTicker(node.path("symbol").asText());
-                listingModel.setName(node.path("companyName").asText());
-                listingModel.setExchange(node.path("primaryExchange").asText());
+                Listing listing = new Listing();
+                listing.setTicker(node.path("symbol").asText());
+                listing.setName(node.path("companyName").asText());
+                listing.setExchange(node.path("primaryExchange").asText());
 
-                listingModel.setLastRefresh((int) (System.currentTimeMillis() / 1000));
+                listing.setLastRefresh((int) (System.currentTimeMillis() / 1000));
 
-                // Add the ListingModel object to the list
-                listings.add(listingModel);
+                // Add the Listing object to the list
+                listings.add(listing);
             }
 
             return listings;
@@ -118,38 +119,38 @@ public class ListingServiceImpl implements ListingService{
         }
     }
 
-    private void updateValuesForListing(ListingModel listingModel){
+    private void updateValuesForListing(Listing listing){
         try{
             // URL of the alphavantage API endpoint
-            String symbol = listingModel.getTicker();
+            String symbol = listing.getTicker();
             String apiUrl = updateListingApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;
 
             // Fetch JSON data from the API
             JsonNode rootNode = objectMapper.readTree(new URL(apiUrl));
 
-            updatelistingModelFields(listingModel, rootNode);
+            updatelistingModelFields(listing, rootNode);
 
         }catch (Exception e){
-            System.out.println(listingModel.getTicker() + " not found on alphavantage");
+            System.out.println(listing.getTicker() + " not found on alphavantage");
         }
     }
 
 
     @Override
 //    updates all listings with new data into database
-    public void updateAllListingsDatabase(List<ListingModel> listings) {
+    public void updateAllListingsDatabase(List<Listing> listings) {
         listingRepository.saveAll(listings);
     }
 
     @Override
-    public List<ListingHistoryModel> fetchAllListingsHistory() {
+    public List<ListingHistory> fetchAllListingsHistory() {
         try{
-            List<ListingModel> listingModels = fetchListingsName();
-            List<ListingHistoryModel> listingHistoryModels = new ArrayList<>();
-            for (ListingModel lmodel : listingModels)
-                listingHistoryModels.addAll(fetchSingleListingHistory(lmodel.getTicker()));
+            List<Listing> listings = fetchListingsName();
+            List<ListingHistory> listingHistories = new ArrayList<>();
+            for (Listing lmodel : listings)
+                listingHistories.addAll(fetchSingleListingHistory(lmodel.getTicker()));
 
-            return listingHistoryModels;
+            return listingHistories;
         }catch (Exception e) {
             e.printStackTrace();
 
@@ -158,13 +159,13 @@ public class ListingServiceImpl implements ListingService{
     }
 
     @Override
-    public List<ListingHistoryModel> fetchSingleListingHistory(String ticker){
+    public List<ListingHistory> fetchSingleListingHistory(String ticker){
         try {
 
             String apiUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + ticker + "&apikey=" + alphaVantageAPIToken;
             JsonNode rootNode = objectMapper.readTree(new URL(apiUrl));
 
-            List<ListingHistoryModel> listingHistoryModels = new ArrayList<>();
+            List<ListingHistory> listingHistories = new ArrayList<>();
             // Get the "Time Series (Daily)" node
             JsonNode timeSeriesNode = rootNode.get("Time Series (Daily)");
             if (timeSeriesNode != null) {
@@ -178,12 +179,12 @@ public class ListingServiceImpl implements ListingService{
 
                     JsonNode dataNode = entry.getValue();
 
-                    ListingHistoryModel listingHistoryModel = createListingHistoryModelFromJson(dataNode, ticker, unixTimestamp);
+                    ListingHistory listingHistory = createListingHistoryModelFromJson(dataNode, ticker, unixTimestamp);
 
-                    listingHistoryModels.add(listingHistoryModel);
+                    listingHistories.add(listingHistory);
                 }
             }
-            return listingHistoryModels;
+            return listingHistories;
         }catch (Exception e){
             e.printStackTrace();
             return new ArrayList<>();
@@ -193,53 +194,23 @@ public class ListingServiceImpl implements ListingService{
 
     //    if we want to add listing to history for certain day, if we already have saved it, we should just update it
     @Override
-    public int addListingToHistory(ListingHistoryModel listingHistoryModel) {
-        Optional<ListingHistoryModel> listingHistoryModelOptional = listingHistoryRepository.findByTickerAndDate(listingHistoryModel.getTicker(), listingHistoryModel.getDate());
+    public int addListingToHistory(ListingHistory listingHistory) {
+        Optional<ListingHistory> listingHistoryModelOptional = listingHistoryRepository.findByTickerAndDate(listingHistory.getTicker(), listingHistory.getDate());
         if (listingHistoryModelOptional.isPresent()) {
-            ListingHistoryModel lhm = listingMapper.updateHistoryListingWithNewData(listingHistoryModelOptional.get(), listingHistoryModel);
+            ListingHistory lhm = listingMapper.updateHistoryListingWithNewData(listingHistoryModelOptional.get(), listingHistory);
             listingHistoryRepository.save(lhm);
             return 0;
         }else{
-            listingHistoryRepository.save(listingHistoryModel);
+            listingHistoryRepository.save(listingHistory);
             return 1;
         }
     }
 
     //    call it at the end of the day (to save API calls, but other than that, you can call it whenever you want)
     @Override
-    public int addAllListingsToHistory(List<ListingHistoryModel> listingHistoryModels) {
+    public int addAllListingsToHistory(List<ListingHistory> listingHistories) {
 
-        return listingHistoryModels.stream().mapToInt(this::addListingToHistory).sum();
-    }
-
-    private String sendRequest(String urlStr) throws Exception{
-        URL url = new URL(urlStr);
-
-        // Open a connection to the URL
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-        // Set the request method to GET
-        connection.setRequestMethod("GET");
-
-        // Set request headers if needed
-        connection.setRequestProperty("Content-Type", "application/json");
-
-        // Get the response code
-        int responseCode = connection.getResponseCode();
-
-        // Read the response body
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        String inputLine;
-        StringBuffer response = new StringBuffer();
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-
-        // Close the connection
-        connection.disconnect();
-
-        return response.toString();
+        return listingHistories.stream().mapToInt(this::addListingToHistory).sum();
     }
 
     public ArrayNode reformatNamesToJSON(String response) throws Exception{
@@ -285,7 +256,7 @@ public class ListingServiceImpl implements ListingService{
         return newArray;
     }
 
-    public void updatelistingModelFields(ListingModel listingModel, JsonNode rootNode){
+    public void updatelistingModelFields(Listing listing, JsonNode rootNode){
         // Get the "Global Quote" node
         JsonNode globalQuoteNode = rootNode.get("Global Quote");
 
@@ -296,10 +267,10 @@ public class ListingServiceImpl implements ListingService{
         int volume = globalQuoteNode.get("06. volume").asInt();
         double change = globalQuoteNode.get("09. change").asDouble();
 
-        listingMapper.listingModelUpdate(listingModel, price, high, low, change, volume);
+        listingMapper.listingModelUpdate(listing, price, high, low, change, volume);
     }
 
-    public ListingHistoryModel createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp){
+    public ListingHistory createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp){
         // Get specific fields from each data node
         double open = dataNode.get("1. open").asDouble();
         double high = dataNode.get("2. high").asDouble();
@@ -308,9 +279,9 @@ public class ListingServiceImpl implements ListingService{
         int volume = dataNode.get("5. volume").asInt();
 
         // make a new ListingHistoryModel
-        ListingHistoryModel listingHistoryModel = listingMapper.createListingHistoryModel(ticker, unixTimestamp, close, high, low, close - open, volume);
+        ListingHistory listingHistory = listingMapper.createListingHistoryModel(ticker, unixTimestamp, close, high, low, close - open, volume);
 
-        return listingHistoryModel;
+        return listingHistory;
     }
 
 }

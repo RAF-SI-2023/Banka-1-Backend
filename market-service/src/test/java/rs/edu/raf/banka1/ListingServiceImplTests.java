@@ -2,7 +2,6 @@ package rs.edu.raf.banka1;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,8 +11,8 @@ import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 import rs.edu.raf.banka1.mapper.ListingMapper;
-import rs.edu.raf.banka1.model.ListingHistoryModel;
-import rs.edu.raf.banka1.model.ListingModel;
+import rs.edu.raf.banka1.model.ListingHistory;
+import rs.edu.raf.banka1.model.Listing;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 import rs.edu.raf.banka1.services.ListingServiceImpl;
 import rs.edu.raf.banka1.utils.Constants;
@@ -39,9 +38,9 @@ public class ListingServiceImplTests {
     @InjectMocks
     private ListingServiceImpl listingService;
 
-    private List<ListingHistoryModel> lst;
-    private ListingHistoryModel model1;
-    private ListingHistoryModel model2;
+    private List<ListingHistory> lst;
+    private ListingHistory model1;
+    private ListingHistory model2;
     private long date;
     List<String> validTickers;
     List<String> validCompanyNames;
@@ -49,7 +48,7 @@ public class ListingServiceImplTests {
 
     @BeforeEach
     public void setUp(){
-        model1 = new ListingHistoryModel();
+        model1 = new ListingHistory();
         model1.setTicker("AAPL");
         model1.setDate(Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         model1.setPrice(100.0);
@@ -58,7 +57,7 @@ public class ListingServiceImplTests {
         model1.setChanged(0.0);
         model1.setVolume(1000);
 
-        model2 = new ListingHistoryModel();
+        model2 = new ListingHistory();
         model2.setTicker("MSFT");
         model2.setDate(Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         model2.setPrice(100.0);
@@ -91,16 +90,16 @@ public class ListingServiceImplTests {
 
     @Test
     public void addListingToHistoryPresentTest(){
-        ListingHistoryModel listingHistoryModel = new ListingHistoryModel();
-        listingHistoryModel.setTicker("AAPL");
-        listingHistoryModel.setDate(date);
-        listingHistoryModel.setPrice(100.0);
-        listingHistoryModel.setAsk(101.0);
-        listingHistoryModel.setBid(99.0);
-        listingHistoryModel.setChanged(0.0);
-        listingHistoryModel.setVolume(1000);
+        ListingHistory listingHistory = new ListingHistory();
+        listingHistory.setTicker("AAPL");
+        listingHistory.setDate(date);
+        listingHistory.setPrice(100.0);
+        listingHistory.setAsk(101.0);
+        listingHistory.setBid(99.0);
+        listingHistory.setChanged(0.0);
+        listingHistory.setVolume(1000);
 
-        ListingHistoryModel updateModel = new ListingHistoryModel();
+        ListingHistory updateModel = new ListingHistory();
         updateModel.setTicker("AAPL");
         updateModel.setDate(date);
         updateModel.setPrice(700.0);
@@ -109,7 +108,7 @@ public class ListingServiceImplTests {
         updateModel.setChanged(1.0);
         updateModel.setVolume(10000);
 
-        when(listingHistoryRepository.findByTickerAndDate("AAPL", date)).thenReturn(Optional.of(listingHistoryModel));
+        when(listingHistoryRepository.findByTickerAndDate("AAPL", date)).thenReturn(Optional.of(listingHistory));
 
         assertEquals(0, listingService.addListingToHistory(updateModel));
     }
@@ -243,7 +242,7 @@ public class ListingServiceImplTests {
 
     @Test
     public void updatelistingModelFieldsTest() {
-        ListingModel listingModel = new ListingModel();
+        Listing listing = new Listing();
         JsonNode rootNode = mock(JsonNode.class);
         JsonNode globalQuoteNode = mock(JsonNode.class);
 
@@ -267,17 +266,17 @@ public class ListingServiceImplTests {
             when(globalQuoteNode.get("09. change")).thenReturn(mock(JsonNode.class));
             when(globalQuoteNode.get("09. change").asDouble()).thenReturn(change);
 
-            listingService.updatelistingModelFields(listingModel, rootNode);
+            listingService.updatelistingModelFields(listing, rootNode);
 
             verify(listingMapper).listingModelUpdate(any(), eq(price), eq(high), eq(low), eq(change), eq(volume));
 
 
             // Assertion
-            assertEquals(price, listingModel.getPrice());
-            assertEquals(low, listingModel.getBid());
-            assertEquals(high, listingModel.getAsk());
-            assertEquals(change, listingModel.getChanged());
-            assertEquals(volume, listingModel.getVolume());
+            assertEquals(price, listing.getPrice());
+            assertEquals(low, listing.getBid());
+            assertEquals(high, listing.getAsk());
+            assertEquals(change, listing.getChanged());
+            assertEquals(volume, listing.getVolume());
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -310,7 +309,7 @@ public class ListingServiceImplTests {
         when(dataNode.get("5. volume").asInt()).thenReturn(volume);
 
         // Call the method
-        ListingHistoryModel actualModel = listingService.createListingHistoryModelFromJson(dataNode, ticker, unixTimestamp);
+        ListingHistory actualModel = listingService.createListingHistoryModelFromJson(dataNode, ticker, unixTimestamp);
 
         // Assertions
         assertEquals(close, actualModel.getPrice());
