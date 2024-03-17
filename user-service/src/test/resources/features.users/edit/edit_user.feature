@@ -1,4 +1,3 @@
-@Ignore
 Feature: users with permission want to edit users
   Scenario: user wants to change users first name
     Given i am logged in with email "admin@admin.com" and password "admin"
