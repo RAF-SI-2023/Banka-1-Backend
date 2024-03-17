@@ -79,7 +79,7 @@ public class UserMapper {
         editUserRequest.setPhoneNumber(user.getPhoneNumber());
         editUserRequest.setPosition(user.getPosition());
         editUserRequest.setActive(user.getActive());
-        editUserRequest.setPermissions(user.getPermissions().stream().map(permission -> permission.getName()).collect(Collectors.toSet()));
+        editUserRequest.setPermissions(user.getPermissions().stream().map(permission -> permission.getName()).collect(Collectors.toList()));
         editUserRequest.setUserId(user.getUserId());
         editUserRequest.setPassword(user.getPassword());
         return editUserRequest;
