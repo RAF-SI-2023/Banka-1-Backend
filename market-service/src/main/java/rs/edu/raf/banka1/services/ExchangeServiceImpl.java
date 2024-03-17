@@ -44,117 +44,112 @@ public class ExchangeServiceImpl implements ExchangeService {
     @Override
     public void seedDatabase() {
         Map<String, BusinessHoursDto> countryIsoToBusinessHoursMap = parseBusinessHoursJson();
-        Map<String, Country> countryIsoToCountryMap = parseCountryTimezonesJson();
-        assert countryIsoToCountryMap != null;
-        saveCountriesToDatabase(countryIsoToCountryMap);
-        System.out.println(countryIsoToBusinessHoursMap);
-        System.out.println(countryIsoToCountryMap);
+        CountryTimezoneDto[] countryTimezones = parseCountryTimezonesJson();
+        // mapping from iso to country entity
+        Map<String, Country> countryIsoToCountryMap = getCountryMap(countryTimezones);
+        // save countries to database
+        countryIsoToCountryMap.replaceAll((k, v) -> countryRepository.save(v));
         parseCsv(countryIsoToBusinessHoursMap, countryIsoToCountryMap);
-
     }
-
-    private void saveCountriesToDatabase(Map<String, Country> countryIsoToBusinessHoursMap) {
-        for (Map.Entry<String, Country> entry : countryIsoToBusinessHoursMap.entrySet()) {
-            Country country = countryRepository.save(entry.getValue());
-            countryIsoToBusinessHoursMap.put(entry.getKey(), country);
-        }
-    }
-
+    
     private void parseCsv(Map<String, BusinessHoursDto> countryIsoToBusinessHoursMap, Map<String, Country> countryIsoToCountryMap) {
         try (CSVReader reader = new CSVReader(new FileReader(Constants.micCsvFilePath))) {
+            // e.g. 17:00:00
             SimpleDateFormat hoursDateFormat = new SimpleDateFormat("HH:mm:ss");
+            // e.g. 2024-01-01
             SimpleDateFormat dateDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
             Map<String, Set<Date>> countryIsoToAllHolidayDatesMap = new HashMap<>();
-            countryIsoToCountryMap.keySet().forEach(countryIso -> countryIsoToAllHolidayDatesMap.put(countryIso, new HashSet<>()));
+            // initialize map values to empty set for every country
+            countryIsoToCountryMap.keySet()
+                    .forEach(countryIso -> countryIsoToAllHolidayDatesMap.put(countryIso, new HashSet<>()));
 
-            String[] nextLine = reader.readNext(); //skip header
+            String[] nextLine;
+            //skip header
+            reader.readNext();
+
             while ((nextLine = reader.readNext()) != null) {
-                Exchange exchange = new Exchange();
                 String countryIso = nextLine[8];
                 String micCode = nextLine[0];
-
-                exchange.setMicCode(micCode);
-                exchange.setExchangeName(nextLine[3]);
-                exchange.setExchangeAcronym(nextLine[7]);
 
                 Country country = countryIsoToCountryMap.get(countryIso);
                 BusinessHoursDto businessHours = countryIsoToBusinessHoursMap.get(micCode);
 
                 if (businessHours != null) {
-                    System.out.println("businessHours");
+                    // set open and close times for country based on it's first occurrence in the csv
                     if (country.getCloseTime() == null) {
                         country.setOpenTime(hoursDateFormat.parse(businessHours.getOpen()));
                         country.setCloseTime(hoursDateFormat.parse(businessHours.getClose()));
                         country = countryRepository.save(country);
                         countryIsoToCountryMap.put(countryIso, country);
                     }
-
                     for(String holidayString : businessHours.getHolidays()) {
                         Date date = dateDateFormat.parse(holidayString);
                         countryIsoToAllHolidayDatesMap.get(countryIso).add(date);
                     }
                 }
-                exchange.setCountry(country);
-                exchangeRepository.save(exchange);
+                saveExchange(micCode, nextLine[3], nextLine[7], country);
             }
-
-            for (Map.Entry<String, Set<Date>> entry : countryIsoToAllHolidayDatesMap.entrySet()) {
-                Country country = countryIsoToCountryMap.get(entry.getKey());
-                for (Date date : entry.getValue()) {
-                    Holiday holiday = new Holiday();
-                    holiday.setDate(date);
-                    holiday.setCountry(country);
-                    holidayRepository.save(holiday);
-                }
-            }
+            saveAllHolidays(countryIsoToCountryMap, countryIsoToAllHolidayDatesMap);
         } catch (IOException | CsvValidationException | ParseException e) {
             e.printStackTrace();
         }
     }
 
-    private Map<String, Country> parseCountryTimezonesJson() {
+    private void saveExchange(String micCode, String exchangeName, String exchangeAcronym, Country country) {
+        Exchange exchange = new Exchange();
+        exchange.setMicCode(micCode);
+        exchange.setExchangeName(exchangeName);
+        exchange.setExchangeAcronym(exchangeAcronym);
+        exchange.setCountry(country);
+        exchangeRepository.save(exchange);
+    }
+
+    private void saveAllHolidays(Map<String, Country> countryIsoToCountryMap, Map<String, Set<Date>> countryIsoToAllHolidayDatesMap) {
+        for (Map.Entry<String, Set<Date>> entry : countryIsoToAllHolidayDatesMap.entrySet()) {
+            Country country = countryIsoToCountryMap.get(entry.getKey());
+            for (Date date : entry.getValue()) {
+                Holiday holiday = new Holiday();
+                holiday.setDate(date);
+                holiday.setCountry(country);
+                holidayRepository.save(holiday);
+            }
+        }
+    }
+
+    private Map<String, Country> getCountryMap(CountryTimezoneDto[] countryTimezones) {
+        Map<String, Country> countryIsoToCountryMap = new HashMap<>();
+        for(CountryTimezoneDto ct : countryTimezones) {
+            if (!countryIsoToCountryMap.containsKey(ct.countryCode)) {
+                Country country = new Country();
+                country.setISOCode(ct.countryCode);
+                country.setTimezoneOffset(ct.gmtOffset);
+                countryIsoToCountryMap.put(ct.countryCode, country);
+            }
+        }
+        return countryIsoToCountryMap;
+    }
+
+    private CountryTimezoneDto[] parseCountryTimezonesJson() {
         CountryTimezoneDto[] countryTimezones = null;
         try {
-            // Create an ObjectMapper instance
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-            // Read the JSON file and parse it into a Map<String, CountryTimezone>
             countryTimezones = mapper.readValue(new File(Constants.countryTimezoneOffsetsFilePath), CountryTimezoneDto[].class);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        if(countryTimezones == null) return null;
-
-        Map<String, Country> countryIsoToCountryMap = new HashMap<>();
-        for(CountryTimezoneDto ct : countryTimezones) {
-                if (!countryIsoToCountryMap.containsKey(ct.countryCode)) {
-                    Country country = new Country();
-                    country.setISOCode(ct.countryCode);
-                    country.setTimezoneOffset(ct.gmtOffset);
-                    countryRepository.save(country);
-                    countryIsoToCountryMap.put(ct.countryCode, country);
-                }
-        }
-
-        return countryIsoToCountryMap;
+        return countryTimezones;
     }
 
-    private static Map<String, BusinessHoursDto> parseBusinessHoursJson() {
+    private Map<String, BusinessHoursDto> parseBusinessHoursJson() {
         Map<String, BusinessHoursDto> resultMap = null;
         try {
-            // Create an ObjectMapper instance
             ObjectMapper mapper = new ObjectMapper();
-
-            // Read the JSON file and parse it into a Map<String, Object>
             resultMap = mapper.readValue(new File(Constants.businessHoursFilePath), HashMap.class);
 
-
-            // Accessing fields from the parsed JSON
             for (Map.Entry<String, BusinessHoursDto> entry : resultMap.entrySet()) {
-//                System.out.println(entry.getKey() + ": " + entry.getValue());
                 resultMap.put(entry.getKey(), mapper.convertValue(entry.getValue(), BusinessHoursDto.class));
             }
         } catch (IOException e) {
