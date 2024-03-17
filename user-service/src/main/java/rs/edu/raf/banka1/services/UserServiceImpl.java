@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
         user.setActivationToken(activationToken);
         userRepository.save(user);
         emailService.sendActivationEmail(createUserRequest.getEmail(), "RAF Banka - User activation",
-                "Visit this URL to activate your account: http://localhost:8080/user/activate/" + activationToken);
+                "Visit this URL to activate your account: http://localhost:8080/user/set-password/" + activationToken);
         return new CreateUserResponse(user.getUserId());
     }
 
