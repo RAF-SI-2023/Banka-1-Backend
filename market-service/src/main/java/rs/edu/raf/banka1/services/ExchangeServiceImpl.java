@@ -68,7 +68,7 @@ public class ExchangeServiceImpl implements ExchangeService {
             Map<String, Set<Date>> countryIsoToAllHolidayDatesMap = new HashMap<>();
             countryIsoToCountryMap.keySet().forEach(countryIso -> countryIsoToAllHolidayDatesMap.put(countryIso, new HashSet<>()));
 
-            String[] nextLine;
+            String[] nextLine = reader.readNext(); //skip header
             while ((nextLine = reader.readNext()) != null) {
                 Exchange exchange = new Exchange();
                 String countryIso = nextLine[8];
@@ -78,14 +78,6 @@ public class ExchangeServiceImpl implements ExchangeService {
                 exchange.setExchangeName(nextLine[3]);
                 exchange.setExchangeAcronym(nextLine[7]);
 
-
-                System.out.println("===========");
-                System.out.println(countryIso);
-                System.out.println(countryIsoToCountryMap.get(countryIso));
-                System.out.println(micCode);
-                System.out.println(countryIsoToBusinessHoursMap.get(micCode));
-                System.out.println("--------------");
-
                 Country country = countryIsoToCountryMap.get(countryIso);
                 BusinessHoursDto businessHours = countryIsoToBusinessHoursMap.get(micCode);
 
@@ -94,7 +86,8 @@ public class ExchangeServiceImpl implements ExchangeService {
                     if (country.getCloseTime() == null) {
                         country.setOpenTime(hoursDateFormat.parse(businessHours.getOpen()));
                         country.setCloseTime(hoursDateFormat.parse(businessHours.getClose()));
-                        countryIsoToCountryMap.put(countryIso, countryRepository.save(country));
+                        country = countryRepository.save(country);
+                        countryIsoToCountryMap.put(countryIso, country);
                     }
 
                     for(String holidayString : businessHours.getHolidays()) {
@@ -102,10 +95,8 @@ public class ExchangeServiceImpl implements ExchangeService {
                         countryIsoToAllHolidayDatesMap.get(countryIso).add(date);
                     }
                 }
-//
-//                exchange.setCountry();
-//                exchange.setCurrency();
-
+                exchange.setCountry(country);
+                exchangeRepository.save(exchange);
             }
 
             for (Map.Entry<String, Set<Date>> entry : countryIsoToAllHolidayDatesMap.entrySet()) {
