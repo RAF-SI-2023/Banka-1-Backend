@@ -171,7 +171,7 @@ public class UserController {
         return new ResponseEntity<>(userService.deleteUser(id), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/permissions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/permissions/userId/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all permissions of user", description = "Returns all permissions")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -181,12 +181,14 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<PermissionDto>> readAllPermissions(@RequestParam(name = "userId") Long id) {
-        return new ResponseEntity<>(this.userService.findPermissions(id), HttpStatus.OK);
+    public ResponseEntity<List<PermissionDto>> readAllPermissions(@PathVariable Long userId) {
+        return new ResponseEntity<>(this.userService.findPermissions(userId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/permissions", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all permissions of user for email", description = "Returns all permissions")
+
+
+    @GetMapping(value = "/permissions/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all permissions of user", description = "Returns all permissions")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -195,7 +197,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<PermissionDto>> readAllPermissionsFromEmail(@RequestParam(name = "email") String email) {
+    public ResponseEntity<List<PermissionDto>> readAllPermissions(@PathVariable String email) {
         return new ResponseEntity<>(this.userService.findPermissions(email), HttpStatus.OK);
     }
 
