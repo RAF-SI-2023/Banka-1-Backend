@@ -40,19 +40,21 @@ public class BootstrapData implements CommandLineRunner {
 
         System.out.println("Loading Data...");
 
-      //  exchangeService.seedDatabase();
+        exchangeService.seedDatabase();
         System.out.println("Exchange data loaded!");
 
-        //List<CurrencyDto> currencyList = loadCurrencies();
-        //currencyService.addCurrencies(currencyList);
-        //System.out.println("Currency Data Loaded!");
+        List<CurrencyDto> currencyList = loadCurrencies();
+        currencyService.addCurrencies(currencyList);
+        System.out.println("Currency Data Loaded!");
 
 //        fetchiing and bootstrapping listing data
 
 //        call it only from time to time to update json because api isn't free and we need it only once
         //this is used for stockService as well
-        listingService.initializeListings();
+//        listingService.initializeListings();
+
 //        loading data from json and fetches data from other API (professor will give us API token for this one)
+//        List<ListingModel> listingModels = listingService.fetchListings();
         List<ListingModel> listingModels = listingService.fetchListings();
 
 
