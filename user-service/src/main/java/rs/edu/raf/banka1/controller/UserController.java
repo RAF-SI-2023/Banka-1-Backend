@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.requests.ActivateAccountRequest;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
@@ -178,4 +179,35 @@ public class UserController {
     public ResponseEntity<Boolean> deleteUser(@PathVariable Long id) {
         return new ResponseEntity<>(userService.deleteUser(id), HttpStatus.OK);
     }
+
+    @GetMapping(value = "/permissions/userId/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all permissions of user", description = "Returns all permissions")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {PermissionDto.class}))}),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<PermissionDto>> readAllPermissions(@PathVariable Long userId) {
+        return new ResponseEntity<>(this.userService.findPermissions(userId), HttpStatus.OK);
+    }
+
+
+    @GetMapping(value = "/permissions/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all permissions of user", description = "Returns all permissions")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {PermissionDto.class}))}),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<PermissionDto>> readAllPermissions(@PathVariable String email) {
+        return new ResponseEntity<>(this.userService.findPermissions(email), HttpStatus.OK);
+    }
+
+
 }

@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -25,5 +26,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                                                   @Param("position") String position);
     Optional<User> findByEmail(String username);
     Optional<User> findByActivationToken(String activationToken);
+
+    @Modifying
+    @Query("update User u set u.active = false where u.userId = :userId")
+    void deactivateUser(@Param("userId") Long userId);
 }
 
