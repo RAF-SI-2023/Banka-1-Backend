@@ -9,15 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.ListingMapper;
+import rs.edu.raf.banka1.mapper.ListingStockMapper;
 import rs.edu.raf.banka1.model.ListingHistoryModel;
 import rs.edu.raf.banka1.model.ListingModel;
+import rs.edu.raf.banka1.model.entities.ListingStock;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 import rs.edu.raf.banka1.repositories.ListingRepository;
+import rs.edu.raf.banka1.repositories.StockRepository;
 import rs.edu.raf.banka1.utils.Constants;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
@@ -29,7 +30,11 @@ public class ListingServiceImpl implements ListingService{
     private ObjectMapper objectMapper;
 
     @Autowired
+    private ListingStockMapper stockMapper;
+    @Autowired
     private ListingMapper listingMapper;
+    @Autowired
+    private StockRepository stockRepository;
 
     @Autowired
     private ListingRepository listingRepository;
@@ -61,23 +66,35 @@ public class ListingServiceImpl implements ListingService{
     @Override
     public void initializeListings() {
         try {
-            String sectorsEncoded = String.join("%20", Constants.sectors);
+            StringBuilder responses = new StringBuilder();
+            for (String sector : Constants.sectors) {
+                String sectorsEncoded = String.join("%20", sector.split(" "));
 
-            String urlStr = listingNameApiUrl + sectorsEncoded + "&token=" + listingAPItoken;
+                String urlStr = listingNameApiUrl + sectorsEncoded + "&token=" + listingAPItoken;
 
-            String response = sendRequest(urlStr);
+                String response = sendRequest(urlStr);
+                responses.append(response);
 
-            ArrayNode jsonArray = reformatNamesToJSON(response);
-
+            }
+            ArrayNode jsonArray = reformatNamesToJSON(responses.toString());
             // Save the new JSON array to a file
             File file = new File(Constants.listingsFilePath);
-            objectMapper.writeValue(file, jsonArray);
+            try (FileWriter fileWriter = new FileWriter(file)) {
+                // Convert jsonArray to JSON string
+                String jsonString = jsonArray.toString();
 
+                // Append JSON string to the file
+                fileWriter.write(jsonString);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
 
     }
+
+
 
     //    loads listings from json file and updates them with trending data
     @Override
@@ -128,6 +145,7 @@ public class ListingServiceImpl implements ListingService{
             JsonNode rootNode = objectMapper.readTree(new URL(apiUrl));
 
             updatelistingModelFields(listingModel, rootNode);
+            createListingStockModel(symbol,rootNode);
 
         }catch (Exception e){
             System.out.println(listingModel.getTicker() + " not found on alphavantage");
@@ -299,6 +317,21 @@ public class ListingServiceImpl implements ListingService{
         listingMapper.listingModelUpdate(listingModel, price, high, low, change, volume);
     }
 
+    private void createListingStockModel(String symbol,JsonNode rootNode){
+        // Get the "Global Quote" node
+        JsonNode globalQuoteNode = rootNode.get("Global Quote");
+
+        // Parse data from the "Global Quote" node
+        double high = globalQuoteNode.get("03. high").asDouble();
+        double low = globalQuoteNode.get("04. low").asDouble();
+        double price = globalQuoteNode.get("05. price").asDouble();
+        int volume = globalQuoteNode.get("06. volume").asInt();
+        double change = globalQuoteNode.get("09. change").asDouble();
+
+        ListingStock stock =stockMapper.listingStockCreate(symbol,price,high,low,change,volume);
+        stockRepository.save(stock);
+
+    }
     private ListingHistoryModel createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp){
         // Get specific fields from each data node
         double open = dataNode.get("1. open").asDouble();
