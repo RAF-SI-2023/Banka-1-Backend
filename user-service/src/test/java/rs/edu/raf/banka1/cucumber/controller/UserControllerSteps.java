@@ -22,7 +22,11 @@ import rs.edu.raf.banka1.requests.ActivateAccountRequest;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.requests.LoginRequest;
-import rs.edu.raf.banka1.responses.*;
+import rs.edu.raf.banka1.responses.ActivateAccountResponse;
+import rs.edu.raf.banka1.responses.CreateUserResponse;
+import rs.edu.raf.banka1.responses.EditUserResponse;
+import rs.edu.raf.banka1.responses.LoginResponse;
+import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.EmailService;
 
 import java.net.URI;
@@ -66,7 +70,7 @@ public class UserControllerSteps {
     private String password;
 
     @Data
-    class SearchFilter{
+    class SearchFilter {
         private String email;
         private String firstName;
         private String lastName;

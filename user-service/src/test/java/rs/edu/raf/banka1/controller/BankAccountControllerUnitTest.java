@@ -34,7 +34,7 @@ public class BankAccountControllerUnitTest {
     }
 
     @Test
-    void testGetAllDevizniRacuni_Success() {
+    void testGetAllDevizniRacuniSuccess() {
         List<DevizniRacun> devizniRacuni = Arrays.asList(
                 createDevizniRacun(new User(), new User()),
                 createDevizniRacun(new User(), new User()));
@@ -48,7 +48,7 @@ public class BankAccountControllerUnitTest {
     }
 
     @Test
-    void testGetDevizniRacun_Success() {
+    void testGetDevizniRacunSuccess() {
         Long devizniRacunId = 1L;
         DevizniRacun devizniRacun = createDevizniRacun(new User(), new User());
         when(bankAccountService.getDevizniRacunById(devizniRacunId)).thenReturn(devizniRacun);

@@ -25,6 +25,7 @@ import java.util.List;
 @SecurityRequirement(name = "basicScheme")
 public class MarketController {
 
+    @Autowired
     private final ExchangeService exchangeService;
 
     @Autowired

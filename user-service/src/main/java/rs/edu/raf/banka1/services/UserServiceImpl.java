@@ -7,7 +7,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import rs.edu.raf.banka1.configuration.SpringSecurityConfig;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.PermissionRepository;

@@ -1,7 +1,5 @@
 package rs.edu.raf.banka1.responses;
 
-import lombok.Data;
-
 public class EditUserResponse {
     private Long userId;
 
