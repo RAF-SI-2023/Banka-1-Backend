@@ -51,9 +51,9 @@ public class BootstrapData implements CommandLineRunner {
 //        listingService.initializeListings();
 
 //        loading data from json and fetches data from other API (professor will give us API token for this one)
-        List<ListingModel> listingModels = listingService.fetchListings();
+//        List<ListingModel> listingModels = listingService.fetchListings();
 //        use this to update or initialize database with fresh data
-        listingService.updateAllListingsDatabase(listingModels);
+//        listingService.updateAllListingsDatabase(listingModels);
 
 //        fetching and bootstrapping listing history data (not recommended as each listing generates 100 history records and we have around 3500 listings)
 //        List<ListingHistoryModel> listingHistoryModels = listingService.fetchAllListingsHistory();

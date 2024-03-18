@@ -9,8 +9,10 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.mapper.ExchangeMapper;
 import rs.edu.raf.banka1.model.dtos.BusinessHoursDto;
 import rs.edu.raf.banka1.model.dtos.CountryTimezoneDto;
+import rs.edu.raf.banka1.model.dtos.ExchangeDto;
 import rs.edu.raf.banka1.model.entities.Country;
 import rs.edu.raf.banka1.model.entities.Exchange;
 import rs.edu.raf.banka1.model.entities.Holiday;
@@ -32,15 +34,18 @@ public class ExchangeServiceImpl implements ExchangeService {
     private final CountryRepository countryRepository;
     private final HolidayRepository holidayRepository;
     private final ExchangeRepository exchangeRepository;
+    private final ExchangeMapper exchangeMapper;
 
     @Autowired
     public ExchangeServiceImpl(
             CountryRepository countryRepository,
             HolidayRepository holidayRepository,
-            ExchangeRepository exchangeRepository) {
+            ExchangeRepository exchangeRepository,
+            ExchangeMapper exchangeMapper) {
         this.countryRepository = countryRepository;
         this.holidayRepository = holidayRepository;
         this.exchangeRepository = exchangeRepository;
+        this.exchangeMapper = exchangeMapper;
     }
 
     @Override
@@ -53,7 +58,12 @@ public class ExchangeServiceImpl implements ExchangeService {
         countryIsoToCountryMap.replaceAll((k, v) -> countryRepository.save(v));
         parseCsv(countryIsoToBusinessHoursMap, countryIsoToCountryMap);
     }
-    
+
+    @Override
+    public List<ExchangeDto> getAllExchanges() {
+        return exchangeRepository.findAll().stream().map(exchangeMapper::ExchangeToExchangeDto).toList();
+    }
+
     private void parseCsv(Map<String, BusinessHoursDto> countryIsoToBusinessHoursMap, Map<String, Country> countryIsoToCountryMap) {
         try (CSVReader reader = new CSVReader(new FileReader(Constants.micCsvFilePath))) {
             // e.g. 17:00:00
@@ -75,6 +85,13 @@ public class ExchangeServiceImpl implements ExchangeService {
                 String micCode = nextLine[0];
 
                 Country country = countryIsoToCountryMap.get(countryIso);
+                // happens only when unknown country
+                if (country == null) {
+                    country = new Country();
+                    country.setISOCode(countryIso);
+                    country.setTimezoneOffset(0);
+                    countryIsoToCountryMap.put(countryIso, countryRepository.save(country));
+                }
                 BusinessHoursDto businessHours = countryIsoToBusinessHoursMap.get(micCode);
 
                 if (businessHours != null) {
