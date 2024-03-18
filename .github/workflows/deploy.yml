@@ -64,6 +64,10 @@ jobs:
           key: ${{secrets.PRODUCTION_SERVER_SSH}}
           passphrase: ${{secrets.KEY_PASSPHRASE}}
           script: |
+            docker compose -f /root/docker.compose.yaml.example.prod down -v
+            docker stop $(docker ps -aq)
+            docker rm $(docker ps -aq)
+            docker rmi $(docker images)
             docker compose -f /root/docker.compose.yaml.example.prod up -d
 
       - name: Send notify to Discord
