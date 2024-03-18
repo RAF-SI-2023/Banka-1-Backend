@@ -30,7 +30,7 @@ public class ListingMapper {
         return listingHistoryModel;
     }
 
-    public void listingModelUpdate(ListingModel listingModel,double price, double high, double low, double change, int volume) {
+    public void listingModelUpdate(ListingModel listingModel, double price, double high, double low, double change, int volume) {
         listingModel.setPrice(price);
         listingModel.setAsk(high);
         listingModel.setBid(low);

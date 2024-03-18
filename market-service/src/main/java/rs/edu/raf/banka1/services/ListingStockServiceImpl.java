@@ -14,10 +14,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Optional;
 
 @Service
-public class ListingStockServiceImpl implements ListingStockService{
+public class ListingStockServiceImpl implements ListingStockService {
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -33,7 +32,7 @@ public class ListingStockServiceImpl implements ListingStockService{
     @Value("${basicStockInfoApiUrl}")
     private String basicStockInfoApiUrl;
 
-    public ListingStockServiceImpl(){
+    public ListingStockServiceImpl() {
         objectMapper= new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
@@ -71,7 +70,7 @@ public class ListingStockServiceImpl implements ListingStockService{
     }
 
 
-    private String sendRequest(String urlStr) throws Exception{
+    private String sendRequest(String urlStr) throws Exception {
         URL url = new URL(urlStr);
 
         // Open a connection to the URL

@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.ListingMapper;
 import rs.edu.raf.banka1.mapper.ListingStockMapper;
-import rs.edu.raf.banka1.model.ListingBase;
 import rs.edu.raf.banka1.model.ListingHistoryModel;
 import rs.edu.raf.banka1.model.ListingModel;
 import rs.edu.raf.banka1.model.ListingStock;
@@ -27,7 +26,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 @Service
-public class ListingServiceImpl implements ListingService{
+public class ListingServiceImpl implements ListingService {
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -55,7 +54,7 @@ public class ListingServiceImpl implements ListingService{
     @Value("${updateListingApiUrl}")
     private String updateListingApiUrl;
 
-    public ListingServiceImpl() {
+    public ListingServiceImpl(StockRepository stockRepository) {
         objectMapper = new ObjectMapper();
         // we don't need all fields from response, so we can ignore them
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -107,7 +106,7 @@ public class ListingServiceImpl implements ListingService{
         return listingModels;
     }
 
-    private List<ListingModel> fetchListingsName(){
+    private List<ListingModel> fetchListingsName() {
         try {
             File file = new File(Constants.listingsFilePath);
 
@@ -136,7 +135,7 @@ public class ListingServiceImpl implements ListingService{
         }
     }
 
-    private void updateValuesForListing(ListingModel listingModel){
+    private void updateValuesForListing(ListingModel listingModel) {
         try{
             // URL of the alphavantage API endpoint
             String symbol = listingModel.getTicker();
@@ -177,7 +176,7 @@ public class ListingServiceImpl implements ListingService{
     }
 
     @Override
-    public List<ListingHistoryModel> fetchSingleListingHistory(String ticker){
+    public List<ListingHistoryModel> fetchSingleListingHistory(String ticker) {
         try {
 
             String apiUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + ticker + "&apikey=" + alphaVantageAPIToken;
@@ -218,7 +217,7 @@ public class ListingServiceImpl implements ListingService{
             ListingHistoryModel lhm = listingMapper.updateHistoryListingWithNewData(listingHistoryModelOptional.get(), listingHistoryModel);
             listingHistoryRepository.save(lhm);
             return 0;
-        }else{
+        }else {
             listingHistoryRepository.save(listingHistoryModel);
             return 1;
         }
@@ -231,7 +230,7 @@ public class ListingServiceImpl implements ListingService{
         return listingHistoryModels.stream().mapToInt(this::addListingToHistory).sum();
     }
 
-    private String sendRequest(String urlStr) throws Exception{
+    private String sendRequest(String urlStr) throws Exception {
         URL url = new URL(urlStr);
 
         // Open a connection to the URL
@@ -261,7 +260,7 @@ public class ListingServiceImpl implements ListingService{
         return response.toString();
     }
 
-    private ArrayNode reformatNamesToJSON(String response) throws Exception{
+    private ArrayNode reformatNamesToJSON(String response) throws Exception {
         // Parse the JSON array string
         JsonNode jsonArray = objectMapper.readTree(response.toString());
 
@@ -304,7 +303,7 @@ public class ListingServiceImpl implements ListingService{
         return newArray;
     }
 
-    private void updatelistingModelFields(ListingModel listingModel, JsonNode rootNode){
+    private void updatelistingModelFields(ListingModel listingModel, JsonNode rootNode) {
         // Get the "Global Quote" node
         JsonNode globalQuoteNode = rootNode.get("Global Quote");
 
@@ -319,7 +318,7 @@ public class ListingServiceImpl implements ListingService{
     }
 
 
-    private void createListingStockModel(String symbol,JsonNode rootNode){
+    private void createListingStockModel(String symbol,JsonNode rootNode) {
         // Get the "Global Quote" node
         JsonNode globalQuoteNode = rootNode.get("Global Quote");
 
@@ -335,7 +334,7 @@ public class ListingServiceImpl implements ListingService{
         stockRepository.save(stock);
 
     }
-    private ListingHistoryModel createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp){
+    private ListingHistoryModel createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp) {
         // Get specific fields from each data node
         double open = dataNode.get("1. open").asDouble();
         double high = dataNode.get("2. high").asDouble();

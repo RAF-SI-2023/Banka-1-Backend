@@ -5,7 +5,7 @@ import rs.edu.raf.banka1.model.ListingStock;
 
 @Component
 public class ListingStockMapper {
-    public ListingStock listingStockCreate(String symbol,double price, double high, double low, double change, int volume) {
+    public ListingStock listingStockCreate(String symbol, double price, double high, double low, double change, int volume) {
         ListingStock stock = new ListingStock();
         stock.setTicker(symbol);
         stock.setListingType("Stock");
@@ -17,7 +17,7 @@ public class ListingStockMapper {
         stock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
         return stock;
     }
-    public void updatelistingStock(ListingStock stock,String name, Integer outstandingShare, Double dividendYield,String exchange){
+    public void updatelistingStock(ListingStock stock, String name, Integer outstandingShare, Double dividendYield, String exchange) {
         stock.setOutstandingShares(outstandingShare);
         stock.setDividendYield(dividendYield);
         stock.setName(name);
