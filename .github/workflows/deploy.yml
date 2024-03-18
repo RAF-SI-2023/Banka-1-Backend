@@ -3,7 +3,9 @@ name: Deploy backend service to DigitalOcean
 on:
   push:
     branches:
+      - sprint-1
       - sprint-2
+      - main
 
 jobs:
   build:
@@ -13,7 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          ref: sprint-2
+          ref: ${{secrets.CURRENT_BRANCH}}
 
 
       - name: Set up JDK 21
