@@ -6,13 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.ForexMapper;
-import rs.edu.raf.banka1.model.Forex;
+import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.repositories.ForexRepository;
-import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.Requests;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ForexServiceImpl implements ForexService {
@@ -46,7 +46,7 @@ public class ForexServiceImpl implements ForexService {
 
     // Run only once to get all forex-pairs names (from diferent forex places)
     @Override
-    public List<Forex> initializeForex() {
+    public List<ListingForex> initializeForex() {
         try {
             String urlStr = forexExchangePlaceApiUrl + forexAPItoken;
             String response = Requests.sendRequest(urlStr);
@@ -54,13 +54,13 @@ public class ForexServiceImpl implements ForexService {
             // Parse the response
             JsonNode jsonArray = objectMapper.readTree(response);
 
-            List<Forex> forexList = new ArrayList<>();
+            List<ListingForex> listingForexList = new ArrayList<>();
 
             // Iterate through array elements
             for(JsonNode element: jsonArray)
-                forexList.addAll(fetchAllForexPairs(element.asText()));
+                listingForexList.addAll(fetchAllForexPairs(element.asText()));
 
-            return forexList;
+            return listingForexList;
         }catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();
@@ -68,7 +68,7 @@ public class ForexServiceImpl implements ForexService {
      }
 
     @Override
-    public List<Forex> fetchAllForexPairs(String forex_place) {
+    public List<ListingForex> fetchAllForexPairs(String forex_place) {
         try {
             String urlStr = forexSymbolsApiUrl + forex_place + "&token=" + forexAPItoken;
             String response = Requests.sendRequest(urlStr);
@@ -76,7 +76,7 @@ public class ForexServiceImpl implements ForexService {
             // Parse the response
             JsonNode jsonArray = objectMapper.readTree(response);
 
-            List<Forex> forexList = new ArrayList<>();
+            List<ListingForex> listingForexList = new ArrayList<>();
 
             // Iterate through array elements
             for(JsonNode element: jsonArray){
@@ -86,11 +86,13 @@ public class ForexServiceImpl implements ForexService {
                 String left = displaySymbol.split("/")[0];
                 String right = displaySymbol.split("/")[1];
 
-                Forex forex = forexMapper.createForex(element.get("displaySymbol").asText());
-                forexList.add(forex);
+                String name = element.get("description").asText();
+
+                ListingForex listingForex = forexMapper.createForex(displaySymbol, name, forex_place);
+                listingForexList.add(listingForex);
             }
 
-            return forexList;
+            return listingForexList;
         }catch (Exception e) {
             e.printStackTrace();
             System.out.println();
@@ -99,40 +101,40 @@ public class ForexServiceImpl implements ForexService {
     }
 
     @Override
-    public List<Forex> fetchAllExchangeRates(List<Forex> forexList) {
-        for(Forex forex: forexList){
-            double exchangeRate = fetchExchangeRate(forex.getBaseCurrency(), forex.getQuoteCurrency());
-            forex.setExchangeRate(exchangeRate);
-        }
-            return forexList;
+    public List<ListingForex> updateAllPrices(List<ListingForex> listingForexList) {
+//        return only values that are not null
+        return listingForexList.stream().map(this::getUpdatedForex).filter(Objects::nonNull).toList();
     }
 
     @Override
-    public double fetchExchangeRate(String baseCurrency, String quoteCurrency) {
+    public ListingForex getUpdatedForex(ListingForex listingForex) {
         String response = "";
         try {
-            String urlStr = forexExchangeRateApiUrl + "&from_currency=" + baseCurrency
-                                                    + "&to_currency=" + quoteCurrency
+            String urlStr = forexExchangeRateApiUrl + "&from_currency=" + listingForex.getBaseCurrency()
+                                                    + "&to_currency=" + listingForex.getQuoteCurrency()
                                                     + "&apikey=" + alphaVantageAPIToken;
 
             response = Requests.sendRequest(urlStr);
 
             // Parse the response
-            double exchangeRate = objectMapper.readTree(response).get("Realtime Currency Exchange Rate").get("5. Exchange Rate").asDouble();
+            double price = objectMapper.readTree(response).get("Realtime Currency Exchange Rate").get("5. Exchange Rate").asDouble();
+            double high = objectMapper.readTree(response).get("Realtime Currency Exchange Rate").get("9. Ask Price").asDouble();
+            double low = objectMapper.readTree(response).get("Realtime Currency Exchange Rate").get("8. Bid Price").asDouble();
 
-            return exchangeRate;
+            ListingForex updatedForex = forexMapper.updatePrices(listingForex, price, high, low);
+            return updatedForex;
         }catch (Exception e) {
 //            e.printStackTrace();
 //            System.out.println("Response: " + response);
 //            this currency pair is not supported by the API
-            System.out.println("BaseCurrency: " + baseCurrency + ", QuoteCurrency: " + quoteCurrency);
-            return 0;
+            System.out.println("BaseCurrency: " + listingForex.getBaseCurrency() + ", QuoteCurrency: " + listingForex.getQuoteCurrency() + " are not awailable on the API");
+            return null;
         }
     }
 
     @Override
-    public void saveAllForexes(List<Forex> forexList) {
-        forexRepository.saveAll(forexList);
+    public void saveAllForexes(List<ListingForex> listingForexList) {
+        forexRepository.saveAll(listingForexList);
     }
 
 

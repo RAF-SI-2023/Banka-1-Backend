@@ -1,19 +1,19 @@
 package rs.edu.raf.banka1.services;
 
-import rs.edu.raf.banka1.model.Forex;
+import rs.edu.raf.banka1.model.ListingForex;
 
 import java.util.List;
 
 public interface ForexService {
-    List<Forex> initializeForex();
+    List<ListingForex> initializeForex();
 
-    List<Forex> fetchAllForexPairs(String forex_place);
+    List<ListingForex> fetchAllForexPairs(String forex_place);
 
-    List<Forex> fetchAllExchangeRates(List<Forex> forexList);
+    List<ListingForex> updateAllPrices(List<ListingForex> listingForexList);
 
-    double fetchExchangeRate(String baseCurrency, String quoteCurrency);
+    ListingForex getUpdatedForex(ListingForex listingForex);
 
-    public void saveAllForexes(List<Forex> forexList);
+    void saveAllForexes(List<ListingForex> listingForexList);
 
 
 }

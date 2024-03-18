@@ -1,14 +1,17 @@
 package rs.edu.raf.banka1.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-public class ListingForex extends ListingBase {
+@NoArgsConstructor
+@AllArgsConstructor
+public class ListingForex extends ListingBase{
     @Column
     private String baseCurrency;
     @Column
