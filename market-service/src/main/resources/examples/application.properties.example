@@ -27,3 +27,6 @@ alphaVantageAPIToken=OF6BVKZOCXWHD9NS
 # API URLs:
 listingNameApiUrl=https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=
 updateListingApiUrl=https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=
+
+# OPTIONS URL:
+optionsUrl=https://query2.finance.yahoo.com/v7/finance/options/
