@@ -186,7 +186,6 @@ public class UserController {
     }
 
 
-
     @GetMapping(value = "/permissions/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all permissions of user", description = "Returns all permissions")
     @ApiResponses({
