@@ -17,39 +17,21 @@ import static rs.edu.raf.banka1.utils.PermissionUtil.packPermissions;
 
 @Service
 public class AuthenticationService {
-    private final AuthenticationManager authenticationManager;
-    private final UserService userService;
     private final JwtUtil jwtUtil;
 
-    public AuthenticationService(AuthenticationManager authenticationManager, UserService userService, JwtUtil jwtUtil) {
-        this.authenticationManager = authenticationManager;
-        this.userService = userService;
+    public AuthenticationService(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
 
-    public ResponseEntity<?> login(LoginRequest loginRequest) {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        UserResponse user = this.userService.findByEmail(loginRequest.getEmail());
+    public LoginResponse generateLoginResponse(LoginRequest loginRequest, UserResponse user) {
         String permissions = "";
-
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         if (user.getPermissions() != null && !user.getPermissions().isEmpty()) {
             permissions = (packPermissions(user.getPermissions()));
         }
 
-        return ResponseEntity.ok(
-                new LoginResponse(
-                        jwtUtil.generateToken(loginRequest.getEmail(), permissions),
-                        user.getPermissions().stream().map(PermissionDto::getName).collect(Collectors.toList())
-                )
+        return new LoginResponse(
+            jwtUtil.generateToken(loginRequest.getEmail(), permissions),
+            user.getPermissions().stream().map(PermissionDto::getName).collect(Collectors.toList())
         );
     }
 }
