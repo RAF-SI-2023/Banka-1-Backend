@@ -9,6 +9,7 @@ import rs.edu.raf.banka1.model.ListingHistoryModel;
 import rs.edu.raf.banka1.model.ListingModel;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.services.CurrencyService;
+import rs.edu.raf.banka1.services.ExchangeService;
 import rs.edu.raf.banka1.services.ListingService;
 
 import java.io.BufferedReader;
@@ -29,10 +30,16 @@ public class BootstrapData implements CommandLineRunner {
     @Autowired
     private ListingMapper listingMapper;
 
+    @Autowired
+    private ExchangeService exchangeService;
+
     @Override
     public void run(String... args) throws Exception {
 
         System.out.println("Loading Data...");
+
+        exchangeService.seedDatabase();
+        System.out.println("Exchange data loaded!");
 
         List<CurrencyDto> currencyList = loadCurrencies();
         currencyService.addCurrencies(currencyList);
@@ -42,10 +49,11 @@ public class BootstrapData implements CommandLineRunner {
 
 //        call it only from time to time to update json because api isn't free and we need it only once
 //        listingService.initializeListings();
+
 //        loading data from json and fetches data from other API (professor will give us API token for this one)
-        List<ListingModel> listingModels = listingService.fetchListings();
+//        List<ListingModel> listingModels = listingService.fetchListings();
 //        use this to update or initialize database with fresh data
-        listingService.updateAllListingsDatabase(listingModels);
+//        listingService.updateAllListingsDatabase(listingModels);
 
 //        fetching and bootstrapping listing history data (not recommended as each listing generates 100 history records and we have around 3500 listings)
 //        List<ListingHistoryModel> listingHistoryModels = listingService.fetchAllListingsHistory();
