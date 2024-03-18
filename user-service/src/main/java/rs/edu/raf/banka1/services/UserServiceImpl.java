@@ -118,10 +118,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean deleteUser(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        if (user.isPresent()) {
-            userRepository.deleteById(id);
-            return true;
+        Optional<User> optUser = userRepository.findById(id);
+        if (optUser.isPresent()) {
+            User user = optUser.get();
+            if (!user.getActive()) {
+                userRepository.deactivateUser(user.getUserId());
+                return true;
+            }
         }
         return false;
     }
