@@ -1,11 +1,13 @@
 package rs.edu.raf.banka1.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import rs.edu.raf.banka1.model.ExampleModel;
-import rs.edu.raf.banka1.model.entities.ListingStock;
+import org.springframework.stereotype.Repository;
+import rs.edu.raf.banka1.model.ListingStock;
 
 import java.util.Optional;
 
+@Repository
 public interface StockRepository extends JpaRepository<ListingStock,String> {
+    ListingStock findByTicker(String ticker);
 
 }

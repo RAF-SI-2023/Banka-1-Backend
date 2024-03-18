@@ -10,9 +10,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.ListingMapper;
 import rs.edu.raf.banka1.mapper.ListingStockMapper;
+import rs.edu.raf.banka1.model.ListingBase;
 import rs.edu.raf.banka1.model.ListingHistoryModel;
 import rs.edu.raf.banka1.model.ListingModel;
-import rs.edu.raf.banka1.model.entities.ListingStock;
+import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 import rs.edu.raf.banka1.repositories.ListingRepository;
 import rs.edu.raf.banka1.repositories.StockRepository;
@@ -63,6 +64,7 @@ public class ListingServiceImpl implements ListingService{
 
     //    NOTE: see what to do with this, as API isn't free (almost nothing from this API changes so it is okay to do it once and store it into json file)
 //    NOTE: Maybe name/description of the company changes, so we should update it from time to time
+
     @Override
     public void initializeListings() {
         try {
@@ -93,7 +95,6 @@ public class ListingServiceImpl implements ListingService{
         }
 
     }
-
 
 
     //    loads listings from json file and updates them with trending data
@@ -317,11 +318,13 @@ public class ListingServiceImpl implements ListingService{
         listingMapper.listingModelUpdate(listingModel, price, high, low, change, volume);
     }
 
+
     private void createListingStockModel(String symbol,JsonNode rootNode){
         // Get the "Global Quote" node
         JsonNode globalQuoteNode = rootNode.get("Global Quote");
 
         // Parse data from the "Global Quote" node
+
         double high = globalQuoteNode.get("03. high").asDouble();
         double low = globalQuoteNode.get("04. low").asDouble();
         double price = globalQuoteNode.get("05. price").asDouble();

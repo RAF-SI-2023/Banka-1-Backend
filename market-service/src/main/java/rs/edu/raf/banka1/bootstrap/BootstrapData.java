@@ -9,6 +9,7 @@ import rs.edu.raf.banka1.model.ListingHistoryModel;
 import rs.edu.raf.banka1.model.ListingModel;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.services.CurrencyService;
+import rs.edu.raf.banka1.services.ExchangeService;
 import rs.edu.raf.banka1.services.ListingService;
 import rs.edu.raf.banka1.services.ListingStockService;
 
@@ -23,25 +24,28 @@ import java.util.List;
 public class BootstrapData implements CommandLineRunner {
 
     private final CurrencyService currencyService;
-
     @Autowired
     private ListingService listingService;
-
-
     @Autowired
     private ListingStockService stockService;
 
     @Autowired
     private ListingMapper listingMapper;
 
+    @Autowired
+    private ExchangeService exchangeService;
+
     @Override
     public void run(String... args) throws Exception {
 
         System.out.println("Loading Data...");
 
-        List<CurrencyDto> currencyList = loadCurrencies();
-        currencyService.addCurrencies(currencyList);
-        System.out.println("Currency Data Loaded!");
+      //  exchangeService.seedDatabase();
+        System.out.println("Exchange data loaded!");
+
+        //List<CurrencyDto> currencyList = loadCurrencies();
+        //currencyService.addCurrencies(currencyList);
+        //System.out.println("Currency Data Loaded!");
 
 //        fetchiing and bootstrapping listing data
 

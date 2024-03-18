@@ -5,25 +5,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.mapper.ListingStockMapper;
-import rs.edu.raf.banka1.model.ListingModel;
-import rs.edu.raf.banka1.model.entities.ListingStock;
+import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.repositories.StockRepository;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ListingStockServiceImpl implements ListingStockService{
-
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -44,9 +38,12 @@ public class ListingStockServiceImpl implements ListingStockService{
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
+
     @Override
-    public void initializeStock(){
-        return;
+    public void initializeStock() {
+
+        stockRepository.findAll().forEach(stock -> getStockData(stock.getTicker()));
+
     }
 
     public void getStockData(String symbol) {
@@ -57,19 +54,21 @@ public class ListingStockServiceImpl implements ListingStockService{
 
             // Parse the response
             JsonNode jsonArray = objectMapper.readTree(response);
+            String name = jsonArray.get("Name").asText();
             Double dividendYield=jsonArray.get("DividendYield").asDouble();
             Integer outstandingShares=jsonArray.get("SharesOutstanding").asInt();
+            String exchange=jsonArray.get("Exchange").asText();
 
-            ListingStock stock = stockRepository.findById(symbol).get();
-
-            stockMapper.updatelistingStock(stock,outstandingShares,dividendYield);
+            //ListingStock stock = stockRepository.findById(symbol).get();
+            ListingStock stock = stockRepository.findByTicker(symbol);
+                // Update the stock fields// Only set if the "Exchange" field is present in the JSON response
+            stockMapper.updatelistingStock(stock,name,outstandingShares,dividendYield,exchange);
             stockRepository.save(stock);
 
         }catch (Exception e) {
             e.printStackTrace();
         }
     }
-
 
 
     private String sendRequest(String urlStr) throws Exception{
