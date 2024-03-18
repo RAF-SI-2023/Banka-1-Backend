@@ -21,6 +21,8 @@ import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.UserService;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static rs.edu.raf.banka1.utils.PermissionUtil.packPermissions;
@@ -56,15 +58,14 @@ public class AuthenticationController {
         }
 
         UserResponse user = this.userService.findByEmail(loginRequest.getEmail());
-        String permissions = "";
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+        List<String> permissions = new ArrayList<>();
         if (user.getPermissions() != null && !user.getPermissions().isEmpty()) {
-
-            permissions = (packPermissions(user.getPermissions()));
+            permissions = user.getPermissions().stream().map(PermissionDto::getName).collect(Collectors.toList());
          }
 
         return ResponseEntity.ok(
