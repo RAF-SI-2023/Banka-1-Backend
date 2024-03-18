@@ -121,7 +121,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> optUser = userRepository.findById(id);
         if (optUser.isPresent()) {
             User user = optUser.get();
-            if (!user.getActive()) {
+            if (user.getActive()) {
                 userRepository.deactivateUser(user.getUserId());
                 return true;
             }
