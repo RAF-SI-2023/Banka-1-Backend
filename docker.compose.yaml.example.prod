@@ -35,7 +35,7 @@ services:
         "spring.mail.password":"fony nhtw hlah vzul",
         "spring.mail.properties.mail.smtp.auth":true,
         "spring.mail.properties.mail.smtp.starttls.enable":true,
-        "springdoc.packages-to-scan": "rs.edu.raf.banka1.controller"
+        "springdoc.packagesToScan": "rs.edu.raf.banka1.controller"
       }'
 
     depends_on:
