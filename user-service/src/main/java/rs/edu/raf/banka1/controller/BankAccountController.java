@@ -10,15 +10,18 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.dtos.DevizniRacunDto;
 import rs.edu.raf.banka1.model.DevizniRacun;
 import rs.edu.raf.banka1.repositories.DevizniRacunRepository;
 import rs.edu.raf.banka1.services.BankAccountService;
 
 import java.util.List;
 
+import static org.springframework.security.core.context.SecurityContextHolder.getContext;
+
 @RestController
 @CrossOrigin
-@RequestMapping("/api/balance")
+@RequestMapping("/balance")
 public class BankAccountController {
 
     private final BankAccountService bankAccountService;
@@ -53,7 +56,7 @@ public class BankAccountController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PreAuthorize("hasAuthority('can_read_users')")
-    public ResponseEntity<DevizniRacun> getDevizniRacun(@PathVariable(name = "devizniRacunId") String id) {
+    public ResponseEntity<DevizniRacun> getDevizniRacun(@PathVariable(name = "devizniRacunId") Long id) {
         return ResponseEntity.ok(bankAccountService.getDevizniRacunById(id));
     }
 

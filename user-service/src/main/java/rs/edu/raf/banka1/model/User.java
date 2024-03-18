@@ -61,7 +61,7 @@ public class User {
     )
     private Set<Permission> permissions = new HashSet<>();
 
-    @OneToMany
+    @OneToMany(mappedBy = "user")
     private List<DevizniRacun> devizniRacuni;
 
 //    @ManyToOne

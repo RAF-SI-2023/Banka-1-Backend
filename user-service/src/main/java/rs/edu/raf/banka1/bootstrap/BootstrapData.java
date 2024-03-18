@@ -4,12 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import rs.edu.raf.banka1.model.Permission;
-import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.repositories.DevizniRacunRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -17,12 +19,14 @@ public class BootstrapData implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PermissionRepository permissionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final DevizniRacunRepository devizniRacunRepository;
 
     @Autowired
-    public BootstrapData(UserRepository userRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository) {
+    public BootstrapData(UserRepository userRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository, DevizniRacunRepository devizniRacunRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
+        this.devizniRacunRepository = devizniRacunRepository;
     }
 
     @Override
@@ -41,8 +45,45 @@ public class BootstrapData implements CommandLineRunner {
         user1.setFirstName("User1");
         user1.setLastName("User1Prezime");
         user1.setPermissions(permissions1);
+
+        User client = new User();
+        client.setEmail("client@gmail.com");
+        client.setPassword(passwordEncoder.encode("client"));
+        client.setFirstName("Client");
+        client.setLastName("ClientPrezime");
         userRepository.save(user1);
+        userRepository.save(client);
+
+
+        DevizniRacun account1 = createDevizniRacun(client, user1);
+
+        List<DevizniRacun> devizniRacuni = new ArrayList<>();
+        devizniRacuni.add(account1);
+//        devizniRacuni.add(account2);
+        client.setDevizniRacuni(devizniRacuni);
+
+        userRepository.save(client);
+        devizniRacunRepository.save(account1);
 
         System.out.println("Data loaded!");
+    }
+
+    private static DevizniRacun createDevizniRacun(User client, User user1) {
+        DevizniRacun account1 = new DevizniRacun();
+//        account1.setOwnerId(user1.getUserId());
+        account1.setUser(client);
+        account1.setCreatedByAgentId(user1.getUserId());
+        account1.setAccountNumber("ACC123456789");
+        account1.setVrstaRacuna(VrstaRacuna.DEVIZNI);
+        account1.setBalance(1000.0);
+        account1.setAvailableBalance(900.0);
+        account1.setCreationDate("2024-03-18");
+        account1.setExpirationDate("2025-03-18");
+        account1.setCurrency("USD");
+        account1.setStatusRacuna(StatusRacuna.ACTIVE);
+        account1.setPodvrstaRacuna(PodvrstaRacuna.LICNI);
+        account1.setAccountMaintenance(10.0);
+        account1.setDefaultCurrency(true);
+        return account1;
     }
 }
