@@ -23,8 +23,10 @@ public class OptionsServiceImpl implements OptionsService{
     @Override
     public List<Object> fetchOptions() {
         // ovo nije dobar url --> vrati HTML stranicu
-        String str = fetchData("https://finance.yahoo.com/quote/NFLX/options?p=NFLX");
-        System.out.println(str);
+//        https://query2.finance.yahoo.com/v7/finance/options/MSFT?crumb=U2GshuxwTFy
+
+//        String str = fetchData("https://query2.finance.yahoo.com/v7/finance/options/MSFT?crumb="+getCrumb());
+        System.out.println(getCrumb());
 //        JsonNode rootNode = objectMapper.readTree(file);
 //
 //        List<ListingModel> listings = new ArrayList<>();
@@ -43,6 +45,13 @@ public class OptionsServiceImpl implements OptionsService{
 //        }
 
         return null;
+    }
+
+    private static String getCrumb() {
+//        https://query2.finance.yahoo.com/v1/test/getcrumb
+        String crumb = fetchData("https://query2.finance.yahoo.com/v1/test/getcrumb");
+//        System.out.println(crumb);
+        return crumb;
     }
 
     private static String fetchData(String apiUrl) {
