@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.ExchangeMapper;
@@ -20,7 +17,6 @@ import rs.edu.raf.banka1.repositories.CountryRepository;
 import rs.edu.raf.banka1.repositories.ExchangeRepository;
 import rs.edu.raf.banka1.repositories.HolidayRepository;
 import rs.edu.raf.banka1.utils.Constants;
-import rs.edu.raf.banka1.utils.DateUtils;
 
 import java.io.File;
 import java.io.FileReader;
@@ -61,7 +57,12 @@ public class ExchangeServiceImpl implements ExchangeService {
 
     @Override
     public List<ExchangeDto> getAllExchanges() {
-        return exchangeRepository.findAll().stream().map(exchangeMapper::ExchangeToExchangeDto).toList();
+        return exchangeRepository.findAll().stream().map(exchangeMapper::exchangeToExchangeDto).toList();
+    }
+
+    @Override
+    public ExchangeDto getExchangeById(Long id) {
+        return this.exchangeRepository.findById(id).map(exchangeMapper::exchangeToExchangeDto).orElse(null);
     }
 
     private void parseCsv(Map<String, BusinessHoursDto> countryIsoToBusinessHoursMap, Map<String, Country> countryIsoToCountryMap) {

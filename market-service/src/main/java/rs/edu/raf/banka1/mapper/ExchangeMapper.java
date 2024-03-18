@@ -6,7 +6,7 @@ import rs.edu.raf.banka1.model.entities.Exchange;
 
 @Component
 public class ExchangeMapper {
-    public ExchangeDto ExchangeToExchangeDto(Exchange exchange) {
+    public ExchangeDto exchangeToExchangeDto(Exchange exchange) {
         ExchangeDto exchangeDto = new ExchangeDto();
         exchangeDto.setExchangeId(exchange.getId());
         exchangeDto.setExchangeName(exchange.getExchangeName());
