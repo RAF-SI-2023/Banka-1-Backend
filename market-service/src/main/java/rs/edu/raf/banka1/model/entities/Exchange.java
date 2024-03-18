@@ -21,5 +21,5 @@ public class Exchange {
     @JoinColumn(name = "country_id")
     private Country country;
 
-//    private String currency; //todo: should this be FK to Currency table, also where to get this info
+    private String currency; //todo: should this be FK to Currency table, also where to get this info
 }
