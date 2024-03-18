@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.configuration.SpringSecurityConfig;
+import rs.edu.raf.banka1.dtos.PermissionDto;
+import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
@@ -32,16 +34,20 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
     private UserRepository userRepository;
     private PermissionRepository permissionRepository;
+
+    private PermissionMapper permissionMapper;
     private EmailService emailService;
     private JwtUtil jwtUtil;
     @Autowired
     public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, EmailService emailService,
-                           PermissionRepository permissionRepository, JwtUtil jwtUtil) {
+                           PermissionRepository permissionRepository,
+                           JwtUtil jwtUtil, PermissionMapper permissionMapper) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.emailService = emailService;
         this.permissionRepository = permissionRepository;
         this.jwtUtil = jwtUtil;
+        this.permissionMapper = permissionMapper;
     }
 
     public UserResponse findByEmail(String email) {
@@ -120,6 +126,22 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
+    @Override
+    public List<PermissionDto> findPermissions(Long userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if(user == null)
+            return null;
+        return extractPermissionsFromUser(user);
+    }
+
+    @Override
+    public List<PermissionDto> findPermissions(String email) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        if(user == null)
+            return null;
+        return extractPermissionsFromUser(user);
+    }
+
     //necessary for authentication
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -135,5 +157,10 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
 
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);
+    }
+
+    private List<PermissionDto> extractPermissionsFromUser(User user) {
+        return user.getPermissions().stream().
+                map(permissionMapper::permissionToPermissionDto).collect(Collectors.toList());
     }
 }

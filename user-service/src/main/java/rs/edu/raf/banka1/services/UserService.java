@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.services;
 
 
 
+import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
@@ -23,7 +24,7 @@ public interface UserService extends UserDetailsService {
     EditUserResponse editUser(EditUserRequest editUserRequest);
     boolean deleteUser(Long id);
 
+    List<PermissionDto> findPermissions(Long userId);
 
-
-
+    List<PermissionDto> findPermissions(String email);
 }
