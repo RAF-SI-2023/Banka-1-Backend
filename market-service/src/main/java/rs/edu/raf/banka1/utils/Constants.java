@@ -8,7 +8,7 @@ public class Constants {
     public static final String businessHoursFilePath = "market-service/src/main/resources/working_hours_and_holidays_for_exchanges.json";
     public static final String micCsvFilePath = "market-service/src/main/resources/ISO10383_MIC.csv";
     public static final String countryTimezoneOffsetsFilePath = "market-service/src/main/resources/country_timezone_offsets.json";
-    public static final List<String> sectors = List.of("Technology");
+    public static final List<String> sectors = List.of("Technology","Electronic Technology","Health Technology","Health Services","Finance","Energy");
     public static final int maxListings = 7;
     public static final List<String> ListingsToIgnore = List.of(
             "ATLEF",
