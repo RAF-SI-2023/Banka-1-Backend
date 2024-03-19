@@ -26,7 +26,6 @@ public class UserMapper {
         userResponse.setFirstName(user.getFirstName());
         userResponse.setLastName(user.getLastName());
         userResponse.setEmail(user.getEmail());
-        userResponse.setJmbg(user.getJmbg());
         userResponse.setPhoneNumber(user.getPhoneNumber());
         userResponse.setPosition(user.getPosition());
         userResponse.setActive(user.getActive());
@@ -40,7 +39,6 @@ public class UserMapper {
         user.setFirstName(userResponse.getFirstName());
         user.setLastName(userResponse.getLastName());
         user.setEmail(userResponse.getEmail());
-        user.setJmbg(userResponse.getJmbg());
         user.setPhoneNumber(userResponse.getPhoneNumber());
         user.setPosition(userResponse.getPosition());
         user.setActive(userResponse.getActive());
@@ -82,7 +80,7 @@ public class UserMapper {
         editUserRequest.setPhoneNumber(user.getPhoneNumber());
         editUserRequest.setPosition(user.getPosition());
         editUserRequest.setIsActive(user.getActive());
-        editUserRequest.setPermissions(user.getPermissions().stream().map(permission -> permission.getName()).collect(Collectors.toSet()));
+        editUserRequest.setPermissions(user.getPermissions().stream().map(permission -> permission.getName()).collect(Collectors.toList()));
         editUserRequest.setUserId(user.getUserId());
         editUserRequest.setPassword(user.getPassword());
         return editUserRequest;

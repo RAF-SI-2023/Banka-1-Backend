@@ -9,4 +9,7 @@ public class ActivateAccountResponse {
     public ActivateAccountResponse(Long userId) {
         this.userId = userId;
     }
+
+    public ActivateAccountResponse() {
+    }
 }

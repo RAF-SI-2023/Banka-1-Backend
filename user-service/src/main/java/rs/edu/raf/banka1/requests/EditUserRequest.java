@@ -1,10 +1,13 @@
 package rs.edu.raf.banka1.requests;
 
-import lombok.Data;
+import lombok.*;
 
-import java.util.Set;
+import java.util.List;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class EditUserRequest {
     private Long userId;
     private String email;
@@ -15,5 +18,5 @@ public class EditUserRequest {
     private String position;
     private String phoneNumber;
     private Boolean isActive;
-    private Set<String> permissions;
+    private List<String> permissions;
 }
