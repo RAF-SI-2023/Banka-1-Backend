@@ -1,6 +1,12 @@
 package rs.edu.raf.banka1.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.ElementCollection;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.AllArgsConstructor;
@@ -19,9 +25,6 @@ public class ForeignCurrencyAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-//    @ManyToOne
-//    @JoinColumn(name = "user_id")
-//    private User user;
     private Long ownerId;
     private Long createdByAgentId;
     private String accountNumber;
@@ -31,10 +34,8 @@ public class ForeignCurrencyAccount {
     private Integer creationDate;
     private Integer expirationDate;
     private String currency;
-    @Enumerated(EnumType.STRING)
-    private AccountStatus accountStatus;
-    @Enumerated(EnumType.STRING)
-    private SubtypeOfAccount subtypeOfAccount;
+    private String accountStatus;
+    private String subtypeOfAccount;
     private Double accountMaintenance;
     private Boolean defaultCurrency;
     @ElementCollection

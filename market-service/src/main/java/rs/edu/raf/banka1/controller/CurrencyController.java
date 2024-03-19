@@ -13,7 +13,7 @@ import rs.edu.raf.banka1.model.exceptions.CurrencyNotFoundException;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/currencies")
+@RequestMapping("/market/currency")
 public class CurrencyController {
 
     private final CurrencyService currencyService;

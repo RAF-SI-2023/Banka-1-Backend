@@ -1,7 +1,6 @@
 package rs.edu.raf.banka1.mapper;
 
 import org.springframework.stereotype.Component;
-import rs.edu.raf.banka1.model.AccountStatus;
 import rs.edu.raf.banka1.model.ForeignCurrencyAccount;
 import rs.edu.raf.banka1.requests.ForeignCurrencyAccountRequest;
 import rs.edu.raf.banka1.responses.ForeignCurrencyAccountResponse;
@@ -36,7 +35,7 @@ public class ForeignCurrencyAccountMapper {
         foreignCurrencyAccount.setAllowedCurrencies(foreignCurrencyAccountRequest.getAllowedCurrencies());
         foreignCurrencyAccount.setAccountNumber(UUID.randomUUID().toString());
         foreignCurrencyAccount.setBalance(1000.0);
-        foreignCurrencyAccount.setAccountStatus(AccountStatus.ACTIVE);
+        foreignCurrencyAccount.setAccountStatus("ACTIVE");
         foreignCurrencyAccount.setCreationDate((int) System.currentTimeMillis());
         foreignCurrencyAccount.setExpirationDate((int) System.currentTimeMillis() + 2 * 365 * 24 * 60 * 60 * 1000);
 

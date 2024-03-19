@@ -82,8 +82,8 @@ public class BootstrapData implements CommandLineRunner {
         account1.setCreationDate(dateIntegerCreation);
         account1.setExpirationDate(dateIntegerExpiration);
         account1.setCurrency("USD");
-        account1.setAccountStatus(AccountStatus.ACTIVE);
-        account1.setSubtypeOfAccount(SubtypeOfAccount.LICNI);
+        account1.setAccountStatus("ACTIVE");
+        account1.setSubtypeOfAccount("LICNI");
         account1.setAccountMaintenance(10.0);
         account1.setDefaultCurrency(true);
         account1.setAllowedCurrencies(List.of("USD", "EUR", "CHF"));
