@@ -19,13 +19,14 @@ public class OptionsModel {
     @Column
     private OptionType optionType;
     @Column
-    private double strikePrice;
+    private Double strikePrice;
     @Column
     private String currency;
     @Column
-    private double impliedVolatility;
+    private Double impliedVolatility;
+
     @Column
-    private int openInterest;
+    private Integer openInterest;
     @Column
-    private long expirationDate;
+    private Long expirationDate;
 }

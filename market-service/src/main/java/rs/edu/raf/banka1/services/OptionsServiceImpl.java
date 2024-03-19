@@ -25,8 +25,8 @@ import java.util.Map;
 @Service
 public class OptionsServiceImpl implements OptionsService{
     private ObjectMapper objectMapper = new ObjectMapper();
-    private static String cookie = null;
-    private static String crumb = null;
+    private  String cookie = null;
+    private  String crumb = null;
     @Value("${optionsUrl}")
     private String optionsUrl;
     private  String urlWithCrumb = null;
@@ -51,7 +51,7 @@ public class OptionsServiceImpl implements OptionsService{
         List<OptionsModel> optionsModels = new ArrayList<>();
         try{
             List<String> tickers = fetchTickers();
-            // Constants.tickersForTestingOptions
+//             Constants.tickersForTestingOptions
             for (String ticker : tickers)
                 optionsModels.addAll(fetchOptionsForTicker(ticker, optionsUrl + ticker + "?crumb=" + crumb));
 
@@ -78,7 +78,7 @@ public class OptionsServiceImpl implements OptionsService{
             for (JsonNode node : rootNode) {
                 tickers.add(node.path("symbol").asText());
             }
-
+//
             return tickers;
         }catch (Exception e){
             e.printStackTrace();
@@ -137,43 +137,9 @@ public class OptionsServiceImpl implements OptionsService{
 
                 callsThread.join();
                 putsThread.join();
-//                // CALLS
-//                Iterator<JsonNode> calls = callsNode.elements();
-//                while(calls.hasNext()) {
-//                    JsonNode row = calls.next();
-//
-//                    OptionsModel callOption = new OptionsModel();
-//                    callOption.setTicker(ticker);
-//                    callOption.setOptionType(OptionType.CALL);
-//                    callOption.setStrikePrice(row.path("strike").doubleValue());
-//                    callOption.setCurrency(row.path("currency").asText());
-//                    callOption.setImpliedVolatility(row.path("impliedVolatility").doubleValue());
-//                    callOption.setOpenInterest(row.path("openInterest").asInt());
-//                    callOption.setExpirationDate(row.path("expiration").longValue());
-//
-//                    options.add(callOption);
-//                }
 
-                // PUTS
-//                Iterator<JsonNode> puts = putsNode.elements();
-//                while(puts.hasNext()) {
-//                    JsonNode row = puts.next();
-//
-//                    OptionsModel putOption = new OptionsModel();
-//                    putOption.setTicker(ticker);
-//                    putOption.setOptionType(OptionType.CALL);
-//                    putOption.setStrikePrice(row.path("strike").doubleValue());
-//                    putOption.setCurrency(row.path("currency").asText());
-//                    putOption.setImpliedVolatility(row.path("impliedVolatility").doubleValue());
-//                    putOption.setOpenInterest(row.path("openInterest").asInt());
-//                    putOption.setExpirationDate(row.path("expiration").longValue());
-//
-//                    options.add(putOption);
-//                }
+                optionsRepository.saveAll(options);
 
-                // TODO
-                //  this should be done async! Uncomment when done! Or uncomment to see that it works but slowly!
-//                optionsRepository.saveAll(options);
             } else {
                 System.out.println("Failed to retrieve data. Status code: " + response.statusCode());
             }
@@ -201,7 +167,7 @@ public class OptionsServiceImpl implements OptionsService{
         return options;
     }
 
-    private static boolean getCookieAndCrumb() {
+    private  boolean getCookieAndCrumb() {
         String initialUrl = "https://fc.yahoo.com";
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()

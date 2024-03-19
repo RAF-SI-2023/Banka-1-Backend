@@ -40,12 +40,10 @@ public class BootstrapData implements CommandLineRunner {
         this.optionsService = optionsService;
         this.currencyService = currencyService;
     }
-
     @Override
     public void run(String... args) throws Exception {
 
         System.out.println("Loading Data...");
-
         List<CurrencyDto> currencyList = loadCurrencies();
 
 
@@ -71,7 +69,12 @@ public class BootstrapData implements CommandLineRunner {
         List<ListingHistoryModel> oneListingHistoryList = listingService.fetchSingleListingHistory("AAPL");
         listingService.addAllListingsToHistory(oneListingHistoryList);
 
-        optionsService.fetchOptions();
+
+        Thread optionsThread = new Thread(()->{
+            optionsService.fetchOptions();
+        });
+        optionsThread.start();
+        optionsThread.join();
 
         System.out.println("All Data loaded!");
     }

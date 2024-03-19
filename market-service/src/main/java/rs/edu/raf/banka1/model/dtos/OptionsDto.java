@@ -11,9 +11,9 @@ import rs.edu.raf.banka1.model.enums.OptionType;
 public class OptionsDto {
     private String ticker;
     private OptionType optionType;
-    private double strikePrice;
+    private Double strikePrice;
     private String currency;
-    private double impliedVolatility;
-    private int openInterest;
-    private long expirationDate;
+    private Double impliedVolatility;
+    private Integer openInterest;
+    private Long expirationDate;
 }
