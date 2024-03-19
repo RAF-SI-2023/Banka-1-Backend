@@ -128,7 +128,7 @@ public class MarketController {
             @ApiResponse(responseCode = "404", description = "Listing not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<ListingHistoryDto>> getListingsHistoryById(@RequestParam String ticker,
+    public ResponseEntity<List<ListingHistoryDto>> getListingsHistoryByTicker(@RequestParam String ticker,
                                                                           @RequestParam(required = false) Integer timestampFrom,
                                                                           @RequestParam(required = false) Integer timestampTo) {
 
