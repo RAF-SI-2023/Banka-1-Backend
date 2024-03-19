@@ -75,7 +75,7 @@ public class MarketController {
         return exchangeDto != null ? new ResponseEntity<>(exchangeDto, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    
+
     @GetMapping(value = "/listing/", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all listings", description = "Returns list of listings")
     @ApiResponses({

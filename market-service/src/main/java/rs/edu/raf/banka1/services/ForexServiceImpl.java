@@ -2,6 +2,8 @@ package rs.edu.raf.banka1.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,16 +21,15 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 @Service
+@NoArgsConstructor
+@Setter
 public class ForexServiceImpl implements ForexService {
     private ObjectMapper objectMapper;
 
-    @Autowired
     private ForexMapper forexMapper;
 
-    @Autowired
     ListingHistoryMapper listingHistoryMapper;
 
-    @Autowired
     private ForexRepository forexRepository;
 
     @Value("${alphaVantageAPIToken}")
@@ -50,7 +51,10 @@ public class ForexServiceImpl implements ForexService {
     private String forexDailyApiUrl;
 
 
-    public ForexServiceImpl() {
+    public ForexServiceImpl(ForexMapper forexMapper, ListingHistoryMapper listingHistoryMapper, ForexRepository forexRepository) {
+        this.forexMapper = forexMapper;
+        this.listingHistoryMapper = listingHistoryMapper;
+        this.forexRepository = forexRepository;
         this.objectMapper = new ObjectMapper();
     }
 
@@ -72,7 +76,8 @@ public class ForexServiceImpl implements ForexService {
 
             return listingForexList;
         }catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
+            System.out.println("Error while initializing forex returning empty list ");
             return new ArrayList<>();
         }
      }
@@ -186,8 +191,8 @@ public class ForexServiceImpl implements ForexService {
             }
             return listingHistories;
         }catch (Exception e) {
-            e.printStackTrace();
-            System.out.printf(response);
+//            e.printStackTrace();
+            System.out.printf("Error while getting forex history, response is: " + response);
             return new ArrayList<>();
         }
     }
