@@ -12,8 +12,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.mapper.ListingHistoryMapper;
+import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.dtos.ExchangeDto;
+import rs.edu.raf.banka1.model.dtos.ListingHistoryDto;
 import rs.edu.raf.banka1.services.ExchangeService;
+import rs.edu.raf.banka1.services.ForexService;
+import rs.edu.raf.banka1.services.ListingService;
 
 import java.util.List;
 
@@ -26,10 +31,16 @@ import java.util.List;
 public class MarketController {
 
     private final ExchangeService exchangeService;
+    private final ForexService forexService;
+    private final ListingService listingService;
+    private final ListingHistoryMapper listingHistoryMapper;
 
     @Autowired
-    public MarketController(ExchangeService exchangeService) {
+    public MarketController(ExchangeService exchangeService, ForexService forexService, ListingService listingService, ListingHistoryMapper listingHistoryMapper) {
         this.exchangeService = exchangeService;
+        this.forexService = forexService;
+        this.listingService = listingService;
+        this.listingHistoryMapper = listingHistoryMapper;
     }
 
     @GetMapping(value = "/exchange", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -57,6 +68,27 @@ public class MarketController {
     public ResponseEntity<ExchangeDto> readUser(@PathVariable Long id) {
         ExchangeDto exchangeDto = this.exchangeService.getExchangeById(id);
         return exchangeDto != null ? new ResponseEntity<>(exchangeDto, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping(value = "/listing/history/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get history by id", description = "Returns List of histories for given listingId, timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is provided it's exclusive)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {ListingHistoryDto.class}))}),
+            @ApiResponse(responseCode = "404", description = "Listing not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<ListingHistoryDto>> getListingsHistoryById(@PathVariable Long id,
+                                                                          @RequestParam(required = false) Integer timestampFrom,
+                                                                          @RequestParam(required = false) Integer timestampTo) {
+
+        List<ListingHistory> listingHistories = listingService.getListingHistoriesByTimestamp(id, timestampFrom, timestampTo);
+        if(listingHistories.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        else
+            return new ResponseEntity<>(listingHistories.stream().map(listingHistoryMapper::toDto).toList(), HttpStatus.OK);
     }
 
 }

@@ -213,6 +213,33 @@ public class ListingServiceImpl implements ListingService{
         return listingHistories.stream().mapToInt(this::addListingToHistory).sum();
     }
 
+    @Override
+    public List<ListingHistory> getListingHistoriesByTimestamp(long id, Integer from, Integer to) {
+        List<ListingHistory> listingHistories = new ArrayList<>();
+//        return all timestamps
+        if(from == null && to == null){
+            System.out.println("ALL ARE NULL");
+            listingHistories = listingHistoryRepository.getListingHistoriesByListingId(id);
+        }
+//        return all timestamps before given timestamp
+        else if(from == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByListingIdAndDateBefore(id, to);
+            System.out.println("FROM IS NULL");
+        }
+//        return all timestamps after given timestamp
+        else if(to == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByListingIdAndDateAfter(id, from);
+            System.out.println("TO IS NULL");
+        }
+//        return all timestamps between two timestamps
+        else{
+            System.out.println("NONE ARE NULL");
+            listingHistories = listingHistoryRepository.getListingHistoriesByListingIdAndDateBetween(id, from, to);
+        }
+
+        return listingHistories;
+    }
+
     public ArrayNode reformatNamesToJSON(String response) throws Exception{
         // Parse the JSON array string
         JsonNode jsonArray = objectMapper.readTree(response.toString());

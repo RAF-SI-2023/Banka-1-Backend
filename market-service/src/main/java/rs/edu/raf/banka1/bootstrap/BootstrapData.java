@@ -43,6 +43,7 @@ public class BootstrapData implements CommandLineRunner {
 //        System.out.println("Currency Data Loaded!");
 
 //        ////////////////////////////////////////////////////////////////
+//        DEPRECATED
 ////        LISTINGS
 //
 ////        call it only from time to time to update json because api isn't free and we need it only once
@@ -72,12 +73,12 @@ public class BootstrapData implements CommandLineRunner {
         List<ListingForex> updated = forexService.updateAllPrices(listingForexList.subList(0, 10));
 //        saves forex data to database (only after update)
 //       because update uses other API which doesn't support all forex names, so we need to save only available forexs
-
+//        first you need to save forexes and after that histories because histories need forex ids from database
+        forexService.saveAllForexes(updated);
 
 //        add forexes histories to database
-//        Warning: agreement is to add just histories for 10 forexes
+//        Warning: agreement was to add just histories for 10 forexes
         List<ListingHistory> histories = forexService.getAllForexHistories(updated);
-        forexService.saveAllForexes(updated);
         listingService.addAllListingsToHistory(histories);
         ////////////////////////////////////////////////////////////////
         System.out.printf("Updated: " + updated.size());

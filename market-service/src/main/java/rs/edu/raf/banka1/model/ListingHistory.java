@@ -17,7 +17,7 @@ public class ListingHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private Long listingId;
     private String ticker;
     private Integer date;
     private Double price;

@@ -136,7 +136,7 @@ public class ForexServiceImpl implements ForexService {
 //            e.printStackTrace();
 //            System.out.println("Response: " + response);
 //            this currency pair is not supported by the API
-            System.out.println("BaseCurrency: " + listingForex.getBaseCurrency() + ", QuoteCurrency: " + listingForex.getQuoteCurrency() + " are not awailable on the API");
+            System.out.println("BaseCurrency: " + listingForex.getBaseCurrency() + ", QuoteCurrency: " + listingForex.getQuoteCurrency() + " are not available on the API");
             return null;
         }
     }
@@ -174,11 +174,11 @@ public class ForexServiceImpl implements ForexService {
 
                     String dateStr = entry.getKey();
                     LocalDate date = LocalDate.parse(dateStr); // Parse the date string to LocalDate
-                    int unixTimestamp = (int) date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli() / 1000;
+                    int unixTimestamp = (int) date.atStartOfDay(ZoneOffset.UTC).toEpochSecond(); // get beggining of the day
 
                     JsonNode dataNode = entry.getValue();
 
-                    ListingHistory listingHistory = parseHistory(listingForex.getTicker(), unixTimestamp, dataNode);
+                    ListingHistory listingHistory = parseHistory(listingForex.getListingId(), listingForex.getTicker(), unixTimestamp, dataNode);
 
                     listingHistories.add(listingHistory);
                 }
@@ -196,14 +196,14 @@ public class ForexServiceImpl implements ForexService {
         return listingForexList.stream().map(this::getForexHistory).flatMap(List::stream).toList();
     }
 
-    public ListingHistory parseHistory(String ticker, int date, JsonNode dataNode){
+    public ListingHistory parseHistory(long listingId, String ticker, int date, JsonNode dataNode){
         double open = dataNode.get("1. open").asDouble();
         double high = dataNode.get("2. high").asDouble();
         double low = dataNode.get("3. low").asDouble();
         double close = dataNode.get("4. close").asDouble();
         int volume = 0;
 
-        return listingHistoryMapper.createHistory(ticker, date, open, high, low, close, volume);
+        return listingHistoryMapper.createHistory(listingId, ticker, date, open, high, low, close, volume);
     }
 
 

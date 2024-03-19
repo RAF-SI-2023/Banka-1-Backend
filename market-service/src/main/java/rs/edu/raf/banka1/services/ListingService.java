@@ -26,4 +26,7 @@ public interface ListingService {
 
 //    returns how many new listings were added
     int addAllListingsToHistory(List<ListingHistory> listingHistories);
+
+//    returns Listing histories between two timestamps
+    List<ListingHistory> getListingHistoriesByTimestamp(long id, Integer from, Integer to);
 }
