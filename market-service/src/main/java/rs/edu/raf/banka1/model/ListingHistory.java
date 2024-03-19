@@ -8,23 +8,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 // you should add entry at the end of the day
-public class ListingHistoryModel {
+public class ListingHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    private Long listingHistoryId;
     private String ticker;
-    private long date;
-    private double price;
-    private double ask;
-    private double bid;
-    private double changed;
-    private int volume;
+    private Integer date;
+    private Double price;
+    private Double high;
+    private Double low;
+    private Double changed;
+    private Integer volume;
 }
