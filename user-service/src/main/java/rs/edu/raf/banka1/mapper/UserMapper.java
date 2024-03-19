@@ -3,11 +3,14 @@ package rs.edu.raf.banka1.mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.responses.UserResponse;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -16,6 +19,8 @@ public class UserMapper {
     private PermissionMapper permissionMapper;
 
     private PasswordEncoder passwordEncoder;
+
+    private PermissionRepository permissionRepository;
 
     public UserMapper(PermissionMapper permissionMapper) {
         this.permissionMapper = permissionMapper;
@@ -68,6 +73,11 @@ public class UserMapper {
         if (editUserRequest.getPosition() != null) user.setPosition(editUserRequest.getPosition());
         if (editUserRequest.getPhoneNumber() != null) user.setPhoneNumber(editUserRequest.getPhoneNumber());
         if (editUserRequest.getIsActive() != null) user.setActive(editUserRequest.getIsActive());
+        if (editUserRequest.getPermissions() != null) user.setPermissions(editUserRequest.getPermissions()
+                .stream()
+                .map(permissionString -> permissionRepository.findByName(permissionString).orElseThrow())
+                .collect(Collectors.toSet())
+        );
         return user;
     }
 
@@ -89,5 +99,10 @@ public class UserMapper {
     @Autowired
     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
+    }
+
+    @Autowired
+    public void setPermissionRepository(PermissionRepository permissionRepository) {
+        this.permissionRepository = permissionRepository;
     }
 }

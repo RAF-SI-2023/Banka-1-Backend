@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,6 +32,8 @@ import java.util.UUID;
 @Service
 public class UserServiceImpl implements UserService {
 
+    @Value("${front.port}")
+    String frontPort;
     private UserMapper userMapper;
     private UserRepository userRepository;
     private PermissionRepository permissionRepository;
@@ -38,6 +41,7 @@ public class UserServiceImpl implements UserService {
     private PermissionMapper permissionMapper;
     private EmailService emailService;
     private JwtUtil jwtUtil;
+
     @Autowired
     public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, EmailService emailService,
                            PermissionRepository permissionRepository,
@@ -94,13 +98,13 @@ public class UserServiceImpl implements UserService {
         user.setActivationToken(activationToken);
         userRepository.save(user);
         emailService.sendActivationEmail(createUserRequest.getEmail(), "RAF Banka - User activation",
-                "Visit this URL to activate your account: http://localhost:8080/user/activate/" + activationToken);
+                "Visit this URL to activate your account: http://localhost:" + frontPort + "/user/set-password/" + activationToken);
         return new CreateUserResponse(user.getUserId());
     }
 
     @Override
     public ActivateAccountResponse activateAccount(String token, String password) {
-        User user = userRepository.findByActivationToken(token).get();
+        User user = userRepository.findByActivationToken(token).orElseThrow();
         user.setActivationToken(null);
         user.setPassword(password);
         userRepository.save(user);
@@ -109,11 +113,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public EditUserResponse editUser(EditUserRequest editUserRequest) {
-        User user = userRepository.findByEmail(editUserRequest.getEmail()).get();
+        User user = userRepository.findByEmail(editUserRequest.getEmail()).orElseThrow();
         user = userMapper.editUserRequestToUser(user, editUserRequest);
-        user.setPermissions(editUserRequest.getPermissions().stream().map(perm -> permissionRepository.findByName(perm).get()).collect(Collectors.toSet()));
         userRepository.save(user);
-        return new EditUserResponse(user.getUserId());
+        return new EditUserResponse();
     }
 
     @Override
