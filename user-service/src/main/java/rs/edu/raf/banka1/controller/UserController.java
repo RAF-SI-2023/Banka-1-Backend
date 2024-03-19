@@ -173,7 +173,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Boolean> deleteUser(@PathVariable Long id) {
-        boolean deleted = userService.deleteUser(id);
+        Boolean deleted = userService.deleteUser(id);
         return new ResponseEntity<>(deleted, deleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 

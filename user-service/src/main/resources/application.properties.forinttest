@@ -22,3 +22,5 @@ spring.mail.username=noreply.rafbanka1@gmail.com
 spring.mail.password=fony nhtw hlah vzul
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
+
+front.port=4200
