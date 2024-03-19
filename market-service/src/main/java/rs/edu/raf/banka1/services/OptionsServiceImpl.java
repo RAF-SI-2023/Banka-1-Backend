@@ -91,7 +91,7 @@ public class OptionsServiceImpl implements OptionsService{
     public List<OptionsModel> fetchOptionsForTicker(String ticker, String url) {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url)) //rul with crumb !!!
+                .uri(URI.create(url)) //url with crumb !!!
                 .header("Cookie", cookie) // Include the cached cookie in the request
                 .GET()
                 .build();
@@ -113,39 +113,63 @@ public class OptionsServiceImpl implements OptionsService{
                 JsonNode callsNode = rootNode.path("optionChain").path("result").get(0).path("options").get(0).path("calls");
                 JsonNode putsNode = rootNode.path("optionChain").path("result").get(0).path("options").get(0).path("puts");
 
-                // CALLS
-                Iterator<JsonNode> calls = callsNode.elements();
-                while(calls.hasNext()) {
-                    JsonNode row = calls.next();
+                //calls
+                Thread callsThread = new Thread(() -> {
+                    try {
+                        List<OptionsModel> callsOptions = parseOptions(callsNode, ticker, OptionType.CALL);
+                        options.addAll(callsOptions);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+                // PUTS
+                Thread putsThread = new Thread(() -> {
+                    try {
+                        List<OptionsModel> putsOptions = parseOptions(putsNode, ticker, OptionType.PUT);
+                        options.addAll(putsOptions);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
 
-                    OptionsModel callOption = new OptionsModel();
-                    callOption.setTicker(ticker);
-                    callOption.setOptionType(OptionType.CALL);
-                    callOption.setStrikePrice(row.path("strike").doubleValue());
-                    callOption.setCurrency(row.path("currency").asText());
-                    callOption.setImpliedVolatility(row.path("impliedVolatility").doubleValue());
-                    callOption.setOpenInterest(row.path("openInterest").asInt());
-                    callOption.setExpirationDate(row.path("expiration").longValue());
+                callsThread.start();
+                putsThread.start();
 
-                    options.add(callOption);
-                }
+                callsThread.join();
+                putsThread.join();
+//                // CALLS
+//                Iterator<JsonNode> calls = callsNode.elements();
+//                while(calls.hasNext()) {
+//                    JsonNode row = calls.next();
+//
+//                    OptionsModel callOption = new OptionsModel();
+//                    callOption.setTicker(ticker);
+//                    callOption.setOptionType(OptionType.CALL);
+//                    callOption.setStrikePrice(row.path("strike").doubleValue());
+//                    callOption.setCurrency(row.path("currency").asText());
+//                    callOption.setImpliedVolatility(row.path("impliedVolatility").doubleValue());
+//                    callOption.setOpenInterest(row.path("openInterest").asInt());
+//                    callOption.setExpirationDate(row.path("expiration").longValue());
+//
+//                    options.add(callOption);
+//                }
 
                 // PUTS
-                Iterator<JsonNode> puts = putsNode.elements();
-                while(puts.hasNext()) {
-                    JsonNode row = puts.next();
-
-                    OptionsModel putOption = new OptionsModel();
-                    putOption.setTicker(ticker);
-                    putOption.setOptionType(OptionType.CALL);
-                    putOption.setStrikePrice(row.path("strike").doubleValue());
-                    putOption.setCurrency(row.path("currency").asText());
-                    putOption.setImpliedVolatility(row.path("impliedVolatility").doubleValue());
-                    putOption.setOpenInterest(row.path("openInterest").asInt());
-                    putOption.setExpirationDate(row.path("expiration").longValue());
-
-                    options.add(putOption);
-                }
+//                Iterator<JsonNode> puts = putsNode.elements();
+//                while(puts.hasNext()) {
+//                    JsonNode row = puts.next();
+//
+//                    OptionsModel putOption = new OptionsModel();
+//                    putOption.setTicker(ticker);
+//                    putOption.setOptionType(OptionType.CALL);
+//                    putOption.setStrikePrice(row.path("strike").doubleValue());
+//                    putOption.setCurrency(row.path("currency").asText());
+//                    putOption.setImpliedVolatility(row.path("impliedVolatility").doubleValue());
+//                    putOption.setOpenInterest(row.path("openInterest").asInt());
+//                    putOption.setExpirationDate(row.path("expiration").longValue());
+//
+//                    options.add(putOption);
+//                }
 
                 // TODO
                 //  this should be done async! Uncomment when done! Or uncomment to see that it works but slowly!
@@ -155,6 +179,24 @@ public class OptionsServiceImpl implements OptionsService{
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        return options;
+    }
+
+    private List<OptionsModel> parseOptions(JsonNode optionsNode, String ticker, OptionType optionType) {
+        List<OptionsModel> options = new ArrayList<>();
+        Iterator<JsonNode> optionsIterator = optionsNode.elements();
+        while(optionsIterator.hasNext()) {
+            JsonNode row = optionsIterator.next();
+            OptionsModel option = new OptionsModel();
+            option.setTicker(ticker);
+            option.setOptionType(optionType);
+            option.setStrikePrice(row.path("strike").doubleValue());
+            option.setCurrency(row.path("currency").asText());
+            option.setImpliedVolatility(row.path("impliedVolatility").doubleValue());
+            option.setOpenInterest(row.path("openInterest").asInt());
+            option.setExpirationDate(row.path("expiration").longValue());
+            options.add(option);
         }
         return options;
     }
