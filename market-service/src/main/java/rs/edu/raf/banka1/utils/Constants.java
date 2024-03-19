@@ -4,10 +4,13 @@ import java.io.File;
 import java.util.List;
 
 public class Constants {
-    public static String listingsFilePath = "market-service/src/main/resources/listings.json";
-    public static List<String> sectors = List.of("Technology", "Utilities", "Health Services", "Finance and Insurance", "Information", "Transportation");
-    public static int maxListings = 700;
-    public static List<String> ListingsToIgnore = List.of(
+    public static final String listingsFilePath = "market-service/src/main/resources/listings.json";
+    public static final String businessHoursFilePath = "market-service/src/main/resources/working_hours_and_holidays_for_exchanges.json";
+    public static final String micCsvFilePath = "market-service/src/main/resources/ISO10383_MIC.csv";
+    public static final String countryTimezoneOffsetsFilePath = "market-service/src/main/resources/country_timezone_offsets.json";
+    public static final List<String> sectors = List.of("Technology");
+    public static final int maxListings = 700;
+    public static final List<String> ListingsToIgnore = List.of(
             "ATLEF",
             "NTXNF",
             "HUTMF",
