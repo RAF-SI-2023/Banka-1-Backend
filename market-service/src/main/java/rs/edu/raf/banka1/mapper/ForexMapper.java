@@ -2,7 +2,6 @@ package rs.edu.raf.banka1.mapper;
 
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.ListingForex;
-import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.dtos.ListingBaseDto;
 import rs.edu.raf.banka1.model.dtos.ListingForexDto;
 
@@ -10,7 +9,7 @@ import java.time.Instant;
 
 @Component
 public class ForexMapper {
-    public ListingForex createForex(String ticker, String name, String exchange){
+    public ListingForex createForex(String ticker, String name, String exchange) {
         String[] symbolArr = ticker.split("/");
         String baseCurrency = symbolArr[0];
         String quoteCurrency = symbolArr[1];
@@ -37,7 +36,7 @@ public class ForexMapper {
         return forex;
     }
 
-    public ListingForexDto toDto(ListingForex listingForex){
+    public ListingForexDto toDto(ListingForex listingForex) {
         ListingForexDto dto = new ListingForexDto();
         settingFieldsForListingBaseDto(listingForex, dto);
         dto.setBaseCurrency(listingForex.getBaseCurrency());
@@ -46,14 +45,14 @@ public class ForexMapper {
         return dto;
     }
 
-    public ListingBaseDto forexToListingBaseDto(ListingForex listingForex){
+    public ListingBaseDto forexToListingBaseDto(ListingForex listingForex) {
         ListingBaseDto dto = new ListingBaseDto();
         settingFieldsForListingBaseDto(listingForex, dto);
 
         return dto;
     }
 
-    public void settingFieldsForListingBaseDto(ListingForex listingForex, ListingBaseDto dto){
+    public void settingFieldsForListingBaseDto(ListingForex listingForex, ListingBaseDto dto) {
         dto.setListingId(listingForex.getListingId());
         dto.setListingType(listingForex.getListingType());
         dto.setTicker(listingForex.getTicker());

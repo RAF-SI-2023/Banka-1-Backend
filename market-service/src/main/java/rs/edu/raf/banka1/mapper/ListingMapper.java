@@ -18,7 +18,7 @@ public class ListingMapper {
         LocalDate localDate = Instant.ofEpochSecond(listing.getLastRefresh()).atZone(ZoneOffset.UTC).toLocalDate();
 
         // Get the Unix timestamp for the beginning of the day
-        int beginningOfDayUnixTimestamp = (int)localDate.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
+        int beginningOfDayUnixTimestamp = (int) localDate.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
 
         listingHistory.setDate(beginningOfDayUnixTimestamp);
 

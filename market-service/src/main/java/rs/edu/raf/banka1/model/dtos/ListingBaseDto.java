@@ -1,7 +1,6 @@
 package rs.edu.raf.banka1.model.dtos;
 
 
-import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 

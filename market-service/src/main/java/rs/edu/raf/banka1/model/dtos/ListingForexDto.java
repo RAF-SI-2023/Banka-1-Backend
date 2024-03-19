@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ListingForexDto extends ListingBaseDto{
+public class ListingForexDto extends ListingBaseDto {
     private String baseCurrency;
     private String quoteCurrency;
 }

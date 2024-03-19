@@ -12,7 +12,9 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class ListingMapperTests {
 
@@ -52,7 +54,7 @@ public class ListingMapperTests {
     }
 
     @Test
-    public void createListingHistoryModelTest(){
+    public void createListingHistoryModelTest() {
         // Create a new instance of ListingMapper
         ListingMapper listingMapper = new ListingMapper();
 
@@ -78,7 +80,7 @@ public class ListingMapperTests {
     }
 
     @Test
-    public void updateHistoryListingWithNewDataTest(){
+    public void updateHistoryListingWithNewDataTest() {
         // Mock necessary objects
         ListingHistory oldModel = mock(ListingHistory.class);
         ListingHistory newModel = mock(ListingHistory.class);

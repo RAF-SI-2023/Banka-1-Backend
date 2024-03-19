@@ -16,7 +16,8 @@ import rs.edu.raf.banka1.repositories.ForexRepository;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ForexServiceImplTest {
@@ -95,7 +96,7 @@ public class ForexServiceImplTest {
     }
 
     @Test
-    public void updateAllPricesTest(){
+    public void updateAllPricesTest() {
         ListingForex oldForex1 = new ListingForex();
         ListingForex oldForex2 = new ListingForex();
 

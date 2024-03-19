@@ -2,7 +2,6 @@ package rs.edu.raf.banka1.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,11 +13,14 @@ import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.repositories.ForexRepository;
 import rs.edu.raf.banka1.utils.Requests;
 
-import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Iterator;
+import java.util.Map;
 
 @Service
 @Setter
@@ -29,7 +31,7 @@ public class ForexServiceImpl implements ForexService {
     private ForexMapper forexMapper;
 
     @Autowired
-    ListingHistoryMapper listingHistoryMapper;
+    private ListingHistoryMapper listingHistoryMapper;
 
     @Autowired
     private ForexRepository forexRepository;
@@ -70,11 +72,12 @@ public class ForexServiceImpl implements ForexService {
             List<ListingForex> listingForexList = new ArrayList<>();
 
             // Iterate through array elements
-            for(JsonNode element: jsonArray)
+            for (JsonNode element: jsonArray) {
                 listingForexList.addAll(fetchAllForexPairs(element.asText()));
+            }
 
             return listingForexList;
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error while initializing forex returning empty list ");
             return new ArrayList<>();
@@ -93,10 +96,11 @@ public class ForexServiceImpl implements ForexService {
             List<ListingForex> listingForexList = new ArrayList<>();
 
             // Iterate through array elements
-            for(JsonNode element: jsonArray){
+            for (JsonNode element: jsonArray) {
                 String displaySymbol = element.get("displaySymbol").asText();
-                if(!displaySymbol.contains("/"))
+                if (!displaySymbol.contains("/")) {
                     continue;
+                }
                 String left = displaySymbol.split("/")[0];
                 String right = displaySymbol.split("/")[1];
 
@@ -107,7 +111,7 @@ public class ForexServiceImpl implements ForexService {
             }
 
             return listingForexList;
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println();
             return new ArrayList<>();
@@ -137,11 +141,12 @@ public class ForexServiceImpl implements ForexService {
 
             ListingForex updatedForex = updatePrices(listingForex, price, high, low);
             return updatedForex;
-        }catch (Exception e) {
+        } catch (Exception e) {
 //            e.printStackTrace();
             System.out.println("Response: " + response);
 //            this currency pair is not supported by the API (or maybe we are sending too much requests)
-            System.out.println("BaseCurrency: " + listingForex.getBaseCurrency() + ", QuoteCurrency: " + listingForex.getQuoteCurrency() + " are not available on the alphavantae API");
+            System.out.println("BaseCurrency: " + listingForex.getBaseCurrency() + ", QuoteCurrency: "
+                    + listingForex.getQuoteCurrency() + " are not available on the alphavantae API");
             return null;
         }
     }
@@ -189,7 +194,7 @@ public class ForexServiceImpl implements ForexService {
                 }
             }
             return listingHistories;
-        }catch (Exception e) {
+        } catch (Exception e) {
 //            e.printStackTrace();
             System.out.printf("Error while getting forex history, response is: " + response);
             return new ArrayList<>();
@@ -201,7 +206,7 @@ public class ForexServiceImpl implements ForexService {
         return listingForexList.stream().map(this::getForexHistory).flatMap(List::stream).toList();
     }
 
-    public ListingHistory parseHistory(String ticker, int date, JsonNode dataNode){
+    public ListingHistory parseHistory(String ticker, int date, JsonNode dataNode) {
         double open = dataNode.get("1. open").asDouble();
         double high = dataNode.get("2. high").asDouble();
         double low = dataNode.get("3. low").asDouble();
@@ -211,7 +216,7 @@ public class ForexServiceImpl implements ForexService {
         return listingHistoryMapper.createHistory(ticker, date, open, high, low, close, volume);
     }
 
-    public ListingForex updatePrices(ListingForex listingForex, Double price, Double high, Double low){
+    public ListingForex updatePrices(ListingForex listingForex, Double price, Double high, Double low) {
         Double previousPrice = listingForex.getPrice();
         listingForex.setPrice(price);
         listingForex.setHigh(high);

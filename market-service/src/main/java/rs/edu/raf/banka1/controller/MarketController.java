@@ -11,10 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import rs.edu.raf.banka1.mapper.ForexMapper;
 import rs.edu.raf.banka1.mapper.ListingHistoryMapper;
-import rs.edu.raf.banka1.model.ListingBase;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.dtos.ExchangeDto;
 import rs.edu.raf.banka1.model.dtos.ListingBaseDto;
@@ -40,7 +44,8 @@ public class MarketController {
     private final ForexMapper forexMapper;
 
     @Autowired
-    public MarketController(ExchangeService exchangeService, ForexService forexService, ListingService listingService, ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper) {
+    public MarketController(ExchangeService exchangeService, ForexService forexService, ListingService listingService,
+                            ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper) {
         this.exchangeService = exchangeService;
         this.forexService = forexService;
         this.listingService = listingService;
@@ -96,7 +101,8 @@ public class MarketController {
     }
 
     @GetMapping(value = "/listing/{listingType}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get specific listing based on listingType param", description = "Returns list of specific listingType based on listingType param (forex, stock, futures)")
+    @Operation(summary = "Get specific listing based on listingType param", description = "Returns list of specific "
+            + "listingType based on listingType param (forex, stock, futures)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -106,20 +112,24 @@ public class MarketController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<?> getListingByType(@PathVariable String listingType) {
-        if(listingType.equalsIgnoreCase("forex"))
+        if (listingType.equalsIgnoreCase("forex")) {
             return new ResponseEntity<>(forexService.getAllForexes().stream().map(forexMapper::toDto).toList(), HttpStatus.OK);
+        }
 //        uncomment this and add dtos when merging (only leave futures commented becasue we don't have futures in this sprint)
 //        else if(listingType.equalsIgnoreCase("stock"))
 //            return new ResponseEntity<>(this.stockService.getAllStocks(), HttpStatus.OK);
 //        else if(listingType.equalsIgnoreCase("futures"))
 //            return new ResponseEntity<>(this.futuresService.getAllFutures(), HttpStatus.OK);
-        else
+        else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
     }
 
     @GetMapping(value = "/listing/history/", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get history by ticker", description = "Returns List of histories for given ticker, timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is provided it's exclusive)")
+    @Operation(summary = "Get history by ticker", description = "Returns List of histories for given ticker, "
+            + "timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is "
+            + "provided it's exclusive)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -133,10 +143,11 @@ public class MarketController {
                                                                           @RequestParam(required = false) Integer timestampTo) {
 
         List<ListingHistory> listingHistories = listingService.getListingHistoriesByTimestamp(ticker, timestampFrom, timestampTo);
-        if(listingHistories.isEmpty())
+        if (listingHistories.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        else
+        } else {
             return new ResponseEntity<>(listingHistories.stream().map(listingHistoryMapper::toDto).toList(), HttpStatus.OK);
+        }
     }
 
 }

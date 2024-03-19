@@ -6,7 +6,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class Requests {
-    public static String sendRequest(String urlStr) throws Exception{
+    public static String sendRequest(String urlStr) throws Exception {
         URL url = new URL(urlStr);
 
         // Open a connection to the URL

@@ -1,8 +1,7 @@
 package rs.edu.raf.banka1.utils;
 
-import java.util.HashSet;
+
 import java.util.List;
-import java.util.Set;
 
 public class Constants {
     public static final String listingsFilePath = "market-service/src/main/resources/listings.json";
