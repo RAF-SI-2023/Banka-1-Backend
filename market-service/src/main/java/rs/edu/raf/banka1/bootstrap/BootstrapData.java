@@ -32,11 +32,11 @@ public class BootstrapData implements CommandLineRunner {
 
         System.out.println("Loading Data...");
 
-    //    exchangeService.seedDatabase();
+        exchangeService.seedDatabase();
         System.out.println("Exchange data loaded!");
 
         List<CurrencyDto> currencyList = loadCurrencies();
-      //  currencyService.addCurrencies(currencyList);
+        currencyService.addCurrencies(currencyList);
         System.out.println("Currency Data Loaded!");
 
         //        call it only from time to time to update json because api isn't free and we need it only once
