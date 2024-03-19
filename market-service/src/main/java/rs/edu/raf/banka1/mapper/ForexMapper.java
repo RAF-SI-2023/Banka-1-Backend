@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.mapper;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingHistory;
+import rs.edu.raf.banka1.model.dtos.ListingBaseDto;
 import rs.edu.raf.banka1.model.dtos.ListingForexDto;
 
 import java.time.Instant;
@@ -38,6 +39,21 @@ public class ForexMapper {
 
     public ListingForexDto toDto(ListingForex listingForex){
         ListingForexDto dto = new ListingForexDto();
+        settingFieldsForListingBaseDto(listingForex, dto);
+        dto.setBaseCurrency(listingForex.getBaseCurrency());
+        dto.setQuoteCurrency(listingForex.getQuoteCurrency());
+
+        return dto;
+    }
+
+    public ListingBaseDto forexToListingBaseDto(ListingForex listingForex){
+        ListingBaseDto dto = new ListingBaseDto();
+        settingFieldsForListingBaseDto(listingForex, dto);
+
+        return dto;
+    }
+
+    public void settingFieldsForListingBaseDto(ListingForex listingForex, ListingBaseDto dto){
         dto.setListingId(listingForex.getListingId());
         dto.setListingType(listingForex.getListingType());
         dto.setTicker(listingForex.getTicker());
@@ -49,10 +65,6 @@ public class ForexMapper {
         dto.setLow(listingForex.getLow());
         dto.setPriceChange(listingForex.getPriceChange());
         dto.setVolume(listingForex.getVolume());
-        dto.setBaseCurrency(listingForex.getBaseCurrency());
-        dto.setQuoteCurrency(listingForex.getQuoteCurrency());
-
-        return dto;
     }
 
 }

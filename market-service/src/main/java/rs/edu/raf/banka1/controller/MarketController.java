@@ -17,6 +17,7 @@ import rs.edu.raf.banka1.mapper.ListingHistoryMapper;
 import rs.edu.raf.banka1.model.ListingBase;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.dtos.ExchangeDto;
+import rs.edu.raf.banka1.model.dtos.ListingBaseDto;
 import rs.edu.raf.banka1.model.dtos.ListingHistoryDto;
 import rs.edu.raf.banka1.services.ExchangeService;
 import rs.edu.raf.banka1.services.ForexService;
@@ -74,6 +75,49 @@ public class MarketController {
         return exchangeDto != null ? new ResponseEntity<>(exchangeDto, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    
+    @GetMapping(value = "/listing/", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all listings", description = "Returns list of listings")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {ListingBaseDto.class}))}),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<ListingBaseDto>> getAllListings() {
+        List<ListingBaseDto> l1 = forexService.getAllForexes().stream().map(forexMapper::forexToListingBaseDto).toList();
+//        uncomment this when merging for sprint-2
+//        l1.addAll(stockService.getAllStocks().stream().map(stockMapper::stockToListingBaseDto).toList());
+//        uncomment this in some other sprint
+//        l1.addAll(futuresService.getAllFutures().stream().map(futuresMapper::futuresToListingBaseDto).toList());
+
+        return new ResponseEntity<>(l1, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/listing/{listingType}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get specific listing based on listingType param", description = "Returns list of specific listingType based on listingType param (forex, stock, futures)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class))}),
+            @ApiResponse(responseCode = "404", description = "Listing not found"),
+            @ApiResponse(responseCode = "400", description = "listingType not valid"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<?> getListingByType(@PathVariable String listingType) {
+        if(listingType.equalsIgnoreCase("forex"))
+            return new ResponseEntity<>(forexService.getAllForexes().stream().map(forexMapper::toDto).toList(), HttpStatus.OK);
+//        uncomment this and add dtos when merging (only leave futures commented becasue we don't have futures in this sprint)
+//        else if(listingType.equalsIgnoreCase("stock"))
+//            return new ResponseEntity<>(this.stockService.getAllStocks(), HttpStatus.OK);
+//        else if(listingType.equalsIgnoreCase("futures"))
+//            return new ResponseEntity<>(this.futuresService.getAllFutures(), HttpStatus.OK);
+        else
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+    }
+
     @GetMapping(value = "/listing/history/", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get history by ticker", description = "Returns List of histories for given ticker, timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is provided it's exclusive)")
     @ApiResponses({
@@ -93,28 +137,6 @@ public class MarketController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         else
             return new ResponseEntity<>(listingHistories.stream().map(listingHistoryMapper::toDto).toList(), HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/listing/{listingType}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get specific listing based on listingType param", description = "Returns list of specific listingType based on listingType param (forex, stock, futures)")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = List.class))}),
-            @ApiResponse(responseCode = "404", description = "Listing not found"),
-            @ApiResponse(responseCode = "400", description = "listingType not valid")
-    })
-    public ResponseEntity<?> getListingByType(@PathVariable String listingType) {
-        if(listingType.equalsIgnoreCase("forex"))
-            return new ResponseEntity<>(this.forexService.getAllForexes().stream().map(forexMapper::toDto).toList(), HttpStatus.OK);
-//        uncomment this and add dtos when merging (only leave futures commented becasue we don't have futures in this sprint)
-//        else if(listingType.equalsIgnoreCase("stock"))
-//            return new ResponseEntity<>(this.listingService.getAllStocks(), HttpStatus.OK);
-//        else if(listingType.equalsIgnoreCase("futures"))
-//            return new ResponseEntity<>(this.listingService.getAllFutures(), HttpStatus.OK);
-        else
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
     }
 
 }
