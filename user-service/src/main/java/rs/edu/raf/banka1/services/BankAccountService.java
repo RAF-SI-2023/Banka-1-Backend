@@ -1,33 +1,13 @@
 package rs.edu.raf.banka1.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import rs.edu.raf.banka1.model.DevizniRacun;
-import rs.edu.raf.banka1.repositories.DevizniRacunRepository;
+import rs.edu.raf.banka1.model.ForeignCurrencyAccount;
 
 import java.util.List;
-import java.util.Optional;
 
-@Service
-public class BankAccountService {
+public interface BankAccountService {
 
-    private final DevizniRacunRepository devizniRacunRepository;
-    private final UserService userService;
+    ForeignCurrencyAccount getForeignCurrencyAccountById(Long id);
 
-    @Autowired
-    public BankAccountService(DevizniRacunRepository devizniRacunRepository, UserService userService) {
-        this.devizniRacunRepository = devizniRacunRepository;
-        this.userService = userService;
-    }
-
-    public DevizniRacun getDevizniRacunById(Long id) {
-        Optional<DevizniRacun> devizniRacun = devizniRacunRepository.findById(id);
-        return devizniRacun.orElse(null);
-    }
-
-    public List<DevizniRacun> getAllDevizniRacuni() {
-        return devizniRacunRepository.findAll();
-    }
-
+    List<ForeignCurrencyAccount> getAllForeignCurrencyAccounts();
 
 }

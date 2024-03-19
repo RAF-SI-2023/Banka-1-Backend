@@ -11,14 +11,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.FetchType;
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -70,9 +68,4 @@ public class User {
     )
     private Set<Permission> permissions = new HashSet<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<DevizniRacun> devizniRacuni;
-
-//    @ManyToOne
-//    private BankAccount bankAccount;
 }

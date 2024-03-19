@@ -4,17 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import rs.edu.raf.banka1.model.User;
-import rs.edu.raf.banka1.model.DevizniRacun;
-import rs.edu.raf.banka1.model.Permission;
-import rs.edu.raf.banka1.model.VrstaRacuna;
-import rs.edu.raf.banka1.model.PodvrstaRacuna;
-import rs.edu.raf.banka1.model.StatusRacuna;
-import rs.edu.raf.banka1.repositories.DevizniRacunRepository;
+import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,14 +20,14 @@ public class BootstrapData implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PermissionRepository permissionRepository;
     private final PasswordEncoder passwordEncoder;
-    private final DevizniRacunRepository devizniRacunRepository;
+    private final ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
 
     @Autowired
-    public BootstrapData(UserRepository userRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository, DevizniRacunRepository devizniRacunRepository) {
+    public BootstrapData(UserRepository userRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository, ForeignCurrencyAccountRepository foreignCurrencyAccountRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
-        this.devizniRacunRepository = devizniRacunRepository;
+        this.foreignCurrencyAccountRepository = foreignCurrencyAccountRepository;
     }
 
     @Override
@@ -59,36 +55,38 @@ public class BootstrapData implements CommandLineRunner {
         userRepository.save(user1);
         userRepository.save(client);
 
-
-        DevizniRacun account1 = createDevizniRacun(client, user1);
-
-        List<DevizniRacun> devizniRacuni = new ArrayList<>();
-        devizniRacuni.add(account1);
-//        devizniRacuni.add(account2);
-        client.setDevizniRacuni(devizniRacuni);
+        ForeignCurrencyAccount account1 = createDevizniRacun(client, user1);
 
         userRepository.save(client);
-        devizniRacunRepository.save(account1);
+        foreignCurrencyAccountRepository.save(account1);
 
         System.out.println("Data loaded!");
     }
 
-    private static DevizniRacun createDevizniRacun(User client, User user1) {
-        DevizniRacun account1 = new DevizniRacun();
-//        account1.setOwnerId(user1.getUserId());
-        account1.setUser(client);
+    private static ForeignCurrencyAccount createDevizniRacun(User client, User user1) {
+        ForeignCurrencyAccount account1 = new ForeignCurrencyAccount();
+        String creationDate = "2024-03-18";
+        String expirationDate = "2024-03-18";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDateCreation = LocalDate.parse(creationDate, formatter);
+        LocalDate localDateExpiration = LocalDate.parse(expirationDate, formatter);
+        int dateIntegerCreation = (int) localDateCreation.toEpochDay();
+        int dateIntegerExpiration = (int) localDateExpiration.toEpochDay();
+
+        account1.setOwnerId(client.getUserId());
         account1.setCreatedByAgentId(user1.getUserId());
         account1.setAccountNumber("ACC123456789");
-        account1.setVrstaRacuna(VrstaRacuna.DEVIZNI);
+        account1.setTypeOfAccount("DEVIZNI");
         account1.setBalance(1000.0);
         account1.setAvailableBalance(900.0);
-        account1.setCreationDate("2024-03-18");
-        account1.setExpirationDate("2025-03-18");
+        account1.setCreationDate(dateIntegerCreation);
+        account1.setExpirationDate(dateIntegerExpiration);
         account1.setCurrency("USD");
-        account1.setStatusRacuna(StatusRacuna.ACTIVE);
-        account1.setPodvrstaRacuna(PodvrstaRacuna.LICNI);
+        account1.setAccountStatus(AccountStatus.ACTIVE);
+        account1.setSubtypeOfAccount(SubtypeOfAccount.LICNI);
         account1.setAccountMaintenance(10.0);
         account1.setDefaultCurrency(true);
+        account1.setAllowedCurrencies(List.of("USD", "EUR", "CHF"));
         return account1;
     }
 }

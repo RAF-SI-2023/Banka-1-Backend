@@ -1,6 +1,6 @@
 package rs.edu.raf.banka1.model;
 
-public enum VrstaRacuna {
+public enum TypeOfAccount {
     DEVIZNI,
     TEKUCI,
     POSLOVNI

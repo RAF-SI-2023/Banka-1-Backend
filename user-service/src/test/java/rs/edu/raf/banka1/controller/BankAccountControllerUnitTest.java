@@ -7,13 +7,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import rs.edu.raf.banka1.model.DevizniRacun;
-import rs.edu.raf.banka1.model.PodvrstaRacuna;
-import rs.edu.raf.banka1.model.StatusRacuna;
-import rs.edu.raf.banka1.model.User;
-import rs.edu.raf.banka1.model.VrstaRacuna;
+import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.services.BankAccountService;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,45 +32,54 @@ public class BankAccountControllerUnitTest {
     }
 
     @Test
-    void testGetAllDevizniRacuniSuccess() {
-        List<DevizniRacun> devizniRacuni = Arrays.asList(
-                createDevizniRacun(new User(), new User()),
-                createDevizniRacun(new User(), new User()));
+    void testGetAllForeignCurrencyAccountsSuccess() {
+        List<ForeignCurrencyAccount> foreignCurrencyAccounts = Arrays.asList(
+                createForeignCurrencyAccount(new User(), new User()),
+                createForeignCurrencyAccount(new User(), new User()));
 
-        when(bankAccountService.getAllDevizniRacuni()).thenReturn(devizniRacuni);
+        when(bankAccountService.getAllForeignCurrencyAccounts()).thenReturn(foreignCurrencyAccounts);
 
-        ResponseEntity<List<DevizniRacun>> response = bankAccountController.getAllDevizniRacuni();
+        ResponseEntity<List<ForeignCurrencyAccount>> response = bankAccountController.getAllForeignCurrencyAccounts();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(devizniRacuni, response.getBody());
+        assertEquals(foreignCurrencyAccounts, response.getBody());
     }
 
     @Test
-    void testGetDevizniRacunSuccess() {
-        Long devizniRacunId = 1L;
-        DevizniRacun devizniRacun = createDevizniRacun(new User(), new User());
-        when(bankAccountService.getDevizniRacunById(devizniRacunId)).thenReturn(devizniRacun);
+    void testGetForeignCurrencyAccountSuccess() {
+        Long foreignCurrencyAccountId = 1L;
+        ForeignCurrencyAccount foreignCurrencyAccount = createForeignCurrencyAccount(new User(), new User());
+        when(bankAccountService.getForeignCurrencyAccountById(foreignCurrencyAccountId)).thenReturn(foreignCurrencyAccount);
 
-        ResponseEntity<DevizniRacun> response = bankAccountController.getDevizniRacun(devizniRacunId);
+        ResponseEntity<ForeignCurrencyAccount> response = bankAccountController.getForeignCurrencyAccount(foreignCurrencyAccountId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(devizniRacun, response.getBody());
+        assertEquals(foreignCurrencyAccount, response.getBody());
     }
 
-    private DevizniRacun createDevizniRacun(User client, User user1) {
-        DevizniRacun account1 = new DevizniRacun();
+    private ForeignCurrencyAccount createForeignCurrencyAccount(User client, User user1) {
+        ForeignCurrencyAccount account1 = new ForeignCurrencyAccount();
 //        account1.setOwnerId(user1.getUserId());
-        account1.setUser(client);
+//        account1.setUser(client);
+        String creationDate = "2024-03-18";
+        String expirationDate = "2024-03-18";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDateCreation = LocalDate.parse(creationDate, formatter);
+        LocalDate localDateExpiration = LocalDate.parse(expirationDate, formatter);
+        int dateIntegerCreation = (int) localDateCreation.toEpochDay();
+        int dateIntegerExpiration = (int) localDateExpiration.toEpochDay();
+
+        account1.setOwnerId(client.getUserId());
         account1.setCreatedByAgentId(user1.getUserId());
         account1.setAccountNumber("ACC123456789");
-        account1.setVrstaRacuna(VrstaRacuna.DEVIZNI);
+        account1.setTypeOfAccount("DEVIZNI");
         account1.setBalance(1000.0);
         account1.setAvailableBalance(900.0);
-        account1.setCreationDate("2024-03-18");
-        account1.setExpirationDate("2025-03-18");
+        account1.setCreationDate(dateIntegerCreation);
+        account1.setExpirationDate(dateIntegerExpiration);
         account1.setCurrency("USD");
-        account1.setStatusRacuna(StatusRacuna.ACTIVE);
-        account1.setPodvrstaRacuna(PodvrstaRacuna.LICNI);
+        account1.setAccountStatus(AccountStatus.ACTIVE);
+        account1.setSubtypeOfAccount(SubtypeOfAccount.LICNI);
         account1.setAccountMaintenance(10.0);
         account1.setDefaultCurrency(true);
         return account1;
