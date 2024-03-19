@@ -94,37 +94,12 @@ public class UserServiceImpl implements UserService {
         String activationToken = UUID.randomUUID().toString();
         user.setActivationToken(activationToken);
         if (createUserRequest.getPosition().equalsIgnoreCase("admin")) {
-            user.setPermissions(adminPermissions());
+            user.setPermissions(new HashSet<>(permissionRepository.findAll()));
         }
         userRepository.save(user);
         emailService.sendActivationEmail(createUserRequest.getEmail(), "RAF Banka - User activation",
                 "Visit this URL to activate your account: http://localhost:" + frontPort + "/user/set-password/" + activationToken);
         return new CreateUserResponse(user.getUserId());
-    }
-
-    //temporary
-    private Set<Permission> adminPermissions() {
-        Permission readPermission = new Permission();
-        readPermission.setName("readUser");
-        Permission addPermission = new Permission();
-        addPermission.setName("addUser");
-        Permission modifyPermission = new Permission();
-        modifyPermission.setName("modifyUser");
-        Permission deletePermission = new Permission();
-        deletePermission.setName("deleteUser");
-
-        permissionRepository.save(readPermission);
-        permissionRepository.save(addPermission);
-        permissionRepository.save(modifyPermission);
-        permissionRepository.save(deletePermission);
-
-        Set<Permission> adminPermissions = new HashSet<>();
-        adminPermissions.add(readPermission);
-        adminPermissions.add(addPermission);
-        adminPermissions.add(modifyPermission);
-        adminPermissions.add(deletePermission);
-
-        return adminPermissions;
     }
 
     @Override
