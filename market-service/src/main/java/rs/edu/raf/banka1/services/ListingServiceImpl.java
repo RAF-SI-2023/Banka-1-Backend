@@ -1,6 +1,5 @@
 package rs.edu.raf.banka1.services;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,7 +15,9 @@ import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 import rs.edu.raf.banka1.repositories.ListingRepository;
 import rs.edu.raf.banka1.utils.Constants;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
@@ -60,27 +61,17 @@ public class ListingServiceImpl implements ListingService{
     @Override
     public void initializeListings() {
         try {
-            StringBuilder responses = new StringBuilder();
-            for (String sector : Constants.sectors) {
-                String sectorsEncoded = String.join("%20", sector.split(" "));
+            String sectorsEncoded = String.join("%20", Constants.sectors);
 
-                String urlStr = listingNameApiUrl + sectorsEncoded + "&token=" + listingAPItoken;
+            String urlStr = listingNameApiUrl + sectorsEncoded + "&token=" + listingAPItoken;
 
-                String response = sendRequest(urlStr);
-                responses.append(response);
-            }
-            ArrayNode jsonArray = reformatNamesToJSON(responses.toString());
+            String response = sendRequest(urlStr);
 
+            ArrayNode jsonArray = reformatNamesToJSON(response);
+
+            // Save the new JSON array to a file
             File file = new File(Constants.listingsFilePath);
-            try (FileWriter fileWriter = new FileWriter(file)) {
-                // Convert jsonArray to JSON string
-                String jsonString = jsonArray.toString();
-
-                // Append JSON string to the file
-                fileWriter.write(jsonString);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            objectMapper.writeValue(file, jsonArray);
 
         }catch (Exception e){
             e.printStackTrace();
@@ -92,10 +83,8 @@ public class ListingServiceImpl implements ListingService{
     @Override
     public List<ListingModel> fetchListings() {
         List<ListingModel> listingModels = fetchListingsName();
-        for (ListingModel listingModel : listingModels) {
+        for (ListingModel listingModel : listingModels)
             updateValuesForListing(listingModel);
-            updateStockForListing(listingModel);
-        }
 
         return listingModels;
     }
@@ -145,21 +134,6 @@ public class ListingServiceImpl implements ListingService{
         }
     }
 
-    private void updateStockForListing(ListingModel listingModel){
-        try{
-            // URL of the alphavantage API endpoint
-            String symbol = listingModel.getTicker();
-            String apiUrl = updateListingApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;
-
-            // Fetch JSON data from the API
-            JsonNode rootNode = objectMapper.readTree(new URL(apiUrl));
-
-            updatelistingModelFields(listingModel, rootNode);
-
-        }catch (Exception e){
-            System.out.println(listingModel.getTicker() + " not found on alphavantage");
-        }
-    }
 
     @Override
 //    updates all listings with new data into database
