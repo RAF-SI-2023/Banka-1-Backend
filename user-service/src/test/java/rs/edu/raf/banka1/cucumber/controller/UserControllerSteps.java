@@ -70,6 +70,7 @@ public class UserControllerSteps {
     private List<UserResponse> userResponses = new ArrayList<>();
     //private final String url = "http://localhost:";
     private final String url = "http://" + SpringIntegrationTest.enviroment.getServiceHost("user-service", 8080) + ":";
+    //private final String url = "http://" + "host.docker.internal" + ":";
     private Long lastid;
     private String password;
 
@@ -152,6 +153,7 @@ public class UserControllerSteps {
         user.setActivationToken("testtoken");
         user.setEmail("testemail");
         user.setPassword("testpassword");
+        user.setActive(true);
         userRepository.save(user);
     }
 
@@ -263,6 +265,7 @@ public class UserControllerSteps {
                 fail("Failed to parse response body");
             }
             userRepository.findAll().forEach(user -> {
+                if(!user.getActive()) return;
                 if(searchFilter.getEmail() != null && !user.getEmail().equals(searchFilter.getEmail())) return;
                 if(searchFilter.getFirstName() != null && !user.getFirstName().equalsIgnoreCase(searchFilter.getFirstName())) return;
                 if(searchFilter.getLastName() != null && !user.getLastName().equalsIgnoreCase(searchFilter.getLastName())) return;
