@@ -8,14 +8,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import rs.edu.raf.banka1.model.ForeignCurrencyAccount;
-import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
+import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.requests.ForeignCurrencyAccountRequest;
+import rs.edu.raf.banka1.responses.CreateForeignCurrencyAccountResponse;
+import rs.edu.raf.banka1.responses.ForeignCurrencyAccountResponse;
 import rs.edu.raf.banka1.services.BankAccountService;
 
 import java.util.List;
@@ -26,39 +22,54 @@ import java.util.List;
 public class BankAccountController {
 
     private final BankAccountService bankAccountService;
-    private final ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
 
     @Autowired
-    public BankAccountController(BankAccountService bankAccountService, ForeignCurrencyAccountRepository foreignCurrencyAccountRepository) {
+    public BankAccountController(BankAccountService bankAccountService) {
         this.bankAccountService = bankAccountService;
-        this.foreignCurrencyAccountRepository = foreignCurrencyAccountRepository;
     }
 
     @GetMapping(value = "/foreign_currency", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all Foreign currency accounts", description = "Get all foreign currency accounts")
+//    @PreAuthorize("hasAuthority('can_read_users')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = List.class))}),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to get all foreign currency accounts"),
+            @ApiResponse(responseCode = "404", description = "No foreign currency accounts found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PreAuthorize("hasAuthority('can_read_users')")
-    public ResponseEntity<List<ForeignCurrencyAccount>> getAllForeignCurrencyAccounts() {
+    public ResponseEntity<List<ForeignCurrencyAccountResponse>> getAllForeignCurrencyAccounts() {
         return ResponseEntity.ok(bankAccountService.getAllForeignCurrencyAccounts());
     }
 
     @GetMapping(value = "/foreign_currency/{foreignCurrencyId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get Foreign currency account", description = "Get a specific foreign currency account based on its id")
+//    @PreAuthorize("hasAuthority('can_read_users')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ForeignCurrencyAccount.class))}),
-            @ApiResponse(responseCode = "404", description = "Devizni racun not found"),
+                            schema = @Schema(implementation = ForeignCurrencyAccountResponse.class))}),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to get a foreign currency account"),
+            @ApiResponse(responseCode = "404", description = "Foreign currency account not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PreAuthorize("hasAuthority('can_read_users')")
-    public ResponseEntity<ForeignCurrencyAccount> getForeignCurrencyAccount(@PathVariable(name = "foreignCurrencyId") Long id) {
+    public ResponseEntity<ForeignCurrencyAccountResponse> getForeignCurrencyAccount(@PathVariable(name = "foreignCurrencyId") Long id) {
         return ResponseEntity.ok(bankAccountService.getForeignCurrencyAccountById(id));
+    }
+
+    @PostMapping(value = "/foreign_currency/create", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Create Foreign currency account", description = "Create a foreign currency account for a client")
+//    @PreAuthorize("hasAuthority('can_read_users')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CreateForeignCurrencyAccountResponse.class))}),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to create a foreign currency account"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<CreateForeignCurrencyAccountResponse> createForeignCurrencyAccount(@RequestBody ForeignCurrencyAccountRequest foreignCurrencyAccountRequest) {
+        return ResponseEntity.ok(bankAccountService.createForeignCurrencyAccount(foreignCurrencyAccountRequest));
     }
 
 }

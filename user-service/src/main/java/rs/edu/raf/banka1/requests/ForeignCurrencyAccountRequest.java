@@ -1,23 +1,25 @@
-package rs.edu.raf.banka1.dtos;
+package rs.edu.raf.banka1.requests;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import rs.edu.raf.banka1.model.VrstaRacuna;
+import rs.edu.raf.banka1.model.SubtypeOfAccount;
+
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class DevizniRacunDto {
+public class ForeignCurrencyAccountRequest {
 
-    private String ownerId;
+    private Long ownerId;
     private Long assignedAgentId;
     private String currency;
-    private VrstaRacuna vrstaRacuna;
-    private Integer interestRatePercentage;
+    private String typeOfAccount;
+    private SubtypeOfAccount subtypeOfAccount;
     private Double accountMaintenance;
     private Boolean defaultCurrency;
-//    private List<String> allowedCurrencies;
+    private List<String> allowedCurrencies;
 }
