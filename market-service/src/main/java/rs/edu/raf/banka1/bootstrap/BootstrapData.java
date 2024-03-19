@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.services.CurrencyService;
 import rs.edu.raf.banka1.services.ExchangeService;
@@ -40,12 +41,11 @@ public class BootstrapData implements CommandLineRunner {
 
         //        call it only from time to time to update json because api isn't free and we need it only once
         //this is used for all listing bases
-        try{
-            listingStockService.generateJSONSymbols();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+//-------------------------------------NIKADA VISE NE POZIVATI OVO--------------------------------------------
+       // listingStockService.generateJSONSymbols();
+
         listingStockService.populateListingStocks();
+
 
 //        use this to update or initialize database with fresh data
 

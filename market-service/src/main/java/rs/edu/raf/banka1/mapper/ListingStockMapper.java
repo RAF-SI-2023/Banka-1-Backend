@@ -24,6 +24,7 @@ public class ListingStockMapper {
     public void updatelistingStock(ListingStock stock, String name, String symbol, Double price, Double high, Double low, Double priceChange, Integer volume,Integer outstandingShare, Double dividendYield, String exchange) {
         stock.setTicker(symbol);
         stock.setLow(low);
+        stock.setListingType("Stock");
         stock.setHigh(high);
         stock.setPrice(price);
         stock.setPriceChange(priceChange);

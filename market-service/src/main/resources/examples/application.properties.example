@@ -19,8 +19,8 @@ server.servlet.context-path=/
 oauth.jwt.secret=secret_key
 
 # API TOKENS:
-# after free trial ends, replace with your own token (won't be necessary if you use the json file)
-listingAPItoken=pk_f87286e075c94cc484405da70691c030
+# !!!JAKO BITNO--------------------------------after free trial ends, replace with your own token (won't be necessary if you use the json file)
+listingAPItoken=pk_281c641e5b204f97965454e2a239a236
 # professor will provide the token later
 alphaVantageAPIToken=OF6BVKZOCXWHD9NS
 

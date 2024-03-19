@@ -24,6 +24,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -54,7 +55,6 @@ public class ListingStockServiceImpl implements ListingStockService {
         objectMapper= new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
-
 
     @Override
     public void generateJSONSymbols() {
@@ -103,19 +103,20 @@ public class ListingStockServiceImpl implements ListingStockService {
                 listingStock.setTicker(node.path("symbol").asText());
                 listingStock.setName(node.path("companyName").asText());
                 listingStock.setExchange(node.path("primaryExchange").asText());
-
-              //  listingStock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
-
                 updateValuesForListingStock(listingStock);
 
             }
+
         }catch (Exception e){
             //e.printStackTrace();
             System.err.println("[populateListinStocks] Exception occured:"+e.getMessage());
-
         }
-    }
 
+    }
+    @Override
+    public List<ListingStock> getAllStocks(){
+       return stockRepository.findAll();
+    }
 
     public void updateValuesForListingStock(ListingStock listingStock) {
         try{
@@ -128,6 +129,7 @@ public class ListingStockServiceImpl implements ListingStockService {
 
             // Fetch JSON data from the API
             JsonNode rootNode = objectMapper.readTree(baseResponse);
+            rootNode = rootNode.get("Global Quote");
 
             double high = rootNode.get("03. high").asDouble();
             double low = rootNode.get("04. low").asDouble();
@@ -140,6 +142,7 @@ public class ListingStockServiceImpl implements ListingStockService {
             Double dividendYield=jsonArray.get("DividendYield").asDouble();
             Integer outstandingShares=jsonArray.get("SharesOutstanding").asInt();
             String exchange=jsonArray.get("Exchange").asText();
+
 
             listingStock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
             stockMapper.updatelistingStock(listingStock,symbol,name,price,high,low,change,volume,outstandingShares,dividendYield,exchange);
@@ -155,7 +158,7 @@ public class ListingStockServiceImpl implements ListingStockService {
 
 
    /* @Override
-  //  public List<ListingHistoryModel> fetchAllListingsHistory() {
+    public List<ListingHistoryModel> fetchAllListingsHistory() {
         try{
             List<ListingModel> listingModels = fetchListingsName();
             List<ListingHistoryModel> listingHistoryModels = new ArrayList<>();
@@ -245,7 +248,7 @@ public class ListingStockServiceImpl implements ListingStockService {
             // Add the new object to the new JSON array
             newArray.add(newObj);
 
-            if(i++ >= Constants.maxListings)
+            if(i++ >= Constants.maxStockListings)
                 break;
         }
         return newArray;

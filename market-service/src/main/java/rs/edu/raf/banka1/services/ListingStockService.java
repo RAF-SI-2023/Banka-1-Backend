@@ -9,8 +9,9 @@ public interface ListingStockService {
     void generateJSONSymbols();
     void populateListingStocks();
     void updateValuesForListingStock(ListingStock listingStock);
+    List<ListingStock> getAllStocks();
 
- //   List<ListingHistoryModel> fetchAllListingsHistory();
+ //  List<ListingHistoryModel> fetchAllListingsHistory();
   //  void initializeStock();
    // void getStockData(String symbol);
 }
