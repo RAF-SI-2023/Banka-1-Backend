@@ -1,5 +1,5 @@
 package rs.edu.raf.banka1.services;
-
+/*
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +24,7 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
-
+/*
 @Service
 public class ListingServiceImpl implements ListingService {
     private ObjectMapper objectMapper;
@@ -64,76 +64,9 @@ public class ListingServiceImpl implements ListingService {
     //    NOTE: see what to do with this, as API isn't free (almost nothing from this API changes so it is okay to do it once and store it into json file)
 //    NOTE: Maybe name/description of the company changes, so we should update it from time to time
 
-    @Override
-    public void initializeListings() {
-        try {
-            StringBuilder responses = new StringBuilder();
-            for (String sector : Constants.sectors) {
-                String sectorsEncoded = String.join("%20", sector.split(" "));
-
-                String urlStr = listingNameApiUrl + sectorsEncoded + "&token=" + listingAPItoken;
-
-                String response = sendRequest(urlStr);
-                responses.append(response);
-
-            }
-            ArrayNode jsonArray = reformatNamesToJSON(responses.toString());
-            // Save the new JSON array to a file
-            File file = new File(Constants.listingsFilePath);
-            try (FileWriter fileWriter = new FileWriter(file)) {
-                // Convert jsonArray to JSON string
-                String jsonString = jsonArray.toString();
-
-                // Append JSON string to the file
-                fileWriter.write(jsonString);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-    }
-
 
     //    loads listings from json file and updates them with trending data
-    @Override
-    public List<ListingModel> fetchListings() {
-        List<ListingModel> listingModels = fetchListingsName();
-        for (ListingModel listingModel : listingModels)
-            updateValuesForListing(listingModel);
 
-        return listingModels;
-    }
-
-    private List<ListingModel> fetchListingsName() {
-        try {
-            File file = new File(Constants.listingsFilePath);
-
-            // Read JSON data from the file
-            JsonNode rootNode = objectMapper.readTree(file);
-
-            List<ListingModel> listings = new ArrayList<>();
-
-            // Iterate over each element in the JSON array
-            for (JsonNode node : rootNode) {
-                ListingModel listingModel = new ListingModel();
-                listingModel.setTicker(node.path("symbol").asText());
-                listingModel.setName(node.path("companyName").asText());
-                listingModel.setExchange(node.path("primaryExchange").asText());
-
-                listingModel.setLastRefresh((int) (System.currentTimeMillis() / 1000));
-
-                // Add the ListingModel object to the list
-                listings.add(listingModel);
-            }
-
-            return listings;
-        }catch (Exception e){
-            e.printStackTrace();
-            return new ArrayList<>();
-        }
-    }
 
     private void updateValuesForListing(ListingModel listingModel) {
         try{
@@ -153,11 +86,6 @@ public class ListingServiceImpl implements ListingService {
     }
 
 
-    @Override
-//    updates all listings with new data into database
-    public void updateAllListingsDatabase(List<ListingModel> listings) {
-        listingRepository.saveAll(listings);
-    }
 
     @Override
     public List<ListingHistoryModel> fetchAllListingsHistory() {
@@ -349,3 +277,4 @@ public class ListingServiceImpl implements ListingService {
     }
 
 }
+*/
