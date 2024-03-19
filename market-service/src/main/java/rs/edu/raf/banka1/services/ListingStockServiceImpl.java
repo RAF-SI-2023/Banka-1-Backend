@@ -15,6 +15,7 @@ import rs.edu.raf.banka1.model.ListingHistoryModel;
 
 import rs.edu.raf.banka1.model.ListingStock;
 
+import rs.edu.raf.banka1.model.exceptions.APIException;
 import rs.edu.raf.banka1.repositories.StockRepository;
 import rs.edu.raf.banka1.utils.Constants;
 
@@ -80,8 +81,11 @@ public class ListingStockServiceImpl implements ListingStockService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }catch (Exception e){
-            e.printStackTrace();
+        } catch (APIException apiException){
+            System.out.println(apiException.getMessage());
+        } catch (Exception e){
+            //e.printStackTrace();
+            System.err.println("[generateJSONSymbols] Exception occured:"+e.getMessage());
         }
 
     }
@@ -100,13 +104,14 @@ public class ListingStockServiceImpl implements ListingStockService {
                 listingStock.setName(node.path("companyName").asText());
                 listingStock.setExchange(node.path("primaryExchange").asText());
 
-                listingStock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
+              //  listingStock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
 
                 updateValuesForListingStock(listingStock);
 
             }
         }catch (Exception e){
-            e.printStackTrace();
+            //e.printStackTrace();
+            System.err.println("[populateListinStocks] Exception occured:"+e.getMessage());
 
         }
     }
@@ -140,7 +145,9 @@ public class ListingStockServiceImpl implements ListingStockService {
             stockMapper.updatelistingStock(listingStock,symbol,name,price,high,low,change,volume,outstandingShares,dividendYield,exchange);
             stockRepository.save(listingStock);
 
-        }catch (Exception e){
+        } catch (APIException apiException){
+            System.out.println(apiException.getMessage());
+        } catch (Exception e){
             System.out.println(listingStock.getTicker() + " not found on alphavantage");
         }
     }
@@ -164,7 +171,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     }
 
 */
-    private String sendRequest(String urlStr) throws Exception {
+    private String sendRequest(String urlStr) throws Exception,APIException {
         URL url = new URL(urlStr);
 
         // Open a connection to the URL
@@ -178,6 +185,13 @@ public class ListingStockServiceImpl implements ListingStockService {
 
         // Get the response code
         int responseCode = connection.getResponseCode();
+
+        switch (responseCode){
+            case 402:
+                throw new APIException("[Send request] Error occured because API requires payment");
+            case 500:
+                throw new APIException("[Send request] Error occured because API returned internal server error");
+        }
 
         // Read the response body
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
