@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.cucumber.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -20,6 +21,7 @@ import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.ActivateAccountRequest;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
@@ -63,16 +65,19 @@ public class UserControllerSteps {
     private User activatedUser;
     private EditUserRequest editUserRequest = new EditUserRequest();
     private CreateUserRequest createUserRequest = new CreateUserRequest();
+    private Long userToRemove;
     private String email;
     private UserMapper userMapper = new UserMapper(new PermissionMapper());
 
     private UserRepository userRepository;
+    private PermissionRepository permissionRepository;
     private List<UserResponse> userResponses = new ArrayList<>();
     //private final String url = "http://localhost:";
     private final String url = "http://" + SpringIntegrationTest.enviroment.getServiceHost("user-service", 8080) + ":";
     //private final String url = "http://" + "host.docker.internal" + ":";
     private Long lastid;
     private String password;
+
 
     @Data
     class SearchFilter{
@@ -95,6 +100,27 @@ public class UserControllerSteps {
         jwt = responseEntity.getBody().getJwt();
     }
 
+    @Given("I have a user with id {int}")
+    public void iHaveAUserWithId(int id) {
+        User user = new User();
+        user.setUserId((long) id);
+        user.setEmail("teeeest@gmail.com");
+        user.setPassword("testpassword");
+        user.setActivationToken(null);
+        user.setJmbg("testjmbg");
+        user.setActive(true);
+        user.setPermissions(new HashSet<>());
+        user.setFirstName("nebitno");
+        user.setLastName("nebitno");
+        user.setPosition("nebitno");
+        userRepository.save(user);
+    }
+
+    @Given("there is a permission with name {string}")
+    public void thereIsAPermissionWithName(String permission) {
+
+    }
+
     @Given("user with email {string} exists")
     public void userWithEmailExists(String email) {
         User user = new User();
@@ -104,9 +130,30 @@ public class UserControllerSteps {
         user.setJmbg("testjmbg");
         user.setActive(true);
         user.setPermissions(new HashSet<>());
+        user.setFirstName("nebitno");
+        user.setLastName("nebitno");
+        user.setPosition("nebitno");
         userRepository.save(user);
 
         editUserRequest = userMapper.userToEditUserRequest(user);
+    }
+
+    @Given("user i want to delete exists")
+    public void userWithIdExists() {
+        User user = new User();
+        user.setEmail("testemail123@gmail.com");
+        user.setPassword("testpassword");
+        user.setActivationToken(null);
+        user.setJmbg("testjmbg12345");
+        user.setActive(true);
+        user.setPermissions(new HashSet<>());
+        user = userRepository.save(user);
+        userToRemove = user.getUserId();
+    }
+
+    @Given("admin wants to remove user with id {string}")
+    public void adminWantsToRemoveUserWithId(String id) {
+        userToRemove = Long.parseLong(id);
     }
 
     public UserControllerSteps(UserRepository userRepository) {
@@ -198,14 +245,22 @@ public class UserControllerSteps {
                 .method("GET", java.net.http.HttpRequest.BodyPublishers.noBody())
                 .build();
 
-        if(searchFilter.getEmail() != null)
-            path = path.concat("?email=" + searchFilter.getEmail());
-        if(searchFilter.getFirstName() != null)
-            path = path.concat("?firstName=" + searchFilter.getFirstName());
-        if(searchFilter.getLastName() != null)
-            path = path.concat("?lastName=" + searchFilter.getLastName());
-        if(searchFilter.getPosition() != null)
-            path = path.concat("?position=" + searchFilter.getPosition());
+        char combiner = '?';
+        if(searchFilter.getEmail() != null) {
+            path = path.concat(combiner + "email=" + searchFilter.getEmail());
+            combiner = '&';
+        }
+        if(searchFilter.getFirstName() != null) {
+            path = path.concat(combiner + "firstName=" + searchFilter.getFirstName());
+            combiner = '&';
+        }
+        if(searchFilter.getLastName() != null) {
+            path = path.concat(combiner + "lastName=" + searchFilter.getLastName());
+            combiner = '&';
+        }
+        if(searchFilter.getPosition() != null) {
+            path = path.concat(combiner + "position=" + searchFilter.getPosition());
+        }
 
         try {
             HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
@@ -219,7 +274,7 @@ public class UserControllerSteps {
     }
 
 
-    private String put(String path, Object objectToPut) throws JsonProcessingException {
+    private void put(String path, Object objectToPut) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
@@ -227,8 +282,18 @@ public class UserControllerSteps {
         headers.setBearerAuth(jwt);
         HttpEntity<Object> request = new HttpEntity<>(objectToPut, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.PUT, request, String.class);
-        return response.getBody();
+        restTemplate.exchange(path, org.springframework.http.HttpMethod.PUT, request, String.class);
+    }
+
+    private void delete(String path) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
+        HttpEntity<Object> request = new HttpEntity<>(headers);
+
+        restTemplate.exchange(path, org.springframework.http.HttpMethod.DELETE, request, Boolean.class);
     }
 
 
@@ -302,6 +367,11 @@ public class UserControllerSteps {
        }
    }
 
+    @When("i send DELETE request to remove the user")
+    public void iSendDELETERequestTo() {
+        delete(url + port + "/user/remove/" + userToRemove);
+    }
+
    @When("I go to {string}")
     public void iGoTo(String path) {
         activatedUser = userRepository.findByActivationToken("testtoken").get();
@@ -330,7 +400,7 @@ public class UserControllerSteps {
     public void whenISendPUTRequestTo(String path) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            lastEditUserResponse = objectMapper.readValue(put(url + port + path, editUserRequest), EditUserResponse.class);
+            put(url + port + path, editUserRequest);
         } catch (Exception e) {
             e.printStackTrace();
             fail("Failed to parse response body");
@@ -394,5 +464,10 @@ public class UserControllerSteps {
     public void userWithEmailHasHisFirstNameChangedTo(String email, String firstName) {
         User user = userRepository.findByEmail(email).get();
         assertThat(user.getFirstName()).isEqualTo(firstName);
+    }
+
+    @Then("user is removed from the system")
+    public void userWithIdIsRemoved() {
+        assertThat(userRepository.findById(userToRemove).get().getActive()).isFalse();
     }
 }

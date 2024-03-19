@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.repositories;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -27,6 +28,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String username);
     Optional<User> findByActivationToken(String activationToken);
 
+    @Transactional
     @Modifying
     @Query("update User u set u.active = false where u.userId = :userId")
     void deactivateUser(@Param("userId") Long userId);

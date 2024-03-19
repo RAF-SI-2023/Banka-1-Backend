@@ -22,7 +22,7 @@ public interface UserService extends UserDetailsService {
     CreateUserResponse createUser(CreateUserRequest createUserRequest);
     ActivateAccountResponse activateAccount(String token, String password);
     boolean editUser(EditUserRequest editUserRequest);
-    boolean deleteUser(Long id);
+    Boolean deleteUser(Long id);
 
     List<PermissionDto> findPermissions(Long userId);
 
