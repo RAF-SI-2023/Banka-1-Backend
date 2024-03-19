@@ -49,6 +49,7 @@ public class SpringSecurityConfig {
                                         .requestMatchers(antMatcher("/user/activate/**")).permitAll()
                                         .requestMatchers(antMatcher("/permission/**")).permitAll()
                                         .anyRequest().authenticated()
+
                 )
 //                .cors().configurationSource(corsConfigurationSource())
 
