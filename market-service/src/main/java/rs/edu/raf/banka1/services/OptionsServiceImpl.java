@@ -156,7 +156,7 @@ public class OptionsServiceImpl implements OptionsService{
             JsonNode row = optionsIterator.next();
             OptionsModel option = new OptionsModel();
             option.setTicker(ticker);
-            option.setOptionType(optionType);
+            option.setOptionType(optionType.name());
             option.setStrikePrice(row.path("strike").doubleValue());
             option.setCurrency(row.path("currency").asText());
             option.setImpliedVolatility(row.path("impliedVolatility").doubleValue());

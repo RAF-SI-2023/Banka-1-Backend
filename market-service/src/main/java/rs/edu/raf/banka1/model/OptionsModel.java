@@ -17,7 +17,7 @@ public class OptionsModel {
     @Column
     private String ticker;
     @Column
-    private OptionType optionType;
+    private String optionType;
     @Column
     private Double strikePrice;
     @Column

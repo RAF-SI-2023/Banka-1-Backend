@@ -10,7 +10,7 @@ import rs.edu.raf.banka1.model.enums.OptionType;
 @NoArgsConstructor
 public class OptionsDto {
     private String ticker;
-    private OptionType optionType;
+    private String optionType;
     private Double strikePrice;
     private String currency;
     private Double impliedVolatility;
