@@ -88,5 +88,9 @@ public class BootstrapData implements CommandLineRunner {
         account1.setDefaultCurrency(true);
         account1.setAllowedCurrencies(List.of("USD", "EUR", "CHF"));
         return account1;
+//        System.out.println("Loading Data...");
+//
+//
+//        System.out.println("Data loaded!");
     }
 }

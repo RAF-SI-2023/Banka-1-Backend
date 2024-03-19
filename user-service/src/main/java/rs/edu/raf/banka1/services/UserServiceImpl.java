@@ -8,10 +8,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import rs.edu.raf.banka1.configuration.SpringSecurityConfig;
 import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
+import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
@@ -23,11 +23,8 @@ import rs.edu.raf.banka1.responses.EditUserResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -96,6 +93,9 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.createUserRequestToUser(createUserRequest);
         String activationToken = UUID.randomUUID().toString();
         user.setActivationToken(activationToken);
+        if (createUserRequest.getPosition().equalsIgnoreCase("admin")) {
+            user.setPermissions(new HashSet<>(permissionRepository.findAll()));
+        }
         userRepository.save(user);
         emailService.sendActivationEmail(createUserRequest.getEmail(), "RAF Banka - User activation",
                 "Visit this URL to activate your account: http://localhost:" + frontPort + "/user/set-password/" + activationToken);
