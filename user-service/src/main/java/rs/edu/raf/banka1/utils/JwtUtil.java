@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
+import java.util.*;
 
 
 @Component
@@ -37,11 +34,20 @@ public class JwtUtil {
         return claims.getSubject();
     }
 
+    public List<String> extractRoles(String token) {
+        Claims claims = extractAllClaims(token);
+        if (claims == null) {
+            return new ArrayList<>();
+        }
+        //noinspection unchecked
+        return claims.get("roles", (Class<List<String>>)(Class<?>)List.class);
+    }
+
     public boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());
     }
 
-    public String generateToken(String email, String permissions) {
+    public String generateToken(String email, List<String> permissions) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", permissions);
         return Jwts.builder()
@@ -52,7 +58,7 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS512, secretKey).compact();
     }
 
-    public boolean validateToken(String token, UserDetails user) {
-        return (user.getUsername().equals(extractEmail(token)) && !isTokenExpired(token));
+    public boolean validateToken(String token) {
+        return !isTokenExpired(token);
     }
 }
