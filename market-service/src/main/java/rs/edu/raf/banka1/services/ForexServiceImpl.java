@@ -13,6 +13,7 @@ import rs.edu.raf.banka1.repositories.ForexRepository;
 import rs.edu.raf.banka1.utils.Requests;
 
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -130,13 +131,13 @@ public class ForexServiceImpl implements ForexService {
             double high = objectMapper.readTree(response).get("Realtime Currency Exchange Rate").get("9. Ask Price").asDouble();
             double low = objectMapper.readTree(response).get("Realtime Currency Exchange Rate").get("8. Bid Price").asDouble();
 
-            ListingForex updatedForex = forexMapper.updatePrices(listingForex, price, high, low);
+            ListingForex updatedForex = updatePrices(listingForex, price, high, low);
             return updatedForex;
         }catch (Exception e) {
 //            e.printStackTrace();
-//            System.out.println("Response: " + response);
-//            this currency pair is not supported by the API
-            System.out.println("BaseCurrency: " + listingForex.getBaseCurrency() + ", QuoteCurrency: " + listingForex.getQuoteCurrency() + " are not available on the API");
+            System.out.println("Response: " + response);
+//            this currency pair is not supported by the API (or maybe we are sending too much requests)
+            System.out.println("BaseCurrency: " + listingForex.getBaseCurrency() + ", QuoteCurrency: " + listingForex.getQuoteCurrency() + " are not available on the alphavantae API");
             return null;
         }
     }
@@ -178,7 +179,7 @@ public class ForexServiceImpl implements ForexService {
 
                     JsonNode dataNode = entry.getValue();
 
-                    ListingHistory listingHistory = parseHistory(listingForex.getListingId(), listingForex.getTicker(), unixTimestamp, dataNode);
+                    ListingHistory listingHistory = parseHistory(listingForex.getTicker(), unixTimestamp, dataNode);
 
                     listingHistories.add(listingHistory);
                 }
@@ -196,18 +197,24 @@ public class ForexServiceImpl implements ForexService {
         return listingForexList.stream().map(this::getForexHistory).flatMap(List::stream).toList();
     }
 
-    public ListingHistory parseHistory(long listingId, String ticker, int date, JsonNode dataNode){
+    public ListingHistory parseHistory(String ticker, int date, JsonNode dataNode){
         double open = dataNode.get("1. open").asDouble();
         double high = dataNode.get("2. high").asDouble();
         double low = dataNode.get("3. low").asDouble();
         double close = dataNode.get("4. close").asDouble();
         int volume = 0;
 
-        return listingHistoryMapper.createHistory(listingId, ticker, date, open, high, low, close, volume);
+        return listingHistoryMapper.createHistory(ticker, date, open, high, low, close, volume);
     }
 
-
-
-
+    public ListingForex updatePrices(ListingForex listingForex, Double price, Double high, Double low){
+        Double previousPrice = listingForex.getPrice();
+        listingForex.setPrice(price);
+        listingForex.setHigh(high);
+        listingForex.setLow(low);
+        listingForex.setLastRefresh((int) Instant.now().getEpochSecond());
+        listingForex.setPriceChange(price - previousPrice);
+        return listingForex;
+    }
 
 }

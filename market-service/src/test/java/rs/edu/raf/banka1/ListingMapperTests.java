@@ -71,8 +71,8 @@ public class ListingMapperTests {
         assertEquals(ticker, result.getTicker());
         assertEquals(date, result.getDate());
         assertEquals(price, result.getPrice());
-        assertEquals(ask, result.getAsk());
-        assertEquals(bid, result.getBid());
+        assertEquals(ask, result.getHigh());
+        assertEquals(bid, result.getLow());
         assertEquals(changed, result.getChanged());
         assertEquals(volume, result.getVolume());
     }
@@ -92,8 +92,8 @@ public class ListingMapperTests {
         int newVolume = 1200;
 
         when(newModel.getPrice()).thenReturn(newPrice);
-        when(newModel.getAsk()).thenReturn(newAsk);
-        when(newModel.getBid()).thenReturn(newBid);
+        when(newModel.getHigh()).thenReturn(newAsk);
+        when(newModel.getLow()).thenReturn(newBid);
         when(newModel.getChanged()).thenReturn(newChanged);
         when(newModel.getVolume()).thenReturn(newVolume);
 
@@ -102,8 +102,8 @@ public class ListingMapperTests {
 
         // Verify method calls on oldModel and check if the fields are set correctly
         verify(oldModel).setPrice(newPrice);
-        verify(oldModel).setAsk(newAsk);
-        verify(oldModel).setBid(newBid);
+        verify(oldModel).setHigh(newAsk);
+        verify(oldModel).setLow(newBid);
         verify(oldModel).setChanged(newChanged);
         verify(oldModel).setVolume(newVolume);
 
@@ -147,8 +147,8 @@ public class ListingMapperTests {
 
         assertEquals(beginningOfDayUnixTimestamp, result.getDate());
         assertEquals(price, result.getPrice());
-        assertEquals(ask, result.getAsk());
-        assertEquals(bid, result.getBid());
+        assertEquals(ask, result.getHigh());
+        assertEquals(bid, result.getLow());
         assertEquals(changed, result.getChanged());
         assertEquals(volume, result.getVolume());
     }

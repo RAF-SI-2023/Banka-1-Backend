@@ -23,8 +23,8 @@ public class ListingMapper {
         listingHistory.setDate(beginningOfDayUnixTimestamp);
 
         listingHistory.setPrice(listing.getPrice());
-        listingHistory.setAsk(listing.getAsk());
-        listingHistory.setBid(listing.getBid());
+        listingHistory.setHigh(listing.getAsk());
+        listingHistory.setLow(listing.getBid());
         listingHistory.setChanged(listing.getChanged());
         listingHistory.setVolume(listing.getVolume());
         return listingHistory;
@@ -44,8 +44,8 @@ public class ListingMapper {
         listingHistory.setTicker(ticker);
         listingHistory.setDate(date);
         listingHistory.setPrice(price);
-        listingHistory.setAsk(ask);
-        listingHistory.setBid(bid);
+        listingHistory.setHigh(ask);
+        listingHistory.setLow(bid);
         listingHistory.setChanged(changed);
         listingHistory.setVolume(volume);
         return listingHistory;
@@ -53,8 +53,8 @@ public class ListingMapper {
 
     public ListingHistory updateHistoryListingWithNewData(ListingHistory oldModel, ListingHistory newModel) {
         oldModel.setPrice(newModel.getPrice());
-        oldModel.setAsk(newModel.getAsk());
-        oldModel.setBid(newModel.getBid());
+        oldModel.setHigh(newModel.getHigh());
+        oldModel.setLow(newModel.getLow());
         oldModel.setChanged(newModel.getChanged());
         oldModel.setVolume(newModel.getVolume());
 

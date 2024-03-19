@@ -28,5 +28,5 @@ public interface ListingService {
     int addAllListingsToHistory(List<ListingHistory> listingHistories);
 
 //    returns Listing histories between two timestamps
-    List<ListingHistory> getListingHistoriesByTimestamp(long id, Integer from, Integer to);
+    List<ListingHistory> getListingHistoriesByTimestamp(String ticker, Integer from, Integer to);
 }

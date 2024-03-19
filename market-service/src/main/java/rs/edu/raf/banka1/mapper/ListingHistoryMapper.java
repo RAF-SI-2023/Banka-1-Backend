@@ -6,14 +6,13 @@ import rs.edu.raf.banka1.model.dtos.ListingHistoryDto;
 
 @Component
 public class ListingHistoryMapper {
-    public ListingHistory createHistory(long listingId, String ticker, int date, double open, double high, double low, double close, int volume){
+    public ListingHistory createHistory(String ticker, int date, double open, double high, double low, double close, int volume){
         ListingHistory history = new ListingHistory();
-        history.setListingId(listingId);
         history.setTicker(ticker);
         history.setDate(date);
         history.setPrice(close);
-        history.setAsk(high);
-        history.setBid(low);
+        history.setHigh(high);
+        history.setLow(low);
         history.setChanged(close - open);
         history.setVolume(volume);
 
@@ -22,13 +21,12 @@ public class ListingHistoryMapper {
 
     public ListingHistoryDto toDto(ListingHistory history){
         ListingHistoryDto dto = new ListingHistoryDto();
-        dto.setId(history.getId());
-        dto.setListingId(history.getListingId());
+        dto.setListingHistoryId(history.getListingHistoryId());
         dto.setTicker(history.getTicker());
         dto.setDate(history.getDate());
         dto.setPrice(history.getPrice());
-        dto.setAsk(history.getAsk());
-        dto.setBid(history.getBid());
+        dto.setHigh(history.getHigh());
+        dto.setLow(history.getLow());
         dto.setChanged(history.getChanged());
         dto.setVolume(history.getVolume());
 

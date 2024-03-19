@@ -6,13 +6,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ListingHistoryDto {
-    private Long id;
-    private Long listingId;
+    private Long listingHistoryId;
     private String ticker;
     private Integer date;
     private Double price;
-    private Double ask;
-    private Double bid;
+    private Double high;
+    private Double low;
     private Double changed;
     private Integer volume;
 }

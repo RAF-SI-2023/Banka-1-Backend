@@ -52,8 +52,8 @@ public class ListingServiceImplTests {
         model1.setTicker("AAPL");
         model1.setDate((int) Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         model1.setPrice(100.0);
-        model1.setAsk(101.0);
-        model1.setBid(99.0);
+        model1.setHigh(101.0);
+        model1.setLow(99.0);
         model1.setChanged(0.0);
         model1.setVolume(1000);
 
@@ -61,8 +61,8 @@ public class ListingServiceImplTests {
         model2.setTicker("MSFT");
         model2.setDate((int)Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         model2.setPrice(100.0);
-        model2.setAsk(101.0);
-        model2.setBid(99.0);
+        model2.setHigh(101.0);
+        model2.setLow(99.0);
         model2.setChanged(0.0);
         model2.setVolume(1000);
 
@@ -94,8 +94,8 @@ public class ListingServiceImplTests {
         listingHistory.setTicker("AAPL");
         listingHistory.setDate(date);
         listingHistory.setPrice(100.0);
-        listingHistory.setAsk(101.0);
-        listingHistory.setBid(99.0);
+        listingHistory.setHigh(101.0);
+        listingHistory.setLow(99.0);
         listingHistory.setChanged(0.0);
         listingHistory.setVolume(1000);
 
@@ -103,8 +103,8 @@ public class ListingServiceImplTests {
         updateModel.setTicker("AAPL");
         updateModel.setDate(date);
         updateModel.setPrice(700.0);
-        updateModel.setAsk(105.0);
-        updateModel.setBid(100.0);
+        updateModel.setHigh(105.0);
+        updateModel.setLow(100.0);
         updateModel.setChanged(1.0);
         updateModel.setVolume(10000);
 
@@ -313,8 +313,8 @@ public class ListingServiceImplTests {
 
         // Assertions
         assertEquals(close, actualModel.getPrice());
-        assertEquals(low, actualModel.getBid());
-        assertEquals(high, actualModel.getAsk());
+        assertEquals(low, actualModel.getLow());
+        assertEquals(high, actualModel.getHigh());
         assertEquals(close - open, actualModel.getChanged());
         assertEquals(volume, actualModel.getVolume());
         assertEquals(unixTimestamp, actualModel.getDate());

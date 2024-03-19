@@ -16,10 +16,7 @@ import rs.edu.raf.banka1.repositories.ListingRepository;
 import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.Requests;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -214,27 +211,23 @@ public class ListingServiceImpl implements ListingService{
     }
 
     @Override
-    public List<ListingHistory> getListingHistoriesByTimestamp(long id, Integer from, Integer to) {
+    public List<ListingHistory> getListingHistoriesByTimestamp(String ticker, Integer from, Integer to) {
         List<ListingHistory> listingHistories = new ArrayList<>();
 //        return all timestamps
         if(from == null && to == null){
-            System.out.println("ALL ARE NULL");
-            listingHistories = listingHistoryRepository.getListingHistoriesByListingId(id);
+            listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
         }
 //        return all timestamps before given timestamp
         else if(from == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByListingIdAndDateBefore(id, to);
-            System.out.println("FROM IS NULL");
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBefore(ticker, to);
         }
 //        return all timestamps after given timestamp
         else if(to == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByListingIdAndDateAfter(id, from);
-            System.out.println("TO IS NULL");
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateAfter(ticker, from);
         }
 //        return all timestamps between two timestamps
         else{
-            System.out.println("NONE ARE NULL");
-            listingHistories = listingHistoryRepository.getListingHistoriesByListingIdAndDateBetween(id, from, to);
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to);
         }
 
         return listingHistories;

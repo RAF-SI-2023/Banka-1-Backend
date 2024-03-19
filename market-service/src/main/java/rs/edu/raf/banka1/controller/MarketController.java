@@ -70,8 +70,8 @@ public class MarketController {
         return exchangeDto != null ? new ResponseEntity<>(exchangeDto, HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping(value = "/listing/history/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get history by id", description = "Returns List of histories for given listingId, timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is provided it's exclusive)")
+    @GetMapping(value = "/listing/history/", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get history by ticker", description = "Returns List of histories for given ticker, timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is provided it's exclusive)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -80,11 +80,12 @@ public class MarketController {
             @ApiResponse(responseCode = "404", description = "Listing not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<ListingHistoryDto>> getListingsHistoryById(@PathVariable Long id,
+    public ResponseEntity<List<ListingHistoryDto>> getListingsHistoryById(@RequestParam String ticker,
                                                                           @RequestParam(required = false) Integer timestampFrom,
                                                                           @RequestParam(required = false) Integer timestampTo) {
 
-        List<ListingHistory> listingHistories = listingService.getListingHistoriesByTimestamp(id, timestampFrom, timestampTo);
+        System.out.println("ticker: " + ticker + " timestampFrom: " + timestampFrom + " timestampTo: " + timestampTo);
+        List<ListingHistory> listingHistories = listingService.getListingHistoriesByTimestamp(ticker, timestampFrom, timestampTo);
         if(listingHistories.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         else
