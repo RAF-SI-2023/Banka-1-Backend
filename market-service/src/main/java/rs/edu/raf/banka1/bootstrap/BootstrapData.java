@@ -7,8 +7,10 @@ import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.mapper.ListingMapper;
 import rs.edu.raf.banka1.model.ListingHistoryModel;
 import rs.edu.raf.banka1.model.ListingModel;
+import rs.edu.raf.banka1.model.OptionsModel;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.services.CurrencyService;
+import rs.edu.raf.banka1.services.ExchangeService;
 import rs.edu.raf.banka1.services.ListingService;
 import rs.edu.raf.banka1.services.OptionsService;
 
@@ -24,29 +26,27 @@ public class BootstrapData implements CommandLineRunner {
 
     private final CurrencyService currencyService;
 
+    @Autowired
     private ListingService listingService;
 
+    @Autowired
     private ListingMapper listingMapper;
 
-    private OptionsService optionsService;
+    @Autowired
+    private ExchangeService exchangeService;
 
     @Autowired
-    public BootstrapData(ListingService listingService,
-                         ListingMapper listingMapper,
-                         CurrencyService currencyService,
-                         OptionsService optionsService) {
-        this.listingService = listingService;
-        this.listingMapper = listingMapper;
-        this.optionsService = optionsService;
-        this.currencyService = currencyService;
-    }
+    private OptionsService optionsService;
+
     @Override
     public void run(String... args) throws Exception {
 
         System.out.println("Loading Data...");
+
+        exchangeService.seedDatabase();
+        System.out.println("Exchange data loaded!");
+
         List<CurrencyDto> currencyList = loadCurrencies();
-
-
         currencyService.addCurrencies(currencyList);
         System.out.println("Currency Data Loaded!");
 
@@ -54,18 +54,15 @@ public class BootstrapData implements CommandLineRunner {
 
 //        call it only from time to time to update json because api isn't free and we need it only once
 //        listingService.initializeListings();
+
 //        loading data from json and fetches data from other API (professor will give us API token for this one)
-
-        List<ListingModel> listingModels = listingService.fetchListings();
-
+//        List<ListingModel> listingModels = listingService.fetchListings();
 //        use this to update or initialize database with fresh data
-
-        listingService.updateAllListingsDatabase(listingModels);
+//        listingService.updateAllListingsDatabase(listingModels);
 
 //        fetching and bootstrapping listing history data (not recommended as each listing generates 100 history records and we have around 3500 listings)
 //        List<ListingHistoryModel> listingHistoryModels = listingService.fetchAllListingsHistory();
 //        so better alternative is to fetch history only for given listing when needed
-
         List<ListingHistoryModel> oneListingHistoryList = listingService.fetchSingleListingHistory("AAPL");
         listingService.addAllListingsToHistory(oneListingHistoryList);
 
@@ -81,7 +78,7 @@ public class BootstrapData implements CommandLineRunner {
 
     public List<CurrencyDto> loadCurrencies() {
         List<CurrencyDto> currencyList = new ArrayList<>();
-        String csvFile = "src/main/resources/physical_currency_list.csv";
+        String csvFile = "market-service/src/main/resources/physical_currency_list.csv";
         String line = "";
         String csvSplitBy = ",";
 

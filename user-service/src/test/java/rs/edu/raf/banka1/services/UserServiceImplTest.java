@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.userdetails.UserDetails;
+import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
@@ -18,6 +19,7 @@ import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
+import rs.edu.raf.banka1.utils.JwtUtil;
 
 import java.util.Set;
 import java.util.HashSet;
@@ -45,6 +47,12 @@ public class UserServiceImplTest {
 
     @MockBean
     private EmailServiceImpl emailServiceBean;
+
+    @MockBean
+    private JwtUtil jwtUtil;
+
+    @MockBean
+    private PermissionMapper permissionMapper;
 
     @InjectMocks
     @Autowired
@@ -173,7 +181,7 @@ public class UserServiceImplTest {
         editUserRequest.setJmbg("1234");
         editUserRequest.setPosition("asdf");
         editUserRequest.setPhoneNumber("1234");
-        editUserRequest.setActive(false);
+        editUserRequest.setIsActive(false);
         String perm = "can_manage_users";
         Set<String> permissions = new HashSet<>();
         permissions.add(perm);
