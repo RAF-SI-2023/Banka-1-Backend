@@ -92,8 +92,10 @@ public class ListingServiceImpl implements ListingService{
     @Override
     public List<ListingModel> fetchListings() {
         List<ListingModel> listingModels = fetchListingsName();
-        for (ListingModel listingModel : listingModels)
+        for (ListingModel listingModel : listingModels) {
             updateValuesForListing(listingModel);
+            updateStockForListing(listingModel);
+        }
 
         return listingModels;
     }
@@ -143,6 +145,21 @@ public class ListingServiceImpl implements ListingService{
         }
     }
 
+    private void updateStockForListing(ListingModel listingModel){
+        try{
+            // URL of the alphavantage API endpoint
+            String symbol = listingModel.getTicker();
+            String apiUrl = updateListingApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;
+
+            // Fetch JSON data from the API
+            JsonNode rootNode = objectMapper.readTree(new URL(apiUrl));
+
+            updatelistingModelFields(listingModel, rootNode);
+
+        }catch (Exception e){
+            System.out.println(listingModel.getTicker() + " not found on alphavantage");
+        }
+    }
 
     @Override
 //    updates all listings with new data into database
