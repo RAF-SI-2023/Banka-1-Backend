@@ -3,7 +3,6 @@ package rs.edu.raf.banka1.requests;
 import lombok.*;
 
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -18,6 +17,6 @@ public class EditUserRequest {
     private String jmbg;
     private String position;
     private String phoneNumber;
-    private boolean isActive;
+    private Boolean isActive;
     private List<String> permissions;
 }
