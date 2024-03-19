@@ -1,9 +1,5 @@
 package rs.edu.raf.banka1.services;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.requests.LoginRequest;
@@ -14,8 +10,6 @@ import rs.edu.raf.banka1.utils.JwtUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static rs.edu.raf.banka1.utils.PermissionUtil.packPermissions;
 
 @Service
 public class AuthenticationService {

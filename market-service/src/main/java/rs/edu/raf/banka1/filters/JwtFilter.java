@@ -46,7 +46,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (email != null) {
             List<String> permissions = jwtUtil.extractRoles(jwt);
-            System.out.println(permissions);
             List<SimpleGrantedAuthority> authorities = permissions.stream()
                     .map((SimpleGrantedAuthority::new))
                     .collect(Collectors.toList());

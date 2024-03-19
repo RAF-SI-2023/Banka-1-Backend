@@ -19,6 +19,9 @@ import rs.edu.raf.banka1.filters.JwtFilter;
 
 import java.util.Arrays;
 
+import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
+
+
 @EnableWebSecurity
 @EnableScheduling
 @EnableAsync
@@ -37,7 +40,11 @@ public class SpringSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((authz) ->
-                                authz.anyRequest().authenticated()
+                                authz
+                                    .requestMatchers(antMatcher("/swagger-ui.html")).permitAll()
+                                    .requestMatchers(antMatcher("/swagger-ui/**")).permitAll()
+                                    .requestMatchers( antMatcher("/v3/api-docs/**")).permitAll()
+                                    .anyRequest().authenticated()
                 )
 //                .cors().configurationSource(corsConfigurationSource())
 
