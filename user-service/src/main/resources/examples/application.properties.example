@@ -25,5 +25,6 @@ spring.mail.properties.mail.smtp.starttls.enable=true
 logging.level.org.hibernate.SQL=DEBUG
 logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
 server.port=8080
+front.port=4200
 server.servlet.context-path=/
 oauth.jwt.secret=secret_key
