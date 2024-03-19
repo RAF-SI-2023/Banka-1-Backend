@@ -13,7 +13,10 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.client.RestTemplate;
+import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.User;
@@ -37,14 +40,18 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static rs.edu.raf.banka1.cucumber.SpringIntegrationTest.enviroment;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerSteps {
 
     @Autowired
     private EmailService emailService;
-    @LocalServerPort
-    private String port;
+    //@LocalServerPort
+    //private String port;
+
+    private String port = Integer.toString(SpringIntegrationTest.enviroment.getServicePort("user-service", 8080));
+    //private String port = "8080";
 
     private String jwt = "";
 
@@ -61,7 +68,8 @@ public class UserControllerSteps {
 
     private UserRepository userRepository;
     private List<UserResponse> userResponses = new ArrayList<>();
-    private final String url = "http://localhost:";
+    //private final String url = "http://localhost:";
+    private final String url = "http://" + SpringIntegrationTest.enviroment.getServiceHost("user-service", 8080) + ":";
     private Long lastid;
     private String password;
 
@@ -179,6 +187,35 @@ public class UserControllerSteps {
 
     }
 
+    private String getFiltered(String path) throws JsonProcessingException {
+        RestTemplate restTemplate = new RestTemplate();
+        java.net.http.HttpRequest httpRequest = java.net.http.HttpRequest.newBuilder()
+                .uri(URI.create(path))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + jwt)
+                .method("GET", java.net.http.HttpRequest.BodyPublishers.noBody())
+                .build();
+
+        if(searchFilter.getEmail() != null)
+            path = path.concat("?email=" + searchFilter.getEmail());
+        if(searchFilter.getFirstName() != null)
+            path = path.concat("?firstName=" + searchFilter.getFirstName());
+        if(searchFilter.getLastName() != null)
+            path = path.concat("?lastName=" + searchFilter.getLastName());
+        if(searchFilter.getPosition() != null)
+            path = path.concat("?position=" + searchFilter.getPosition());
+
+        try {
+            HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            return httpResponse.body();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            fail("Http GET request error");
+            return "";
+        }
+    }
+
 
     private String put(String path, Object objectToPut) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
@@ -219,7 +256,7 @@ public class UserControllerSteps {
         }
         else if(path.equals("/user/search")) {
             try {
-                lastReadAllUsersResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<UserResponse>>() {});
+                lastReadAllUsersResponse = objectMapper.readValue(getFiltered(url + port + path), new TypeReference<List<UserResponse>>() {});
             }
             catch (Exception e){
                 e.printStackTrace();
