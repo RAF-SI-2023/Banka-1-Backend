@@ -12,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.mapper.ForexMapper;
 import rs.edu.raf.banka1.mapper.ListingHistoryMapper;
+import rs.edu.raf.banka1.model.ListingBase;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.dtos.ExchangeDto;
 import rs.edu.raf.banka1.model.dtos.ListingHistoryDto;
@@ -34,13 +36,15 @@ public class MarketController {
     private final ForexService forexService;
     private final ListingService listingService;
     private final ListingHistoryMapper listingHistoryMapper;
+    private final ForexMapper forexMapper;
 
     @Autowired
-    public MarketController(ExchangeService exchangeService, ForexService forexService, ListingService listingService, ListingHistoryMapper listingHistoryMapper) {
+    public MarketController(ExchangeService exchangeService, ForexService forexService, ListingService listingService, ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper) {
         this.exchangeService = exchangeService;
         this.forexService = forexService;
         this.listingService = listingService;
         this.listingHistoryMapper = listingHistoryMapper;
+        this.forexMapper = forexMapper;
     }
 
     @GetMapping(value = "/exchange", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -84,12 +88,33 @@ public class MarketController {
                                                                           @RequestParam(required = false) Integer timestampFrom,
                                                                           @RequestParam(required = false) Integer timestampTo) {
 
-        System.out.println("ticker: " + ticker + " timestampFrom: " + timestampFrom + " timestampTo: " + timestampTo);
         List<ListingHistory> listingHistories = listingService.getListingHistoriesByTimestamp(ticker, timestampFrom, timestampTo);
         if(listingHistories.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         else
             return new ResponseEntity<>(listingHistories.stream().map(listingHistoryMapper::toDto).toList(), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/listing/{listingType}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get specific listing based on listingType param", description = "Returns list of specific listingType based on listingType param (forex, stock, futures)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class))}),
+            @ApiResponse(responseCode = "404", description = "Listing not found"),
+            @ApiResponse(responseCode = "400", description = "listingType not valid")
+    })
+    public ResponseEntity<?> getListingByType(@PathVariable String listingType) {
+        if(listingType.equalsIgnoreCase("forex"))
+            return new ResponseEntity<>(this.forexService.getAllForexes().stream().map(forexMapper::toDto).toList(), HttpStatus.OK);
+//        uncomment this and add dtos when merging (only leave futures commented becasue we don't have futures in this sprint)
+//        else if(listingType.equalsIgnoreCase("stock"))
+//            return new ResponseEntity<>(this.listingService.getAllStocks(), HttpStatus.OK);
+//        else if(listingType.equalsIgnoreCase("futures"))
+//            return new ResponseEntity<>(this.listingService.getAllFutures(), HttpStatus.OK);
+        else
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
     }
 
 }

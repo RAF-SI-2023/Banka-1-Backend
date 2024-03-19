@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.mapper;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingHistory;
+import rs.edu.raf.banka1.model.dtos.ListingForexDto;
 
 import java.time.Instant;
 
@@ -35,14 +36,23 @@ public class ForexMapper {
         return forex;
     }
 
-    public ListingForex updatePrices(ListingForex listingForex, Double price, Double high, Double low){
-        Double previousPrice = listingForex.getPrice();
-        listingForex.setPrice(price);
-        listingForex.setHigh(high);
-        listingForex.setLow(low);
-        listingForex.setLastRefresh((int) Instant.now().getEpochSecond());
-        listingForex.setPriceChange(price - previousPrice);
-        return listingForex;
+    public ListingForexDto toDto(ListingForex listingForex){
+        ListingForexDto dto = new ListingForexDto();
+        dto.setListingId(listingForex.getListingId());
+        dto.setListingType(listingForex.getListingType());
+        dto.setTicker(listingForex.getTicker());
+        dto.setName(listingForex.getName());
+        dto.setExchange(listingForex.getExchange());
+        dto.setLastRefresh(listingForex.getLastRefresh());
+        dto.setPrice(listingForex.getPrice());
+        dto.setHigh(listingForex.getHigh());
+        dto.setLow(listingForex.getLow());
+        dto.setPriceChange(listingForex.getPriceChange());
+        dto.setVolume(listingForex.getVolume());
+        dto.setBaseCurrency(listingForex.getBaseCurrency());
+        dto.setQuoteCurrency(listingForex.getQuoteCurrency());
+
+        return dto;
     }
 
 }
