@@ -18,7 +18,7 @@ public class ListingMapper {
         LocalDate localDate = Instant.ofEpochSecond(listing.getLastRefresh()).atZone(ZoneOffset.UTC).toLocalDate();
 
         // Get the Unix timestamp for the beginning of the day
-        long beginningOfDayUnixTimestamp = localDate.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
+        int beginningOfDayUnixTimestamp = (int)localDate.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
 
         listingHistory.setDate(beginningOfDayUnixTimestamp);
 
@@ -39,7 +39,7 @@ public class ListingMapper {
         listing.setLastRefresh((int) (System.currentTimeMillis() / 1000));
     }
 
-    public ListingHistory createListingHistoryModel(String ticker, long date, double price, double ask, double bid, double changed, int volume) {
+    public ListingHistory createListingHistoryModel(String ticker, int date, double price, double ask, double bid, double changed, int volume) {
         ListingHistory listingHistory = new ListingHistory();
         listingHistory.setTicker(ticker);
         listingHistory.setDate(date);

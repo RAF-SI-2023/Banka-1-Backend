@@ -6,13 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.ForexMapper;
+import rs.edu.raf.banka1.mapper.ListingHistoryMapper;
 import rs.edu.raf.banka1.model.ListingForex;
+import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.repositories.ForexRepository;
 import rs.edu.raf.banka1.utils.Requests;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.net.URL;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.*;
 
 @Service
 public class ForexServiceImpl implements ForexService {
@@ -20,6 +23,9 @@ public class ForexServiceImpl implements ForexService {
 
     @Autowired
     private ForexMapper forexMapper;
+
+    @Autowired
+    ListingHistoryMapper listingHistoryMapper;
 
     @Autowired
     private ForexRepository forexRepository;
@@ -38,6 +44,9 @@ public class ForexServiceImpl implements ForexService {
 
     @Value("${forexExchangeRateApiUrl}")
     private String forexExchangeRateApiUrl;
+
+    @Value("${forexDailyApiUrl}")
+    private String forexDailyApiUrl;
 
 
     public ForexServiceImpl() {
@@ -136,6 +145,69 @@ public class ForexServiceImpl implements ForexService {
     public void saveAllForexes(List<ListingForex> listingForexList) {
         forexRepository.saveAll(listingForexList);
     }
+
+    @Override
+    public List<ListingForex> getAllForexes() {
+        return forexRepository.findAll();
+    }
+
+    @Override
+    public List<ListingHistory> getForexHistory(ListingForex listingForex) {
+        String response = "";
+        try {
+            String apiUrl = forexDailyApiUrl + "&from_symbol=" + listingForex.getBaseCurrency()
+                    + "&to_symbol=" + listingForex.getQuoteCurrency()
+                    + "&apikey=" + alphaVantageAPIToken;
+
+            response = Requests.sendRequest(apiUrl);
+
+            JsonNode rootNode = objectMapper.readTree(response);
+
+            List<ListingHistory> listingHistories = new ArrayList<>();
+
+            // Get the "Time Series FX (Daily)" node
+            JsonNode timeSeriesNode = rootNode.get("Time Series FX (Daily)");
+            if (timeSeriesNode != null) {
+                Iterator<Map.Entry<String, JsonNode>> fields = timeSeriesNode.fields();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = fields.next();
+
+                    String dateStr = entry.getKey();
+                    LocalDate date = LocalDate.parse(dateStr); // Parse the date string to LocalDate
+                    int unixTimestamp = (int) date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli() / 1000;
+
+                    JsonNode dataNode = entry.getValue();
+
+                    ListingHistory listingHistory = parseHistory(listingForex.getTicker(), unixTimestamp, dataNode);
+
+                    listingHistories.add(listingHistory);
+                }
+            }
+            return listingHistories;
+        }catch (Exception e) {
+            e.printStackTrace();
+            System.out.printf(response);
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<ListingHistory> getAllForexHistories(List<ListingForex> listingForexList) {
+        return listingForexList.stream().map(this::getForexHistory).flatMap(List::stream).toList();
+    }
+
+    public ListingHistory parseHistory(String ticker, int date, JsonNode dataNode){
+        double open = dataNode.get("1. open").asDouble();
+        double high = dataNode.get("2. high").asDouble();
+        double low = dataNode.get("3. low").asDouble();
+        double close = dataNode.get("4. close").asDouble();
+        int volume = 0;
+
+        return listingHistoryMapper.createHistory(ticker, date, open, high, low, close, volume);
+    }
+
+
+
 
 
 }

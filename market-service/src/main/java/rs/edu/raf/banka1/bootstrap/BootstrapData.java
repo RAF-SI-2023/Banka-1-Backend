@@ -6,6 +6,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.mapper.ListingMapper;
 import rs.edu.raf.banka1.model.ListingForex;
+import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.services.CurrencyService;
 import rs.edu.raf.banka1.services.ForexService;
@@ -36,10 +37,10 @@ public class BootstrapData implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         System.out.println("Loading Data...");
-
-        List<CurrencyDto> currencyList = loadCurrencies();
-        currencyService.addCurrencies(currencyList);
-        System.out.println("Currency Data Loaded!");
+//
+//        List<CurrencyDto> currencyList = loadCurrencies();
+//        currencyService.addCurrencies(currencyList);
+//        System.out.println("Currency Data Loaded!");
 
 //        ////////////////////////////////////////////////////////////////
 ////        LISTINGS
@@ -71,9 +72,16 @@ public class BootstrapData implements CommandLineRunner {
         List<ListingForex> updated = forexService.updateAllPrices(listingForexList.subList(0, 10));
 //        saves forex data to database (only after update)
 //       because update uses other API which doesn't support all forex names, so we need to save only available forexs
-        forexService.saveAllForexes(updated);
-        ////////////////////////////////////////////////////////////////
 
+
+//        add forexes histories to database
+//        Warning: agreement is to add just histories for 10 forexes
+        List<ListingHistory> histories = forexService.getAllForexHistories(updated);
+        forexService.saveAllForexes(updated);
+        listingService.addAllListingsToHistory(histories);
+        ////////////////////////////////////////////////////////////////
+        System.out.printf("Updated: " + updated.size());
+        System.out.println("Histories: " + histories.size());
         System.out.println("All Data loaded!");
     }
 

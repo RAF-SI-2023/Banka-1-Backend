@@ -19,10 +19,10 @@ public class ListingHistory {
     private Long id;
 
     private String ticker;
-    private long date;
-    private double price;
-    private double ask;
-    private double bid;
-    private double changed;
-    private int volume;
+    private Integer date;
+    private Double price;
+    private Double ask;
+    private Double bid;
+    private Double changed;
+    private Integer volume;
 }

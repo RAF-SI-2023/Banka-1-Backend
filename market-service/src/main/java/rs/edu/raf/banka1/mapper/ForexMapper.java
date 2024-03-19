@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.mapper;
 
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.ListingForex;
+import rs.edu.raf.banka1.model.ListingHistory;
 
 import java.time.Instant;
 
@@ -43,4 +44,5 @@ public class ForexMapper {
         listingForex.setPriceChange(price - previousPrice);
         return listingForex;
     }
+
 }

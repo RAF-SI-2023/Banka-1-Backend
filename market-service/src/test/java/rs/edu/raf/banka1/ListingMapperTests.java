@@ -58,7 +58,7 @@ public class ListingMapperTests {
 
         // Call the method
         String ticker = "XYZ";
-        long date = 1647433200; // Example date, you can adjust it as needed
+        int date = 1647433200; // Example date, you can adjust it as needed
         double price = 75.0;
         double ask = 100.0;
         double bid = 50.0;
@@ -143,7 +143,7 @@ public class ListingMapperTests {
         LocalDate localDate = Instant.ofEpochSecond(lastRefresh).atZone(ZoneOffset.UTC).toLocalDate();
 
         // Get the Unix timestamp for the beginning of the day
-        long beginningOfDayUnixTimestamp = localDate.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
+        int beginningOfDayUnixTimestamp = (int) localDate.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
 
         assertEquals(beginningOfDayUnixTimestamp, result.getDate());
         assertEquals(price, result.getPrice());

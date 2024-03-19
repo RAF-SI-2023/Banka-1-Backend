@@ -32,3 +32,4 @@ updateListingApiUrl=https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symb
 forexExchangePlaceApiUrl=https://finnhub.io/api/v1/forex/exchange?token=
 forexSymbolsApiUrl=https://finnhub.io/api/v1/forex/symbol?exchange=
 forexExchangeRateApiUrl=https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE
+forexDailyApiUrl=https://www.alphavantage.co/query?function=FX_DAILY

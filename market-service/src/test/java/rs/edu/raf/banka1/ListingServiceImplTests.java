@@ -41,7 +41,7 @@ public class ListingServiceImplTests {
     private List<ListingHistory> lst;
     private ListingHistory model1;
     private ListingHistory model2;
-    private long date;
+    private int date;
     List<String> validTickers;
     List<String> validCompanyNames;
     List<String> validPrimaryExchanges;
@@ -50,7 +50,7 @@ public class ListingServiceImplTests {
     public void setUp(){
         model1 = new ListingHistory();
         model1.setTicker("AAPL");
-        model1.setDate(Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
+        model1.setDate((int) Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         model1.setPrice(100.0);
         model1.setAsk(101.0);
         model1.setBid(99.0);
@@ -59,7 +59,7 @@ public class ListingServiceImplTests {
 
         model2 = new ListingHistory();
         model2.setTicker("MSFT");
-        model2.setDate(Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
+        model2.setDate((int)Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         model2.setPrice(100.0);
         model2.setAsk(101.0);
         model2.setBid(99.0);
@@ -70,7 +70,7 @@ public class ListingServiceImplTests {
         lst.add(model1);
         lst.add(model2);
 
-        date = Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
+        date = (int) Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
 
         validTickers = List.of("DT");
         validCompanyNames = List.of("Dynatrace Inc");
