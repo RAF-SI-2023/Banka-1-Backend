@@ -14,7 +14,7 @@ import java.util.List;
 public class ForeignCurrencyAccountRequest {
 
     private Long ownerId;
-    private Long assignedAgentId;
+    private Long createdByAgentId;
     private String currency;
     private String typeOfAccount;
     private String subtypeOfAccount;

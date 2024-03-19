@@ -55,7 +55,7 @@ public class BootstrapData implements CommandLineRunner {
         userRepository.save(user1);
         userRepository.save(client);
 
-        ForeignCurrencyAccount account1 = createDevizniRacun(client, user1);
+        ForeignCurrencyAccount account1 = createForeignCurrencyAccount(client, user1);
 
         userRepository.save(client);
         foreignCurrencyAccountRepository.save(account1);
@@ -63,7 +63,7 @@ public class BootstrapData implements CommandLineRunner {
         System.out.println("Data loaded!");
     }
 
-    private static ForeignCurrencyAccount createDevizniRacun(User client, User user1) {
+    private static ForeignCurrencyAccount createForeignCurrencyAccount(User client, User user1) {
         ForeignCurrencyAccount account1 = new ForeignCurrencyAccount();
         String creationDate = "2024-03-18";
         String expirationDate = "2024-03-18";

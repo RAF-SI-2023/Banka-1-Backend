@@ -10,7 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateForeignCurrencyAccountResponse {
-    private Long userId;
+    private Long id;
 
 
 }

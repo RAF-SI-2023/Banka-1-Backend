@@ -33,7 +33,11 @@ public class BankAccountServiceImpl implements BankAccountService {
     @Override
     public CreateForeignCurrencyAccountResponse createForeignCurrencyAccount(ForeignCurrencyAccountRequest foreignCurrencyAccountRequest) {
         ForeignCurrencyAccount foreignCurrencyAccount = foreignCurrencyAccountMapper.createForeignCurrencyAccountRequestToForeignCurrencyAccount(foreignCurrencyAccountRequest);
-        foreignCurrencyAccountRepository.save(foreignCurrencyAccount);
-        return new CreateForeignCurrencyAccountResponse(foreignCurrencyAccount.getId());
+        if (foreignCurrencyAccount != null) {
+            foreignCurrencyAccountRepository.save(foreignCurrencyAccount);
+            return new CreateForeignCurrencyAccountResponse(foreignCurrencyAccount.getId());
+        }else {
+            return new CreateForeignCurrencyAccountResponse(-1L);
+        }
     }
 }
