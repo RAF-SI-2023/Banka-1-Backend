@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.swagger.v3.core.util.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,13 +20,22 @@ import rs.edu.raf.banka1.repositories.StockRepository;
 import rs.edu.raf.banka1.utils.Constants;
 
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Iterator;
+import java.util.Optional;
 
 @Service
 public class ListingStockServiceImpl implements ListingStockService {
@@ -60,7 +68,7 @@ public class ListingStockServiceImpl implements ListingStockService {
 
 
     public ListingStockServiceImpl() {
-        objectMapper= new ObjectMapper();
+        objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
@@ -93,7 +101,7 @@ public class ListingStockServiceImpl implements ListingStockService {
             System.out.println(apiException.getMessage());
         } catch (Exception e){
             //e.printStackTrace();
-            System.err.println("[generateJSONSymbols] Exception occured:"+e.getMessage());
+            System.err.println("[generateJSONSymbols] Exception occured:" + e.getMessage());
         }
 
     }

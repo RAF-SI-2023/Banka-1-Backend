@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import rs.edu.raf.banka1.model.ListingHistoryModel;
-import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.services.CurrencyService;
 import rs.edu.raf.banka1.services.ExchangeService;

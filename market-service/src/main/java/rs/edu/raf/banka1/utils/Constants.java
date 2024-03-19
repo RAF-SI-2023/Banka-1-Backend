@@ -1,6 +1,5 @@
 package rs.edu.raf.banka1.utils;
 
-import java.io.File;
 import java.util.List;
 
 public class Constants {
