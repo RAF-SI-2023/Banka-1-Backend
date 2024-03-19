@@ -28,7 +28,14 @@ services:
         "spring.datasource.password": "mypassword",
         "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL8Dialect",
         "spring.jpa.hibernate.ddl-auto" : "update",
-        "oauth.jwt.secret": "my_secret"
+        "oauth.jwt.secret": "my_secret",
+        "spring.mail.host":"smtp.gmail.com",
+        "spring.mail.port":587,
+        "spring.mail.username":"noreply.rafbanka1@gmail.com",
+        "spring.mail.password":"fony nhtw hlah vzul",
+        "spring.mail.properties.mail.smtp.auth":true,
+        "spring.mail.properties.mail.smtp.starttls.enable":true,
+        "springdoc.packagesToScan": "rs.edu.raf.banka1.controller"
       }'
 
     depends_on:
@@ -48,7 +55,12 @@ services:
         "spring.datasource.password": "mypassword",
         "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL8Dialect",
         "spring.jpa.hibernate.ddl-auto" : "update",
-        "oauth.jwt.secret": "my_secret"
+        "oauth.jwt.secret": "secret_key",
+        "listingAPItoken": "pk_f87286e075c94cc484405da70691c030",
+        "alphaVantageAPIToken":"OF6BVKZOCXWHD9NS",
+        "listingNameApiUrl":"https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=",
+        "updateListingApiUrl":"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=",
+        "springdoc.packagesToScan": "rs.edu.raf.banka1.controller"
       }'
     depends_on:
       mysql:

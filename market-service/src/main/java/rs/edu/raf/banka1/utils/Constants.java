@@ -11,6 +11,7 @@ public class Constants {
     public static final String countryTimezoneOffsetsFilePath = "market-service/src/main/resources/country_timezone_offsets.json";
     public static final List<String> sectors = List.of("Technology");
     public static final int maxListings = 700;
+    public static final Integer BEARER_PREFIX_SIZE = 7;
     public static final List<String> ListingsToIgnore = List.of(
             "ATLEF",
             "NTXNF",
