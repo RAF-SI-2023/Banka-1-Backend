@@ -173,7 +173,7 @@ public class UserServiceImplTest {
         editUserRequest.setJmbg("1234");
         editUserRequest.setPosition("asdf");
         editUserRequest.setPhoneNumber("1234");
-        editUserRequest.setActive(false);
+        editUserRequest.setIsActive(false);
         String perm = "can_manage_users";
         Set<String> permissions = new HashSet<>();
         permissions.add(perm);

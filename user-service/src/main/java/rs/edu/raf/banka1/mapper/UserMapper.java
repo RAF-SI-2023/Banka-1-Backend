@@ -1,5 +1,7 @@
 package rs.edu.raf.banka1.mapper;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
@@ -11,8 +13,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class UserMapper {
-
     private PermissionMapper permissionMapper;
+
+    private PasswordEncoder passwordEncoder;
 
     public UserMapper(PermissionMapper permissionMapper) {
         this.permissionMapper = permissionMapper;
@@ -60,13 +63,13 @@ public class UserMapper {
     }
 
     public User editUserRequestToUser(User user, EditUserRequest editUserRequest) {
-        user.setPassword(editUserRequest.getPassword());
-        user.setFirstName(editUserRequest.getFirstName());
-        user.setLastName(editUserRequest.getLastName());
-        user.setJmbg(editUserRequest.getJmbg());
-        user.setPosition(editUserRequest.getPosition());
-        user.setPhoneNumber(editUserRequest.getPhoneNumber());
-        user.setActive(editUserRequest.isActive());
+        if (editUserRequest.getPassword() != null) user.setPassword(passwordEncoder.encode(editUserRequest.getPassword()));
+        if (editUserRequest.getFirstName() != null) user.setFirstName(editUserRequest.getFirstName());
+        if (editUserRequest.getLastName() != null) user.setLastName(editUserRequest.getLastName());
+        if (editUserRequest.getJmbg() != null) user.setJmbg(editUserRequest.getJmbg());
+        if (editUserRequest.getPosition() != null) user.setPosition(editUserRequest.getPosition());
+        if (editUserRequest.getPhoneNumber() != null) user.setPhoneNumber(editUserRequest.getPhoneNumber());
+        if (editUserRequest.getIsActive() != null) user.setActive(editUserRequest.getIsActive());
         return user;
     }
 
@@ -78,10 +81,15 @@ public class UserMapper {
         editUserRequest.setJmbg(user.getJmbg());
         editUserRequest.setPhoneNumber(user.getPhoneNumber());
         editUserRequest.setPosition(user.getPosition());
-        editUserRequest.setActive(user.getActive());
+        editUserRequest.setIsActive(user.getActive());
         editUserRequest.setPermissions(user.getPermissions().stream().map(permission -> permission.getName()).collect(Collectors.toSet()));
         editUserRequest.setUserId(user.getUserId());
         editUserRequest.setPassword(user.getPassword());
         return editUserRequest;
+    }
+
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
     }
 }
