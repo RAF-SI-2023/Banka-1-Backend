@@ -27,22 +27,22 @@ public class BootstrapData implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("Loading Data...");
-
-        Permission testPermission = new Permission();
-        testPermission.setName("can_manage_users");
-        permissionRepository.save(testPermission);
-        Set<Permission> permissions1 = new HashSet<>();
-        permissions1.add(testPermission);
-
-        User user1 = new User();
-        user1.setEmail("user1@gmail.com");
-        user1.setPassword(passwordEncoder.encode("user1"));
-        user1.setFirstName("User1");
-        user1.setLastName("User1Prezime");
-        user1.setPermissions(permissions1);
-        userRepository.save(user1);
-
-        System.out.println("Data loaded!");
+//        System.out.println("Loading Data...");
+//
+//        Permission testPermission = new Permission();
+//        testPermission.setName("can_manage_users");
+//        permissionRepository.save(testPermission);
+//        Set<Permission> permissions1 = new HashSet<>();
+//        permissions1.add(testPermission);
+//
+//        User user1 = new User();
+//        user1.setEmail("user1@gmail.com");
+//        user1.setPassword(passwordEncoder.encode("user1"));
+//        user1.setFirstName("User1");
+//        user1.setLastName("User1Prezime");
+//        user1.setPermissions(permissions1);
+//        userRepository.save(user1);
+//
+//        System.out.println("Data loaded!");
     }
 }
