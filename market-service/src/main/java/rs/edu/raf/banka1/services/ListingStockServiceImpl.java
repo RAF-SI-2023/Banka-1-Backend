@@ -5,17 +5,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.v3.core.util.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import rs.edu.raf.banka1.mapper.ListingStockMapper;
-import rs.edu.raf.banka1.model.ListingBase;
 import rs.edu.raf.banka1.model.ListingHistoryModel;
 
 import rs.edu.raf.banka1.model.ListingStock;
 
 import rs.edu.raf.banka1.model.exceptions.APIException;
+import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 import rs.edu.raf.banka1.repositories.StockRepository;
 import rs.edu.raf.banka1.utils.Constants;
 
@@ -23,9 +24,10 @@ import rs.edu.raf.banka1.utils.Constants;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ListingStockServiceImpl implements ListingStockService {
@@ -35,6 +37,8 @@ public class ListingStockServiceImpl implements ListingStockService {
     private StockRepository stockRepository;
     @Autowired
     private ListingStockMapper stockMapper;
+    @Autowired
+    private ListingHistoryRepository listingHistoryRepository;
 
     @Value("${listingAPItoken}")
     private String listingAPItoken;
@@ -50,6 +54,10 @@ public class ListingStockServiceImpl implements ListingStockService {
 
     @Value("${updateListingApiUrl}")
     private String updateListingApiUrl;
+
+    @Value("${HistoryListingApiUrl}")
+    private String historyListingApiUrl;
+
 
     public ListingStockServiceImpl() {
         objectMapper= new ObjectMapper();
@@ -155,25 +163,119 @@ public class ListingStockServiceImpl implements ListingStockService {
         }
     }
 
+    public List<ListingStock> fetchTenStocks() {
+        List<ListingStock> allStocks = getAllStocks();
 
+        // Use Java streams to limit the number of stocks to 10 or less
+        List<ListingStock> tenStocks = allStocks.stream()
+                .limit(10)
+                .collect(Collectors.toList());
 
-   /* @Override
+        return tenStocks;
+    }
+
+    /*
+    @Override
     public List<ListingHistoryModel> fetchAllListingsHistory() {
         try{
-            List<ListingModel> listingModels = fetchListingsName();
+            List<ListingStock> listingStocks = fetchTenStocks();
             List<ListingHistoryModel> listingHistoryModels = new ArrayList<>();
-            for (ListingModel lmodel : listingModels)
-                listingHistoryModels.addAll(fetchSingleListingHistory(lmodel.getTicker()));
+            for (ListingStock stock : listingStocks)
+                listingHistoryModels.addAll(fetchSingleListingHistory(stock.getTicker()));
 
             return listingHistoryModels;
         }catch (Exception e) {
             e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+    *
+     */
 
+    //------!!!-------Ovo vraca za 10 stocks StockHistory
+    @Override
+    public List<ListingHistoryModel> fetchAllListingsHistory() {
+        try{
+            List<ListingStock> listingStocks = fetchTenStocks();
+            List<ListingHistoryModel> listingHistoryModels = new ArrayList<>();
+            for (ListingStock stock : listingStocks){
+                List<ListingHistoryModel> singleStockHistory = fetchSingleListingHistory(stock.getTicker());
+                listingHistoryModels.addAll(singleStockHistory);
+            }
+
+            return listingHistoryModels;
+        }catch (Exception e) {
+            e.printStackTrace();
             return new ArrayList<>();
         }
     }
 
-*/
+
+    @Override
+    public List<ListingHistoryModel> fetchSingleListingHistory(String ticker){
+        try {
+            String apiUrl = historyListingApiUrl + ticker + "&outputsize=compact&apikey=" + alphaVantageAPIToken;
+            String response = sendRequest(apiUrl);
+            JsonNode rootNode = objectMapper.readTree(response);
+
+            List<ListingHistoryModel> listingHistoryModels = new ArrayList<>();
+            // Get the "Time Series (Daily)" node
+            JsonNode timeSeriesNode = rootNode.get("Time Series (Daily)");
+            if (timeSeriesNode != null) {
+                Iterator<Map.Entry<String, JsonNode>> fields = timeSeriesNode.fields();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = fields.next();
+
+                    String dateStr = entry.getKey();
+                    LocalDate date = LocalDate.parse(dateStr); // Parse the date string to LocalDate
+                    int unixTimestamp = (int) date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli() / 1000;
+
+                    JsonNode dataNode = entry.getValue();
+
+                    ListingHistoryModel listingHistoryModel = createListingHistoryModelFromJson(dataNode, ticker, unixTimestamp);
+
+                    listingHistoryModels.add(listingHistoryModel);
+                }
+            }
+            return listingHistoryModels;
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public int addListingToHistory(ListingHistoryModel listingHistory) {
+        Optional<ListingHistoryModel> listingHistoryModelOptional = listingHistoryRepository.findByTickerAndDate(listingHistory.getTicker(), listingHistory.getDate());
+        if (listingHistoryModelOptional.isPresent()) {
+            ListingHistoryModel lhm = stockMapper.updateHistoryListingWithNewData(listingHistoryModelOptional.get(), listingHistory);
+            listingHistoryRepository.save(lhm);
+            return 0;
+        }else{
+            listingHistoryRepository.save(listingHistory);
+            return 1;
+        }
+    }
+
+    @Override
+    public int addAllListingsToHistory(List<ListingHistoryModel> listingHistoriesModels) {
+        return listingHistoriesModels.stream().mapToInt(this::addListingToHistory).sum();
+    }
+
+    private ListingHistoryModel createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp){
+        // Get specific fields from each data node
+        double open = dataNode.get("1. open").asDouble();
+        double high = dataNode.get("2. high").asDouble();
+        double low = dataNode.get("3. low").asDouble();
+        double close = dataNode.get("4. close").asDouble();
+        int volume = dataNode.get("5. volume").asInt();
+
+        // make a new ListingHistoryModel
+        ListingHistoryModel listingHistoryModel = stockMapper.createListingHistoryModel(ticker, unixTimestamp, close, high, low, close - open, volume);
+
+        return listingHistoryModel;
+    }
+
     private String sendRequest(String urlStr) throws Exception,APIException {
         URL url = new URL(urlStr);
 

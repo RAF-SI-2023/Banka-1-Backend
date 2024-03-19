@@ -28,3 +28,4 @@ alphaVantageAPIToken=OF6BVKZOCXWHD9NS
 listingNameApiUrl=https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=
 updateListingApiUrl=https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=
 basicStockInfoApiUrl=https://www.alphavantage.co/query?function=OVERVIEW&symbol=
+HistoryListingApiUrl=https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=

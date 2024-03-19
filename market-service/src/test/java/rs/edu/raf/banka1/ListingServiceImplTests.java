@@ -6,10 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import rs.edu.raf.banka1.mapper.ListingMapper;
+
+import rs.edu.raf.banka1.mapper.ListingStockMapper;
 import rs.edu.raf.banka1.model.ListingHistoryModel;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
-import rs.edu.raf.banka1.services.ListingServiceImpl;
+
+import rs.edu.raf.banka1.services.ListingStockServiceImpl;
 
 import java.sql.Date;
 import java.time.ZoneOffset;
@@ -26,10 +28,10 @@ public class ListingServiceImplTests {
     @Mock
     private ListingHistoryRepository listingHistoryRepository;
     @Mock
-    private ListingMapper listingMapper;
+    private ListingStockMapper listingMapper;
 
     @InjectMocks
-    private ListingServiceImpl listingService;
+    private ListingStockServiceImpl listingService;
 
     private List<ListingHistoryModel> lst = new ArrayList<>();
     private ListingHistoryModel model1;

@@ -9,7 +9,7 @@ public class Constants {
     public static final String micCsvFilePath = "market-service/src/main/resources/ISO10383_MIC.csv";
     public static final String countryTimezoneOffsetsFilePath = "market-service/src/main/resources/country_timezone_offsets.json";
     public static final List<String> sectors = List.of("Technology","Electronic Technology","Health Technology","Health Services","Finance","Energy");
-    public static final int maxStockListings = 100;
+    public static final int maxStockListings = 20;
     public static final List<String> ListingsToIgnore = List.of(
             "ATLEF",
             "NTXNF",

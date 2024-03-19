@@ -11,7 +11,15 @@ public interface ListingStockService {
     void updateValuesForListingStock(ListingStock listingStock);
     List<ListingStock> getAllStocks();
 
- //  List<ListingHistoryModel> fetchAllListingsHistory();
-  //  void initializeStock();
-   // void getStockData(String symbol);
+    List<ListingHistoryModel> fetchAllListingsHistory();
+
+    //    fetch single listing-history
+    List<ListingHistoryModel> fetchSingleListingHistory(String ticker);
+
+    //    return 1 if it's a new listing, 0 if it's just an update
+    int addListingToHistory(ListingHistoryModel listingHistoryModel);
+
+    //    returns how many new listings were added
+    int addAllListingsToHistory(List<ListingHistoryModel> listingHistoryModels);
+
 }

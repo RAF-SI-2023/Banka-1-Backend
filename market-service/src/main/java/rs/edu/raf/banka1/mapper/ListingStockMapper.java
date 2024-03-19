@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.mapper;
 
 import org.springframework.stereotype.Component;
+import rs.edu.raf.banka1.model.ListingHistoryModel;
 import rs.edu.raf.banka1.model.ListingStock;
 
 @Component
@@ -21,7 +22,7 @@ public class ListingStockMapper {
         stock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
         return stock;
     }
-    public void updatelistingStock(ListingStock stock, String name, String symbol, Double price, Double high, Double low, Double priceChange, Integer volume,Integer outstandingShare, Double dividendYield, String exchange) {
+    public void updatelistingStock(ListingStock stock, String symbol,String name, Double price, Double high, Double low, Double priceChange, Integer volume,Integer outstandingShare, Double dividendYield, String exchange) {
         stock.setTicker(symbol);
         stock.setLow(low);
         stock.setListingType("Stock");
@@ -34,7 +35,27 @@ public class ListingStockMapper {
         stock.setName(name);
         stock.setExchange(exchange);
         stock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
+    }
+    public ListingHistoryModel createListingHistoryModel(String ticker, long date, double price, double ask, double bid, double changed, int volume) {
+        ListingHistoryModel listingHistoryModel = new ListingHistoryModel();
+        listingHistoryModel.setTicker(ticker);
+        listingHistoryModel.setDate(date);
+        listingHistoryModel.setPrice(price);
+        listingHistoryModel.setAsk(ask);
+        listingHistoryModel.setBid(bid);
+        listingHistoryModel.setChanged(changed);
+        listingHistoryModel.setVolume(volume);
+        return listingHistoryModel;
+    }
 
+    public ListingHistoryModel updateHistoryListingWithNewData(ListingHistoryModel oldModel, ListingHistoryModel newModel) {
+        oldModel.setPrice(newModel.getPrice());
+        oldModel.setAsk(newModel.getAsk());
+        oldModel.setBid(newModel.getBid());
+        oldModel.setChanged(newModel.getChanged());
+        oldModel.setVolume(newModel.getVolume());
+
+        return oldModel;
     }
 
 }
