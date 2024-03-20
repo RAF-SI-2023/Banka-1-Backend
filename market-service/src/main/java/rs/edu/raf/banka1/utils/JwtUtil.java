@@ -39,7 +39,7 @@ public class JwtUtil {
             return new ArrayList<>();
         }
         //noinspection unchecked
-        return claims.get("roles", (Class<List<String>>)(Class<?>)List.class);
+        return claims.get("roles", (Class<List<String>>) (Class<?>) List.class);
     }
 
     public boolean isTokenExpired(String token) {

@@ -157,8 +157,9 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<EditUserResponse> editUser(@RequestBody EditUserRequest editUserRequest) {
-        return new ResponseEntity<>(userService.editUser(editUserRequest), HttpStatus.OK);
+    public ResponseEntity<Boolean> editUser(@RequestBody EditUserRequest editUserRequest) {
+        boolean edited = userService.editUser(editUserRequest);
+        return new ResponseEntity<>(edited, edited ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping(value = "/remove/{id}")
@@ -172,7 +173,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Boolean> deleteUser(@PathVariable Long id) {
-        boolean deleted = userService.deleteUser(id);
+        Boolean deleted = userService.deleteUser(id);
         return new ResponseEntity<>(deleted, deleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
