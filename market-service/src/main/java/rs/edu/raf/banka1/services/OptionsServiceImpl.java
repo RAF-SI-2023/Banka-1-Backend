@@ -47,7 +47,7 @@ public class OptionsServiceImpl implements OptionsService{
             // If not cached, obtain them
             if (!getCookieAndCrumb()) {
                 System.out.println("Failed to obtain cookie and crumb values");
-                return null;
+                return new ArrayList<>();
             }
         }
 
