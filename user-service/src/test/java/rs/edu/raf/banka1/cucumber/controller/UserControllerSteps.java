@@ -18,20 +18,15 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
+import rs.edu.raf.banka1.mapper.ForeignCurrencyAccountMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
-import rs.edu.raf.banka1.requests.ActivateAccountRequest;
-import rs.edu.raf.banka1.requests.CreateUserRequest;
-import rs.edu.raf.banka1.requests.EditUserRequest;
-import rs.edu.raf.banka1.requests.LoginRequest;
-import rs.edu.raf.banka1.responses.ActivateAccountResponse;
-import rs.edu.raf.banka1.responses.CreateUserResponse;
-import rs.edu.raf.banka1.responses.EditUserResponse;
-import rs.edu.raf.banka1.responses.LoginResponse;
-import rs.edu.raf.banka1.responses.UserResponse;
+import rs.edu.raf.banka1.requests.*;
+import rs.edu.raf.banka1.responses.*;
 import rs.edu.raf.banka1.services.EmailService;
 
 import java.net.URI;
@@ -64,6 +59,8 @@ public class UserControllerSteps {
     private UserResponse lastReadUserResponse;
     private List<UserResponse> lastReadAllUsersResponse;
     private CreateUserResponse lastCreateUserResponse;
+    private CreateForeignCurrencyAccountResponse lastCreateForeignCurrencyAccountResponse;
+    private List<ForeignCurrencyAccountResponse> lastReadAllForeignCurrencyAccountsResponse;
     private EditUserResponse lastEditUserResponse;
     private ActivateAccountResponse lastActivateAccountResponse;
     private User activatedUser;
@@ -75,6 +72,8 @@ public class UserControllerSteps {
     private ResponseEntity<?> lastResponse;
 
     private UserRepository userRepository;
+    private ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
+    private ForeignCurrencyAccountRequest foreignCurrencyAccountRequest = new ForeignCurrencyAccountRequest();
     private PermissionRepository permissionRepository;
     private List<UserResponse> userResponses = new ArrayList<>();
     //private final String url = "http://localhost:";
@@ -93,6 +92,44 @@ public class UserControllerSteps {
     }
 
     private SearchFilter searchFilter = new SearchFilter();
+
+    @Given("ownerId is {string}")
+    public void owneridIs(String arg0) {
+        foreignCurrencyAccountRequest.setOwnerId(Long.parseLong(arg0));
+    }
+
+    @Given("createdByAgentId is {string}")
+    public void createdbyagentidIs(String arg0) {
+        foreignCurrencyAccountRequest.setCreatedByAgentId(Long.parseLong(arg0));
+    }
+
+    @Given("currency is {string}")
+    public void currencyIs(String arg0) {
+        foreignCurrencyAccountRequest.setCurrency(arg0);
+    }
+
+    @Given("subtypeOfAccount is {string}")
+    public void subtypeofaccountIs(String arg0) {
+        foreignCurrencyAccountRequest.setSubtypeOfAccount(arg0);
+    }
+    @Given("typeOfAccount is {string}")
+    public void typeofaccountIs(String arg0) {
+        foreignCurrencyAccountRequest.setTypeOfAccount(arg0);
+    }
+    @Given("accountMaintenance is {string}")
+    public void accountmaintenanceIs(String arg0) {
+        foreignCurrencyAccountRequest.setAccountMaintenance(Double.parseDouble(arg0));
+    }
+    @Given("defaultCurrency is {string}")
+    public void defaultcurrencyIs(String arg0) {
+        foreignCurrencyAccountRequest.setDefaultCurrency(Boolean.valueOf(arg0));
+    }
+    @Given("allowedCurrencies is {string}")
+    public void allowedcurrenciesIs(String arg0) {
+        List<String> allowedCurrencies = new ArrayList<>();
+        allowedCurrencies.add(arg0);
+        foreignCurrencyAccountRequest.setAllowedCurrencies(allowedCurrencies);
+    }
 
     @Given("i am logged in with email {string} and password {string}")
     public void iAmLoggedIn(String email, String password) {
@@ -161,8 +198,10 @@ public class UserControllerSteps {
         userToRemove = Long.parseLong(id);
     }
 
-    public UserControllerSteps(UserRepository userRepository) {
+    public UserControllerSteps(UserRepository userRepository, ForeignCurrencyAccountRepository foreignCurrencyAccountRepository, PermissionRepository permissionRepository) {
         this.userRepository = userRepository;
+        this.foreignCurrencyAccountRepository = foreignCurrencyAccountRepository;
+        this.permissionRepository = permissionRepository;
     }
 
     @Given("i have email {string}")
@@ -241,7 +280,7 @@ public class UserControllerSteps {
         return response.getBody();
     }
 
-    private String post(String path, Object objectToPost) throws JsonProcessingException {
+    private String post(String path, Object objectToPost){
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
@@ -255,7 +294,7 @@ public class UserControllerSteps {
 
     }
 
-    private String getFiltered(String path) throws JsonProcessingException {
+    private String getFiltered(String path){
         RestTemplate restTemplate = new RestTemplate();
         java.net.http.HttpRequest httpRequest = java.net.http.HttpRequest.newBuilder()
                 .uri(URI.create(path))
@@ -293,7 +332,7 @@ public class UserControllerSteps {
     }
 
 
-    private void put(String path, Object objectToPut) throws JsonProcessingException {
+    private void put(String path, Object objectToPut){
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
@@ -320,72 +359,69 @@ public class UserControllerSteps {
     public void iSendAGETRequestTo(String path) {
         userResponses.clear();
         ObjectMapper objectMapper = new ObjectMapper();
-        if(path.equals("/user/getAll")) {
-            try {
-                lastReadAllUsersResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<UserResponse>>() {});
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail("Failed to parse response body");
+        try {
+            if (path.equals("/user/getAll")) {
+                lastReadAllUsersResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<UserResponse>>() {
+                });
+                userRepository.findAll().forEach(user -> userResponses.add(userMapper.userToUserResponse(user)));
             }
-            userRepository.findAll().forEach(user -> userResponses.add(userMapper.userToUserResponse(user)));
-        }
-        else if(path.startsWith("/user/get/")) {
-            try {
+            else if (path.startsWith("/user/get/")) {
+                    lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), UserResponse.class);
+                String[] split = path.split("/");
+                email = split[split.length - 1];
+            }
+            else if (path.equals("/user/search")) {
+                lastReadAllUsersResponse = objectMapper.readValue(getFiltered(url + port + path), new TypeReference<List<UserResponse>>() {
+                });
+                userRepository.findAll().forEach(user -> {
+                    if (!user.getActive()) return;
+                    if (searchFilter.getEmail() != null && !user.getEmail().equals(searchFilter.getEmail())) return;
+                    if (searchFilter.getFirstName() != null && !user.getFirstName().equalsIgnoreCase(searchFilter.getFirstName()))
+                        return;
+                    if (searchFilter.getLastName() != null && !user.getLastName().equalsIgnoreCase(searchFilter.getLastName()))
+                        return;
+                    if (searchFilter.getPosition() != null && !user.getPosition().equalsIgnoreCase(searchFilter.getPosition()))
+                        return;
+                    userResponses.add(userMapper.userToUserResponse(user));
+                });
+            }
+            else if (path.equals("/user/permissions/userId/100") || path.equals("/user/permissions/email/admin@admin.com")) {
+                getBody(url + port + path);
+            }
+            else if (path.equals("/balance/foreign_currency/100")) {
+                getBody(url + port + path);
+            }
+            else if (path.equals("/balance/foreign_currency")) {
+                lastReadAllForeignCurrencyAccountsResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<ForeignCurrencyAccountResponse>>() {
+                });
+            }
+            else if (path.startsWith("/user/")) {
                 lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), UserResponse.class);
+                String[] split = path.split("/");
+                lastid = Long.parseLong(split[split.length - 1]);
             }
-            catch (Exception e){
-                e.printStackTrace();
-                fail("Failed to parse response body");
-            }
-            String[] split = path.split("/");
-            email = split[split.length - 1];
         }
-        else if(path.equals("/user/search")) {
-            try {
-                lastReadAllUsersResponse = objectMapper.readValue(getFiltered(url + port + path), new TypeReference<List<UserResponse>>() {});
-            }
-            catch (Exception e){
-                e.printStackTrace();
-                fail("Failed to parse response body");
-            }
-            userRepository.findAll().forEach(user -> {
-                if(!user.getActive()) return;
-                if(searchFilter.getEmail() != null && !user.getEmail().equals(searchFilter.getEmail())) return;
-                if(searchFilter.getFirstName() != null && !user.getFirstName().equalsIgnoreCase(searchFilter.getFirstName())) return;
-                if(searchFilter.getLastName() != null && !user.getLastName().equalsIgnoreCase(searchFilter.getLastName())) return;
-                if(searchFilter.getPosition() != null && !user.getPosition().equalsIgnoreCase(searchFilter.getPosition())) return;
-                userResponses.add(userMapper.userToUserResponse(user));
-            });
-        }
-        else if(path.equals("/user/permissions/userId/100") || path.equals("/user/permissions/email/admin@admin.com")){
-            getBody(url + port + path);
-        }
-        else if(path.startsWith("/user/")) {
-            try {
-                lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), UserResponse.class);
-            }
-            catch (Exception e){
-                e.printStackTrace();
-                fail("Failed to parse response body");
-            }
-            String[] split = path.split("/");
-            lastid = Long.parseLong(split[split.length - 1]);
+        catch (Exception e){
+            e.printStackTrace();
+            fail(e.getMessage());
         }
     }
 
    @When("user calls POST on {string}")
    public void userCallsPostOn(String path) {
         ObjectMapper objectMapper = new ObjectMapper();
-       if(path.equals("/user/createUser")) {
-           try{
-               String tmp = post(url + port + path, createUserRequest);
-               lastCreateUserResponse = objectMapper.readValue(tmp, CreateUserResponse.class);
-           }
-           catch (Exception e){
-               e.printStackTrace();
-               fail("Failed to parse response body");
-           }
-       }
+        try {
+            if (path.equals("/user/createUser")) {
+                String tmp = post(url + port + path, createUserRequest);
+                lastCreateUserResponse = objectMapper.readValue(tmp, CreateUserResponse.class);
+            } else if (path.equals("/balance/foreign_currency/create")) {
+                lastCreateForeignCurrencyAccountResponse = objectMapper.readValue(post(url + port + path, foreignCurrencyAccountRequest), CreateForeignCurrencyAccountResponse.class);
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            fail("Failed to parse response body");
+        }
    }
 
     @When("i send DELETE request to remove the user")
@@ -495,5 +531,23 @@ public class UserControllerSteps {
     @Then("i should get response with status {int}")
     public void iShouldGetResponseWithStatus(int status) {
         assertThat(lastResponse.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.valueOf(status));
+    }
+
+    @Then("new foreign account should be created")
+    public void newForeignAccountShouldBeCreated() {
+        assertThat(lastCreateForeignCurrencyAccountResponse).isNotNull();
+        assertThat(foreignCurrencyAccountRepository.findById(lastCreateForeignCurrencyAccountResponse.getId())).isNotNull();
+    }
+
+    @Then("i should get all foreign accounts")
+    public void iShouldGetAllForeignAccounts() {
+        ForeignCurrencyAccountMapper mapper = new ForeignCurrencyAccountMapper();
+        List<ForeignCurrencyAccountResponse> foreignCurrencyAccountResponses = new ArrayList<>();
+        foreignCurrencyAccountRepository.findAll().forEach(
+                x->{
+                    foreignCurrencyAccountResponses.add(mapper.foreignCurrencyAccountToForeignCurrencyAccountResponse(x));
+                }
+        );
+        assertThat(lastReadAllForeignCurrencyAccountsResponse).hasSameElementsAs(foreignCurrencyAccountResponses);
     }
 }

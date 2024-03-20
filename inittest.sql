@@ -33,15 +33,45 @@ SET time_zone = "+00:00";
 
 -- INSERT INTO A VALUES B;
 
+CREATE TABLE `foreign_currency_accounts` (
+                                             `id` bigint(20) NOT NULL,
+                                             `account_maintenance` double DEFAULT NULL,
+                                             `account_number` varchar(255) DEFAULT NULL,
+                                             `account_status` varchar(255) DEFAULT NULL,
+                                             `available_balance` double DEFAULT NULL,
+                                             `balance` double DEFAULT NULL,
+                                             `created_by_agent_id` bigint(20) DEFAULT NULL,
+                                             `creation_date` int(11) DEFAULT NULL,
+                                             `currency` varchar(255) DEFAULT NULL,
+                                             `default_currency` bit(1) DEFAULT NULL,
+                                             `expiration_date` int(11) DEFAULT NULL,
+                                             `owner_id` bigint(20) DEFAULT NULL,
+                                             `subtype_of_account` varchar(255) DEFAULT NULL,
+                                             `type_of_account` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `foreign_currency_account_allowed_currencies`
+--
+
+CREATE TABLE `foreign_currency_account_allowed_currencies` (
+                                                               `foreign_currency_account_id` bigint(20) NOT NULL,
+                                                               `allowed_currencies` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `permission`
+--
+
 CREATE TABLE `permission` (
                               `permission_id` bigint(20) NOT NULL,
                               `description` varchar(255) DEFAULT NULL,
                               `name` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `permission`
---
 
 -- --------------------------------------------------------
 
@@ -51,6 +81,7 @@ CREATE TABLE `permission` (
 
 CREATE TABLE `user` (
                         `user_id` bigint(20) NOT NULL,
+                        `activation_token` varchar(255) DEFAULT NULL,
                         `active` bit(1) DEFAULT NULL,
                         `email` varchar(255) DEFAULT NULL,
                         `first_name` varchar(255) DEFAULT NULL,
@@ -60,10 +91,6 @@ CREATE TABLE `user` (
                         `phone_number` varchar(255) DEFAULT NULL,
                         `position` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `user`
---
 
 -- --------------------------------------------------------
 
@@ -77,13 +104,20 @@ CREATE TABLE `user_permissions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `user_permissions`
---
-
-
---
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `foreign_currency_accounts`
+--
+ALTER TABLE `foreign_currency_accounts`
+    ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `foreign_currency_account_allowed_currencies`
+--
+ALTER TABLE `foreign_currency_account_allowed_currencies`
+    ADD KEY `FKocnkcjfqadi66n4f518l0ywx9` (`foreign_currency_account_id`);
 
 --
 -- Indexes for table `permission`
@@ -111,20 +145,32 @@ ALTER TABLE `user_permissions`
 --
 
 --
+-- AUTO_INCREMENT for table `foreign_currency_accounts`
+--
+ALTER TABLE `foreign_currency_accounts`
+    MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `permission`
 --
 ALTER TABLE `permission`
-    MODIFY `permission_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+    MODIFY `permission_id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-    MODIFY `user_id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+    MODIFY `user_id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `foreign_currency_account_allowed_currencies`
+--
+ALTER TABLE `foreign_currency_account_allowed_currencies`
+    ADD CONSTRAINT `FKocnkcjfqadi66n4f518l0ywx9` FOREIGN KEY (`foreign_currency_account_id`) REFERENCES `foreign_currency_accounts` (`id`);
 
 --
 -- Constraints for table `user_permissions`
@@ -151,6 +197,9 @@ INSERT INTO `permission` (`permission_id`, `description`, `name`) VALUES
 INSERT INTO `user` (`user_id`, `active`, `email`, `first_name`, `jmbg`, `last_name`, `password`, `phone_number`, `position`) VALUES
     (100, b'1', 'admin@admin.com', 'admin', 'admin', 'admin', '$2a$10$PBWT9wzA7OPpZPr5lVNxj.SLlHhrBrUzHH/wOG6sqfOp3wbYk8Kze', '1234567890', 'admin');
 
+INSERT INTO `user` (`user_id`, `active`, `email`, `first_name`, `jmbg`, `last_name`, `password`, `phone_number`, `position`) VALUES
+    (101, b'1', 'user@test.com', 'petar', '412325124', 'petrovic', '$2a$10$PBWT9wzA7OPpZPr5lVNxj.SLlHhrBrUzHH/wOG6sqfOp3wbYk8Kze', '1111111111', 'user');
+
 INSERT INTO `user_permissions` (`user_id`, `permission_id`) VALUES
     (100, 2);
 
@@ -165,6 +214,9 @@ INSERT INTO `user_permissions` (`user_id`, `permission_id`) VALUES
 
 INSERT INTO `user_permissions` (`user_id`, `permission_id`) VALUES
     (100, 6);
+
+INSERT INTO `foreign_currency_accounts` (`id`, `account_maintenance`, `account_number`, `account_status`, `available_balance`, `balance`, `created_by_agent_id`, `creation_date`, `currency`, `default_currency`, `expiration_date`, `owner_id`, `subtype_of_account`, `type_of_account`) VALUES
+ (100, 100.0, '123456789', 'active', 1000.0, 1200.0, 100, 1710959528, 'CD1', 'CD1', 2710959528, 102, 'subtest', 'test');
 
 -- COMMIT;
 
