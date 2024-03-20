@@ -35,7 +35,7 @@ public class CurrencyController {
         this.inflationService = inflationService;
     }
 
-    @GetMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all Currencies", description = "Get all currencies")
 //    @PreAuthorize("hasAuthority('can_read_users')")
     @ApiResponses({
