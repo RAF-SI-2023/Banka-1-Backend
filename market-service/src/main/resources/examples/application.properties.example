@@ -29,6 +29,8 @@ forexAPItoken=cnr3i41r01qs2jr5d5bgcnr3i41r01qs2jr5d5c0
 # API URLs:
 listingNameApiUrl=https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=
 updateListingApiUrl=https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=
+basicStockInfoApiUrl=https://www.alphavantage.co/query?function=OVERVIEW&symbol=
+HistoryListingApiUrl=https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=
 forexExchangePlaceApiUrl=https://finnhub.io/api/v1/forex/exchange?token=
 forexSymbolsApiUrl=https://finnhub.io/api/v1/forex/symbol?exchange=
 forexExchangeRateApiUrl=https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE

@@ -1,5 +1,5 @@
 package rs.edu.raf.banka1.mapper;
-
+/*
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.Listing;
@@ -7,7 +7,7 @@ import rs.edu.raf.banka1.model.Listing;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-
+/*
 @Component
 public class ListingMapper {
     public ListingHistory listingModelToListongHistoryModel(Listing listing) {
@@ -64,3 +64,6 @@ public class ListingMapper {
 
 
 }
+
+
+ */

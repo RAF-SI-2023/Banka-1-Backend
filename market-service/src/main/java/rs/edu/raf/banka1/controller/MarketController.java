@@ -25,7 +25,7 @@ import rs.edu.raf.banka1.model.dtos.ListingBaseDto;
 import rs.edu.raf.banka1.model.dtos.ListingHistoryDto;
 import rs.edu.raf.banka1.services.ExchangeService;
 import rs.edu.raf.banka1.services.ForexService;
-import rs.edu.raf.banka1.services.ListingService;
+import rs.edu.raf.banka1.services.ListingStockService;
 
 import java.util.List;
 
@@ -39,16 +39,16 @@ public class MarketController {
 
     private final ExchangeService exchangeService;
     private final ForexService forexService;
-    private final ListingService listingService;
+    private final ListingStockService listingStockService;
     private final ListingHistoryMapper listingHistoryMapper;
     private final ForexMapper forexMapper;
 
     @Autowired
-    public MarketController(ExchangeService exchangeService, ForexService forexService, ListingService listingService,
+    public MarketController(ExchangeService exchangeService, ForexService forexService, ListingStockService listingStockService,
                             ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper) {
         this.exchangeService = exchangeService;
         this.forexService = forexService;
-        this.listingService = listingService;
+        this.listingStockService = listingStockService;
         this.listingHistoryMapper = listingHistoryMapper;
         this.forexMapper = forexMapper;
     }
@@ -142,7 +142,7 @@ public class MarketController {
                                                                           @RequestParam(required = false) Integer timestampFrom,
                                                                           @RequestParam(required = false) Integer timestampTo) {
 
-        List<ListingHistory> listingHistories = listingService.getListingHistoriesByTimestamp(ticker, timestampFrom, timestampTo);
+        List<ListingHistory> listingHistories = listingStockService.getListingHistoriesByTimestamp(ticker, timestampFrom, timestampTo);
         if (listingHistories.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {

@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import rs.edu.raf.banka1.model.entities.Currency;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.repositories.CurrencyRepository;
+import rs.edu.raf.banka1.repositories.InflationRepository;
 import rs.edu.raf.banka1.services.CurrencyService;
 
 
@@ -28,7 +29,8 @@ public class CurrencyServiceUnitTests {
 
     @Mock
     private CurrencyRepository currencyRepository;
-
+    @Mock
+    private InflationRepository inflationRepository;
     @InjectMocks
     private CurrencyService currencyService;
 

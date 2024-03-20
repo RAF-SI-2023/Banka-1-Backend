@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import rs.edu.raf.banka1.mapper.ListingMapper;
-import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingHistory;
+import rs.edu.raf.banka1.model.ListingStock;
+import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.services.CurrencyService;
+import rs.edu.raf.banka1.services.ListingStockService;
 import rs.edu.raf.banka1.services.ForexService;
 import rs.edu.raf.banka1.services.ListingService;
 import rs.edu.raf.banka1.services.OptionsService;
@@ -20,6 +21,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static rs.edu.raf.banka1.utils.Constants.maxStockListings;
+import static rs.edu.raf.banka1.utils.Constants.maxStockListingsHistory;
+
 @Component
 @AllArgsConstructor
 public class BootstrapData implements CommandLineRunner {
@@ -27,10 +31,7 @@ public class BootstrapData implements CommandLineRunner {
     private final CurrencyService currencyService;
 
     @Autowired
-    private ListingService listingService;
-
-    @Autowired
-    private ListingMapper listingMapper;
+    private ListingStockService listingStockService;
 
     private ForexService forexService;
 
@@ -41,49 +42,40 @@ public class BootstrapData implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         System.out.println("Loading Data...");
-//
         List<CurrencyDto> currencyList = loadCurrencies();
         currencyService.addCurrencies(currencyList);
         System.out.println("Currency Data Loaded!");
 
-//        ////////////////////////////////////////////////////////////////
-//        DEPRECATED
-////        LISTINGS
-//
-////        call it only from time to time to update json because api isn't free and we need it only once
-////        listingService.initializeListings();
-////        loading data from json and fetches data from other API (professor will give us API token for this one)
-//        List<Listing> listings = listingService.fetchListings();
-////        use this to update or initialize database with fresh data
-//        listingService.updateAllListingsDatabase(listings);
-//
-////        fetching and bootstrapping listing history data (not recommended as each listing generates 100 history records and we have around 3500 listings)
-////        List<ListingHistoryModel> listingHistoryModels = listingService.fetchAllListingsHistory();
-////        so better alternative is to fetch history only for given listing when needed
-//        List<ListingHistory> oneListingHistoryList = listingService.fetchSingleListingHistory("AAPL");
-//        listingService.addAllListingsToHistory(oneListingHistoryList);
-//        ////////////////////////////////////////////////////////////////
+        // Since JSON symbols are available in repo, and the API key needs to be replaced or paid,
+        // we only need to call the function below every once in a while
+        // listingStockService.generateJSONSymbols();
 
+        // STOCK
+        // Populate stock and stock history
+        List<ListingStock> listingStocks = listingStockService.fetchNListingStocks(maxStockListings);
+        listingStockService.addAllListingStocks(listingStocks);
+        List<ListingHistory> listingHistories = listingStockService.fetchNListingsHistory(maxStockListingsHistory);
+        listingStockService.addAllListingsToHistory(listingHistories);
 
         ////////////////////////////////////////////////////////////////
-//        FOREX
+        // FOREX
 
-//        get initial forex names data (do it only once)
+        // get initial forex names data (do it only once)
         List<ListingForex> listingForexList = forexService.initializeForex();
 
-//        update forex prices (will be called every 15 minutes or so)
-//        Warning: for the testing purposes I only update first 10 forex pairs (API limitations)
-//        Warning: in the production we should update all forex pairs
+        // update forex prices (will be called every 15 minutes or so)
+        // Warning: for the testing purposes I only update first 10 forex pairs (API limitations)
+        // Warning: in the production we should update all forex pairs
         List<ListingForex> updated = forexService.updateAllPrices(listingForexList.subList(0, 10));
-//        saves forex data to database (only after update)
-//       because update uses other API which doesn't support all forex names, so we need to save only available forexs
-//        first you need to save forexes and after that histories because histories need forex ids from database
+        // saves forex data to database (only after update)
+        // because update uses other API which doesn't support all forex names, so we need to save only available forexs
+        // first you need to save forexes and after that histories because histories need forex ids from database
         forexService.saveAllForexes(updated);
 
-//        add forexes histories to database
-//        Warning: agreement was to add just histories for 10 forexes
+        // add forexes histories to database
+        // Warning: agreement was to add just histories for 10 forexes
         List<ListingHistory> histories = forexService.getAllForexHistories(updated);
-        listingService.addAllListingsToHistory(histories);
+        listingStockService.addAllListingsToHistory(histories);
         ////////////////////////////////////////////////////////////////
         System.out.printf("Updated: " + updated.size());
         System.out.println("Histories: " + histories.size());
