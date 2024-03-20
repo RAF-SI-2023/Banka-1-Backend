@@ -1,4 +1,4 @@
-package rs.edu.raf.banka1;
+package rs.edu.raf.banka1.services;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
