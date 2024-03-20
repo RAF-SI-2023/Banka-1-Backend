@@ -11,6 +11,8 @@ import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.services.CurrencyService;
 import rs.edu.raf.banka1.services.ListingStockService;
 import rs.edu.raf.banka1.services.ForexService;
+import rs.edu.raf.banka1.services.ListingService;
+import rs.edu.raf.banka1.services.OptionsService;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.io.BufferedReader;
@@ -33,14 +35,16 @@ public class BootstrapData implements CommandLineRunner {
 
     private ForexService forexService;
 
+    @Autowired
+    private OptionsService optionsService;
+
     @Override
     public void run(String... args) throws Exception {
 
         System.out.println("Loading Data...");
-
-//        List<CurrencyDto> currencyList = loadCurrencies();
-//        currencyService.addCurrencies(currencyList);
-//        System.out.println("Currency Data Loaded!");
+        List<CurrencyDto> currencyList = loadCurrencies();
+        currencyService.addCurrencies(currencyList);
+        System.out.println("Currency Data Loaded!");
 
         // Since JSON symbols are available in repo, and the API key needs to be replaced or paid,
         // we only need to call the function below every once in a while
@@ -75,6 +79,13 @@ public class BootstrapData implements CommandLineRunner {
         ////////////////////////////////////////////////////////////////
         System.out.printf("Updated: " + updated.size());
         System.out.println("Histories: " + histories.size());
+
+        Thread optionsThread = new Thread(()->{
+            optionsService.fetchOptions();
+        });
+        optionsThread.start();
+        optionsThread.join();
+
         System.out.println("All Data loaded!");
     }
 

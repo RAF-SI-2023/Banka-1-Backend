@@ -10,6 +10,10 @@ public class Constants {
     public static final List<String> sectors = List.of("Technology","Electronic Technology","Health Technology","Health Services","Finance","Energy");
     public static final int maxStockListings = 20;
     public static final int maxStockListingsHistory = 10;
+    public static String optionsFilePath = "market-service/src/main/resources/options.json";
+    public static final List<String> sectors = List.of("Technology");
+    public static List<String> tickersForTestingOptions = List.of("APPL", "ORCL", "MSFT", "VXX");
+    public static final int maxListings = 700;
     public static final Integer BEARER_PREFIX_SIZE = 7;
     public static final List<String> ListingsToIgnore = List.of(
             "ATLEF",
@@ -24,5 +28,5 @@ public class Constants {
             "ATMQF",
             "FLUXF");
 
-    public static String currencyFilePath = "src/main/resources/physical_currency_list.csv";
+    public static String currencyFilePath = "market-service/src/main/resources/physical_currency_list.csv";
 }
