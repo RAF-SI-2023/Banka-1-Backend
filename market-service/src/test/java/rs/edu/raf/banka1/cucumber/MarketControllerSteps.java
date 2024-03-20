@@ -11,12 +11,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import rs.edu.raf.banka1.mapper.CurrencyMapper;
 import rs.edu.raf.banka1.mapper.ExchangeMapper;
-import rs.edu.raf.banka1.model.dtos.ExchangeDto;
-import rs.edu.raf.banka1.model.dtos.LoginRequest;
-import rs.edu.raf.banka1.model.dtos.LoginResponse;
-import rs.edu.raf.banka1.model.dtos.OptionsDto;
+import rs.edu.raf.banka1.model.dtos.*;
+import rs.edu.raf.banka1.model.entities.Currency;
+import rs.edu.raf.banka1.model.entities.Exchange;
 import rs.edu.raf.banka1.model.entities.Inflation;
+import rs.edu.raf.banka1.repositories.CurrencyRepository;
 import rs.edu.raf.banka1.repositories.ExchangeRepository;
 
 import java.util.List;
@@ -27,7 +28,9 @@ import static org.assertj.core.api.Assertions.fail;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class MarketControllerSteps {
     private ExchangeRepository exchangeRepository;
-    private ExchangeMapper exchangeMapper;
+    private CurrencyRepository currencyRepository;
+    private ExchangeMapper exchangeMapper = new ExchangeMapper();
+    private CurrencyMapper currencyMapper = new CurrencyMapper();
     private final String userurl = "http://" + SpringIntegrationTest.enviroment.getServiceHost("user-service", 8080) + ":";
     private String userport = Integer.toString(SpringIntegrationTest.enviroment.getServicePort("user-service", 8080));
     private final String marketurl = "http://" + SpringIntegrationTest.enviroment.getServiceHost("market-service", 8081) + ":";
@@ -35,6 +38,10 @@ public class MarketControllerSteps {
     private String jwt;
     private ResponseEntity<?> lastResponse;
     private ExchangeDto lastExchangeDto;
+    private CurrencyDto lastCurrencyDto;
+    private List<CurrencyDto> lastCurrenciesResponse;
+    private InflationDto lastInflationDto;
+    private List<InflationDto> lastInflationDtos;
     private Object lastObject;
     private List<OptionsDto> lastOptionsResponse;
 
@@ -49,8 +56,9 @@ public class MarketControllerSteps {
 
     private Ticker ticker = new Ticker();
 
-    public MarketControllerSteps(ExchangeRepository exchangeRepository) {
+    public MarketControllerSteps(ExchangeRepository exchangeRepository, CurrencyRepository currencyRepository) {
         this.exchangeRepository = exchangeRepository;
+        this.currencyRepository = currencyRepository;
     }
 
     @Given("i am logged in with email {string} and password {string}")
@@ -93,9 +101,7 @@ public class MarketControllerSteps {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             //lastReadAllUsersResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<UserResponse>>() {});
-            if (url.equals("/market/currency/100000/inflation")) {
-                System.out.println("todo");
-            } else if (url.equals("/market/exchange") || url.equals("/market/listing/")) {
+            if (url.equals("/market/exchange") || url.equals("/market/listing/")) {
                 get(marketurl + marketport + url);
             }
             else if(url.equals("/market/exchange/100000")){
@@ -112,6 +118,22 @@ public class MarketControllerSteps {
             else if(url.equals("/options/testticker")){
                 get(marketurl + marketport + url);
             }
+            else if(url.equals("/market/currency/100000")){
+                lastCurrencyDto = objectMapper.readValue(get(marketurl + marketport + url), CurrencyDto.class);
+                lastObject = currencyRepository.findById(100000L).orElseThrow(()->new RuntimeException("Currency not found"));
+            }
+            else if(url.equals("/market/currency/100000/inflation/2024")){
+                lastInflationDtos = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<List<InflationDto>>() {});
+            }
+            else if(url.equals("/market/currency")){
+                lastCurrenciesResponse = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<List<CurrencyDto>>() {});
+            }
+            else if(url.equals("/market/currency/code/CD1")){
+                lastCurrencyDto = objectMapper.readValue(get(marketurl + marketport + url), CurrencyDto.class);
+            }
+            else if(url.equals("/market/currency/100000/inflation")){
+                lastInflationDtos = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<List<InflationDto>>() {});
+            }
         }
         catch (Exception e){
             e.printStackTrace();
@@ -126,8 +148,10 @@ public class MarketControllerSteps {
 
     @Then("Response body is the correct exchange JSON")
     public void responseBodyIsTheCorrectExchangeJSON() {
-        assertThat(lastExchangeDto).isNotNull();
-        if(lastObject instanceof ExchangeDto)
+        if (lastObject instanceof Exchange)
             assertThat(lastExchangeDto).isEqualTo(exchangeMapper.exchangeToExchangeDto((rs.edu.raf.banka1.model.entities.Exchange) lastObject));
+        else if(lastObject instanceof Currency){
+            assertThat(lastCurrencyDto).isEqualTo(currencyMapper.currencyToCurrencyDto((rs.edu.raf.banka1.model.entities.Currency) lastObject));
+        }
     }
 }

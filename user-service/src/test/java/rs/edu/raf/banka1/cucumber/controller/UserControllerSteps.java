@@ -295,14 +295,6 @@ public class UserControllerSteps {
     }
 
     private String getFiltered(String path){
-        RestTemplate restTemplate = new RestTemplate();
-        java.net.http.HttpRequest httpRequest = java.net.http.HttpRequest.newBuilder()
-                .uri(URI.create(path))
-                .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + jwt)
-                .method("GET", java.net.http.HttpRequest.BodyPublishers.noBody())
-                .build();
-
         char combiner = '?';
         if(searchFilter.getEmail() != null) {
             path = path.concat(combiner + "email=" + searchFilter.getEmail());
@@ -320,15 +312,16 @@ public class UserControllerSteps {
             path = path.concat(combiner + "position=" + searchFilter.getPosition());
         }
 
-        try {
-            HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            return httpResponse.body();
-        }
-        catch (Exception e){
-            e.printStackTrace();
-            fail("Http GET request error");
-            return "";
-        }
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
+        HttpEntity<Object> request = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.GET, request, String.class);
+        lastResponse = response;
+        return response.getBody();
     }
 
 
