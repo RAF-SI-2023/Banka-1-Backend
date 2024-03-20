@@ -5,9 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import rs.edu.raf.banka1.model.ListingHistoryModel;
-import rs.edu.raf.banka1.model.ListingModel;
+import rs.edu.raf.banka1.exceptions.OptionsException;
+import rs.edu.raf.banka1.mapper.OptionsMapper;
 import rs.edu.raf.banka1.model.OptionsModel;
+import rs.edu.raf.banka1.model.dtos.OptionsDto;
 import rs.edu.raf.banka1.model.enums.OptionType;
 import rs.edu.raf.banka1.repositories.OptionsRepository;
 import rs.edu.raf.banka1.utils.Constants;
@@ -17,29 +18,31 @@ import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class OptionsServiceImpl implements OptionsService{
     private ObjectMapper objectMapper = new ObjectMapper();
-    private  String cookie = null;
-    private  String crumb = null;
+    private HttpClient httpClient = HttpClient.newHttpClient();
+    private HttpRequest httpRequest;
+    private String cookie = null;
+    private String crumb = null;
     @Value("${optionsUrl}")
     private String optionsUrl;
-    private  String urlWithCrumb = null;
+    private String urlWithCrumb = null;
     private static final String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
-
     private OptionsRepository optionsRepository;
+    private OptionsMapper optionsMapper;
 
-    public OptionsServiceImpl(OptionsRepository optionsRepository) {
+    public OptionsServiceImpl(OptionsRepository optionsRepository,
+                              OptionsMapper optionsMapper) {
         this.optionsRepository = optionsRepository;
+        this.optionsMapper = optionsMapper;
     }
 
     @Override
-    public List<OptionsModel> fetchOptions() {
+    public List<OptionsDto> fetchOptions() {
         if (cookie == null || crumb == null) {
             // If not cached, obtain them
             if (!getCookieAndCrumb()) {
@@ -48,7 +51,7 @@ public class OptionsServiceImpl implements OptionsService{
             }
         }
 
-        List<OptionsModel> optionsModels = new ArrayList<>();
+        List<OptionsDto> optionsModels = new ArrayList<>();
         try{
             List<String> tickers = fetchTickers();
 //             Constants.tickersForTestingOptions
@@ -67,7 +70,7 @@ public class OptionsServiceImpl implements OptionsService{
         }
     }
 
-    private List<String> fetchTickers() {
+    List<String> fetchTickers() {
         try {
             File file = new File(Constants.listingsFilePath);
 
@@ -88,9 +91,8 @@ public class OptionsServiceImpl implements OptionsService{
 
 
     @Override
-    public List<OptionsModel> fetchOptionsForTicker(String ticker, String url) {
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
+    public List<OptionsDto> fetchOptionsForTicker(String ticker, String url) {
+        httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(url)) //url with crumb !!!
                 .header("Cookie", cookie) // Include the cached cookie in the request
                 .GET()
@@ -100,7 +102,7 @@ public class OptionsServiceImpl implements OptionsService{
 
         try {
             // Send the request to retrieve data with crumb value
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             // Print the response body
             if (response.statusCode() == 200) {
                 String responseBody = response.body();
@@ -141,12 +143,19 @@ public class OptionsServiceImpl implements OptionsService{
                 optionsRepository.saveAll(options);
 
             } else {
-                System.out.println("Failed to retrieve data. Status code: " + response.statusCode());
+                throw new OptionsException("Failed to retrieve data for ticker: " + ticker + ". Status code: " + response.statusCode());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return options;
+        } catch (Exception ignored) {}
+        return options.stream().map((optionsModel) -> optionsMapper.optionsModelToOptionsDto(optionsModel)).toList();
+    }
+
+    @Override
+    public List<OptionsDto> getOptionsByTicker(String ticker) {
+        return this.optionsRepository.findByTicker(ticker).map(optionsModels ->
+            optionsModels.stream()
+                .map(optionsMapper::optionsModelToOptionsDto)
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
     }
 
     private List<OptionsModel> parseOptions(JsonNode optionsNode, String ticker, OptionType optionType) {
@@ -167,17 +176,16 @@ public class OptionsServiceImpl implements OptionsService{
         return options;
     }
 
-    private  boolean getCookieAndCrumb() {
+    private boolean getCookieAndCrumb() {
         String initialUrl = "https://fc.yahoo.com";
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
+        httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(initialUrl))
                 .GET()
                 .build();
 
         try {
             // Dohvatanje cookie-ja sa pocetne stranice i ignorisanje 404 ili 500 koda
-            HttpResponse<Void> initialResponse = client.send(request, HttpResponse.BodyHandlers.discarding());
+            HttpResponse<Void> initialResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.discarding());
 
             if (initialResponse.statusCode() == 404 || initialResponse.statusCode() == 500) {
                 Map<String, List<String>> headers = initialResponse.headers().map();
@@ -188,31 +196,48 @@ public class OptionsServiceImpl implements OptionsService{
                     // Ubacivanje cookie-ja u zahtev za crumb
                     String crumbUrl = "https://query2.finance.yahoo.com/v1/test/getcrumb";
 
-                    HttpRequest crumbRequest = HttpRequest.newBuilder()
+                    httpRequest = HttpRequest.newBuilder()
                             .uri(URI.create(crumbUrl))
                             .header("Cookie", cookie)
                             .header("User-Agent", userAgent)
                             .GET()
                             .build();
 
-                    HttpResponse<String> crumbResponse = client.send(crumbRequest, HttpResponse.BodyHandlers.ofString());
+                    HttpResponse<String> crumbResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
                     // Check if the crumb request is successful
                     if (crumbResponse.statusCode() == 200) {
                         crumb = crumbResponse.body();
                         return true;
                     } else {
-                        System.out.println("Failed to retrieve crumb value. Status code: " + crumbResponse.statusCode());
+                        throw new OptionsException("Failed to retrieve crumb value. Status code: " + crumbResponse.statusCode());
                     }
                 } else {
-                    System.out.println("No Set-Cookie header found in initial response");
+                    throw new OptionsException("No Set-Cookie header found in initial response");
                 }
             } else {
-                System.out.println("Initial HTTP request did not return a 404||500 response");
+                throw new OptionsException("Initial HTTP request did not return a 404||500 response");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Problem with getting cookie: " + e.getMessage());
+//            throw new OptionsException("Problem with getting cookie: " + e.getMessage());
         }
         return false;
+    }
+
+    public void setHttpClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
+
+    public void setHttpRequest(HttpRequest httpRequest) {
+        this.httpRequest = httpRequest;
+    }
+
+    public void setCookie(String cookie) {
+        this.cookie = cookie;
+    }
+
+    public void setCrumb(String crumb) {
+        this.crumb = crumb;
     }
 }
 
