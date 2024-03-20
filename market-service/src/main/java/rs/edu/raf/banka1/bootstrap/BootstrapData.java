@@ -11,7 +11,6 @@ import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.services.CurrencyService;
 import rs.edu.raf.banka1.services.ListingStockService;
 import rs.edu.raf.banka1.services.ForexService;
-import rs.edu.raf.banka1.services.ListingService;
 import rs.edu.raf.banka1.services.OptionsService;
 import rs.edu.raf.banka1.utils.Constants;
 
