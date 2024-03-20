@@ -1,6 +1,6 @@
 package rs.edu.raf.banka1.requests;
 
-import lombok.*;
+import lombok.Data;
 
 @Data
 public class CreateUserRequest {

@@ -10,13 +10,15 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.RequiredArgsConstructor;
 
-@Data
+@Entity
+@Getter
+@Setter
 @AllArgsConstructor
 @RequiredArgsConstructor
-@Entity
 @Table(name = "inflations", uniqueConstraints = {@UniqueConstraint(columnNames = {"id"})})
 public class Inflation  {
     @Id

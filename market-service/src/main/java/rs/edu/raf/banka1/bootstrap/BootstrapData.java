@@ -38,9 +38,9 @@ public class BootstrapData implements CommandLineRunner {
 
         System.out.println("Loading Data...");
 //
-//        List<CurrencyDto> currencyList = loadCurrencies();
-//        currencyService.addCurrencies(currencyList);
-//        System.out.println("Currency Data Loaded!");
+        List<CurrencyDto> currencyList = loadCurrencies();
+        currencyService.addCurrencies(currencyList);
+        System.out.println("Currency Data Loaded!");
 
 //        ////////////////////////////////////////////////////////////////
 //        DEPRECATED
