@@ -4,6 +4,7 @@ import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ListingStockService {
     void generateJSONSymbols();
@@ -26,5 +27,7 @@ public interface ListingStockService {
 
     //    returns how many new listings were added
     int addAllListingsToHistory(List<ListingHistory> listingHistories);
+
+    Optional<ListingStock> findByTicker(String ticker);
 
 }

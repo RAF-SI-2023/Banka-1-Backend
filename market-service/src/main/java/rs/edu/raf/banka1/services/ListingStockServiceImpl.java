@@ -230,7 +230,7 @@ public class ListingStockServiceImpl implements ListingStockService {
 
                     String dateStr = entry.getKey();
                     LocalDate date = LocalDate.parse(dateStr); // Parse the date string to LocalDate
-                    int unixTimestamp = (int) date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli() / 1000;
+                    int unixTimestamp = (int) date.atStartOfDay(ZoneOffset.UTC).toEpochSecond(); // get beggining of the day
 
                     JsonNode dataNode = entry.getValue();
 
@@ -352,6 +352,8 @@ public class ListingStockServiceImpl implements ListingStockService {
         return newArray;
     }
 
-
-
+    @Override
+    public Optional<ListingStock> findByTicker(String ticker) {
+        return stockRepository.findByTicker(ticker);
+    }
 }
