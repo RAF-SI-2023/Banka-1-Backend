@@ -8,7 +8,8 @@ import java.util.List;
 
 @Repository
 public interface InflationRepository extends JpaRepository<Inflation, Long> {
+
     List<Inflation> findAllByCurrencyId(Long currencyId);
 
-    List<Inflation> findAllByCurrencyIdAndYear(Long currencyId, int year);
+    List<Inflation> findAllByCurrencyIdAndYear(Long currencyId, Integer year);
 }
