@@ -45,6 +45,7 @@ public class UserController {
 
     @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all users", description = "Returns all users")
+    @PreAuthorize("hasAuthority('readUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -58,6 +59,7 @@ public class UserController {
 
     @GetMapping(value = "/get/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get user by email", description = "Returns user by email")
+    @PreAuthorize("hasAuthority('readUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -71,6 +73,7 @@ public class UserController {
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get user by id", description = "Returns user by id")
+    @PreAuthorize("hasAuthority('readUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -100,6 +103,7 @@ public class UserController {
 
     @GetMapping(value = "/search")
     @Operation(summary = "Search and filter users", description = "Returns users by e-mail, last name and/or position.")
+    @PreAuthorize("hasAuthority('readUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -118,7 +122,7 @@ public class UserController {
 
     @PostMapping(value = "/createUser")
     @Operation(summary = "Admin create user", description = "Creates a new user with the specified params, and forwards an activation mail to the user.")
-    @PreAuthorize("hasAuthority('can_manage_users')")
+    @PreAuthorize("hasAuthority('addUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User created successfully",
                     content = {@Content(mediaType = "application/json",
@@ -145,7 +149,7 @@ public class UserController {
 
     @PutMapping()
     @Operation(summary = "Admin edit user", description = "Admin can edit a user's info")
-    @PreAuthorize("hasAuthority('can_manage_users')")
+    @PreAuthorize("hasAuthority('modifyUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User edited successfully",
                     content = {@Content(mediaType = "application/json",
@@ -153,13 +157,14 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<EditUserResponse> editUser(@RequestBody EditUserRequest editUserRequest) {
-        return new ResponseEntity<>(userService.editUser(editUserRequest), HttpStatus.OK);
+    public ResponseEntity<Boolean> editUser(@RequestBody EditUserRequest editUserRequest) {
+        boolean edited = userService.editUser(editUserRequest);
+        return new ResponseEntity<>(edited, edited ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
-    @DeleteMapping(value = "/delete/{id}")
+    @DeleteMapping(value = "/remove/{id}")
     @Operation(summary = "Admin delete user", description = "Admin can delete a user")
-    @PreAuthorize("hasAuthority('can_manage_users')")
+    @PreAuthorize("hasAuthority('deleteUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User deleted successfully",
                     content = {@Content(mediaType = "application/json",
@@ -168,10 +173,11 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Boolean> deleteUser(@PathVariable Long id) {
-        return new ResponseEntity<>(userService.deleteUser(id), HttpStatus.OK);
+        Boolean deleted = userService.deleteUser(id);
+        return new ResponseEntity<>(deleted, deleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping(value = "/permissions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/permissions/userId/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all permissions of user", description = "Returns all permissions")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -181,12 +187,13 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<PermissionDto>> readAllPermissions(@RequestParam(name = "userId") Long id) {
-        return new ResponseEntity<>(this.userService.findPermissions(id), HttpStatus.OK);
+    public ResponseEntity<List<PermissionDto>> readAllPermissions(@PathVariable Long userId) {
+        return new ResponseEntity<>(this.userService.findPermissions(userId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/permissions", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all permissions of user for email", description = "Returns all permissions")
+
+    @GetMapping(value = "/permissions/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all permissions of user", description = "Returns all permissions")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -195,7 +202,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<PermissionDto>> readAllPermissionsFromEmail(@RequestParam(name = "email") String email) {
+    public ResponseEntity<List<PermissionDto>> readAllPermissions(@PathVariable String email) {
         return new ResponseEntity<>(this.userService.findPermissions(email), HttpStatus.OK);
     }
 

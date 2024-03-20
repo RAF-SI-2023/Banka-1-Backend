@@ -29,6 +29,7 @@ public class SearchAndFilterTests {
     private UserMapper userMapper;
     private EmailService emailService;
     private PermissionRepository permissionRepository;
+    private PermissionMapper permissionMapper;
     private JwtUtil jwtUtil;
 
     private User admin;
@@ -41,8 +42,11 @@ public class SearchAndFilterTests {
         userMapper = new UserMapper(new PermissionMapper());
         emailService = mock(EmailService.class);
         jwtUtil = mock(JwtUtil.class);
+        permissionRepository = mock(PermissionRepository.class);
 
-        userService = new UserServiceImpl(userRepository, userMapper, emailService, permissionRepository, jwtUtil);
+
+        userService = new UserServiceImpl(userRepository, userMapper, emailService, permissionRepository, jwtUtil,
+                permissionMapper);
 
         this.admin = new User();
         admin.setActive(true);

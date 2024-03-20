@@ -32,13 +32,13 @@ public class ListingStockMapper {
         oldStock.setName(newStock.getName());
         oldStock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
     }
-    public ListingHistory createListingHistoryModel(String ticker, long date, double price, double ask, double bid, double changed, int volume) {
+    public ListingHistory createListingHistoryModel(String ticker, Integer date, double price, double ask, double bid, double changed, int volume) {
         ListingHistory listingHistory = new ListingHistory();
         listingHistory.setTicker(ticker);
         listingHistory.setDate(date);
         listingHistory.setPrice(price);
-        listingHistory.setAsk(ask);
-        listingHistory.setBid(bid);
+        listingHistory.setHigh(ask);
+        listingHistory.setLow(bid);
         listingHistory.setChanged(changed);
         listingHistory.setVolume(volume);
         return listingHistory;
@@ -46,8 +46,8 @@ public class ListingStockMapper {
 
     public ListingHistory updateHistoryListingWithNewData(ListingHistory oldModel, ListingHistory newModel) {
         oldModel.setPrice(newModel.getPrice());
-        oldModel.setAsk(newModel.getAsk());
-        oldModel.setBid(newModel.getBid());
+        oldModel.setHigh(newModel.getHigh());
+        oldModel.setLow(newModel.getLow());
         oldModel.setChanged(newModel.getChanged());
         oldModel.setVolume(newModel.getVolume());
 

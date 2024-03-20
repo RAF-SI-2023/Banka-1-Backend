@@ -6,25 +6,25 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import rs.edu.raf.banka1.services.UserService;
 import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
-    private final UserService userService;
     private final JwtUtil jwtUtil;
 
     @Autowired
-    public JwtFilter(UserService userService, JwtUtil jwtUtil) {
-        this.userService = userService;
+    public JwtFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
 
@@ -43,13 +43,15 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         if (email != null) {
+            List<String> permissions = jwtUtil.extractRoles(jwt);
+            List<SimpleGrantedAuthority> authorities = permissions.stream()
+                    .map((SimpleGrantedAuthority::new))
+                    .collect(Collectors.toList());
+            UserDetails userDetails = new org.springframework.security.core.userdetails.User(email, "", authorities);
 
-            UserDetails userDetails = this.userService.loadUserByUsername(email);
-
-            if (jwtUtil.validateToken(jwt, userDetails)) {
+            if (jwtUtil.validateToken(jwt)) {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                        new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 httpServletRequest.setAttribute("email", email);
                 usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));

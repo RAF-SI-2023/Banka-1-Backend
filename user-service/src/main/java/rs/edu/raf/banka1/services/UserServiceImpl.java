@@ -1,16 +1,17 @@
 package rs.edu.raf.banka1.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import rs.edu.raf.banka1.configuration.SpringSecurityConfig;
 import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
+import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
@@ -22,15 +23,14 @@ import rs.edu.raf.banka1.responses.EditUserResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
 
+    @Value("${front.port}")
+    String frontPort;
     private UserMapper userMapper;
     private UserRepository userRepository;
     private PermissionRepository permissionRepository;
@@ -38,6 +38,7 @@ public class UserServiceImpl implements UserService {
     private PermissionMapper permissionMapper;
     private EmailService emailService;
     private JwtUtil jwtUtil;
+
     @Autowired
     public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, EmailService emailService,
                            PermissionRepository permissionRepository,
@@ -92,15 +93,18 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.createUserRequestToUser(createUserRequest);
         String activationToken = UUID.randomUUID().toString();
         user.setActivationToken(activationToken);
+        if (createUserRequest.getPosition().equalsIgnoreCase("admin")) {
+            user.setPermissions(new HashSet<>(permissionRepository.findAll()));
+        }
         userRepository.save(user);
         emailService.sendActivationEmail(createUserRequest.getEmail(), "RAF Banka - User activation",
-                "Visit this URL to activate your account: http://localhost:8080/user/activate/" + activationToken);
+                "Visit this URL to activate your account: http://localhost:" + frontPort + "/user/set-password/" + activationToken);
         return new CreateUserResponse(user.getUserId());
     }
 
     @Override
     public ActivateAccountResponse activateAccount(String token, String password) {
-        User user = userRepository.findByActivationToken(token).get();
+        User user = userRepository.findByActivationToken(token).orElseThrow();
         user.setActivationToken(null);
         user.setPassword(password);
         userRepository.save(user);
@@ -108,20 +112,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EditUserResponse editUser(EditUserRequest editUserRequest) {
-        User user = userRepository.findByEmail(editUserRequest.getEmail()).get();
-        user = userMapper.editUserRequestToUser(user, editUserRequest);
-        user.setPermissions(editUserRequest.getPermissions().stream().map(perm -> permissionRepository.findByName(perm).get()).collect(Collectors.toSet()));
-        userRepository.save(user);
-        return new EditUserResponse(user.getUserId());
+    public boolean editUser(EditUserRequest editUserRequest) {
+        Optional<User> user = userRepository.findByEmail(editUserRequest.getEmail());
+        if (user.isEmpty()) {
+            return false;
+        }
+        User newUser = userMapper.editUserRequestToUser(user.get(), editUserRequest);
+        userRepository.save(newUser);
+        return true;
     }
 
     @Override
-    public boolean deleteUser(Long id) {
+    public Boolean deleteUser(Long id) {
         Optional<User> optUser = userRepository.findById(id);
         if (optUser.isPresent()) {
             User user = optUser.get();
-            if (!user.getActive()) {
+            if (user.getActive()) {
                 userRepository.deactivateUser(user.getUserId());
                 return true;
             }

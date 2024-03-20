@@ -10,6 +10,7 @@ public class Constants {
     public static final List<String> sectors = List.of("Technology","Electronic Technology","Health Technology","Health Services","Finance","Energy");
     public static final int maxStockListings = 20;
     public static final int maxStockListingsHistory = 10;
+    public static final Integer BEARER_PREFIX_SIZE = 7;
     public static final List<String> ListingsToIgnore = List.of(
             "ATLEF",
             "NTXNF",
@@ -22,4 +23,6 @@ public class Constants {
             "COSDF",
             "ATMQF",
             "FLUXF");
+
+    public static String currencyFilePath = "src/main/resources/physical_currency_list.csv";
 }

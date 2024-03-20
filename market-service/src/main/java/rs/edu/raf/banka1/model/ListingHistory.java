@@ -16,13 +16,12 @@ import lombok.Setter;
 public class ListingHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    private Long listingHistoryId;
     private String ticker;
     private long date;
-    private double price;
-    private double ask;
-    private double bid;
-    private double changed;
-    private int volume;
+    private Double price;
+    private Double high;
+    private Double low;
+    private Double changed;
+    private Integer volume;
 }

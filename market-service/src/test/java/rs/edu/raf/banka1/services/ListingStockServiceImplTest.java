@@ -29,6 +29,8 @@ public class ListingStockServiceImplTest {
     private ListingStockMapper listingMapper;
     @Mock
     private StockRepository stockRepository;
+    @Mock
+    private ListingStockMapper stockMapper;
     @InjectMocks
     private ListingStockServiceImpl listingStockService;
     private ListingStock stockAAPL;
@@ -57,19 +59,17 @@ public class ListingStockServiceImplTest {
         // history data
         model1 = new ListingHistory();
         model1.setTicker("AAPL");
-        model1.setDate(Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
+        model1.setDate((int) Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         model1.setPrice(100.0);
-        model1.setAsk(101.0);
-        model1.setBid(99.0);
+        model1.setChanged(2.0);
         model1.setChanged(0.0);
         model1.setVolume(1000);
 
         model2 = new ListingHistory();
         model2.setTicker("MSFT");
-        model2.setDate(Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
+        model2.setDate((int) Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         model2.setPrice(100.0);
-        model2.setAsk(101.0);
-        model2.setBid(99.0);
+        model2.setChanged(2.0);
         model2.setChanged(0.0);
         model2.setVolume(1000);
 
@@ -110,7 +110,7 @@ public class ListingStockServiceImplTest {
 
     @Test
     public void addListingToHistoryNotPresentTest(){
-        when(listingHistoryRepository.findByTickerAndDate("AAPL", date)).thenReturn(Optional.empty());
+        when(listingHistoryRepository.findByTickerAndDate("AAPL", model1.getDate())).thenReturn(Optional.empty());
         assertEquals(1, listingStockService.addListingToHistory(model1));
     }
 
@@ -120,8 +120,7 @@ public class ListingStockServiceImplTest {
         listingHistory.setTicker("AAPL");
         listingHistory.setDate(date);
         listingHistory.setPrice(100.0);
-        listingHistory.setAsk(101.0);
-        listingHistory.setBid(99.0);
+        listingHistory.setChanged(2.0);
         listingHistory.setChanged(0.0);
         listingHistory.setVolume(1000);
 
@@ -129,8 +128,7 @@ public class ListingStockServiceImplTest {
         updateModel.setTicker("AAPL");
         updateModel.setDate(date);
         updateModel.setPrice(700.0);
-        updateModel.setAsk(105.0);
-        updateModel.setBid(100.0);
+        listingHistory.setChanged(2.0);
         updateModel.setChanged(1.0);
         updateModel.setVolume(10000);
 
@@ -140,15 +138,15 @@ public class ListingStockServiceImplTest {
 
     @Test
     public void addAllListingsToHistoryEveryPresentTest(){
-        when(listingHistoryRepository.findByTickerAndDate("AAPL", date)).thenReturn(Optional.of(model1));
-        when(listingHistoryRepository.findByTickerAndDate("MSFT", date)).thenReturn(Optional.of(model2));
+        when(listingHistoryRepository.findByTickerAndDate("AAPL", model1.getDate())).thenReturn(Optional.of(model1));
+        when(listingHistoryRepository.findByTickerAndDate("MSFT", model2.getDate())).thenReturn(Optional.of(model2));
         assertEquals(0, listingStockService.addAllListingsToHistory(lst));
     }
 
     @Test
     public void addAllListingsToHistoryNothingPresentTest(){
-        when(listingHistoryRepository.findByTickerAndDate("AAPL", date)).thenReturn(Optional.empty());
-        when(listingHistoryRepository.findByTickerAndDate("MSFT", date)).thenReturn(Optional.empty());
+        when(listingHistoryRepository.findByTickerAndDate("AAPL", model1.getDate())).thenReturn(Optional.empty());
+        when(listingHistoryRepository.findByTickerAndDate("MSFT", model2.getDate())).thenReturn(Optional.empty());
         assertEquals(lst.size(), listingStockService.addAllListingsToHistory(lst));
     }
 

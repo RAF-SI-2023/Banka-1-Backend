@@ -356,4 +356,26 @@ public class ListingStockServiceImpl implements ListingStockService {
     public Optional<ListingStock> findByTicker(String ticker) {
         return stockRepository.findByTicker(ticker);
     }
+
+    public List<ListingHistory> getListingHistoriesByTimestamp(String ticker, Integer from, Integer to) {
+        List<ListingHistory> listingHistories = new ArrayList<>();
+//        return all timestamps
+        if(from == null && to == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+        }
+//        return all timestamps before given timestamp
+        else if(from == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBefore(ticker, to);
+        }
+//        return all timestamps after given timestamp
+        else if(to == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateAfter(ticker, from);
+        }
+//        return all timestamps between two timestamps
+        else{
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to);
+        }
+
+        return listingHistories;
+    }
 }

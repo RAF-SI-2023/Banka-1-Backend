@@ -9,7 +9,11 @@ import rs.edu.raf.banka1.model.exceptions.CurrencyNotFoundException;
 import rs.edu.raf.banka1.repositories.CurrencyRepository;
 import rs.edu.raf.banka1.repositories.InflationRepository;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Locale;
 
 @Service
 public class CurrencyService {

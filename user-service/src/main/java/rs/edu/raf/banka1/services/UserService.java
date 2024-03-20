@@ -21,8 +21,8 @@ public interface UserService extends UserDetailsService {
     List<UserResponse> search(String email, String firstName, String lastName, String position);
     CreateUserResponse createUser(CreateUserRequest createUserRequest);
     ActivateAccountResponse activateAccount(String token, String password);
-    EditUserResponse editUser(EditUserRequest editUserRequest);
-    boolean deleteUser(Long id);
+    boolean editUser(EditUserRequest editUserRequest);
+    Boolean deleteUser(Long id);
 
     List<PermissionDto> findPermissions(Long userId);
 

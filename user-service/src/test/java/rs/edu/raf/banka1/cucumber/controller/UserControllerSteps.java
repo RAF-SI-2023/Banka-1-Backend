@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.cucumber.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -13,10 +14,14 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.client.RestTemplate;
+import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.ActivateAccountRequest;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
@@ -37,14 +42,18 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static rs.edu.raf.banka1.cucumber.SpringIntegrationTest.enviroment;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerSteps {
 
     @Autowired
     private EmailService emailService;
-    @LocalServerPort
-    private String port;
+    //@LocalServerPort
+    //private String port;
+
+    private String port = Integer.toString(SpringIntegrationTest.enviroment.getServicePort("user-service", 8080));
+    //private String port = "8080";
 
     private String jwt = "";
 
@@ -56,14 +65,19 @@ public class UserControllerSteps {
     private User activatedUser;
     private EditUserRequest editUserRequest = new EditUserRequest();
     private CreateUserRequest createUserRequest = new CreateUserRequest();
+    private Long userToRemove;
     private String email;
     private UserMapper userMapper = new UserMapper(new PermissionMapper());
 
     private UserRepository userRepository;
+    private PermissionRepository permissionRepository;
     private List<UserResponse> userResponses = new ArrayList<>();
-    private final String url = "http://localhost:";
+    //private final String url = "http://localhost:";
+    private final String url = "http://" + SpringIntegrationTest.enviroment.getServiceHost("user-service", 8080) + ":";
+    //private final String url = "http://" + "host.docker.internal" + ":";
     private Long lastid;
     private String password;
+
 
     @Data
     class SearchFilter{
@@ -86,6 +100,27 @@ public class UserControllerSteps {
         jwt = responseEntity.getBody().getJwt();
     }
 
+    @Given("I have a user with id {int}")
+    public void iHaveAUserWithId(int id) {
+        User user = new User();
+        user.setUserId((long) id);
+        user.setEmail("teeeest@gmail.com");
+        user.setPassword("testpassword");
+        user.setActivationToken(null);
+        user.setJmbg("testjmbg");
+        user.setActive(true);
+        user.setPermissions(new HashSet<>());
+        user.setFirstName("nebitno");
+        user.setLastName("nebitno");
+        user.setPosition("nebitno");
+        userRepository.save(user);
+    }
+
+    @Given("there is a permission with name {string}")
+    public void thereIsAPermissionWithName(String permission) {
+
+    }
+
     @Given("user with email {string} exists")
     public void userWithEmailExists(String email) {
         User user = new User();
@@ -95,9 +130,30 @@ public class UserControllerSteps {
         user.setJmbg("testjmbg");
         user.setActive(true);
         user.setPermissions(new HashSet<>());
+        user.setFirstName("nebitno");
+        user.setLastName("nebitno");
+        user.setPosition("nebitno");
         userRepository.save(user);
 
         editUserRequest = userMapper.userToEditUserRequest(user);
+    }
+
+    @Given("user i want to delete exists")
+    public void userWithIdExists() {
+        User user = new User();
+        user.setEmail("testemail123@gmail.com");
+        user.setPassword("testpassword");
+        user.setActivationToken(null);
+        user.setJmbg("testjmbg12345");
+        user.setActive(true);
+        user.setPermissions(new HashSet<>());
+        user = userRepository.save(user);
+        userToRemove = user.getUserId();
+    }
+
+    @Given("admin wants to remove user with id {string}")
+    public void adminWantsToRemoveUserWithId(String id) {
+        userToRemove = Long.parseLong(id);
     }
 
     public UserControllerSteps(UserRepository userRepository) {
@@ -144,6 +200,7 @@ public class UserControllerSteps {
         user.setActivationToken("testtoken");
         user.setEmail("testemail");
         user.setPassword("testpassword");
+        user.setActive(true);
         userRepository.save(user);
     }
 
@@ -179,8 +236,45 @@ public class UserControllerSteps {
 
     }
 
+    private String getFiltered(String path) throws JsonProcessingException {
+        RestTemplate restTemplate = new RestTemplate();
+        java.net.http.HttpRequest httpRequest = java.net.http.HttpRequest.newBuilder()
+                .uri(URI.create(path))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + jwt)
+                .method("GET", java.net.http.HttpRequest.BodyPublishers.noBody())
+                .build();
 
-    private String put(String path, Object objectToPut) throws JsonProcessingException {
+        char combiner = '?';
+        if(searchFilter.getEmail() != null) {
+            path = path.concat(combiner + "email=" + searchFilter.getEmail());
+            combiner = '&';
+        }
+        if(searchFilter.getFirstName() != null) {
+            path = path.concat(combiner + "firstName=" + searchFilter.getFirstName());
+            combiner = '&';
+        }
+        if(searchFilter.getLastName() != null) {
+            path = path.concat(combiner + "lastName=" + searchFilter.getLastName());
+            combiner = '&';
+        }
+        if(searchFilter.getPosition() != null) {
+            path = path.concat(combiner + "position=" + searchFilter.getPosition());
+        }
+
+        try {
+            HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            return httpResponse.body();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            fail("Http GET request error");
+            return "";
+        }
+    }
+
+
+    private void put(String path, Object objectToPut) throws JsonProcessingException {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
@@ -188,8 +282,18 @@ public class UserControllerSteps {
         headers.setBearerAuth(jwt);
         HttpEntity<Object> request = new HttpEntity<>(objectToPut, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.PUT, request, String.class);
-        return response.getBody();
+        restTemplate.exchange(path, org.springframework.http.HttpMethod.PUT, request, String.class);
+    }
+
+    private void delete(String path) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
+        HttpEntity<Object> request = new HttpEntity<>(headers);
+
+        restTemplate.exchange(path, org.springframework.http.HttpMethod.DELETE, request, Boolean.class);
     }
 
 
@@ -219,13 +323,14 @@ public class UserControllerSteps {
         }
         else if(path.equals("/user/search")) {
             try {
-                lastReadAllUsersResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<UserResponse>>() {});
+                lastReadAllUsersResponse = objectMapper.readValue(getFiltered(url + port + path), new TypeReference<List<UserResponse>>() {});
             }
             catch (Exception e){
                 e.printStackTrace();
                 fail("Failed to parse response body");
             }
             userRepository.findAll().forEach(user -> {
+                if(!user.getActive()) return;
                 if(searchFilter.getEmail() != null && !user.getEmail().equals(searchFilter.getEmail())) return;
                 if(searchFilter.getFirstName() != null && !user.getFirstName().equalsIgnoreCase(searchFilter.getFirstName())) return;
                 if(searchFilter.getLastName() != null && !user.getLastName().equalsIgnoreCase(searchFilter.getLastName())) return;
@@ -262,6 +367,11 @@ public class UserControllerSteps {
        }
    }
 
+    @When("i send DELETE request to remove the user")
+    public void iSendDELETERequestTo() {
+        delete(url + port + "/user/remove/" + userToRemove);
+    }
+
    @When("I go to {string}")
     public void iGoTo(String path) {
         activatedUser = userRepository.findByActivationToken("testtoken").get();
@@ -290,7 +400,7 @@ public class UserControllerSteps {
     public void whenISendPUTRequestTo(String path) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            lastEditUserResponse = objectMapper.readValue(put(url + port + path, editUserRequest), EditUserResponse.class);
+            put(url + port + path, editUserRequest);
         } catch (Exception e) {
             e.printStackTrace();
             fail("Failed to parse response body");
@@ -354,5 +464,10 @@ public class UserControllerSteps {
     public void userWithEmailHasHisFirstNameChangedTo(String email, String firstName) {
         User user = userRepository.findByEmail(email).get();
         assertThat(user.getFirstName()).isEqualTo(firstName);
+    }
+
+    @Then("user is removed from the system")
+    public void userWithIdIsRemoved() {
+        assertThat(userRepository.findById(userToRemove).get().getActive()).isFalse();
     }
 }
