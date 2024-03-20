@@ -19,7 +19,9 @@ public class SwaggerConfiguration {
         return new OpenAPI()
                 .addSecurityItem(new SecurityRequirement().addList(AUTHORIZATION))
                 .components(new Components().addSecuritySchemes(AUTHORIZATION,
-                        new io.swagger.v3.oas.models.security.SecurityScheme().type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
+                        new io.swagger.v3.oas.models.security.SecurityScheme()
+                                .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
+                                .scheme("bearer").bearerFormat("JWT")));
     }
 
     @Bean

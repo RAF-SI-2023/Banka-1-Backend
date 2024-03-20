@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.model.ForeignCurrencyAccount;
+import rs.edu.raf.banka1.model.Permission;
+import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
@@ -23,7 +25,10 @@ public class BootstrapData implements CommandLineRunner {
     private final ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
 
     @Autowired
-    public BootstrapData(UserRepository userRepository, PasswordEncoder passwordEncoder, PermissionRepository permissionRepository, ForeignCurrencyAccountRepository foreignCurrencyAccountRepository) {
+    public BootstrapData(UserRepository userRepository,
+                         PasswordEncoder passwordEncoder,
+                         PermissionRepository permissionRepository,
+                         ForeignCurrencyAccountRepository foreignCurrencyAccountRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;

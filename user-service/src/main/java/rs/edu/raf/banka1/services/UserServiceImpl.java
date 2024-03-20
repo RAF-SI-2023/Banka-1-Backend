@@ -17,20 +17,25 @@ import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
+import rs.edu.raf.banka1.requests.ModifyPermissionsRequest;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
-import rs.edu.raf.banka1.responses.EditUserResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     @Value("${front.port}")
-    String frontPort;
+    private String frontPort;
     private UserMapper userMapper;
     private UserRepository userRepository;
     private PermissionRepository permissionRepository;
@@ -138,17 +143,42 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<PermissionDto> findPermissions(Long userId) {
         User user = userRepository.findById(userId).orElse(null);
-        if(user == null)
+        if(user == null) {
             return null;
+        }
+
         return extractPermissionsFromUser(user);
     }
 
     @Override
     public List<PermissionDto> findPermissions(String email) {
         User user = userRepository.findByEmail(email).orElse(null);
-        if(user == null)
+        if(user == null) {
             return null;
+        }
+
         return extractPermissionsFromUser(user);
+    }
+
+    @Override
+    public Boolean modifyUserPermissions(ModifyPermissionsRequest request, Long userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if(user == null) {
+            return false;
+        }
+
+        Set<Permission> permissions = user.getPermissions();
+        for (String permissionName : request.getPermissions()) {
+            Optional<Permission> permission = permissionRepository.findByName(permissionName);
+            if(request.getAdd()) {
+                permission.ifPresent(permissions::add);
+            }
+            else {
+                permission.ifPresent(permissions::remove);
+            }
+        }
+
+        return true;
     }
 
     //necessary for authentication

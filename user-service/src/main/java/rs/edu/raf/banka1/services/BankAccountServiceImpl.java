@@ -17,22 +17,27 @@ public class BankAccountServiceImpl implements BankAccountService {
     private final ForeignCurrencyAccountMapper foreignCurrencyAccountMapper;
 
     @Autowired
-    public BankAccountServiceImpl(ForeignCurrencyAccountRepository foreignCurrencyAccountRepository, ForeignCurrencyAccountMapper foreignCurrencyAccountMapper) {
+    public BankAccountServiceImpl(ForeignCurrencyAccountRepository foreignCurrencyAccountRepository,
+                                  ForeignCurrencyAccountMapper foreignCurrencyAccountMapper) {
         this.foreignCurrencyAccountRepository = foreignCurrencyAccountRepository;
         this.foreignCurrencyAccountMapper = foreignCurrencyAccountMapper;
     }
 
     public ForeignCurrencyAccountResponse getForeignCurrencyAccountById(Long id) {
-        return foreignCurrencyAccountRepository.findById(id).map(foreignCurrencyAccountMapper::foreignCurrencyAccountToForeignCurrencyAccountResponse).orElse(null);
+        return foreignCurrencyAccountRepository.findById(id).
+                map(foreignCurrencyAccountMapper::foreignCurrencyAccountToForeignCurrencyAccountResponse)
+                .orElse(null);
     }
 
     public List<ForeignCurrencyAccountResponse> getAllForeignCurrencyAccounts() {
-        return foreignCurrencyAccountRepository.findAll().stream().map(foreignCurrencyAccountMapper::foreignCurrencyAccountToForeignCurrencyAccountResponse).toList();
+        return foreignCurrencyAccountRepository.findAll().stream()
+                .map(foreignCurrencyAccountMapper::foreignCurrencyAccountToForeignCurrencyAccountResponse).toList();
     }
 
     @Override
     public CreateForeignCurrencyAccountResponse createForeignCurrencyAccount(ForeignCurrencyAccountRequest foreignCurrencyAccountRequest) {
-        ForeignCurrencyAccount foreignCurrencyAccount = foreignCurrencyAccountMapper.createForeignCurrencyAccountRequestToForeignCurrencyAccount(foreignCurrencyAccountRequest);
+        ForeignCurrencyAccount foreignCurrencyAccount = foreignCurrencyAccountMapper
+                .createForeignCurrencyAccountRequestToForeignCurrencyAccount(foreignCurrencyAccountRequest);
         if (foreignCurrencyAccount != null) {
             foreignCurrencyAccountRepository.save(foreignCurrencyAccount);
             return new CreateForeignCurrencyAccountResponse(foreignCurrencyAccount.getId());

@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.responses;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Setter
 @Getter

@@ -27,6 +27,7 @@ import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.requests.ActivateAccountRequest;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
+import rs.edu.raf.banka1.requests.ModifyPermissionsRequest;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
 import rs.edu.raf.banka1.responses.EditUserResponse;
@@ -105,8 +106,10 @@ public class UserController {
     })
     public ResponseEntity<UserResponse> readUserFromJwt() {
         UserResponse userResponse = this.userService.findByJwt();
-        if(userResponse == null)
+        if (userResponse == null) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+
         return new ResponseEntity<>(userResponse, HttpStatus.OK);
     }
 
@@ -169,6 +172,22 @@ public class UserController {
     public ResponseEntity<Boolean> editUser(@RequestBody EditUserRequest editUserRequest) {
         boolean edited = userService.editUser(editUserRequest);
         return new ResponseEntity<>(edited, edited ? HttpStatus.OK : HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping(value = "permission/{userId}")
+    @Operation(summary = "Change permissions to user", description = "Change permissions to user")
+    @PreAuthorize("hasAuthority('modifyUser')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Permissions changed successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))}),
+            @ApiResponse(responseCode = "404", description = "Bad request"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Boolean> changePermissions(@PathVariable Long userId,
+                                                     @RequestBody ModifyPermissionsRequest request) {
+        boolean changed = userService.modifyUserPermissions(request, userId);
+        return new ResponseEntity<>(changed, changed ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping(value = "/remove/{id}")
