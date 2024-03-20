@@ -136,10 +136,34 @@ ALTER TABLE `user_permissions`
 INSERT INTO `permission` (`permission_id`, `description`, `name`) VALUES
     (2, 'can_manage_users', 'can_manage_users');
 
+INSERT INTO `permission` (`permission_id`, `description`, `name`) VALUES
+    (3, 'readUser', 'readUser');
+
+INSERT INTO `permission` (`permission_id`, `description`, `name`) VALUES
+    (4, 'addUser', 'addUser');
+
+INSERT INTO `permission` (`permission_id`, `description`, `name`) VALUES
+    (5, 'modifyUser', 'modifyUser');
+
+INSERT INTO `permission` (`permission_id`, `description`, `name`) VALUES
+    (6, 'deleteUser', 'deleteUser');
+
 INSERT INTO `user` (`user_id`, `active`, `email`, `first_name`, `jmbg`, `last_name`, `password`, `phone_number`, `position`) VALUES
     (100, b'1', 'admin@admin.com', 'admin', 'admin', 'admin', '$2a$10$PBWT9wzA7OPpZPr5lVNxj.SLlHhrBrUzHH/wOG6sqfOp3wbYk8Kze', '1234567890', 'admin');
 
 INSERT INTO `user_permissions` (`user_id`, `permission_id`) VALUES
     (100, 2);
+
+INSERT INTO `user_permissions` (`user_id`, `permission_id`) VALUES
+    (100, 3);
+
+INSERT INTO `user_permissions` (`user_id`, `permission_id`) VALUES
+    (100, 4);
+
+INSERT INTO `user_permissions` (`user_id`, `permission_id`) VALUES
+    (100, 5);
+
+INSERT INTO `user_permissions` (`user_id`, `permission_id`) VALUES
+    (100, 6);
 
 -- COMMIT;

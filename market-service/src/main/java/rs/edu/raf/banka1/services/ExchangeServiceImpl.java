@@ -23,7 +23,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Date;
 
 @Service
 public class ExchangeServiceImpl implements ExchangeService {
@@ -103,7 +108,7 @@ public class ExchangeServiceImpl implements ExchangeService {
                         country = countryRepository.save(country);
                         countryIsoToCountryMap.put(countryIso, country);
                     }
-                    for(String holidayString : businessHours.getHolidays()) {
+                    for (String holidayString : businessHours.getHolidays()) {
                         Date date = dateDateFormat.parse(holidayString);
                         countryIsoToAllHolidayDatesMap.get(countryIso).add(date);
                     }
@@ -139,7 +144,7 @@ public class ExchangeServiceImpl implements ExchangeService {
 
     private Map<String, Country> getCountryMap(CountryTimezoneDto[] countryTimezones) {
         Map<String, Country> countryIsoToCountryMap = new HashMap<>();
-        for(CountryTimezoneDto ct : countryTimezones) {
+        for (CountryTimezoneDto ct : countryTimezones) {
             if (!countryIsoToCountryMap.containsKey(ct.getCountryCode())) {
                 Country country = new Country();
                 country.setISOCode(ct.getCountryCode());

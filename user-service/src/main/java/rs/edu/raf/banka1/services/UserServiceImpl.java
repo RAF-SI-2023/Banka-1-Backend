@@ -112,15 +112,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public EditUserResponse editUser(EditUserRequest editUserRequest) {
-        User user = userRepository.findByEmail(editUserRequest.getEmail()).orElseThrow();
-        user = userMapper.editUserRequestToUser(user, editUserRequest);
-        userRepository.save(user);
-        return new EditUserResponse();
+    public boolean editUser(EditUserRequest editUserRequest) {
+        Optional<User> user = userRepository.findByEmail(editUserRequest.getEmail());
+        if (user.isEmpty()) {
+            return false;
+        }
+        User newUser = userMapper.editUserRequestToUser(user.get(), editUserRequest);
+        userRepository.save(newUser);
+        return true;
     }
 
     @Override
-    public boolean deleteUser(Long id) {
+    public Boolean deleteUser(Long id) {
         Optional<User> optUser = userRepository.findById(id);
         if (optUser.isPresent()) {
             User user = optUser.get();
