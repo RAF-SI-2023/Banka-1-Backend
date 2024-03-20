@@ -1,6 +1,6 @@
 package rs.edu.raf.banka1.utils;
 
-import java.io.File;
+
 import java.util.List;
 
 public class Constants {
@@ -23,4 +23,6 @@ public class Constants {
             "COSDF",
             "ATMQF",
             "FLUXF");
+
+    public static String currencyFilePath = "src/main/resources/physical_currency_list.csv";
 }
