@@ -72,6 +72,7 @@ public class UserControllerSteps {
     private Long userToRemove;
     private String email;
     private UserMapper userMapper = new UserMapper(new PermissionMapper());
+    private ResponseEntity<?> lastResponse;
 
     private UserRepository userRepository;
     private PermissionRepository permissionRepository;
@@ -208,23 +209,36 @@ public class UserControllerSteps {
         userRepository.save(user);
     }
 
-    private String getBody(String path){
-        java.net.http.HttpRequest httpRequest = java.net.http.HttpRequest.newBuilder()
-                .uri(URI.create(path))
-                .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + jwt)
-                .method("GET", java.net.http.HttpRequest.BodyPublishers.noBody())
-                .build();
+//    private String getBody(String path){
+//        java.net.http.HttpRequest httpRequest = java.net.http.HttpRequest.newBuilder()
+//                .uri(URI.create(path))
+//                .header("Content-Type", "application/json")
+//                .header("Authorization", "Bearer " + jwt)
+//                .method("GET", java.net.http.HttpRequest.BodyPublishers.noBody())
+//                .build();
+//
+//        try {
+//            HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
+//            return httpResponse.body();
+//        }
+//        catch (Exception e){
+//            e.printStackTrace();
+//            fail("Http GET request error");
+//            return "";
+//        }
+//    }
 
-        try {
-            HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            return httpResponse.body();
-        }
-        catch (Exception e){
-            e.printStackTrace();
-            fail("Http GET request error");
-            return "";
-        }
+    private String getBody(String path){
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
+        HttpEntity<Object> request = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.GET, request, String.class);
+        lastResponse = response;
+        return response.getBody();
     }
 
     private String post(String path, Object objectToPost) throws JsonProcessingException {
@@ -236,6 +250,7 @@ public class UserControllerSteps {
         HttpEntity<Object> request = new HttpEntity<>(objectToPost, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.POST, request, String.class);
+        lastResponse = response;
         return response.getBody();
 
     }
@@ -286,7 +301,7 @@ public class UserControllerSteps {
         headers.setBearerAuth(jwt);
         HttpEntity<Object> request = new HttpEntity<>(objectToPut, headers);
 
-        restTemplate.exchange(path, org.springframework.http.HttpMethod.PUT, request, String.class);
+        lastResponse = restTemplate.exchange(path, org.springframework.http.HttpMethod.PUT, request, String.class);
     }
 
     private void delete(String path) {
@@ -297,7 +312,7 @@ public class UserControllerSteps {
         headers.setBearerAuth(jwt);
         HttpEntity<Object> request = new HttpEntity<>(headers);
 
-        restTemplate.exchange(path, org.springframework.http.HttpMethod.DELETE, request, Boolean.class);
+        lastResponse = restTemplate.exchange(path, org.springframework.http.HttpMethod.DELETE, request, Boolean.class);
     }
 
 
@@ -342,6 +357,9 @@ public class UserControllerSteps {
                 userResponses.add(userMapper.userToUserResponse(user));
             });
         }
+        else if(path.equals("/user/permissions/userId/100") || path.equals("/user/permissions/email/admin@admin.com")){
+            getBody(url + port + path);
+        }
         else if(path.startsWith("/user/")) {
             try {
                 lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), UserResponse.class);
@@ -352,7 +370,6 @@ public class UserControllerSteps {
             }
             String[] split = path.split("/");
             lastid = Long.parseLong(split[split.length - 1]);
-
         }
     }
 
@@ -473,5 +490,10 @@ public class UserControllerSteps {
     @Then("user is removed from the system")
     public void userWithIdIsRemoved() {
         assertThat(userRepository.findById(userToRemove).get().getActive()).isFalse();
+    }
+
+    @Then("i should get response with status {int}")
+    public void iShouldGetResponseWithStatus(int status) {
+        assertThat(lastResponse.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.valueOf(status));
     }
 }
