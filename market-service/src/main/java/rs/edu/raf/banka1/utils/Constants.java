@@ -24,5 +24,5 @@ public class Constants {
             "ATMQF",
             "FLUXF");
 
-    public static String currencyFilePath = "src/main/resources/physical_currency_list.csv";
+    public static String currencyFilePath = "market-service/src/main/resources/physical_currency_list.csv";
 }
