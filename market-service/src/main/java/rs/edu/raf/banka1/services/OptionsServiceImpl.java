@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 public class OptionsServiceImpl implements OptionsService{
     private ObjectMapper objectMapper = new ObjectMapper();
     private HttpClient httpClient = HttpClient.newHttpClient();
+    private HttpClient crumbHttpClient = HttpClient.newHttpClient();
     private HttpRequest httpRequest;
     private String cookie = null;
     private String crumb = null;
@@ -176,7 +177,7 @@ public class OptionsServiceImpl implements OptionsService{
         return options;
     }
 
-    private boolean getCookieAndCrumb() {
+    boolean getCookieAndCrumb() {
         String initialUrl = "https://fc.yahoo.com";
         httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(initialUrl))
@@ -203,7 +204,7 @@ public class OptionsServiceImpl implements OptionsService{
                             .GET()
                             .build();
 
-                    HttpResponse<String> crumbResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+                    HttpResponse<String> crumbResponse = crumbHttpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
                     // Check if the crumb request is successful
                     if (crumbResponse.statusCode() == 200) {
                         crumb = crumbResponse.body();
@@ -238,6 +239,10 @@ public class OptionsServiceImpl implements OptionsService{
 
     public void setCrumb(String crumb) {
         this.crumb = crumb;
+    }
+
+    public void setCrumbHttpClient(HttpClient httpClient) {
+        this.crumbHttpClient = httpClient;
     }
 }
 
