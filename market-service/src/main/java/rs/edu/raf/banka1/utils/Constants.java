@@ -11,7 +11,7 @@ public class Constants {
     public static final int maxStockListings = 20;
     public static final int maxStockListingsHistory = 10;
     public static String optionsFilePath = "market-service/src/main/resources/options.json";
-    public static final List<String> sectors = List.of("Technology");
+//    public static final List<String> sectors = List.of("Technology");
     public static List<String> tickersForTestingOptions = List.of("APPL", "ORCL", "MSFT", "VXX");
     public static final int maxListings = 700;
     public static final Integer BEARER_PREFIX_SIZE = 7;
