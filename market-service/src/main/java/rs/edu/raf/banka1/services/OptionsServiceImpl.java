@@ -54,9 +54,9 @@ public class OptionsServiceImpl implements OptionsService{
 
         List<OptionsDto> optionsModels = new ArrayList<>();
         try{
-            List<String> tickers = fetchTickers();
+//            List<String> tickers = fetchTickers();
 //             Constants.tickersForTestingOptions
-            for (String ticker : tickers)
+            for (String ticker : Constants.tickersForTestingOptions)
                 optionsModels.addAll(fetchOptionsForTicker(ticker, optionsUrl + ticker + "?crumb=" + crumb));
 
             // Uncomment when filling the options.json
@@ -152,11 +152,20 @@ public class OptionsServiceImpl implements OptionsService{
 
     @Override
     public List<OptionsDto> getOptionsByTicker(String ticker) {
-        return this.optionsRepository.findByTicker(ticker).map(optionsModels ->
+        List<OptionsDto> options = this.optionsRepository.findByTicker(ticker).map(optionsModels ->
             optionsModels.stream()
                 .map(optionsMapper::optionsModelToOptionsDto)
                 .collect(Collectors.toList()))
             .orElse(Collections.emptyList());
+        if(options.isEmpty()) {
+            if(crumb != null) {
+                options = fetchOptionsForTicker(ticker, optionsUrl + ticker + "?crumb=" + crumb);
+            } else {
+                return new ArrayList<>();
+            }
+        }
+        optionsRepository.saveAll(options.stream().map(optionsMapper::optionsDtoToOptionsModel).toList());
+        return options;
     }
 
     private List<OptionsModel> parseOptions(JsonNode optionsNode, String ticker, OptionType optionType) {
