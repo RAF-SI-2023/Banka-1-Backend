@@ -23,13 +23,16 @@ public class PermissionServiceImpl implements PermissionService {
 
     private void seedPermissions() {
         for(String s : Arrays.asList("addUser", "modifyUser", "deleteUser", "readUser")) {
-            if(permissionRepository.findByName(s).isPresent())
+            if(permissionRepository.findByName(s).isPresent()) {
                 continue;
+            }
+
             Permission permission = new Permission();
             permission.setName(s);
             permission.setDescription(s);
             permissionRepository.save(permission);
         }
+
     }
 
     @Override

@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rs.edu.raf.banka1.mapper.CurrencyMapper;
 import rs.edu.raf.banka1.model.entities.Currency;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.repositories.CurrencyRepository;
@@ -29,6 +30,8 @@ public class CurrencyServiceUnitTests {
 
     @Mock
     private CurrencyRepository currencyRepository;
+    @Mock
+    private CurrencyMapper currencyMapper;
     @Mock
     private InflationRepository inflationRepository;
     @InjectMocks
@@ -56,6 +59,7 @@ public class CurrencyServiceUnitTests {
         currency.setCurrencySymbol("AED");
 
         when(currencyRepository.findByCurrencyName(anyString())).thenReturn(Optional.of(currency));
+        when(currencyMapper.currencyToCurrencyDto(currency)).thenReturn(new CurrencyDto("United Arab Emirates Dirham", "AED"));
         var result = currencyService.findCurrencyByCurrencyName("United Arab Emirates Dirham");
 
         assertEquals("United Arab Emirates Dirham", result.getCurrencyName());
@@ -74,6 +78,7 @@ public class CurrencyServiceUnitTests {
         currency.setCurrencySymbol("AED");
 
         when(currencyRepository.findCurrencyByCurrencyCode(anyString())).thenReturn(Optional.of(currency));
+        when(currencyMapper.currencyToCurrencyDto(currency)).thenReturn(new CurrencyDto("United Arab Emirates Dirham", "AED"));
         var result = currencyService.findCurrencyByCurrencyCode("AED");
 
         assertEquals("United Arab Emirates Dirham", result.getCurrencyName());
