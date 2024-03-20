@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import rs.edu.raf.banka1.mapper.ListingStockMapper;
-import rs.edu.raf.banka1.model.ListingHistoryModel;
+import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 
 import rs.edu.raf.banka1.services.ListingStockServiceImpl;
@@ -33,14 +33,14 @@ public class ListingServiceImplTests {
     @InjectMocks
     private ListingStockServiceImpl listingService;
 
-    private List<ListingHistoryModel> lst = new ArrayList<>();
-    private ListingHistoryModel model1;
-    private ListingHistoryModel model2;
+    private List<ListingHistory> lst = new ArrayList<>();
+    private ListingHistory model1;
+    private ListingHistory model2;
     private long date;
 
     @BeforeEach
     public void setUp(){
-        model1 = new ListingHistoryModel();
+        model1 = new ListingHistory();
         model1.setTicker("AAPL");
         model1.setDate(Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         model1.setPrice(100.0);
@@ -49,7 +49,7 @@ public class ListingServiceImplTests {
         model1.setChanged(0.0);
         model1.setVolume(1000);
 
-        model2 = new ListingHistoryModel();
+        model2 = new ListingHistory();
         model2.setTicker("MSFT");
         model2.setDate(Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         model2.setPrice(100.0);
@@ -77,16 +77,16 @@ public class ListingServiceImplTests {
 
     @Test
     public void addListingToHistoryPresentTest(){
-        ListingHistoryModel listingHistoryModel = new ListingHistoryModel();
-        listingHistoryModel.setTicker("AAPL");
-        listingHistoryModel.setDate(date);
-        listingHistoryModel.setPrice(100.0);
-        listingHistoryModel.setAsk(101.0);
-        listingHistoryModel.setBid(99.0);
-        listingHistoryModel.setChanged(0.0);
-        listingHistoryModel.setVolume(1000);
+        ListingHistory listingHistory = new ListingHistory();
+        listingHistory.setTicker("AAPL");
+        listingHistory.setDate(date);
+        listingHistory.setPrice(100.0);
+        listingHistory.setAsk(101.0);
+        listingHistory.setBid(99.0);
+        listingHistory.setChanged(0.0);
+        listingHistory.setVolume(1000);
 
-        ListingHistoryModel updateModel = new ListingHistoryModel();
+        ListingHistory updateModel = new ListingHistory();
         updateModel.setTicker("AAPL");
         updateModel.setDate(date);
         updateModel.setPrice(700.0);
@@ -95,7 +95,7 @@ public class ListingServiceImplTests {
         updateModel.setChanged(1.0);
         updateModel.setVolume(10000);
 
-        when(listingHistoryRepository.findByTickerAndDate("AAPL", date)).thenReturn(Optional.of(listingHistoryModel));
+        when(listingHistoryRepository.findByTickerAndDate("AAPL", date)).thenReturn(Optional.of(listingHistory));
 
         assertEquals(0, listingService.addListingToHistory(updateModel));
     }

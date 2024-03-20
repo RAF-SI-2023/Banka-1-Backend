@@ -1,15 +1,16 @@
 package rs.edu.raf.banka1.mapper;
 
 import org.springframework.stereotype.Component;
-import rs.edu.raf.banka1.model.ListingHistoryModel;
+import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
 
 @Component
 public class ListingStockMapper {
-    public ListingStock listingStockCreate(String symbol, String name, Double price, Double high, Double low, Double priceChange, Integer volume, Integer outstandingShare, Double dividendYield, String exchange) {
+    public ListingStock createListingStock(String symbol, String name, String exchange, Double price, Double high, Double low, Double priceChange, Integer volume, Integer outstandingShare, Double dividendYield) {
         ListingStock stock = new ListingStock();
         stock.setTicker(symbol);
         stock.setName(name);
+        stock.setExchange(exchange);
         stock.setListingType("Stock");
         stock.setPrice(price);
         stock.setHigh(high);
@@ -18,37 +19,32 @@ public class ListingStockMapper {
         stock.setVolume(volume);
         stock.setOutstandingShares(outstandingShare);
         stock.setDividendYield(dividendYield);
-        stock.setExchange(exchange);
         stock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
         return stock;
     }
-    public void updatelistingStock(ListingStock stock, String symbol, String name, Double price, Double high, Double low, Double priceChange, Integer volume,Integer outstandingShare, Double dividendYield, String exchange) {
-        stock.setTicker(symbol);
-        stock.setLow(low);
-        stock.setListingType("Stock");
-        stock.setHigh(high);
-        stock.setPrice(price);
-        stock.setPriceChange(priceChange);
-        stock.setVolume(volume);
-        stock.setOutstandingShares(outstandingShare);
-        stock.setDividendYield(dividendYield);
-        stock.setName(name);
-        stock.setExchange(exchange);
-        stock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
+    public void updateListingStock(ListingStock oldStock, ListingStock newStock) {
+        oldStock.setLow(newStock.getLow());
+        oldStock.setHigh(newStock.getHigh());
+        oldStock.setPrice(newStock.getPrice());
+        oldStock.setVolume(newStock.getVolume());
+        oldStock.setOutstandingShares(newStock.getOutstandingShares());
+        oldStock.setDividendYield(newStock.getDividendYield());
+        oldStock.setName(newStock.getName());
+        oldStock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
     }
-    public ListingHistoryModel createListingHistoryModel(String ticker, long date, double price, double ask, double bid, double changed, int volume) {
-        ListingHistoryModel listingHistoryModel = new ListingHistoryModel();
-        listingHistoryModel.setTicker(ticker);
-        listingHistoryModel.setDate(date);
-        listingHistoryModel.setPrice(price);
-        listingHistoryModel.setAsk(ask);
-        listingHistoryModel.setBid(bid);
-        listingHistoryModel.setChanged(changed);
-        listingHistoryModel.setVolume(volume);
-        return listingHistoryModel;
+    public ListingHistory createListingHistoryModel(String ticker, long date, double price, double ask, double bid, double changed, int volume) {
+        ListingHistory listingHistory = new ListingHistory();
+        listingHistory.setTicker(ticker);
+        listingHistory.setDate(date);
+        listingHistory.setPrice(price);
+        listingHistory.setAsk(ask);
+        listingHistory.setBid(bid);
+        listingHistory.setChanged(changed);
+        listingHistory.setVolume(volume);
+        return listingHistory;
     }
 
-    public ListingHistoryModel updateHistoryListingWithNewData(ListingHistoryModel oldModel, ListingHistoryModel newModel) {
+    public ListingHistory updateHistoryListingWithNewData(ListingHistory oldModel, ListingHistory newModel) {
         oldModel.setPrice(newModel.getPrice());
         oldModel.setAsk(newModel.getAsk());
         oldModel.setBid(newModel.getBid());

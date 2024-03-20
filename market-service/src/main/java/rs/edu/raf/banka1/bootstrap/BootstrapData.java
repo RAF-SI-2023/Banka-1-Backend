@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import rs.edu.raf.banka1.model.ListingHistory;
+import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.services.CurrencyService;
 import rs.edu.raf.banka1.services.ExchangeService;
@@ -14,6 +16,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static rs.edu.raf.banka1.utils.Constants.maxStockListings;
+import static rs.edu.raf.banka1.utils.Constants.maxStockListingsHistory;
 
 @Component
 @AllArgsConstructor
@@ -38,22 +43,15 @@ public class BootstrapData implements CommandLineRunner {
         currencyService.addCurrencies(currencyList);
         System.out.println("Currency Data Loaded!");
 
-        //        call it only from time to time to update json because api isn't free and we need it only once
-        //this is used for all listing bases
-//-------------------------------------NIKADA VISE NE POZIVATI OVO--------------------------------------------
-        //listingStockService.generateJSONSymbols();
-///---------------------------------OVO SE POZIVA ZA POPUNJAVANJE STOKOVA----------------------------------
-       // listingStockService.populateListingStocks();
+//        Since JSON symbols are available in repo, and the API key needs to be replaced or paid,
+//        we only need to call the function below every once in a while
+//        listingStockService.generateJSONSymbols();
 
-//        use this to update or initialize database with fresh data
-
-//        fetching and bootstrapping listing history data (not recommended as each listing generates 100 history records and we have around 3500 listings)
-   //-----------------------------!poziv za history za 10 stokova-----------------------------------------------
-      //  List<ListingHistoryModel> listingHistoryModels = listingStockService.fetchAllListingsHistory();
-//        so better alternative is to fetch history only for given listing when needed
-        //List<ListingHistoryModel> oneListingHistoryList = listingStockService.fetchSingleListingHistory("AAPL");
-
-     //   listingStockService.addAllListingsToHistory(listingHistoryModels);
+        // Populate stock and stock history
+        List<ListingStock> listingStocks = listingStockService.fetchNListingStocks(maxStockListings);
+        listingStockService.addAllListingStocks(listingStocks);
+        List<ListingHistory> listingHistories = listingStockService.fetchNListingsHistory(maxStockListingsHistory);
+        listingStockService.addAllListingsToHistory(listingHistories);
 
         System.out.println("All Data loaded!");
     }
