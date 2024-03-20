@@ -56,11 +56,11 @@ Video tutorial: https://www.youtube.com/watch?v=3EfvEZ_wThc
 
 ### Running integration tests
 
-1. If you are on windows, start docker engine (by running Docker Desktop)
-2. Set application.properties on all services using the example file (application.properties.forinttest)
-3. For the service you want to start integration tests, run the CucumberIntegrationTest class
+1. If you are on windows, start docker engine (by running Docker Desktop).
+2. Set application.properties on all services using the example file (application.properties.forinttest), in both test and main resources.
+3. For the service you want to start integration tests, run the CucumberIntegrationTest class.
 
-These instructions are subject to change as the project evolves
+These instructions are subject to change as the project evolves.
 
-Note: if you are running Docker desktop, make sure to close it after running the tests, and do wsl --shutdown in cmd to free up resources
+Note: if you are running Docker desktop, make sure to close it after running the tests, and do wsl --shutdown in cmd to free up resources.
 
