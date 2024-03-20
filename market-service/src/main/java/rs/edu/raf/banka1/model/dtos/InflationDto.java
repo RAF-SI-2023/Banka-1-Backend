@@ -1,18 +1,17 @@
 package rs.edu.raf.banka1.model.dtos;
 
-
-import lombok.Getter;
-import lombok.Setter;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CurrencyDto {
+public class InflationDto {
 
-    private String currencyName;
+    private Integer year;
 
-    private String currencyCode;
+    private Float inflationRate;
 }
