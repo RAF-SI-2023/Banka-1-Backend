@@ -11,6 +11,7 @@ import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.services.CurrencyService;
 import rs.edu.raf.banka1.services.ForexService;
 import rs.edu.raf.banka1.services.ListingService;
+import rs.edu.raf.banka1.services.OptionsService;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.io.BufferedReader;
@@ -32,6 +33,9 @@ public class BootstrapData implements CommandLineRunner {
     private ListingMapper listingMapper;
 
     private ForexService forexService;
+
+    @Autowired
+    private OptionsService optionsService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -83,6 +87,13 @@ public class BootstrapData implements CommandLineRunner {
         ////////////////////////////////////////////////////////////////
         System.out.printf("Updated: " + updated.size());
         System.out.println("Histories: " + histories.size());
+
+        Thread optionsThread = new Thread(()->{
+            optionsService.fetchOptions();
+        });
+        optionsThread.start();
+        optionsThread.join();
+
         System.out.println("All Data loaded!");
     }
 
