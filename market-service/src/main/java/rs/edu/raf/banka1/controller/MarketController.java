@@ -121,7 +121,7 @@ public class MarketController {
             return new ResponseEntity<>(forexService.getAllForexes().stream().map(forexMapper::toDto).toList(), HttpStatus.OK);
         }
         else if(listingType.equalsIgnoreCase("stock"))
-            return new ResponseEntity<>(listingStockService.getAllStocks(), HttpStatus.OK);
+            return new ResponseEntity<>(listingStockService.getAllStocks().stream().map(stockMapper::stockDto), HttpStatus.OK);
 //        uncomment this and add dtos when merging (only leave futures commented becasue we don't have futures in this sprint)
 
 //        else if(listingType.equalsIgnoreCase("futures"))
@@ -145,8 +145,8 @@ public class MarketController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<List<ListingHistoryDto>> getListingsHistoryByStockId(@PathVariable Long stockId,
-                                                                          @RequestParam(required = false) Integer timestampFrom,
-                                                                          @RequestParam(required = false) Integer timestampTo) {
+                                                                               @RequestParam(required = false) Integer timestampFrom,
+                                                                               @RequestParam(required = false) Integer timestampTo) {
 
         List<ListingHistory> listingHistories = listingStockService.
                 getListingHistoriesByTimestamp(stockId, timestampFrom, timestampTo);
@@ -170,8 +170,8 @@ public class MarketController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<List<ListingHistoryDto>> getListingsHistoryByForexId(@PathVariable Long forexId,
-                                                                          @RequestParam(required = false) Integer timestampFrom,
-                                                                          @RequestParam(required = false) Integer timestampTo) {
+                                                                               @RequestParam(required = false) Integer timestampFrom,
+                                                                               @RequestParam(required = false) Integer timestampTo) {
 
         List<ListingHistory> listingHistories = forexService.
                 getListingHistoriesByTimestamp(forexId, timestampFrom, timestampTo);
@@ -180,25 +180,6 @@ public class MarketController {
         } else {
             return new ResponseEntity<>(listingHistories.stream().map(listingHistoryMapper::toDto).toList(), HttpStatus.OK);
         }
-    }
-
-    @GetMapping(value = "/listing/stock/{ticker}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get stock by ticker", description = "Returns stock by ticker")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ListingStockDto.class))}),
-            @ApiResponse(responseCode = "404", description = "Stock not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<ListingStockDto> getStockByTicker(@PathVariable String ticker) {
-        ticker = URLDecoder.decode(ticker, StandardCharsets.UTF_8);
-        ListingStock stock = listingStockService.findByTicker(ticker).orElse(null);
-        if (stock == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        ListingStockDto listingStockDto = stockMapper.stockDto(stock);
-        return new ResponseEntity<>(listingStockDto, HttpStatus.OK);
     }
 
     @GetMapping(value = "/listing/stock/{stockId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -217,6 +198,24 @@ public class MarketController {
         }
         ListingStockDto listingStockDto = stockMapper.stockDto(stock);
         return new ResponseEntity<>(listingStockDto, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/listing/forex/{forexId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get forex by id", description = "Returns forex by id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ListingForexDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Forex not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ListingForexDto> getForexById(@PathVariable Long forexId) {
+        ListingForex forex = forexService.findById(forexId).orElse(null);
+        if (forex == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        ListingForexDto listingForexDto = forexMapper.toDto(forex);
+        return new ResponseEntity<>(listingForexDto, HttpStatus.OK);
     }
 
 }

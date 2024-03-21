@@ -387,21 +387,27 @@ public class ListingStockServiceImpl implements ListingStockService {
     @Override
     public List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to) {
         List<ListingHistory> listingHistories = new ArrayList<>();
+//        find stock in database
+        ListingStock stock = stockRepository.findById(id).orElse(null);
+        if(stock == null){
+            return listingHistories;
+        }
+        String ticker = stock.getTicker();
 //        return all timestamps
         if(from == null && to == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByListingHistoryId(id);
+            listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
         }
 //        return all timestamps before given timestamp
         else if(from == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByListingHistoryIdAndDateBefore(id, to);
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBefore(ticker, to);
         }
 //        return all timestamps after given timestamp
         else if(to == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByListingHistoryIdAndDateAfter(id, from);
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateAfter(ticker, from);
         }
 //        return all timestamps between two timestamps
         else{
-            listingHistories = listingHistoryRepository.getListingHistoriesByListingHistoryIdAndDateBetween(id, from, to);
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to);
         }
 
         return listingHistories;
