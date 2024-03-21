@@ -26,6 +26,7 @@ public class UserMapper {
 
     public UserResponse userToUserResponse(User user) {
         UserResponse userResponse = new UserResponse();
+        userResponse.setUserId(user.getUserId();
         userResponse.setFirstName(user.getFirstName());
         userResponse.setLastName(user.getLastName());
         userResponse.setEmail(user.getEmail());
@@ -39,6 +40,7 @@ public class UserMapper {
 
     public User userResponseToUser(UserResponse userResponse) {
         User user = new User();
+        user.setUserId(userResponse.getUserId());
         user.setFirstName(userResponse.getFirstName());
         user.setLastName(userResponse.getLastName());
         user.setEmail(userResponse.getEmail());
