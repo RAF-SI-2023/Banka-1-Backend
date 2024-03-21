@@ -357,6 +357,11 @@ public class ListingStockServiceImpl implements ListingStockService {
         return stockRepository.findByTicker(ticker);
     }
 
+    @Override
+    public Optional<ListingStock> findById(Long id) {
+        return stockRepository.findById(id);
+    }
+
     public List<ListingHistory> getListingHistoriesByTimestamp(String ticker, Integer from, Integer to) {
         List<ListingHistory> listingHistories = new ArrayList<>();
 //        return all timestamps
@@ -374,6 +379,29 @@ public class ListingStockServiceImpl implements ListingStockService {
 //        return all timestamps between two timestamps
         else{
             listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to);
+        }
+
+        return listingHistories;
+    }
+
+    @Override
+    public List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to) {
+        List<ListingHistory> listingHistories = new ArrayList<>();
+//        return all timestamps
+        if(from == null && to == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByListingHistoryId(id);
+        }
+//        return all timestamps before given timestamp
+        else if(from == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByListingHistoryIdAndDateBefore(id, to);
+        }
+//        return all timestamps after given timestamp
+        else if(to == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByListingHistoryIdAndDateAfter(id, from);
+        }
+//        return all timestamps between two timestamps
+        else{
+            listingHistories = listingHistoryRepository.getListingHistoriesByListingHistoryIdAndDateBetween(id, from, to);
         }
 
         return listingHistories;

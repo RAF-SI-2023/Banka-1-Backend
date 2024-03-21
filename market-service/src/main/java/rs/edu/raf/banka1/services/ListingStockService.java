@@ -29,6 +29,9 @@ public interface ListingStockService {
     int addAllListingsToHistory(List<ListingHistory> listingHistories);
 
     Optional<ListingStock> findByTicker(String ticker);
+    Optional<ListingStock> findById(Long id);
 
     List<ListingHistory> getListingHistoriesByTimestamp(String ticker, Integer from, Integer to);
+
+    List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to);
 }

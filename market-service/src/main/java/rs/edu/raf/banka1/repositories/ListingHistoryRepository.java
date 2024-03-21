@@ -14,4 +14,10 @@ public interface ListingHistoryRepository extends JpaRepository<ListingHistory, 
     List<ListingHistory> getListingHistoriesByTickerAndDateBefore(String ticker, Integer date);
     List<ListingHistory> getListingHistoriesByTickerAndDateAfter(String ticker, Integer date);
     List<ListingHistory> getListingHistoriesByTickerAndDateBetween(String ticker, Integer from, Integer to);
+
+    List<ListingHistory> getListingHistoriesByListingHistoryId(Long listingHistoryId);
+    List<ListingHistory> getListingHistoriesByListingHistoryIdAndDateBefore(Long listingHistoryId, Integer date);
+    List<ListingHistory> getListingHistoriesByListingHistoryIdAndDateAfter(Long listingHistoryId, Integer date);
+    List<ListingHistory> getListingHistoriesByListingHistoryIdAndDateBetween(Long listingHistoryId, Integer from, Integer to);
+
 }

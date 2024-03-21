@@ -23,4 +23,6 @@ public interface ForexService {
     List<ListingHistory> getAllForexHistories(List<ListingForex> listingForexList);
 
     ListingForex getForexByTicker(String ticker);
+
+    List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to);
 }
