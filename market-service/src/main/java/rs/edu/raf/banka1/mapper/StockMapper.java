@@ -57,6 +57,7 @@ public class StockMapper {
 
     public ListingStockDto stockDto(ListingStock stock) {
         ListingStockDto dto = new ListingStockDto();
+        dto.setListingId(stock.getListingId());
         dto.setTicker(stock.getTicker());
         dto.setName(stock.getName());
         dto.setExchange(stock.getExchange());
