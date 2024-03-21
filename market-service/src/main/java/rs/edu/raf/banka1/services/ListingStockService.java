@@ -30,6 +30,5 @@ public interface ListingStockService {
 
     Optional<ListingStock> findByTicker(String ticker);
 
-    public List<ListingHistory> getListingHistoriesByTimestamp(String ticker, Integer from, Integer to);
-
+    List<ListingHistory> getListingHistoriesByTimestamp(String ticker, Integer from, Integer to);
 }

@@ -19,15 +19,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import rs.edu.raf.banka1.mapper.ForexMapper;
 import rs.edu.raf.banka1.mapper.ListingHistoryMapper;
+import rs.edu.raf.banka1.mapper.StockMapper;
+import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingHistory;
-import rs.edu.raf.banka1.model.dtos.ExchangeDto;
-import rs.edu.raf.banka1.model.dtos.ListingBaseDto;
-import rs.edu.raf.banka1.model.dtos.ListingHistoryDto;
+import rs.edu.raf.banka1.model.ListingStock;
+import rs.edu.raf.banka1.model.dtos.*;
 import rs.edu.raf.banka1.services.ExchangeService;
 import rs.edu.raf.banka1.services.ForexService;
 import rs.edu.raf.banka1.services.ListingStockService;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -45,15 +45,17 @@ public class MarketController {
     private final ListingStockService listingStockService;
     private final ListingHistoryMapper listingHistoryMapper;
     private final ForexMapper forexMapper;
+    private final StockMapper stockMapper;
 
     @Autowired
     public MarketController(ExchangeService exchangeService, ForexService forexService, ListingStockService listingStockService,
-                            ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper) {
+                            ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper, StockMapper stockMapper) {
         this.exchangeService = exchangeService;
         this.forexService = forexService;
         this.listingStockService = listingStockService;
         this.listingHistoryMapper = listingHistoryMapper;
         this.forexMapper = forexMapper;
+        this.stockMapper = stockMapper;
     }
 
     @GetMapping(value = "/exchange", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -84,7 +86,7 @@ public class MarketController {
     }
 
 
-    @GetMapping(value = "/listing/", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/listing", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all listings", description = "Returns list of listings")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -103,7 +105,7 @@ public class MarketController {
         return new ResponseEntity<>(l1, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/listing/{listingType}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/listing/get/{listingType}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get specific listing based on listingType param", description = "Returns list of specific "
             + "listingType based on listingType param (forex, stock, futures)")
     @ApiResponses({
@@ -118,9 +120,10 @@ public class MarketController {
         if (listingType.equalsIgnoreCase("forex")) {
             return new ResponseEntity<>(forexService.getAllForexes().stream().map(forexMapper::toDto).toList(), HttpStatus.OK);
         }
+        else if(listingType.equalsIgnoreCase("stock"))
+            return new ResponseEntity<>(listingStockService.getAllStocks(), HttpStatus.OK);
 //        uncomment this and add dtos when merging (only leave futures commented becasue we don't have futures in this sprint)
-//        else if(listingType.equalsIgnoreCase("stock"))
-//            return new ResponseEntity<>(this.stockService.getAllStocks(), HttpStatus.OK);
+
 //        else if(listingType.equalsIgnoreCase("futures"))
 //            return new ResponseEntity<>(this.futuresService.getAllFutures(), HttpStatus.OK);
         else {
@@ -153,6 +156,44 @@ public class MarketController {
         } else {
             return new ResponseEntity<>(listingHistories.stream().map(listingHistoryMapper::toDto).toList(), HttpStatus.OK);
         }
+    }
+
+    @GetMapping(value = "/listing/forex/{ticker}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get forex by ticker", description = "Returns forex by ticker")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ListingForexDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Forex not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ListingForexDto> getForexByTicker(@PathVariable String ticker) {
+        ticker = URLDecoder.decode(ticker, StandardCharsets.UTF_8);
+        ListingForex forex = forexService.getForexByTicker(ticker);
+        if (forex == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        ListingForexDto listingForexDto = forexMapper.toDto(forex);
+        return new ResponseEntity<>(listingForexDto, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/listing/stock/{ticker}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get stock by ticker", description = "Returns stock by ticker")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ListingStockDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Stock not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ListingStockDto> getStockByTicker(@PathVariable String ticker) {
+        ticker = URLDecoder.decode(ticker, StandardCharsets.UTF_8);
+        ListingStock stock = listingStockService.findByTicker(ticker).orElse(null);
+        if (stock == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        ListingStockDto listingStockDto = stockMapper.stockDto(stock);
+        return new ResponseEntity<>(listingStockDto, HttpStatus.OK);
     }
 
 }

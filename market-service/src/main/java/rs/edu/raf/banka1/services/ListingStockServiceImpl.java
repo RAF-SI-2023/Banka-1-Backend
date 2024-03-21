@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import rs.edu.raf.banka1.mapper.ListingStockMapper;
+import rs.edu.raf.banka1.mapper.StockMapper;
 import rs.edu.raf.banka1.model.ListingHistory;
 
 import rs.edu.raf.banka1.model.ListingStock;
@@ -44,7 +44,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     @Autowired
     private StockRepository stockRepository;
     @Autowired
-    private ListingStockMapper stockMapper;
+    private StockMapper stockMapper;
     @Autowired
     private ListingHistoryRepository listingHistoryRepository;
 

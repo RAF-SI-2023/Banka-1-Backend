@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rs.edu.raf.banka1.mapper.ListingStockMapper;
+import rs.edu.raf.banka1.mapper.StockMapper;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
@@ -26,11 +26,11 @@ public class ListingStockServiceImplTest {
     @Mock
     private ListingHistoryRepository listingHistoryRepository;
     @Mock
-    private ListingStockMapper listingMapper;
+    private StockMapper listingMapper;
     @Mock
     private StockRepository stockRepository;
     @Mock
-    private ListingStockMapper stockMapper;
+    private StockMapper stockMapper;
     @InjectMocks
     private ListingStockServiceImpl listingStockService;
     private ListingStock stockAAPL;

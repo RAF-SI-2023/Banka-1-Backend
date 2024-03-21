@@ -21,4 +21,6 @@ public interface ForexService {
     List<ListingHistory> getForexHistory(ListingForex listingForex);
 
     List<ListingHistory> getAllForexHistories(List<ListingForex> listingForexList);
+
+    ListingForex getForexByTicker(String ticker);
 }
