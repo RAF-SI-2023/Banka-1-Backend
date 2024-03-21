@@ -1,7 +1,10 @@
 package rs.edu.raf.banka1.mapper;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.responses.UserResponse;
@@ -11,8 +14,11 @@ import java.util.stream.Collectors;
 
 @Component
 public class UserMapper {
-
     private PermissionMapper permissionMapper;
+
+    private PasswordEncoder passwordEncoder;
+
+    private PermissionRepository permissionRepository;
 
     public UserMapper(PermissionMapper permissionMapper) {
         this.permissionMapper = permissionMapper;
@@ -20,11 +26,12 @@ public class UserMapper {
 
     public UserResponse userToUserResponse(User user) {
         UserResponse userResponse = new UserResponse();
+        userResponse.setUserId(user.getUserId());
         userResponse.setFirstName(user.getFirstName());
         userResponse.setLastName(user.getLastName());
         userResponse.setEmail(user.getEmail());
-        userResponse.setJmbg(user.getJmbg());
         userResponse.setPhoneNumber(user.getPhoneNumber());
+        userResponse.setJmbg(user.getJmbg());
         userResponse.setPosition(user.getPosition());
         userResponse.setActive(user.getActive());
         userResponse.setPermissions(user.getPermissions().stream().map(permissionMapper::permissionToPermissionDto).
@@ -34,10 +41,10 @@ public class UserMapper {
 
     public User userResponseToUser(UserResponse userResponse) {
         User user = new User();
+        user.setUserId(userResponse.getUserId());
         user.setFirstName(userResponse.getFirstName());
         user.setLastName(userResponse.getLastName());
         user.setEmail(userResponse.getEmail());
-        user.setJmbg(userResponse.getJmbg());
         user.setPhoneNumber(userResponse.getPhoneNumber());
         user.setPosition(userResponse.getPosition());
         user.setActive(userResponse.getActive());
@@ -60,13 +67,34 @@ public class UserMapper {
     }
 
     public User editUserRequestToUser(User user, EditUserRequest editUserRequest) {
-        user.setPassword(editUserRequest.getPassword());
-        user.setFirstName(editUserRequest.getFirstName());
-        user.setLastName(editUserRequest.getLastName());
-        user.setJmbg(editUserRequest.getJmbg());
-        user.setPosition(editUserRequest.getPosition());
-        user.setPhoneNumber(editUserRequest.getPhoneNumber());
-        user.setActive(editUserRequest.isActive());
+        if (editUserRequest.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(editUserRequest.getPassword()));
+        }
+        if (editUserRequest.getFirstName() != null) {
+            user.setFirstName(editUserRequest.getFirstName());
+        }
+        if (editUserRequest.getLastName() != null) {
+            user.setLastName(editUserRequest.getLastName());
+        }
+        if (editUserRequest.getJmbg() != null) {
+            user.setJmbg(editUserRequest.getJmbg());
+        }
+        if (editUserRequest.getPosition() != null) {
+            user.setPosition(editUserRequest.getPosition());
+        }
+        if (editUserRequest.getPhoneNumber() != null) {
+            user.setPhoneNumber(editUserRequest.getPhoneNumber());
+        }
+        if (editUserRequest.getIsActive() != null) {
+            user.setActive(editUserRequest.getIsActive());
+        }
+        if (editUserRequest.getPermissions() != null) {
+            user.setPermissions(editUserRequest.getPermissions()
+                    .stream()
+                    .map(permissionString -> permissionRepository.findByName(permissionString).orElseThrow())
+                    .collect(Collectors.toSet())
+            );
+        }
         return user;
     }
 
@@ -78,10 +106,20 @@ public class UserMapper {
         editUserRequest.setJmbg(user.getJmbg());
         editUserRequest.setPhoneNumber(user.getPhoneNumber());
         editUserRequest.setPosition(user.getPosition());
-        editUserRequest.setActive(user.getActive());
-        editUserRequest.setPermissions(user.getPermissions().stream().map(permission -> permission.getName()).collect(Collectors.toSet()));
+        editUserRequest.setIsActive(user.getActive());
+        editUserRequest.setPermissions(user.getPermissions().stream().map(permission -> permission.getName()).collect(Collectors.toList()));
         editUserRequest.setUserId(user.getUserId());
         editUserRequest.setPassword(user.getPassword());
         return editUserRequest;
+    }
+
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Autowired
+    public void setPermissionRepository(PermissionRepository permissionRepository) {
+        this.permissionRepository = permissionRepository;
     }
 }

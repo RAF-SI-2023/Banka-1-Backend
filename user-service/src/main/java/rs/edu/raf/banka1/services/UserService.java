@@ -2,11 +2,12 @@ package rs.edu.raf.banka1.services;
 
 
 
+import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
+import rs.edu.raf.banka1.requests.ModifyPermissionsRequest;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
-import rs.edu.raf.banka1.responses.EditUserResponse;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import rs.edu.raf.banka1.responses.UserResponse;
 
@@ -20,10 +21,12 @@ public interface UserService extends UserDetailsService {
     List<UserResponse> search(String email, String firstName, String lastName, String position);
     CreateUserResponse createUser(CreateUserRequest createUserRequest);
     ActivateAccountResponse activateAccount(String token, String password);
-    EditUserResponse editUser(EditUserRequest editUserRequest);
-    boolean deleteUser(Long id);
+    boolean editUser(EditUserRequest editUserRequest);
+    Boolean deleteUser(Long id);
 
+    List<PermissionDto> findPermissions(Long userId);
 
+    List<PermissionDto> findPermissions(String email);
 
-
+    Boolean modifyUserPermissions(ModifyPermissionsRequest request, Long userId);
 }

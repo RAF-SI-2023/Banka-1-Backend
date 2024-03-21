@@ -5,6 +5,8 @@ import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -23,7 +25,7 @@ public class JwtUtil {
         return claims;
     }
 
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         Claims claims = extractAllClaims(token);
         if (claims == null) {
             return null;
@@ -32,18 +34,19 @@ public class JwtUtil {
     }
 
     public List<String> extractRoles(String token) {
-        return null;
+        Claims claims = extractAllClaims(token);
+        if (claims == null) {
+            return new ArrayList<>();
+        }
+        //noinspection unchecked
+        return claims.get("roles", (Class<List<String>>) (Class<?>) List.class);
     }
 
     public boolean isTokenExpired(String token) {
-        return true;
+        return extractAllClaims(token).getExpiration().before(new Date());
     }
 
-//    public boolean validateToken(String token, User user) {
-//        return false;
-//    }
-//
-//    public String generateToken(User user) {
-//        return null;
-//    }
+    public boolean validateToken(String token) {
+        return !isTokenExpired(token);
+    }
 }
