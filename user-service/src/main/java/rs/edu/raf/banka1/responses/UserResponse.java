@@ -18,6 +18,7 @@ public class UserResponse {
     private String position;
     private String phoneNumber;
     private Boolean active;
+    private String jmbg;
     private List<PermissionDto> permissions;
 
     @Override

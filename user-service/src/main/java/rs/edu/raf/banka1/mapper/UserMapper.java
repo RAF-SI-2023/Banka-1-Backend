@@ -26,11 +26,12 @@ public class UserMapper {
 
     public UserResponse userToUserResponse(User user) {
         UserResponse userResponse = new UserResponse();
-        userResponse.setUserId(user.getUserId();
+        userResponse.setUserId(user.getUserId());
         userResponse.setFirstName(user.getFirstName());
         userResponse.setLastName(user.getLastName());
         userResponse.setEmail(user.getEmail());
         userResponse.setPhoneNumber(user.getPhoneNumber());
+        userResponse.setJmbg(user.getJmbg());
         userResponse.setPosition(user.getPosition());
         userResponse.setActive(user.getActive());
         userResponse.setPermissions(user.getPermissions().stream().map(permissionMapper::permissionToPermissionDto).
