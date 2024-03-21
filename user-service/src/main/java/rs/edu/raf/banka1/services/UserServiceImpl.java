@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
@@ -43,17 +44,19 @@ public class UserServiceImpl implements UserService {
     private PermissionMapper permissionMapper;
     private EmailService emailService;
     private JwtUtil jwtUtil;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, EmailService emailService,
                            PermissionRepository permissionRepository,
-                           JwtUtil jwtUtil, PermissionMapper permissionMapper) {
+                           JwtUtil jwtUtil, PermissionMapper permissionMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.emailService = emailService;
         this.permissionRepository = permissionRepository;
         this.jwtUtil = jwtUtil;
         this.permissionMapper = permissionMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserResponse findByEmail(String email) {
@@ -111,7 +114,7 @@ public class UserServiceImpl implements UserService {
     public ActivateAccountResponse activateAccount(String token, String password) {
         User user = userRepository.findByActivationToken(token).orElseThrow();
         user.setActivationToken(null);
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
         return new ActivateAccountResponse(user.getUserId());
     }
@@ -171,12 +174,13 @@ public class UserServiceImpl implements UserService {
         for (String permissionName : request.getPermissions()) {
             Optional<Permission> permission = permissionRepository.findByName(permissionName);
             if(request.getAdd()) {
-                permission.ifPresent(permissions::add);
+                permissions.add(permission.orElse(null));
             }
             else {
-                permission.ifPresent(permissions::remove);
+                permissions.remove(permission.orElse(null));
             }
         }
+        userRepository.save(user);
 
         return true;
     }
