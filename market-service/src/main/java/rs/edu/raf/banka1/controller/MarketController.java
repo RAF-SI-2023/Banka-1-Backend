@@ -27,6 +27,9 @@ import rs.edu.raf.banka1.services.ExchangeService;
 import rs.edu.raf.banka1.services.ForexService;
 import rs.edu.raf.banka1.services.ListingStockService;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -126,7 +129,7 @@ public class MarketController {
 
     }
 
-    @GetMapping(value = "/listing/history/", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/listing/history/{ticker}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get history by ticker", description = "Returns List of histories for given ticker, "
             + "timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is "
             + "provided it's exclusive)")
@@ -138,9 +141,11 @@ public class MarketController {
             @ApiResponse(responseCode = "404", description = "Listing not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<ListingHistoryDto>> getListingsHistoryByTicker(@RequestParam String ticker,
+    public ResponseEntity<List<ListingHistoryDto>> getListingsHistoryByTicker(@PathVariable String ticker,
                                                                           @RequestParam(required = false) Integer timestampFrom,
                                                                           @RequestParam(required = false) Integer timestampTo) {
+
+        ticker = URLDecoder.decode(ticker, StandardCharsets.UTF_8);
 
         List<ListingHistory> listingHistories = listingStockService.getListingHistoriesByTimestamp(ticker, timestampFrom, timestampTo);
         if (listingHistories.isEmpty()) {
