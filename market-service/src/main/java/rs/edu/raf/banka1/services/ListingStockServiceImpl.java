@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import rs.edu.raf.banka1.mapper.ListingStockMapper;
+import rs.edu.raf.banka1.mapper.StockMapper;
 import rs.edu.raf.banka1.model.ListingHistory;
 
 import rs.edu.raf.banka1.model.ListingStock;
@@ -44,7 +44,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     @Autowired
     private StockRepository stockRepository;
     @Autowired
-    private ListingStockMapper stockMapper;
+    private StockMapper stockMapper;
     @Autowired
     private ListingHistoryRepository listingHistoryRepository;
 
@@ -357,8 +357,42 @@ public class ListingStockServiceImpl implements ListingStockService {
         return stockRepository.findByTicker(ticker);
     }
 
+    @Override
+    public Optional<ListingStock> findById(Long id) {
+        return stockRepository.findById(id);
+    }
+
     public List<ListingHistory> getListingHistoriesByTimestamp(String ticker, Integer from, Integer to) {
         List<ListingHistory> listingHistories = new ArrayList<>();
+//        return all timestamps
+        if(from == null && to == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+        }
+//        return all timestamps before given timestamp
+        else if(from == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBefore(ticker, to);
+        }
+//        return all timestamps after given timestamp
+        else if(to == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateAfter(ticker, from);
+        }
+//        return all timestamps between two timestamps
+        else{
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to);
+        }
+
+        return listingHistories;
+    }
+
+    @Override
+    public List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to) {
+        List<ListingHistory> listingHistories = new ArrayList<>();
+//        find stock in database
+        ListingStock stock = stockRepository.findById(id).orElse(null);
+        if(stock == null){
+            return listingHistories;
+        }
+        String ticker = stock.getTicker();
 //        return all timestamps
         if(from == null && to == null){
             listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);

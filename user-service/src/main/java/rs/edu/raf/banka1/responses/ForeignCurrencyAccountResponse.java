@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -21,4 +22,29 @@ public class ForeignCurrencyAccountResponse {
     private Double accountMaintenance;
     private Boolean defaultCurrency;
     private List<String> allowedCurrencies;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ForeignCurrencyAccountResponse that = (ForeignCurrencyAccountResponse) o;
+        return Objects.equals(ownerId, that.ownerId)
+                && Objects.equals(createdByAgentId, that.createdByAgentId)
+                && Objects.equals(currency, that.currency)
+                && Objects.equals(typeOfAccount, that.typeOfAccount)
+                && Objects.equals(subtypeOfAccount, that.subtypeOfAccount)
+                && Objects.equals(accountMaintenance, that.accountMaintenance)
+                && Objects.equals(defaultCurrency, that.defaultCurrency);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ownerId, createdByAgentId, currency, typeOfAccount, subtypeOfAccount, accountMaintenance, defaultCurrency);
+    }
 }

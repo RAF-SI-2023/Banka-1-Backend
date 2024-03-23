@@ -11,16 +11,13 @@ import rs.edu.raf.banka1.mapper.ListingHistoryMapper;
 import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.repositories.ForexRepository;
+import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 import rs.edu.raf.banka1.utils.Requests;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Setter
@@ -32,6 +29,8 @@ public class ForexServiceImpl implements ForexService {
 
     @Autowired
     private ListingHistoryMapper listingHistoryMapper;
+
+    private ListingHistoryRepository listingHistoryRepository;
 
     @Autowired
     private ForexRepository forexRepository;
@@ -55,8 +54,9 @@ public class ForexServiceImpl implements ForexService {
     private String forexDailyApiUrl;
 
 
-    public ForexServiceImpl() {
+    public ForexServiceImpl(ListingHistoryRepository listingHistoryRepository) {
         this.objectMapper = new ObjectMapper();
+        this.listingHistoryRepository = listingHistoryRepository;
     }
 
     // Run only once to get all forex-pairs names (from diferent forex places)
@@ -204,6 +204,46 @@ public class ForexServiceImpl implements ForexService {
     @Override
     public List<ListingHistory> getAllForexHistories(List<ListingForex> listingForexList) {
         return listingForexList.stream().map(this::getForexHistory).flatMap(List::stream).toList();
+    }
+
+    @Override
+    public ListingForex getForexByTicker(String ticker) {
+        return forexRepository.findByTicker(ticker).orElse(null);
+    }
+
+    @Override
+    public List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to) {
+        List<ListingHistory> listingHistories = new ArrayList<>();
+//        Find forex in database
+        ListingForex forex = forexRepository.findById(id).orElse(null);
+        if(forex == null){
+            return listingHistories;
+        }
+
+        String ticker = forex.getTicker();
+//        return all timestamps
+        if(from == null && to == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+        }
+//        return all timestamps before given timestamp
+        else if(from == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBefore(ticker, to);
+        }
+//        return all timestamps after given timestamp
+        else if(to == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateAfter(ticker, from);
+        }
+//        return all timestamps between two timestamps
+        else{
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to);
+        }
+
+        return listingHistories;
+    }
+
+    @Override
+    public Optional<ListingForex> findById(Long id) {
+        return forexRepository.findById(id);
     }
 
     public ListingHistory parseHistory(String ticker, int date, JsonNode dataNode) {

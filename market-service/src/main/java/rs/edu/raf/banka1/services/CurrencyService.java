@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.mapper.CurrencyMapper;
 import rs.edu.raf.banka1.model.entities.Currency;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.model.entities.Inflation;
@@ -20,11 +21,13 @@ public class CurrencyService {
 
     private final CurrencyRepository currencyRepository;
     private final InflationRepository inflationRepository;
+    private final CurrencyMapper currencyMapper;
 
     @Autowired
-    public CurrencyService(CurrencyRepository currencyRepository, InflationRepository inflationRepository) {
+    public CurrencyService(CurrencyRepository currencyRepository, InflationRepository inflationRepository, CurrencyMapper currencyMapper) {
         this.currencyRepository = currencyRepository;
         this.inflationRepository = inflationRepository;
+        this.currencyMapper = currencyMapper;
     }
 
     public void addCurrencies(List<CurrencyDto> currencyList) {
@@ -74,26 +77,25 @@ public class CurrencyService {
 
     }
 
-    public List<Currency> findAll() {
-        return this.currencyRepository.findAll();
+    public List<CurrencyDto> findAll() {
+        return this.currencyRepository.findAll().stream().map(currencyMapper::currencyToCurrencyDto).toList();
     }
 
-    public Optional<Currency> findById(Long currencyId) {
+    public CurrencyDto findById(Long currencyId) {
         Optional<Currency> currency = this.currencyRepository.findById(currencyId);
         if (currency.isPresent()) {
-            return currency;
+            return currencyMapper.currencyToCurrencyDto(currency.get());
         } else {
             throw new CurrencyNotFoundException(currencyId);
         }
     }
 
-    public Currency findCurrencyByCurrencyName(String currencyName) {
-        Optional<Currency> currency = currencyRepository.findByCurrencyName(currencyName);
-        return currency.orElse(null);
+    public CurrencyDto findCurrencyByCurrencyName(String currencyName) {
+        return currencyRepository.findByCurrencyName(currencyName).map(currencyMapper::currencyToCurrencyDto).orElse(null);
     }
 
-    public Currency findCurrencyByCurrencyCode(String currencyCode) {
-        Optional<Currency> currency = currencyRepository.findCurrencyByCurrencyCode(currencyCode);
-        return currency.orElse(null);
+    public CurrencyDto findCurrencyByCurrencyCode(String currencyCode) {
+        return currencyRepository.findCurrencyByCurrencyCode(currencyCode).map(currencyMapper::currencyToCurrencyDto).orElse(null);
     }
+
 }

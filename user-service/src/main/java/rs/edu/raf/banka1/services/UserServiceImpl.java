@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
@@ -17,20 +18,25 @@ import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
+import rs.edu.raf.banka1.requests.ModifyPermissionsRequest;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
-import rs.edu.raf.banka1.responses.EditUserResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     @Value("${front.port}")
-    String frontPort;
+    private String frontPort;
     private UserMapper userMapper;
     private UserRepository userRepository;
     private PermissionRepository permissionRepository;
@@ -38,17 +44,19 @@ public class UserServiceImpl implements UserService {
     private PermissionMapper permissionMapper;
     private EmailService emailService;
     private JwtUtil jwtUtil;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, EmailService emailService,
                            PermissionRepository permissionRepository,
-                           JwtUtil jwtUtil, PermissionMapper permissionMapper) {
+                           JwtUtil jwtUtil, PermissionMapper permissionMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.emailService = emailService;
         this.permissionRepository = permissionRepository;
         this.jwtUtil = jwtUtil;
         this.permissionMapper = permissionMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserResponse findByEmail(String email) {
@@ -106,7 +114,7 @@ public class UserServiceImpl implements UserService {
     public ActivateAccountResponse activateAccount(String token, String password) {
         User user = userRepository.findByActivationToken(token).orElseThrow();
         user.setActivationToken(null);
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
         return new ActivateAccountResponse(user.getUserId());
     }
@@ -138,17 +146,43 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<PermissionDto> findPermissions(Long userId) {
         User user = userRepository.findById(userId).orElse(null);
-        if(user == null)
+        if(user == null) {
             return null;
+        }
+
         return extractPermissionsFromUser(user);
     }
 
     @Override
     public List<PermissionDto> findPermissions(String email) {
         User user = userRepository.findByEmail(email).orElse(null);
-        if(user == null)
+        if(user == null) {
             return null;
+        }
+
         return extractPermissionsFromUser(user);
+    }
+
+    @Override
+    public Boolean modifyUserPermissions(ModifyPermissionsRequest request, Long userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if(user == null) {
+            return false;
+        }
+
+        Set<Permission> permissions = user.getPermissions();
+        for (String permissionName : request.getPermissions()) {
+            Optional<Permission> permission = permissionRepository.findByName(permissionName);
+            if(request.getAdd()) {
+                permissions.add(permission.orElse(null));
+            }
+            else {
+                permissions.remove(permission.orElse(null));
+            }
+        }
+        userRepository.save(user);
+
+        return true;
     }
 
     //necessary for authentication

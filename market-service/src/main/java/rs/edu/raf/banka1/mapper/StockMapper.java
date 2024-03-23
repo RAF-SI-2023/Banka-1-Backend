@@ -3,9 +3,10 @@ package rs.edu.raf.banka1.mapper;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
+import rs.edu.raf.banka1.model.dtos.ListingStockDto;
 
 @Component
-public class ListingStockMapper {
+public class StockMapper {
     public ListingStock createListingStock(String symbol, String name, String exchange, Double price, Double high, Double low, Double priceChange, Integer volume, Integer outstandingShare, Double dividendYield) {
         ListingStock stock = new ListingStock();
         stock.setTicker(symbol);
@@ -52,6 +53,24 @@ public class ListingStockMapper {
         oldModel.setVolume(newModel.getVolume());
 
         return oldModel;
+    }
+
+    public ListingStockDto stockDto(ListingStock stock) {
+        ListingStockDto dto = new ListingStockDto();
+        dto.setListingId(stock.getListingId());
+        dto.setTicker(stock.getTicker());
+        dto.setName(stock.getName());
+        dto.setExchange(stock.getExchange());
+        dto.setListingType(stock.getListingType());
+        dto.setPrice(stock.getPrice());
+        dto.setHigh(stock.getHigh());
+        dto.setLow(stock.getLow());
+        dto.setPriceChange(stock.getPriceChange());
+        dto.setVolume(stock.getVolume());
+        dto.setOutstandingShares(stock.getOutstandingShares());
+        dto.setDividendYield(stock.getDividendYield());
+        dto.setLastRefresh(stock.getLastRefresh());
+        return dto;
     }
 
 }

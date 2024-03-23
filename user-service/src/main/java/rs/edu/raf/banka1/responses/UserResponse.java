@@ -10,6 +10,7 @@ import java.util.Objects;
 @Getter
 @Setter
 public class UserResponse {
+    private Long userId;
     private String username;
     private String email;
     private String firstName;
@@ -17,12 +18,19 @@ public class UserResponse {
     private String position;
     private String phoneNumber;
     private Boolean active;
+    private String jmbg;
     private List<PermissionDto> permissions;
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         UserResponse that = (UserResponse) o;
         return Objects.equals(username, that.username) && Objects.equals(email, that.email);
     }

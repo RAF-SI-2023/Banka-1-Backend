@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import rs.edu.raf.banka1.dtos.PermissionDto;
-import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.PermissionService;
 
 import java.util.List;
