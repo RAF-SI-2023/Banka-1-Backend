@@ -78,7 +78,6 @@ public class BootstrapData implements CommandLineRunner {
         account1.setOwnerId(client.getUserId());
         account1.setCreatedByAgentId(user1.getUserId());
         account1.setAccountNumber("ACC123456789");
-        account1.setTypeOfAccount("DEVIZNI");
         account1.setBalance(1000.0);
         account1.setAvailableBalance(900.0);
         account1.setCreationDate(dateIntegerCreation);
@@ -88,7 +87,6 @@ public class BootstrapData implements CommandLineRunner {
         account1.setSubtypeOfAccount("LICNI");
         account1.setAccountMaintenance(10.0);
         account1.setDefaultCurrency(true);
-        account1.setAllowedCurrencies(List.of("USD", "EUR", "CHF"));
         return account1;
     }
 

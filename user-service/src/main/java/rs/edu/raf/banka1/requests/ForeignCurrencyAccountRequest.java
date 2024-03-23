@@ -16,7 +16,6 @@ public class ForeignCurrencyAccountRequest {
     private Long ownerId;
     private Long createdByAgentId;
     private String currency;
-    private String typeOfAccount;
     private String subtypeOfAccount;
     private Double accountMaintenance;
     private Boolean defaultCurrency;

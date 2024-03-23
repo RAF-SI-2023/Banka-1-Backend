@@ -28,7 +28,6 @@ public class ForeignCurrencyAccount {
     private Long ownerId;
     private Long createdByAgentId;
     private String accountNumber;
-    private String typeOfAccount;
     private Double balance;
     private Double availableBalance;
     private Integer creationDate;
@@ -38,7 +37,4 @@ public class ForeignCurrencyAccount {
     private String subtypeOfAccount;
     private Double accountMaintenance;
     private Boolean defaultCurrency;
-    @ElementCollection
-    private List<String> allowedCurrencies;
-
 }
