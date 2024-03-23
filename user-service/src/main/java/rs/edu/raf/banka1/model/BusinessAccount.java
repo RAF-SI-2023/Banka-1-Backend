@@ -19,8 +19,8 @@ public class BusinessAccount {
     private Double balance;
     private Double availableBalance;
     private Long createdByAgentId;
-    private Integer creationDate;
-    private Integer expirationDate;
+    private Long creationDate;
+    private Long expirationDate;
     private String currency;
     private String accountStatus;
 

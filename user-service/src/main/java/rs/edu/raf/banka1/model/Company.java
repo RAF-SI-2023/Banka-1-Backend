@@ -17,11 +17,11 @@ public class Company {
     private String companyName;
     private String telephoneNumber;
     private String faxNumber;
-    private Integer pib;
+    private String pib;
 //  Matični broj
-    private Integer idNumber;
+    private String idNumber;
 //  Šifra delatnosti
-    private Integer jobId;
+    private String jobId;
 //  Registarski broj
-    private Integer registrationNumber;
+    private String registrationNumber;
 }
