@@ -14,13 +14,19 @@ public class EmailServiceImpl implements EmailService {
         this.javaMailSender = javaMailSender;
     }
 
-    public void sendActivationEmail(String to, String subject, String body) {
+    public Boolean sendActivationEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("noreply.rafbanka1@gmail.com");
         message.setTo(to);
         message.setSubject(subject);
         message.setText(body);
-
-        javaMailSender.send(message);
+        try {
+            javaMailSender.send(message);
+            return true;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

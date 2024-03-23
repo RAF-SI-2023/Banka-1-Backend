@@ -10,6 +10,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import rs.edu.raf.banka1.services.EmailServiceImpl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
 //@SpringBootTest()
@@ -34,7 +35,7 @@ public class EmailServiceTests {
         String subject = "Account activation";
         String body = "Please use the following link to activate your email: {URL}";
 
-        emailService.sendActivationEmail(to, subject, body);
+        assertEquals(true, emailService.sendActivationEmail(to, subject, body));
 
         // Verify that emailService prepares the message correctly
         SimpleMailMessage message = new SimpleMailMessage();
