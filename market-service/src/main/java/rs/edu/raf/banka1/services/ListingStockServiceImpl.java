@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import rs.edu.raf.banka1.mapper.StockMapper;
@@ -17,7 +18,9 @@ import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.exceptions.APIException;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 import rs.edu.raf.banka1.repositories.StockRepository;
+import rs.edu.raf.banka1.threads.FetchingThread;
 import rs.edu.raf.banka1.utils.Constants;
+import rs.edu.raf.banka1.utils.Requests;
 
 
 import java.io.File;
@@ -48,6 +51,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     @Autowired
     private ListingHistoryRepository listingHistoryRepository;
 
+    private Requests requests;
     @Value("${listingAPItoken}")
     private String listingAPItoken;
 
@@ -81,7 +85,7 @@ public class ListingStockServiceImpl implements ListingStockService {
 
                 String urlStr = listingNameApiUrl + sectorsEncoded + "&token=" + listingAPItoken;
 
-                String response = sendRequest(urlStr);
+                String response = requests.sendRequest(urlStr);
                 responses.append(response);
 
             }
@@ -137,8 +141,8 @@ public class ListingStockServiceImpl implements ListingStockService {
             String listingBaseUrl = updateListingApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;
             String listingStockUrl = basicStockInfoApiUrl+symbol+"&apikey=" + alphaVantageAPIToken;
 
-            String baseResponse = sendRequest(listingBaseUrl);
-            String stockResponse = sendRequest(listingStockUrl);
+            String baseResponse = requests.sendRequest(listingBaseUrl);
+            String stockResponse = requests.sendRequest(listingStockUrl);
 
             // Fetch JSON data from the API
             JsonNode rootNode = objectMapper.readTree(baseResponse);
@@ -165,6 +169,20 @@ public class ListingStockServiceImpl implements ListingStockService {
         }
         return null;
     }
+
+    @Scheduled(fixedDelay = 900000)
+    private void runFetchBackground(){
+        Thread thread = new Thread(new FetchingThread(this.stockRepository,
+                this.getAllStocks(), this.updateListingApiUrl, this.alphaVantageAPIToken));
+        thread.run();
+
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     @Override
     public List<ListingStock> getAllStocks(){
@@ -199,6 +217,10 @@ public class ListingStockServiceImpl implements ListingStockService {
         return listingStocks.stream().mapToInt(this::addListingStock).sum();
     }
     @Override
+    public void saveAllListingStocks(List<ListingStock> listingStocks) {
+        stockRepository.saveAll(listingStocks);
+    }
+    @Override
     public int addListingStock(ListingStock listingStock) {
         Optional<ListingStock> listingStockOptional = stockRepository.findByTicker(listingStock.getTicker());
         if (listingStockOptional.isPresent()) {
@@ -217,7 +239,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     public List<ListingHistory> fetchSingleListingHistory(String ticker){
         try {
             String apiUrl = historyListingApiUrl + ticker + "&outputsize=compact&apikey=" + alphaVantageAPIToken;
-            String response = sendRequest(apiUrl);
+            String response = requests.sendRequest(apiUrl);
             JsonNode rootNode = objectMapper.readTree(response);
 
             List<ListingHistory> listingHistories = new ArrayList<>();
@@ -275,43 +297,6 @@ public class ListingStockServiceImpl implements ListingStockService {
         // make a new ListingHistoryModel
 
         return stockMapper.createListingHistoryModel(ticker, unixTimestamp, close, high, low, close - open, volume);
-    }
-
-    private String sendRequest(String urlStr) throws Exception,APIException {
-        URL url = new URL(urlStr);
-
-        // Open a connection to the URL
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-        // Set the request method to GET
-        connection.setRequestMethod("GET");
-
-        // Set request headers if needed
-        connection.setRequestProperty("Content-Type", "application/json");
-
-        // Get the response code
-        int responseCode = connection.getResponseCode();
-
-        switch (responseCode){
-            case 402:
-                throw new APIException("[Send request] Error occured because API requires payment");
-            case 500:
-                throw new APIException("[Send request] Error occured because API returned internal server error");
-        }
-
-        // Read the response body
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        String inputLine;
-        StringBuffer response = new StringBuffer();
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-
-        // Close the connection
-        connection.disconnect();
-
-        return response.toString();
     }
 
     public ArrayNode reformatNamesToJSON(String response) throws Exception {
