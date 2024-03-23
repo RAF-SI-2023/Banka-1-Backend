@@ -1,9 +1,6 @@
 package rs.edu.raf.banka1.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,7 +18,8 @@ public class BusinessAccount {
     private Long createdByAgentId;
     private Long creationDate;
     private Long expirationDate;
-    private String currency;
+    @ManyToOne
+    private Currency currency;
     private String accountStatus;
 
 

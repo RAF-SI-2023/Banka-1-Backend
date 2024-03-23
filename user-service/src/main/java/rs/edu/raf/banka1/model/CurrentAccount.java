@@ -18,7 +18,8 @@ public class CurrentAccount {
     private Long createdByAgentId;
     private Long creationDate;
     private Long expirationDate;
-    private String currency;
+    @ManyToOne
+    private Currency currency;
     private String accountStatus;
     private String subtypeOfAccount;
     private Double accountMaintenance;

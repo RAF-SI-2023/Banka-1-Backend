@@ -1,16 +1,11 @@
 package rs.edu.raf.banka1.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
-import jakarta.persistence.ElementCollection;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+
 
 import java.util.List;
 
@@ -32,7 +27,8 @@ public class ForeignCurrencyAccount {
     private Double availableBalance;
     private Integer creationDate;
     private Integer expirationDate;
-    private String currency;
+    @ManyToOne
+    private Currency currency;
     private String accountStatus;
     private String subtypeOfAccount;
     private Double accountMaintenance;
