@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.controller;
 
+import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -157,6 +158,18 @@ public class UserController {
     public ResponseEntity<ActivateAccountResponse> activateAccount(@PathVariable String token, @RequestBody ActivateAccountRequest activateAccountRequest) {
         String password = activateAccountRequest.getPassword();
         return new ResponseEntity<>(userService.activateAccount(token, password), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/reset/{email}")
+    @Operation(summary = "Reset password", description = "Send password reset email to user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Email with password reset URL sent successfully",
+                    content = {@Content(mediaType = "application/json",
+                        schema = @Schema(implementation = ActivateAccountResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Boolean> sendResetPasswordEmail(@PathVariable String email) {
+        return new ResponseEntity<>(userService.sendResetPasswordEmail(email), HttpStatus.OK);
     }
 
     @PutMapping()

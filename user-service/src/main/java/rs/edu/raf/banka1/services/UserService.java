@@ -29,4 +29,6 @@ public interface UserService extends UserDetailsService {
     List<PermissionDto> findPermissions(String email);
 
     Boolean modifyUserPermissions(ModifyPermissionsRequest request, Long userId);
+
+    Boolean sendResetPasswordEmail(String email);
 }

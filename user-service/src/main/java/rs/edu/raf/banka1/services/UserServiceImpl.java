@@ -206,4 +206,17 @@ public class UserServiceImpl implements UserService {
         return user.getPermissions().stream().
                 map(permissionMapper::permissionToPermissionDto).collect(Collectors.toList());
     }
+
+    @Override
+    public Boolean sendResetPasswordEmail(String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isEmpty()) return false;
+        User user = optionalUser.get();
+        String activationToken = UUID.randomUUID().toString();
+        user.setActivationToken(activationToken);
+        userRepository.save(user);
+        emailService.sendActivationEmail(email, "RAF Banka - Password reset",
+                "Visit this URL to reset your password: http://localhost:" + frontPort + "/user/reset-password/" + activationToken);
+        return true;
+    }
 }
