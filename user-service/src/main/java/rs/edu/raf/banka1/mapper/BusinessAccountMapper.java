@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.mapper;
 
 import org.springframework.stereotype.Component;
+import rs.edu.raf.banka1.dtos.BankAccountDto;
 import rs.edu.raf.banka1.dtos.BusinessAccountDto;
 import rs.edu.raf.banka1.model.BusinessAccount;
 
@@ -20,5 +21,17 @@ public class BusinessAccountMapper {
         businessAccountDto.setAccountStatus(businessAccount.getAccountStatus());
 
         return businessAccountDto;
+    }
+
+    public BankAccountDto toBankAccountDto(BusinessAccount businessAccount) {
+        BankAccountDto bankAccountDto = new BankAccountDto();
+        bankAccountDto.setAccountType("BUSINESS ACCOUNT");
+        bankAccountDto.setAccountNumber(businessAccount.getAccountNumber());
+        bankAccountDto.setAccountStatus(businessAccount.getAccountStatus());
+        bankAccountDto.setCurrency(businessAccount.getCurrency());
+        bankAccountDto.setBalance(businessAccount.getBalance());
+        bankAccountDto.setAvailableBalance(businessAccount.getAvailableBalance());
+
+        return bankAccountDto;
     }
 }

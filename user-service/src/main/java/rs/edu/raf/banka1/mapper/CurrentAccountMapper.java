@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.mapper;
 
 import org.springframework.stereotype.Component;
+import rs.edu.raf.banka1.dtos.BankAccountDto;
 import rs.edu.raf.banka1.dtos.CurrentAccountDto;
 import rs.edu.raf.banka1.model.CurrentAccount;
 
@@ -22,6 +23,18 @@ public class CurrentAccountMapper {
         currentAccountDto.setAccountMaintenance(currentAccount.getAccountMaintenance());
 
         return currentAccountDto;
+    }
+
+    public BankAccountDto toBankAccountDto(CurrentAccount currentAccount) {
+        BankAccountDto bankAccountDto = new BankAccountDto();
+        bankAccountDto.setAccountType("CURRENT ACCOUNT");
+        bankAccountDto.setAccountNumber(currentAccount.getAccountNumber());
+        bankAccountDto.setAccountStatus(currentAccount.getAccountStatus());
+        bankAccountDto.setCurrency(currentAccount.getCurrency());
+        bankAccountDto.setBalance(currentAccount.getBalance());
+        bankAccountDto.setAvailableBalance(currentAccount.getAvailableBalance());
+
+        return bankAccountDto;
     }
 
 }

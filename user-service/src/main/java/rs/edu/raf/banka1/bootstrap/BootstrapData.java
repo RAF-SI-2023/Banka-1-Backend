@@ -4,12 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import rs.edu.raf.banka1.model.ForeignCurrencyAccount;
-import rs.edu.raf.banka1.model.Permission;
-import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
+import rs.edu.raf.banka1.services.CardService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -24,16 +23,18 @@ public class BootstrapData implements CommandLineRunner {
     private final PermissionRepository permissionRepository;
     private final PasswordEncoder passwordEncoder;
     private final ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
+    private final CardService cardService;
 
     @Autowired
     public BootstrapData(UserRepository userRepository,
                          PasswordEncoder passwordEncoder,
                          PermissionRepository permissionRepository,
-                         ForeignCurrencyAccountRepository foreignCurrencyAccountRepository) {
+                         ForeignCurrencyAccountRepository foreignCurrencyAccountRepository, CardService cardService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
         this.foreignCurrencyAccountRepository = foreignCurrencyAccountRepository;
+        this.cardService = cardService;
     }
 
     @Override
@@ -60,7 +61,12 @@ public class BootstrapData implements CommandLineRunner {
         ForeignCurrencyAccount account1 = createForeignCurrencyAccount(client, user1);
 
         userRepository.save(client);
-        foreignCurrencyAccountRepository.save(account1);
+
+        Card card = cardService.createCard("VISA", "VisaCard", account1.getAccountNumber(), 1000);
+        Card card1 = cardService.createCard("MASTER", "MasterCard", account1.getAccountNumber(), 10000);
+
+        cardService.saveCard(card);
+        cardService.saveCard(card1);
 
         System.out.println("Data loaded!");
     }
