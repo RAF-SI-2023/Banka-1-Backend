@@ -17,7 +17,6 @@ public class CardServiceImlp implements CardService{
 
     @Override
     public List<Card> getAllCardsByAccountNumber(String accountNumber) {
-        System.out.println(accountNumber);
         return cardRepository.findByAccountNumber(accountNumber);
     }
 

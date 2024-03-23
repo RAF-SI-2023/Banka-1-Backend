@@ -12,6 +12,7 @@ import rs.edu.raf.banka1.responses.ForeignCurrencyAccountResponse;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -143,6 +144,29 @@ public class BankAccountServiceImpl implements BankAccountService {
         }
 
         return createUniqueAccNumber();
+    }
+
+    @Override
+    public List<BankAccount> getBankAccountsByUser(Long userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if(user != null){
+            return bankAccountRepository.findByUser(user);
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<BankAccount> getBankAccountsByCompany(Long companyId) {
+        Company company = companyRepository.findById(companyId).orElse(null);
+        if(company != null){
+            return bankAccountRepository.findByCompany(company);
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<BankAccount> getBankAccountsByAgent(Long agentId) {
+        return bankAccountRepository.findByCreatedByAgentId(agentId);
     }
 
     @Override

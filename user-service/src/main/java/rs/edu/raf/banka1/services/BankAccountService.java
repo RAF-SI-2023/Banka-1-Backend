@@ -29,4 +29,8 @@ public interface BankAccountService {
 
     BankAccount createBankAccount(CreateBankAccountRequest createRequest);
     void saveBankAccount(BankAccount bankAccount);
+
+    List<BankAccount> getBankAccountsByUser(Long userId);
+    List<BankAccount> getBankAccountsByCompany(Long companyId);
+    List<BankAccount> getBankAccountsByAgent(Long agentId);
 }
