@@ -1,22 +1,26 @@
 package rs.edu.raf.banka1.utils;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+
+import java.io.IOException;
 import java.util.List;
 
 public class Constants {
     public static final String listingsFilePath = getAbsoluteFilePath(
-            "market-service/src/main/resources/listings.json");
+            "listings.json");
     public static final String businessHoursFilePath = getAbsoluteFilePath(
-            "market-service/src/main/resources/working_hours_and_holidays_for_exchanges.json");
+            "working_hours_and_holidays_for_exchanges.json");
     public static final String micCsvFilePath = getAbsoluteFilePath(
-            "market-service/src/main/resources/ISO10383_MIC.csv");
+            "ISO10383_MIC.csv");
     public static final String countryTimezoneOffsetsFilePath = getAbsoluteFilePath(
-            "market-service/src/main/resources/country_timezone_offsets.json");
+            "country_timezone_offsets.json");
     public static final List<String> sectors = List.of(
             "Technology","Electronic Technology","Health Technology","Health Services","Finance","Energy");
     public static final int maxStockListings = 20;
     public static final int maxStockListingsHistory = 10;
     public static String optionsFilePath = getAbsoluteFilePath(
-            "market-service/src/main/resources/options.json");
+            "options.json");
 //    public static final List<String> sectors = List.of("Technology");
     public static List<String> tickersForTestingOptions = List.of("APPL", "ORCL", "MSFT", "VXX");
     public static final int maxListings = 700;
@@ -35,10 +39,19 @@ public class Constants {
             "FLUXF");
 
     public static String currencyFilePath = getAbsoluteFilePath(
-            "market-service/src/main/resources/physical_currency_list.csv");
+            "physical_currency_list.csv");
 
 
     public static String getAbsoluteFilePath(String relativePath) {
-        return System.getProperty("user.dir") + "/" + relativePath;
+        try {
+            Resource resource = new ClassPathResource(relativePath);
+            if(resource.exists())
+                return resource.getURL().getPath();
+            else
+                System.out.println("[Constants getAbsoluteFilePath] Resource does not exist: " + relativePath);
+        } catch (IOException e){
+            System.err.println("[Constants getAbsoluteFilePath] Cannot load resource whose relative path is " + relativePath);
+        }
+        return null;
     }
 }
