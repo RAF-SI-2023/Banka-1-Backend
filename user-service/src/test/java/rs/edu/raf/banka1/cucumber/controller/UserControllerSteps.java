@@ -103,10 +103,10 @@ public class UserControllerSteps {
     public void subtypeofaccountIs(String arg0) {
         foreignCurrencyAccountRequest.setSubtypeOfAccount(arg0);
     }
-    @Given("typeOfAccount is {string}")
-    public void typeofaccountIs(String arg0) {
-        foreignCurrencyAccountRequest.setTypeOfAccount(arg0);
-    }
+//    @Given("typeOfAccount is {string}")
+//    public void typeofaccountIs(String arg0) {
+//        foreignCurrencyAccountRequest.setTypeOfAccount(arg0);
+//    }
     @Given("accountMaintenance is {string}")
     public void accountmaintenanceIs(String arg0) {
         foreignCurrencyAccountRequest.setAccountMaintenance(Double.parseDouble(arg0));
