@@ -116,7 +116,7 @@ public class BankAccountServiceImplTest {
         ForeignCurrencyAccountRequest request = new ForeignCurrencyAccountRequest();
         request.setOwnerId(2L);
         request.setCreatedByAgentId(1L);
-        request.setTypeOfAccount("DEVIZNI");
+//        request.setTypeOfAccount("DEVIZNI");
         request.setCurrency("USD");
         request.setSubtypeOfAccount("LICNI");
         request.setAccountMaintenance(10.0);
