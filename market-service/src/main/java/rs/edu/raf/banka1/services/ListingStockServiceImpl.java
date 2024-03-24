@@ -393,9 +393,16 @@ public class ListingStockServiceImpl implements ListingStockService {
             return listingHistories;
         }
         String ticker = stock.getTicker();
+        List<ListingHistory> existingHistory = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+        if(existingHistory.isEmpty()) {
+            listingHistories = fetchSingleListingHistory(stock.getTicker());
+            listingHistoryRepository.saveAll(listingHistories);
+        }
 //        return all timestamps
         if(from == null && to == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+            if(!existingHistory.isEmpty()) {
+                listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+            }
         }
 //        return all timestamps before given timestamp
         else if(from == null){
