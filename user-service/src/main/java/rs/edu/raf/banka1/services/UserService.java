@@ -9,6 +9,7 @@ import rs.edu.raf.banka1.requests.ModifyPermissionsRequest;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import rs.edu.raf.banka1.responses.NewPasswordResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 
 import java.util.List;
@@ -31,4 +32,5 @@ public interface UserService extends UserDetailsService {
     Boolean modifyUserPermissions(ModifyPermissionsRequest request, Long userId);
 
     Boolean sendResetPasswordEmail(String email);
+    NewPasswordResponse setNewPassword(String token, String password);
 }

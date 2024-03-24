@@ -21,16 +21,12 @@ import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.requests.ModifyPermissionsRequest;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
+import rs.edu.raf.banka1.responses.NewPasswordResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -105,7 +101,7 @@ public class UserServiceImpl implements UserService {
             user.setPermissions(new HashSet<>(permissionRepository.findAll()));
         }
         userRepository.save(user);
-        emailService.sendActivationEmail(createUserRequest.getEmail(), "RAF Banka - User activation",
+        emailService.sendEmail(createUserRequest.getEmail(), "RAF Banka - User activation",
                 "Visit this URL to activate your account: http://localhost:" + frontPort + "/user/set-password/" + activationToken);
         return new CreateUserResponse(user.getUserId());
     }
@@ -215,7 +211,16 @@ public class UserServiceImpl implements UserService {
         String resetPasswordToken = UUID.randomUUID().toString();
         user.setResetPasswordToken(resetPasswordToken);
         userRepository.save(user);
-        return emailService.sendActivationEmail(email, "RAF Banka - Password reset",
+        return emailService.sendEmail(email, "RAF Banka - Password reset",
                 "Visit this URL to reset your password: http://localhost:" + frontPort + "/user/reset-password/" + resetPasswordToken);
+    }
+
+    @Override
+    public NewPasswordResponse setNewPassword(String token, String password) throws NoSuchElementException {
+        User user = userRepository.findByResetPasswordToken(token).orElseThrow();
+        user.setActivationToken(null);
+        user.setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
+        return new NewPasswordResponse(user.getUserId());
     }
 }

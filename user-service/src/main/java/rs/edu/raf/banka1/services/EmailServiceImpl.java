@@ -14,7 +14,7 @@ public class EmailServiceImpl implements EmailService {
         this.javaMailSender = javaMailSender;
     }
 
-    public Boolean sendActivationEmail(String to, String subject, String body) {
+    public Boolean sendEmail(String to, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("noreply.rafbanka1@gmail.com");
         message.setTo(to);

@@ -25,14 +25,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import rs.edu.raf.banka1.dtos.PermissionDto;
-import rs.edu.raf.banka1.requests.ActivateAccountRequest;
-import rs.edu.raf.banka1.requests.CreateUserRequest;
-import rs.edu.raf.banka1.requests.EditUserRequest;
-import rs.edu.raf.banka1.requests.ModifyPermissionsRequest;
-import rs.edu.raf.banka1.responses.ActivateAccountResponse;
-import rs.edu.raf.banka1.responses.CreateUserResponse;
-import rs.edu.raf.banka1.responses.EditUserResponse;
-import rs.edu.raf.banka1.responses.UserResponse;
+import rs.edu.raf.banka1.requests.*;
+import rs.edu.raf.banka1.responses.*;
 import rs.edu.raf.banka1.services.UserService;
 
 import java.util.List;
@@ -170,6 +164,20 @@ public class UserController {
     })
     public ResponseEntity<Boolean> sendResetPasswordEmail(@PathVariable String email) {
         return new ResponseEntity<>(userService.sendResetPasswordEmail(email), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/newpassword/{token}")
+    @Operation(summary = "Activate account", description = "Activate an account by assigning a password")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Account activated successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ActivateAccountResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid token"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<NewPasswordResponse> setNewPassword(@PathVariable String token, @RequestBody NewPasswordRequest newPasswordRequest) {
+        String password = newPasswordRequest.getPassword();
+        return new ResponseEntity<>(userService.setNewPassword(token, password), HttpStatus.OK);
     }
 
     @PutMapping()

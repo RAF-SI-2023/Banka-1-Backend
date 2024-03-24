@@ -35,7 +35,7 @@ public class EmailServiceTests {
         String subject = "Account activation";
         String body = "Please use the following link to activate your email: {URL}";
 
-        assertEquals(true, emailService.sendActivationEmail(to, subject, body));
+        assertEquals(true, emailService.sendEmail(to, subject, body));
 
         // Verify that emailService prepares the message correctly
         SimpleMailMessage message = new SimpleMailMessage();

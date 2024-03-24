@@ -48,7 +48,8 @@ public class SpringSecurityConfig {
                                                 antMatcher("/planning/"),
                                                 antMatcher("/user/activate/**"),
                                                 antMatcher("/permission/**"),
-                                                antMatcher("/**")).permitAll()
+                                                antMatcher("/user/newpassword/**"),
+                                                antMatcher("/user/reset/**")).permitAll()
                                         .anyRequest().authenticated()
 
                 )
