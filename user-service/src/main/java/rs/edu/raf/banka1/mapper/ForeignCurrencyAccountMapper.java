@@ -16,11 +16,9 @@ public class ForeignCurrencyAccountMapper {
         foreignCurrencyAccountResponse.setOwnerId(foreignCurrencyAccount.getOwnerId());
         foreignCurrencyAccountResponse.setCreatedByAgentId(foreignCurrencyAccount.getCreatedByAgentId());
         foreignCurrencyAccountResponse.setCurrency(foreignCurrencyAccount.getCurrency());
-        foreignCurrencyAccountResponse.setTypeOfAccount(foreignCurrencyAccount.getTypeOfAccount());
         foreignCurrencyAccountResponse.setSubtypeOfAccount(foreignCurrencyAccount.getSubtypeOfAccount());
         foreignCurrencyAccountResponse.setAccountMaintenance(foreignCurrencyAccount.getAccountMaintenance());
         foreignCurrencyAccountResponse.setDefaultCurrency(foreignCurrencyAccount.getDefaultCurrency());
-        foreignCurrencyAccountResponse.setAllowedCurrencies(foreignCurrencyAccount.getAllowedCurrencies());
         return foreignCurrencyAccountResponse;
     }
 
@@ -29,11 +27,9 @@ public class ForeignCurrencyAccountMapper {
         foreignCurrencyAccount.setOwnerId(foreignCurrencyAccountRequest.getOwnerId());
         foreignCurrencyAccount.setCreatedByAgentId(foreignCurrencyAccountRequest.getCreatedByAgentId());
         foreignCurrencyAccount.setCurrency(foreignCurrencyAccountRequest.getCurrency());
-        foreignCurrencyAccount.setTypeOfAccount(foreignCurrencyAccountRequest.getTypeOfAccount());
         foreignCurrencyAccount.setSubtypeOfAccount(foreignCurrencyAccountRequest.getSubtypeOfAccount());
         foreignCurrencyAccount.setAccountMaintenance(foreignCurrencyAccountRequest.getAccountMaintenance());
         foreignCurrencyAccount.setDefaultCurrency(foreignCurrencyAccountRequest.getDefaultCurrency());
-        foreignCurrencyAccount.setAllowedCurrencies(foreignCurrencyAccountRequest.getAllowedCurrencies());
         foreignCurrencyAccount.setAccountNumber(UUID.randomUUID().toString());
         foreignCurrencyAccount.setAccountNumber(generateAccountNumber());
         foreignCurrencyAccount.setBalance(1000.0);
