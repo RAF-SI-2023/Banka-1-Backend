@@ -24,6 +24,7 @@ import java.util.*;
 public class ForexServiceImpl implements ForexService {
     private ObjectMapper objectMapper;
 
+
     @Autowired
     private ForexMapper forexMapper;
 
@@ -221,9 +222,17 @@ public class ForexServiceImpl implements ForexService {
         }
 
         String ticker = forex.getTicker();
+        List<ListingHistory> existingHistory = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+        if(existingHistory.isEmpty()) {
+            listingHistories = getForexHistory(forex);
+            listingHistoryRepository.saveAll(listingHistories);
+        }
+
 //        return all timestamps
         if(from == null && to == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+            if(!existingHistory.isEmpty()) {
+                listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+            }
         }
 //        return all timestamps before given timestamp
         else if(from == null){
