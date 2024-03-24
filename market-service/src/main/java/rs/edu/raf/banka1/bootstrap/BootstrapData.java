@@ -8,17 +8,12 @@ import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
-import rs.edu.raf.banka1.services.CurrencyService;
-import rs.edu.raf.banka1.services.ListingStockService;
-import rs.edu.raf.banka1.services.ForexService;
-import rs.edu.raf.banka1.services.OptionsService;
+import rs.edu.raf.banka1.services.*;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +34,8 @@ public class BootstrapData implements CommandLineRunner {
     @Autowired
     private OptionsService optionsService;
 
+    private ExchangeService exchangeService;
+
     @Override
     public void run(String... args) throws Exception {
 
@@ -46,6 +43,9 @@ public class BootstrapData implements CommandLineRunner {
         List<CurrencyDto> currencyList = loadCurrencies();
         currencyService.addCurrencies(currencyList);
         System.out.println("Currency Data Loaded!");
+
+        exchangeService.seedDatabase();
+        System.out.println("Exchange Data Loaded!");
 
         // Since JSON symbols are available in repo, and the API key needs to be replaced or paid,
         // we only need to call the function below every once in a while

@@ -16,7 +16,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Component
 public class BootstrapData implements CommandLineRunner {
@@ -77,7 +76,7 @@ public class BootstrapData implements CommandLineRunner {
 
         account1.setOwnerId(client.getUserId());
         account1.setCreatedByAgentId(user1.getUserId());
-        account1.setAccountNumber("ACC123456789");
+        account1.setAccountNumber("123456700000123401");
         account1.setTypeOfAccount("DEVIZNI");
         account1.setBalance(1000.0);
         account1.setAvailableBalance(900.0);
