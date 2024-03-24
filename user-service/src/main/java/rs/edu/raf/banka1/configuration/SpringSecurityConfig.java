@@ -48,6 +48,8 @@ public class SpringSecurityConfig {
                                                 antMatcher("/planning/")).permitAll()
                                         .requestMatchers(antMatcher("/user/activate/**")).permitAll()
                                         .requestMatchers(antMatcher("/permission/**")).permitAll()
+                                        .requestMatchers(antMatcher("/customer/initialActivation")).permitAll()
+                                        .requestMatchers(antMatcher("/customer/activate/**")).permitAll()
                                         .anyRequest().authenticated()
 
                 )

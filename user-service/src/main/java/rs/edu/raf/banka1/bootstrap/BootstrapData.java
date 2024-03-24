@@ -7,33 +7,31 @@ import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.ForeignCurrencyAccount;
 import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.repositories.CurrencyRepository;
 import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class BootstrapData implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PermissionRepository permissionRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
+    private final CurrencyRepository currencyRepository;
 
     @Autowired
     public BootstrapData(UserRepository userRepository,
                          PasswordEncoder passwordEncoder,
                          PermissionRepository permissionRepository,
-                         ForeignCurrencyAccountRepository foreignCurrencyAccountRepository) {
+                         CurrencyRepository currencyRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
-        this.foreignCurrencyAccountRepository = foreignCurrencyAccountRepository;
+        this.currencyRepository = currencyRepository;
     }
 
     @Override
@@ -60,7 +58,28 @@ public class BootstrapData implements CommandLineRunner {
         ForeignCurrencyAccount account1 = createForeignCurrencyAccount(client, user1);
 
         userRepository.save(client);
-        foreignCurrencyAccountRepository.save(account1);
+//        foreignCurrencyAccountRepository.save(account1);
+
+        //loading currencies
+        Set<Currency> currencies = Currency.getAvailableCurrencies();
+        for(Currency currency : currencies) {
+            if(currencyRepository.findCurrencyByCurrencyCode(currency.getCurrencyCode()).isPresent()) {
+                continue;
+            }
+            rs.edu.raf.banka1.model.Currency myCurrency = new rs.edu.raf.banka1.model.Currency();
+            myCurrency.setCurrencyName(currency.getDisplayName());
+            myCurrency.setCurrencyCode(currency.getCurrencyCode());
+            myCurrency.setCurrencySymbol(currency.getSymbol());
+            myCurrency.setActive(true);
+
+            Locale locale = new Locale("", currency.getCurrencyCode());
+            String country = locale.getDisplayCountry();
+
+            myCurrency.setCountry(country);
+
+            currencyRepository.save(myCurrency);
+
+        }
 
         System.out.println("Data loaded!");
     }
@@ -82,7 +101,7 @@ public class BootstrapData implements CommandLineRunner {
         account1.setAvailableBalance(900.0);
         account1.setCreationDate(dateIntegerCreation);
         account1.setExpirationDate(dateIntegerExpiration);
-        account1.setCurrency("USD");
+        //account1.setCurrency("USD");
         account1.setAccountStatus("ACTIVE");
         account1.setSubtypeOfAccount("LICNI");
         account1.setAccountMaintenance(10.0);

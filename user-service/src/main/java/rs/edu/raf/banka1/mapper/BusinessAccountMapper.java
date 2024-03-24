@@ -16,7 +16,7 @@ public class BusinessAccountMapper {
         businessAccountDto.setCreatedByAgentId(businessAccount.getCreatedByAgentId());
         businessAccountDto.setCreationDate(businessAccount.getCreationDate());
         businessAccountDto.setExpirationDate(businessAccount.getExpirationDate());
-        businessAccountDto.setCurrency(businessAccount.getCurrency());
+        //businessAccountDto.setCurrency(businessAccount.getCurrency());
         businessAccountDto.setAccountStatus(businessAccount.getAccountStatus());
 
         return businessAccountDto;
