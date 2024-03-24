@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import rs.edu.raf.banka1.model.Customer;
+import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.requests.LoginRequest;
 import rs.edu.raf.banka1.responses.LoginResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
@@ -27,11 +29,14 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
+    private final CustomerRepository customerRepository;
 
-    public AuthenticationController(AuthenticationService authenticationService, AuthenticationManager authenticationManager, UserService userService) {
+    public AuthenticationController(AuthenticationService authenticationService, AuthenticationManager authenticationManager,
+                                    UserService userService, CustomerRepository customerRepository) {
         this.authenticationService = authenticationService;
         this.authenticationManager = authenticationManager;
         this.userService = userService;
+        this.customerRepository = customerRepository;
     }
 
     @PostMapping("/login")
@@ -50,7 +55,12 @@ public class AuthenticationController {
 
             UserResponse user = this.userService.findByEmail(loginRequest.getEmail());
             if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+                Customer customer = customerRepository.findCustomerByEmail(loginRequest.getEmail()).orElse(null);
+                if(customer == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+                }
+                LoginResponse loginResponse = this.authenticationService.generateLoginResponse(loginRequest);
+                return ResponseEntity.ok(loginResponse);
             }
 
             // Generate login response
