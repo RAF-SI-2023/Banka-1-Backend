@@ -12,26 +12,33 @@ import rs.edu.raf.banka1.mapper.ListingHistoryMapper;
 import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.repositories.ForexRepository;
+import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ForexServiceImplTest {
     @Spy
     private ForexServiceImpl forexService;
-
+    private ListingHistoryRepository listingHistoryRepository;
+    private ForexRepository forexRepository;
     @Mock
     private JsonNode dataNode;
 
     @BeforeEach
     public void setUp() {
-        ForexRepository forexRepository = mock(ForexRepository.class);
+        this.forexRepository = mock(ForexRepository.class);
+        this.listingHistoryRepository = mock(ListingHistoryRepository.class);
         ForexMapper forexMapper = new ForexMapper();
         ListingHistoryMapper listingHistoryMapper = new ListingHistoryMapper();
+        forexService.setListingHistoryRepository(listingHistoryRepository);
         forexService.setForexMapper(forexMapper);
         forexService.setListingHistoryMapper(listingHistoryMapper);
         forexService.setForexRepository(forexRepository);
@@ -108,5 +115,26 @@ public class ForexServiceImplTest {
         List<ListingForex> updatedList = forexService.updateAllPrices(List.of(oldForex1, oldForex2));
         assertEquals(1, updatedList.size());
 
+    }
+
+    @Test
+    public void fetchHistoriesIfEmpty() {
+        ListingForex lfMock = mock(ListingForex.class);
+        when(lfMock.getTicker()).thenReturn("ticker");
+        when(forexRepository.findById(1L)).thenReturn(Optional.of(lfMock));
+        String ticker = "ticker";
+        when(listingHistoryRepository.getListingHistoriesByTicker(ticker)).thenReturn(new ArrayList<>());
+        when(forexService.getForexHistory(lfMock)).thenReturn(List.of(
+                new ListingHistory(),
+                new ListingHistory(),
+                new ListingHistory()
+        ));
+
+
+        List<ListingHistory> listingHistories = forexService.getListingHistoriesByTimestamp(1L, null, null);
+
+        // Verify the result
+        assertNotNull(listingHistories);
+        assertFalse(listingHistories.isEmpty());
     }
 }

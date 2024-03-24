@@ -30,7 +30,7 @@ public class ForexServiceImpl implements ForexService {
 
     @Autowired
     private ListingHistoryMapper listingHistoryMapper;
-
+    @Autowired
     private ListingHistoryRepository listingHistoryRepository;
 
     @Autowired
@@ -55,9 +55,8 @@ public class ForexServiceImpl implements ForexService {
     private String forexDailyApiUrl;
 
 
-    public ForexServiceImpl(ListingHistoryRepository listingHistoryRepository) {
+    public ForexServiceImpl(/*ListingHistoryRepository listingHistoryRepository*/) {
         this.objectMapper = new ObjectMapper();
-        this.listingHistoryRepository = listingHistoryRepository;
     }
 
     // Run only once to get all forex-pairs names (from diferent forex places)
