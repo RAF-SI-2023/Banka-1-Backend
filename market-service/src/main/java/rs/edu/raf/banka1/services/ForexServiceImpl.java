@@ -221,28 +221,22 @@ public class ForexServiceImpl implements ForexService {
         }
 
         String ticker = forex.getTicker();
-        List<ListingHistory> existingHistory = listingHistoryRepository.getListingHistoriesByTicker(ticker);
-        if(existingHistory.isEmpty()) {
+        listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+        if(listingHistories.isEmpty()) {
             listingHistories = getForexHistory(forex);
             listingHistoryRepository.saveAll(listingHistories);
         }
 
-//        return all timestamps
-        if(from == null && to == null){
-            if(listingHistories.isEmpty()) {
-                listingHistories = existingHistory;
-            }
-        }
 //        return all timestamps before given timestamp
-        else if(from == null){
+        if(from == null && to != null){
             listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBefore(ticker, to);
         }
 //        return all timestamps after given timestamp
-        else if(to == null){
+        else if(from != null && to == null){
             listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateAfter(ticker, from);
         }
 //        return all timestamps between two timestamps
-        else{
+        else if(from != null && to != null){
             listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to);
         }
 
