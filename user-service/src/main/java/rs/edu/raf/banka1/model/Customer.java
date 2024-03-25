@@ -41,8 +41,8 @@ public class Customer extends User {
 //    @Column(unique = true)
 //    private String jmbg;
 //
-    @Column
-    private Long dateOfBirth;
+//    @Column
+//    private Long dateOfBirth;
 //
     @Column
     private String gender;

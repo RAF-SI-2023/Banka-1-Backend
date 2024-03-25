@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.CurrencyRepository;
+import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 
@@ -19,15 +21,19 @@ public class BootstrapData implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final CurrencyRepository currencyRepository;
 
+    private final CustomerRepository customerRepository;
+
     @Autowired
     public BootstrapData(UserRepository userRepository,
                          PasswordEncoder passwordEncoder,
                          PermissionRepository permissionRepository,
-                         CurrencyRepository currencyRepository) {
+                         CurrencyRepository currencyRepository,
+                         CustomerRepository customerRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
         this.currencyRepository = currencyRepository;
+        this.customerRepository = customerRepository;
     }
 
     @Override
@@ -36,22 +42,11 @@ public class BootstrapData implements CommandLineRunner {
 
         seedPermissions();
 
-        User user1 = new User();
-        user1.setEmail("admin");
-        user1.setPassword(passwordEncoder.encode("user1"));
-        user1.setFirstName("User1");
-        user1.setLastName("User1Prezime");
-        user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
+        createRandomUsers();
 
-        User client = new User();
-        client.setEmail("client@gmail.com");
-        client.setPassword(passwordEncoder.encode("client"));
-        client.setFirstName("Client");
-        client.setLastName("ClientPrezime");
-        userRepository.save(user1);
-        userRepository.save(client);
+        createRandomCustomers();
 
-        userRepository.save(client);
+
 //        foreignCurrencyAccountRepository.save(account1);
 
         //loading currencies
@@ -79,7 +74,7 @@ public class BootstrapData implements CommandLineRunner {
     }
 
     private void seedPermissions() {
-        for(String s : Arrays.asList("addUser", "modifyUser", "deleteUser", "readUser")) {
+        for(String s : Arrays.asList("addUser", "modifyUser", "deleteUser", "readUser", "modifyCustomer")) {
             if(permissionRepository.findByName(s).isPresent()) {
                 continue;
             }
@@ -89,7 +84,33 @@ public class BootstrapData implements CommandLineRunner {
             permission.setDescription(s);
             permissionRepository.save(permission);
         }
-
     }
 
+    private void createRandomUsers() {
+        User user1 = new User();
+        user1.setEmail("admin");
+        user1.setPassword(passwordEncoder.encode("user1"));
+        user1.setFirstName("User1");
+        user1.setLastName("User1Prezime");
+        user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
+
+        User client = new User();
+        client.setEmail("client@gmail.com");
+        client.setPassword(passwordEncoder.encode("client"));
+        client.setFirstName("Client");
+        client.setLastName("ClientPrezime");
+        userRepository.save(user1);
+        userRepository.save(client);
+
+        userRepository.save(client);
+    }
+
+    private void createRandomCustomers() {
+        Customer customer = new Customer();
+        customer.setEmail("customer@gmail.com");
+        customer.setPassword(passwordEncoder.encode("customer"));
+        customer.setFirstName("CustomerName");
+        customer.setLastName("CustomerLastName");
+        customerRepository.save(customer);
+    }
 }
