@@ -12,7 +12,6 @@ public class BankAccount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
     private AccountType accountType;
 
     private String accountNumber;
@@ -20,7 +19,7 @@ public class BankAccount {
 
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "userId")
-    private User user;
+    private Customer customer;
 
     @ManyToOne
     @JoinColumn(name = "company_id", referencedColumnName = "id")
@@ -32,7 +31,7 @@ public class BankAccount {
     private Long creationDate;
     private Long expirationDate;
     private String currency;
-    private String accountStatus;
+    private Boolean accountStatus;
 
 //    Only for current_account and foreign_currency_account
     private String subtypeOfAccount;

@@ -51,14 +51,25 @@ public class BankAccountController {
                         subTypes = {CardDto.class}))}),
             @ApiResponse(responseCode = "403",
                     description = "You aren't authorized to get all cards by account number"),
-            @ApiResponse(responseCode = "404", description = "No cards found"),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
     public ResponseEntity<List<CardDto>> getCardsByAccountNumber(@PathVariable(name = "accountNumber") String accountNumber) {
         List<Card> cards = cardService.getAllCardsByAccountNumber(accountNumber);
-        if(cards.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return ResponseEntity.ok(cards.stream().map(cardMapper::toDto).toList());
+    }
+
+    @GetMapping(value = "/getAllCards/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all cards by customer id", description = "Returns all cards from all bank accounts for a given customer")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class,
+                            subTypes = {CardDto.class}))}),
+            @ApiResponse(responseCode = "403",
+                    description = "You aren't authorized to get all cards by account number"),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+    })
+    public ResponseEntity<List<CardDto>> getCardsByCustomerId(@PathVariable(name = "customerId") Long customerId) {
+        List<Card> cards = cardService.getAllCardsByCustomerId(customerId);
         return ResponseEntity.ok(cards.stream().map(cardMapper::toDto).toList());
     }
 
@@ -74,7 +85,7 @@ public class BankAccountController {
     })
 
     public ResponseEntity<List<BankAccountDto>> getBankAccountsByCustomerId(@PathVariable(name = "customerId") Long customerId) {
-            List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByUser(customerId);
+            List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCustomer(customerId);
             if (bankAccounts.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }

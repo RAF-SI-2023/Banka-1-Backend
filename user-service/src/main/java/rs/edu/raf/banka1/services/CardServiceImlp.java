@@ -3,17 +3,26 @@ package rs.edu.raf.banka1.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Card;
+import rs.edu.raf.banka1.model.Customer;
+import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.CardRepository;
+import rs.edu.raf.banka1.repositories.CustomerRepository;
+import rs.edu.raf.banka1.repositories.UserRepository;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class CardServiceImlp implements CardService{
     @Autowired
     private CardRepository cardRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
+
 
     @Override
     public List<Card> getAllCardsByAccountNumber(String accountNumber) {
@@ -43,7 +52,22 @@ public class CardServiceImlp implements CardService{
         return card;
     }
 
-    public String createUniqueCardNumber() {
+    @Override
+    public List<Card> getAllCardsByCustomerId(Long customerId) {
+        Customer customer = customerRepository.findById(customerId).orElse(null);
+        List<Card> cards = new ArrayList<>();
+
+        if (customer == null) {
+            return cards;
+        }
+
+        for(BankAccount bankAccount : customer.getAccountIds()){
+            cards.addAll(cardRepository.findByAccountNumber(bankAccount.getAccountNumber()));
+        }
+        return cards;
+    }
+
+    private String createUniqueCardNumber() {
         // generate unique card number of 16 digits
         StringBuilder cardNumber = new StringBuilder();
         for (int i = 0; i < 16; i++) {
@@ -58,7 +82,7 @@ public class CardServiceImlp implements CardService{
         return createUniqueCardNumber();
     }
 
-    public String createCvv() {
+    private String createCvv() {
         // generate cvv of 3 digits
         StringBuilder cvv = new StringBuilder();
         for (int i = 0; i < 3; i++) {

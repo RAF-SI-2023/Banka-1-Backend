@@ -10,7 +10,11 @@ public class BankAccountMapper {
         BankAccountDto bankAccountDto = new BankAccountDto();
         bankAccountDto.setAccountType(bankAccount.getAccountType().name());
         bankAccountDto.setAccountNumber(bankAccount.getAccountNumber());
-        bankAccountDto.setAccountStatus(bankAccount.getAccountStatus());
+        if(bankAccount.getAccountStatus() != null && bankAccount.getAccountStatus()) {
+            bankAccountDto.setAccountStatus("ACTIVE");
+        } else {
+            bankAccountDto.setAccountStatus("INACTIVE");
+        }
         bankAccountDto.setCurrency(bankAccount.getCurrency());
         bankAccountDto.setBalance(bankAccount.getBalance());
         bankAccountDto.setAvailableBalance(bankAccount.getAvailableBalance());

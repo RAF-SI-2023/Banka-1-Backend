@@ -13,16 +13,18 @@ import java.util.List;
 
 @Service
 public class BankAccountServiceImpl implements BankAccountService {
-    private final UserRepository userRepository;
+    private final CustomerRepository customerRepository;
     private final CompanyRepository companyRepository;
     private final BankAccountRepository bankAccountRepository;
+    private final CardService cardService;
 
     @Autowired
-    public BankAccountServiceImpl(UserRepository userRepository, CompanyRepository companyRepository,
-                                  BankAccountRepository bankAccountRepository) {
-        this.userRepository = userRepository;
+    public BankAccountServiceImpl(CustomerRepository customerRepository, CompanyRepository companyRepository,
+                                  BankAccountRepository bankAccountRepository, CardService cardService) {
+        this.customerRepository = customerRepository;
         this.companyRepository = companyRepository;
         this.bankAccountRepository = bankAccountRepository;
+        this.cardService = cardService;
     }
 
     @Override
@@ -34,15 +36,27 @@ public class BankAccountServiceImpl implements BankAccountService {
 
         bankAccount.setAccountNumber(createUniqueAccNumber());
 
+        boolean should_exit = true;
+
         if(type.equals(AccountType.CURRENT) || type.equals(AccountType.FOREIGN_CURRENCY)){
-            User user = userRepository.findById(createRequest.getCustomerId()).orElse(null);
-            bankAccount.setUser(user);
+            Customer customer = customerRepository.findById(createRequest.getCustomerId()).orElse(null);
+            if (customer != null) {
+            bankAccount.setCustomer(customer);
             bankAccount.setSubtypeOfAccount(createRequest.getSubtypeOfAccount());
             bankAccount.setAccountMaintenance(createRequest.getAccountMaintenance());
+            should_exit = false;
+            }
         }
         if(type.equals(AccountType.BUSINESS)) {
             Company company = companyRepository.findById(createRequest.getCompanyId()).orElse(null);
-            bankAccount.setCompany(company);
+            if (company != null) {
+                bankAccount.setCompany(company);
+                should_exit = false;
+            }
+        }
+
+        if(should_exit){
+            return null;
         }
 //      currentDate
         long creationDate = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toEpochSecond();
@@ -57,7 +71,7 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccount.setAvailableBalance(createRequest.getAvailableBalance());
         bankAccount.setCreatedByAgentId(createRequest.getCreatedByAgentId());
         bankAccount.setCurrency(createRequest.getCurrency());
-        bankAccount.setAccountStatus("ACTIVE");
+        bankAccount.setAccountStatus(true);
 
         return bankAccount;
     }
@@ -79,10 +93,10 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
-    public List<BankAccount> getBankAccountsByUser(Long userId) {
-        User user = userRepository.findById(userId).orElse(null);
-        if(user != null){
-            return bankAccountRepository.findByUser(user);
+    public List<BankAccount> getBankAccountsByCustomer(Long customerId) {
+        Customer customer = customerRepository.findById(customerId).orElse(null);
+        if(customer != null){
+            return bankAccountRepository.findByCustomer(customer);
         }
         return new ArrayList<>();
     }
@@ -101,8 +115,15 @@ public class BankAccountServiceImpl implements BankAccountService {
         return bankAccountRepository.findByCreatedByAgentId(agentId);
     }
 
+//    also creates two cards for that account
     @Override
     public void saveBankAccount(BankAccount bankAccount) {
+        if (bankAccount == null) {
+            return;
+        }
         bankAccountRepository.save(bankAccount);
+        cardService.saveCard(cardService.createCard("VISA", "VisaCard", bankAccount.getAccountNumber(), 1000));
+        cardService.saveCard(cardService.createCard("MASTER", "MasterCard", bankAccount.getAccountNumber(), 10000));
+
     }
 }

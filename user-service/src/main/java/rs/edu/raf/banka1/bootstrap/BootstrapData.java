@@ -6,38 +6,33 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.CompanyRepository;
+import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
-import rs.edu.raf.banka1.services.CardService;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Component
 public class BootstrapData implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PermissionRepository permissionRepository;
     private final PasswordEncoder passwordEncoder;
-    private final CardService cardService;
     private final BankAccountService bankAccountService;
     private final CompanyRepository companyRepository;
+    private final CustomerRepository customerRepository;
 
     @Autowired
     public BootstrapData(UserRepository userRepository,
                          PasswordEncoder passwordEncoder,
                          PermissionRepository permissionRepository,
-                         CardService cardService,
+                         CustomerRepository customerRepository,
                          BankAccountService bankAccountService, CompanyRepository companyRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
-        this.cardService = cardService;
+        this.customerRepository = customerRepository;
         this.bankAccountService = bankAccountService;
         this.companyRepository = companyRepository;
     }
@@ -69,17 +64,19 @@ public class BootstrapData implements CommandLineRunner {
         Company company = createCompany();
         companyRepository.save(company);
 
-        BankAccount bankAccount = createBankAccount(client, user1);
+        Customer customer = new Customer();
+        customer.setFirstName("Customer1");
+        customer.setEmail("customer@gmail.com");
+        customer.setPassword(passwordEncoder.encode("customer"));
+        customerRepository.save(customer);
+
+        BankAccount bankAccount = createBankAccount(customer, user1);
         BankAccount bankAccount1 = createBusinessAccount(company, user1);
 
+
+//        this automatically creates 2 cards for each bank account
         bankAccountService.saveBankAccount(bankAccount);
         bankAccountService.saveBankAccount(bankAccount1);
-
-        Card card = cardService.createCard("VISA", "VisaCard", bankAccount.getAccountNumber(), 1000);
-        Card card1 = cardService.createCard("MASTER", "MasterCard", bankAccount.getAccountNumber(), 10000);
-
-        cardService.saveCard(card);
-        cardService.saveCard(card1);
 
         System.out.println("Data loaded!");
     }
