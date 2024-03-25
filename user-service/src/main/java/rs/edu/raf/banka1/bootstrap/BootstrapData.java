@@ -41,34 +41,9 @@ public class BootstrapData implements CommandLineRunner {
         System.out.println("Loading Data...");
 
         seedPermissions();
-
-        createRandomUsers();
-
-        createRandomCustomers();
-
-
-//        foreignCurrencyAccountRepository.save(account1);
-
-        //loading currencies
-        Set<Currency> currencies = Currency.getAvailableCurrencies();
-        for(Currency currency : currencies) {
-            if(currencyRepository.findCurrencyByCurrencyCode(currency.getCurrencyCode()).isPresent()) {
-                continue;
-            }
-            rs.edu.raf.banka1.model.Currency myCurrency = new rs.edu.raf.banka1.model.Currency();
-            myCurrency.setCurrencyName(currency.getDisplayName());
-            myCurrency.setCurrencyCode(currency.getCurrencyCode());
-            myCurrency.setCurrencySymbol(currency.getSymbol());
-            myCurrency.setActive(true);
-
-            Locale locale = new Locale("", currency.getCurrencyCode());
-            String country = locale.getDisplayCountry();
-
-            myCurrency.setCountry(country);
-
-            currencyRepository.save(myCurrency);
-
-        }
+        seedUsers();
+        seedCustomers();
+        seedCurrencies();
 
         System.out.println("Data loaded!");
     }
@@ -86,7 +61,7 @@ public class BootstrapData implements CommandLineRunner {
         }
     }
 
-    private void createRandomUsers() {
+    private void seedUsers() {
         User user1 = new User();
         user1.setEmail("admin");
         user1.setPassword(passwordEncoder.encode("user1"));
@@ -105,12 +80,34 @@ public class BootstrapData implements CommandLineRunner {
         userRepository.save(client);
     }
 
-    private void createRandomCustomers() {
+    private void seedCustomers() {
         Customer customer = new Customer();
         customer.setEmail("customer@gmail.com");
         customer.setPassword(passwordEncoder.encode("customer"));
         customer.setFirstName("CustomerName");
         customer.setLastName("CustomerLastName");
         customerRepository.save(customer);
+    }
+
+    private void seedCurrencies() {
+        //loading currencies
+        Set<Currency> currencies = Currency.getAvailableCurrencies();
+        for(Currency currency : currencies) {
+            if(currencyRepository.findCurrencyByCurrencyCode(currency.getCurrencyCode()).isPresent()) {
+                continue;
+            }
+            rs.edu.raf.banka1.model.Currency myCurrency = new rs.edu.raf.banka1.model.Currency();
+            myCurrency.setCurrencyName(currency.getDisplayName());
+            myCurrency.setCurrencyCode(currency.getCurrencyCode());
+            myCurrency.setCurrencySymbol(currency.getSymbol());
+            myCurrency.setActive(true);
+
+            Locale locale = new Locale("", currency.getCurrencyCode());
+            String country = locale.getDisplayCountry();
+
+            myCurrency.setCountry(country);
+
+            currencyRepository.save(myCurrency);
+        }
     }
 }
