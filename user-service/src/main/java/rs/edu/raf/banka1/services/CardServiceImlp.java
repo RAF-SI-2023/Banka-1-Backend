@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.services;
 
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.model.BankAccount;
@@ -16,6 +18,9 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
+
+@Getter
+@Setter
 @Service
 public class CardServiceImlp implements CardService{
     @Autowired

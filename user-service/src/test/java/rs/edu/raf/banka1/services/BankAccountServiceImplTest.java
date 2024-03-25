@@ -1,10 +1,20 @@
 package rs.edu.raf.banka1.services;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rs.edu.raf.banka1.model.BankAccount;
+import rs.edu.raf.banka1.model.Company;
+import rs.edu.raf.banka1.model.Customer;
+import rs.edu.raf.banka1.repositories.BankAccountRepository;
+import rs.edu.raf.banka1.repositories.CompanyRepository;
+import rs.edu.raf.banka1.repositories.CustomerRepository;
+import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -15,105 +25,131 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class BankAccountServiceImplTest {
 
-//    @Mock
-//    private ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
-//
-//    @Mock
-//    private ForeignCurrencyAccountMapper foreignCurrencyAccountMapper;
-//
-//    @InjectMocks
-//    private BankAccountServiceImpl bankAccountService;
-//
-//    @Test
-//    public void testCreateForeignCurrencyAccount() {
-//        ForeignCurrencyAccountRequest request = createForeignCurrencyAccountRequest();
-//        ForeignCurrencyAccount foreignCurrencyAccount = new ForeignCurrencyAccount();
-//        when(foreignCurrencyAccountMapper.createForeignCurrencyAccountRequestToForeignCurrencyAccount(request)).thenReturn(foreignCurrencyAccount);
-//
-//        CreateForeignCurrencyAccountResponse response = bankAccountService.createForeignCurrencyAccount(request);
-//
-//        assertEquals(foreignCurrencyAccount.getId(), response.getId());
-//        verify(foreignCurrencyAccountRepository, times(1)).save(foreignCurrencyAccount);
-//    }
-//
-//    @Test
-//    public void testGetForeignCurrencyAccountById_WhenExists() {
-//        ForeignCurrencyAccount foreignCurrencyAccount = new ForeignCurrencyAccount();
-//        when(foreignCurrencyAccountRepository.findById(1L)).thenReturn(Optional.of(foreignCurrencyAccount));
-//        ForeignCurrencyAccountResponse expectedResponse = new ForeignCurrencyAccountResponse();
-//        when(foreignCurrencyAccountMapper.foreignCurrencyAccountToForeignCurrencyAccountResponse(foreignCurrencyAccount)).thenReturn(expectedResponse);
-//
-//        ForeignCurrencyAccountResponse actualResponse = bankAccountService.getForeignCurrencyAccountById(1L);
-//
-//        assertNotNull(actualResponse);
-//        assertEquals(expectedResponse, actualResponse);
-//    }
-//
-//    @Test
-//    public void testGetForeignCurrencyAccountById_WhenNotExists() {
-//        when(foreignCurrencyAccountRepository.findById(1L)).thenReturn(Optional.empty());
-//
-//        ForeignCurrencyAccountResponse actualResponse = bankAccountService.getForeignCurrencyAccountById(1L);
-//
-//        assertNull(actualResponse);
-//    }
-//
-//    @Test
-//    public void testGetForeignCurrencyAccountById_WhenIdIsNull() {
-//        ForeignCurrencyAccountResponse actualResponse = bankAccountService.getForeignCurrencyAccountById(null);
-//
-//        assertNull(actualResponse);
-//    }
-//
-//    @Test
-//    public void testGetAllForeignCurrencyAccounts() {
-//        List<ForeignCurrencyAccount> accountList = Collections.singletonList(new ForeignCurrencyAccount());
-//        when(foreignCurrencyAccountRepository.findAll()).thenReturn(accountList);
-//        List<ForeignCurrencyAccountResponse> expectedResponseList = Collections.singletonList(new ForeignCurrencyAccountResponse());
-//        when(foreignCurrencyAccountMapper.foreignCurrencyAccountToForeignCurrencyAccountResponse(any())).thenReturn(expectedResponseList.getFirst());
-//
-//        List<ForeignCurrencyAccountResponse> actualResponseList = bankAccountService.getAllForeignCurrencyAccounts();
-//
-//        assertNotNull(actualResponseList);
-//        assertEquals(expectedResponseList.size(), actualResponseList.size());
-//        assertEquals(expectedResponseList.getFirst(), actualResponseList.getFirst());
-//    }
-//
-//    @Test
-//    public void testCreateForeignCurrencyAccount_WhenRequestIsNull() {
-//        CreateForeignCurrencyAccountResponse response = bankAccountService.createForeignCurrencyAccount(null);
-//
-//        assertNotNull(response);
-//    }
-//
-//    @Test
-//    public void testCreateForeignCurrencyAccount_WhenRepositorySaveFails() {
-//        ForeignCurrencyAccountRequest request = new ForeignCurrencyAccountRequest();
-//        when(foreignCurrencyAccountMapper.createForeignCurrencyAccountRequestToForeignCurrencyAccount(request)).thenReturn(new ForeignCurrencyAccount());
-//        doThrow(RuntimeException.class).when(foreignCurrencyAccountRepository).save(any());
-//
-//        assertThrows(RuntimeException.class, () -> bankAccountService.createForeignCurrencyAccount(request));
-//    }
-//
-//    @Test
-//    public void testGetAllForeignCurrencyAccounts_WhenRepositoryReturnsEmptyList() {
-//        when(foreignCurrencyAccountRepository.findAll()).thenReturn(Collections.emptyList());
-//
-//        List<ForeignCurrencyAccountResponse> actualResponseList = bankAccountService.getAllForeignCurrencyAccounts();
-//
-//        assertNotNull(actualResponseList);
-//        assertTrue(actualResponseList.isEmpty());
-//    }
-//
-//    public ForeignCurrencyAccountRequest createForeignCurrencyAccountRequest() {
-//        ForeignCurrencyAccountRequest request = new ForeignCurrencyAccountRequest();
-//        request.setOwnerId(2L);
-//        request.setCreatedByAgentId(1L);
-//        request.setCurrency("USD");
-//        request.setSubtypeOfAccount("LICNI");
-//        request.setAccountMaintenance(10.0);
-//        request.setDefaultCurrency(true);
-//        request.setAllowedCurrencies(List.of("USD", "EUR", "CHF"));
-//        return request;
-//    }
+    @Spy
+    private BankAccountServiceImpl bankAccountService;
+
+    @BeforeEach
+    void setUp() {
+        CustomerRepository customerRepository = mock(CustomerRepository.class);
+        CompanyRepository companyRepository = mock(CompanyRepository.class);
+        BankAccountRepository bankAccountRepository = mock(BankAccountRepository.class);
+        CardService cardService = mock(CardService.class);
+        bankAccountService.setCustomerRepository(customerRepository);
+        bankAccountService.setCompanyRepository(companyRepository);
+        bankAccountService.setBankAccountRepository(bankAccountRepository);
+        bankAccountService.setCardService(cardService);
+    }
+
+    @Test
+    public void createBankAccountTestNoCompanyInDatabase(){
+        CreateBankAccountRequest createRequest = new CreateBankAccountRequest();
+        createRequest.setAccountType("BUSINESS");
+        createRequest.setCompanyId(1L);
+        when(bankAccountService.getCompanyRepository().findById(createRequest.getCompanyId())).thenReturn(Optional.empty());
+        assertNull(bankAccountService.createBankAccount(createRequest));
+
+    }
+
+    @Test
+    public void createBankAccountTestNoCustomerInDatabase(){
+        CreateBankAccountRequest createRequest = new CreateBankAccountRequest();
+        createRequest.setAccountType("CURRENT");
+        createRequest.setCustomerId(1L);
+        when(bankAccountService.getCustomerRepository().findById(createRequest.getCustomerId())).thenReturn(Optional.empty());
+        assertNull(bankAccountService.createBankAccount(createRequest));
+
+    }
+
+    @Test
+    public void createBankAccountTestCompanyFound() {
+        Company company = new Company();
+        company.setId(1L);
+        company.setCompanyName("Google DeepMind");
+        CreateBankAccountRequest createRequest = new CreateBankAccountRequest();
+        createRequest.setAccountType("BUSINESS");
+        createRequest.setCompanyId(1L);
+        createRequest.setCustomerId(null);
+        createRequest.setBalance(1000.0);
+        createRequest.setAvailableBalance(900.0);
+        createRequest.setCreatedByAgentId(1L);
+        createRequest.setCurrency("USD");
+
+        when(bankAccountService.getCompanyRepository().findById(createRequest.getCompanyId())).thenReturn(Optional.of(company));
+
+        BankAccount bankAccount = bankAccountService.createBankAccount(createRequest);
+
+    // Assertions
+        assertEquals(bankAccount.getCompany().getId(), company.getId());
+        assertEquals(bankAccount.getBalance(), createRequest.getBalance());
+        assertEquals(bankAccount.getAvailableBalance(), createRequest.getAvailableBalance());
+        assertEquals(bankAccount.getCreatedByAgentId(), createRequest.getCreatedByAgentId());
+        assertEquals(bankAccount.getCurrency(), createRequest.getCurrency());
+        assertTrue(bankAccount.getAccountStatus());
+        assertNull(bankAccount.getCustomer());
+        assertNull(bankAccount.getSubtypeOfAccount());
+        assertNull(bankAccount.getAccountMaintenance());
+    }
+
+    @Test
+    public void createBankAccountTestCustomerFound() {
+        Customer customer = new Customer();
+        customer.setFirstName("Okabe");
+        CreateBankAccountRequest createRequest = new CreateBankAccountRequest();
+        createRequest.setAccountType("CURRENT");
+        createRequest.setCompanyId(null);
+        createRequest.setCustomerId(customer.getUserId());
+        createRequest.setBalance(1000.0);
+        createRequest.setAvailableBalance(900.0);
+        createRequest.setCreatedByAgentId(1L);
+        createRequest.setCurrency("USD");
+        createRequest.setAccountMaintenance(10.0);
+        createRequest.setSubtypeOfAccount("CERN_GATE");
+
+        when(bankAccountService.getCustomerRepository().findById(createRequest.getCustomerId())).thenReturn(Optional.of(customer));
+
+        BankAccount bankAccount = bankAccountService.createBankAccount(createRequest);
+
+        // Assertions
+        assertEquals(bankAccount.getCustomer(), customer);
+        assertEquals(bankAccount.getBalance(), createRequest.getBalance());
+        assertEquals(bankAccount.getAvailableBalance(), createRequest.getAvailableBalance());
+        assertEquals(bankAccount.getCreatedByAgentId(), createRequest.getCreatedByAgentId());
+        assertEquals(bankAccount.getCurrency(), createRequest.getCurrency());
+        assertTrue(bankAccount.getAccountStatus());
+        assertNull(bankAccount.getCompany());
+    }
+
+    @Test
+    public void CreateBankAccountTestNonExistingAccountType() {
+        CreateBankAccountRequest createRequest = new CreateBankAccountRequest();
+        createRequest.setAccountType("INVALID");
+        assertNull(bankAccountService.createBankAccount(createRequest));
+    }
+
+    @Test
+    public void getBankAccountByCompanyTestNoCompany(){
+        Long companyId = 1L;
+        when(bankAccountService.getCompanyRepository().findById(companyId)).thenReturn(Optional.empty());
+        List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCompany(companyId);
+        assertEquals(bankAccounts.size(), 0);
+    }
+
+    @Test
+    public void getBankAccountByCustomerTestNoCustomer(){
+        Long customerId = 1L;
+        when(bankAccountService.getCustomerRepository().findById(customerId)).thenReturn(Optional.empty());
+        List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCustomer(customerId);
+        assertEquals(bankAccounts.size(), 0);
+    }
+
+    @Test
+    public void saveBankAccountTest() {
+        BankAccount bankAccount = new BankAccount();
+        bankAccountService.saveBankAccount(bankAccount);
+        int numberOfCards = 2;
+
+        verify(bankAccountService.getBankAccountRepository(), times(1)).save(bankAccount);
+        verify(bankAccountService.getCardService(), times(numberOfCards)).saveCard(any());
+
+    }
 }

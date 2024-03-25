@@ -1,5 +1,7 @@
 package rs.edu.raf.banka1.services;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.model.*;
@@ -11,27 +13,30 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
+
+@Getter
+@Setter
 @Service
 public class BankAccountServiceImpl implements BankAccountService {
-    private final CustomerRepository customerRepository;
-    private final CompanyRepository companyRepository;
-    private final BankAccountRepository bankAccountRepository;
-    private final CardService cardService;
-
     @Autowired
-    public BankAccountServiceImpl(CustomerRepository customerRepository, CompanyRepository companyRepository,
-                                  BankAccountRepository bankAccountRepository, CardService cardService) {
-        this.customerRepository = customerRepository;
-        this.companyRepository = companyRepository;
-        this.bankAccountRepository = bankAccountRepository;
-        this.cardService = cardService;
-    }
+    private CustomerRepository customerRepository;
+    @Autowired
+    private CompanyRepository companyRepository;
+    @Autowired
+    private BankAccountRepository bankAccountRepository;
+    @Autowired
+    private CardService cardService;
+
 
     @Override
     public BankAccount createBankAccount(CreateBankAccountRequest createRequest) {
         BankAccount bankAccount = new BankAccount();
-
-        AccountType type = AccountType.valueOf(createRequest.getAccountType().toUpperCase());
+        AccountType type = null;
+        try {
+            type = AccountType.valueOf(createRequest.getAccountType().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
         bankAccount.setAccountType(AccountType.valueOf(createRequest.getAccountType().toUpperCase()));
 
         bankAccount.setAccountNumber(createUniqueAccNumber());
@@ -77,7 +82,7 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
 
-    public String createUniqueAccNumber() {
+    private String createUniqueAccNumber() {
         // generate unique account number of 18 digits
         StringBuilder accNumber = new StringBuilder();
         for (int i = 0; i < 18; i++) {
