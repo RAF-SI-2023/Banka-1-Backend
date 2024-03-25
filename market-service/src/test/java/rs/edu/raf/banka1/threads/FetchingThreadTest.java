@@ -4,8 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
 
+
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.exceptions.APIException;
@@ -14,13 +19,13 @@ import rs.edu.raf.banka1.services.ListingStockServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import rs.edu.raf.banka1.utils.Requests;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 
 
