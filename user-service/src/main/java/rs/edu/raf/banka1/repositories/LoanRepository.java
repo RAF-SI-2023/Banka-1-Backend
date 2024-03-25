@@ -14,6 +14,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long>{
     Optional<Loan> findByAccountNumber(final String accountNumber);
 
     @Query("SELECT l FROM Loan l WHERE l.accountNumber IN " +
-        "(SELECT ca.accountNumber FROM CurrentAccount ca WHERE ca.ownerId = :userId)")
+        "(SELECT ca.accountNumber FROM BankAccount ca WHERE ca.customer.userId = :userId )")
     List<Loan> findByUser(final Long userId);
 }

@@ -24,7 +24,7 @@ public class BootstrapData implements CommandLineRunner {
         final UserRepository userRepository,
         final PasswordEncoder passwordEncoder,
         final PermissionRepository permissionRepository,
-        final CurrencyRepository foreignCurrencyAccountRepository
+        final CurrencyRepository currencyRepository
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
