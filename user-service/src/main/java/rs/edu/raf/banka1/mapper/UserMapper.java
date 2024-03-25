@@ -76,9 +76,6 @@ public class UserMapper {
         if (editUserRequest.getLastName() != null) {
             user.setLastName(editUserRequest.getLastName());
         }
-        if (editUserRequest.getJmbg() != null) {
-            user.setJmbg(editUserRequest.getJmbg());
-        }
         if (editUserRequest.getPosition() != null) {
             user.setPosition(editUserRequest.getPosition());
         }
@@ -103,12 +100,10 @@ public class UserMapper {
         editUserRequest.setFirstName(user.getFirstName());
         editUserRequest.setLastName(user.getLastName());
         editUserRequest.setEmail(user.getEmail());
-        editUserRequest.setJmbg(user.getJmbg());
         editUserRequest.setPhoneNumber(user.getPhoneNumber());
         editUserRequest.setPosition(user.getPosition());
         editUserRequest.setIsActive(user.getActive());
         editUserRequest.setPermissions(user.getPermissions().stream().map(permission -> permission.getName()).collect(Collectors.toList()));
-        editUserRequest.setUserId(user.getUserId());
         editUserRequest.setPassword(user.getPassword());
         return editUserRequest;
     }
