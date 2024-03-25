@@ -103,10 +103,10 @@ public class UserControllerSteps {
     public void subtypeofaccountIs(String arg0) {
         foreignCurrencyAccountRequest.setSubtypeOfAccount(arg0);
     }
-    @Given("typeOfAccount is {string}")
-    public void typeofaccountIs(String arg0) {
-        foreignCurrencyAccountRequest.setTypeOfAccount(arg0);
-    }
+//    @Given("typeOfAccount is {string}")
+//    public void typeofaccountIs(String arg0) {
+//        foreignCurrencyAccountRequest.setTypeOfAccount(arg0);
+//    }
     @Given("accountMaintenance is {string}")
     public void accountmaintenanceIs(String arg0) {
         foreignCurrencyAccountRequest.setAccountMaintenance(Double.parseDouble(arg0));
@@ -455,7 +455,7 @@ public class UserControllerSteps {
 
     @Then("email should be sent to me")
     public void emailShouldBeSentToMe() {
-        verify(emailService).sendActivationEmail(eq(createUserRequest.getEmail()), anyString(), anyString());
+        verify(emailService).sendEmail(eq(createUserRequest.getEmail()), anyString(), anyString());
     }
 
     @Given("user provides email {string}")
