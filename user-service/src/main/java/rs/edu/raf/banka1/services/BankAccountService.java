@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.services;
 
+import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.requests.ForeignCurrencyAccountRequest;
+import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
 import rs.edu.raf.banka1.responses.CreateForeignCurrencyAccountResponse;
 import rs.edu.raf.banka1.responses.ForeignCurrencyAccountResponse;
 
@@ -14,5 +16,9 @@ public interface BankAccountService {
 
     CreateForeignCurrencyAccountResponse createForeignCurrencyAccount(ForeignCurrencyAccountRequest foreignCurrencyAccountRequest);
 
+    BankAccount generateBankAccount(GenerateBankAccountRequest generateBankAccountRequest);
 
+    BankAccount findBankAccountByAccountNumber(String accountNumber);
+
+    void activateBankAccount(BankAccount bankAccount);
 }

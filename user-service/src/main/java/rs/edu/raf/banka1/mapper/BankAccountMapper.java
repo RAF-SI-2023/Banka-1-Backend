@@ -6,6 +6,7 @@ import rs.edu.raf.banka1.model.AccountType;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Currency;
 import rs.edu.raf.banka1.model.Customer;
+import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
 import rs.edu.raf.banka1.requests.createCustomerRequest.AccountData;
 
 @Component
@@ -22,19 +23,17 @@ public class BankAccountMapper {
         return bankAccountDto;
     }
 
-    public static BankAccount generateBankAccount(AccountData accountData, Currency currency,
-                                                  Customer customer, Long employeeId, Double maintananceFee){
+    public BankAccount generateBankAccount(GenerateBankAccountRequest generateBankAccountRequest){
         BankAccount currentAccount = new BankAccount();
-        //currentAccount.setAccountNumber(accountData.getAccountNumber()); //todo generisi
         currentAccount.setBalance(0.0);
         currentAccount.setAvailableBalance(0.0);
-        currentAccount.setCustomer(customer);
-        currentAccount.setAccountType(accountData.getAccountType());
-        currentAccount.setCreatedByAgentId(employeeId);
+        currentAccount.setCustomer(generateBankAccountRequest.getCustomer());
+        currentAccount.setAccountType(generateBankAccountRequest.getAccountData().getAccountType());
+        currentAccount.setCreatedByAgentId(generateBankAccountRequest.getEmployeeId());
         currentAccount.setCreationDate(System.currentTimeMillis());
         currentAccount.setExpirationDate(System.currentTimeMillis() + 2L * 365 * 24 * 60 * 60 * 1000); //za sada 2 godine traje racun
-        currentAccount.setCurrency(currency);
-        currentAccount.setAccountMaintenance(maintananceFee);
+        currentAccount.setCurrency(generateBankAccountRequest.getCurrency());
+        currentAccount.setAccountMaintenance(generateBankAccountRequest.getMaintananceFee());
         return currentAccount;
     }
 

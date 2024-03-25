@@ -29,11 +29,11 @@ public class CustomerController {
     }
 
     @PostMapping("/createNewCustomer")
-    //@PreAuthorize("hasAuthority('createUser')")
+    @PreAuthorize("hasAuthority('addUser')")
     @Operation(summary = "Create new customer and bank account for customer", description = "Returns true if user is successfuly created," +
             "false otherwise.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User created successfully",
+            @ApiResponse(responseCode = "200", description = "Customer created successfully",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Boolean.class))}),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
@@ -51,7 +51,7 @@ public class CustomerController {
     @Operation(summary = "Customer wants to activate his account", description = "Returns true if customer exists," +
             "false otherwise. Also sends email to customer with activation link.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User created successfully",
+            @ApiResponse(responseCode = "200", description = "Customer activation",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Boolean.class))}),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
@@ -69,7 +69,7 @@ public class CustomerController {
     @Operation(summary = "Customer sets his password using token", description = "Returns id if user is successfuly set password," +
             "null otherwise.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User created successfully",
+            @ApiResponse(responseCode = "200", description = "Customer sets his password",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Boolean.class))}),
             @ApiResponse(responseCode = "500", description = "Internal server error"),

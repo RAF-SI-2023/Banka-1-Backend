@@ -10,8 +10,10 @@ import rs.edu.raf.banka1.mapper.CurrentAccountMapper;
 import rs.edu.raf.banka1.mapper.CustomerMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
+import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
 import rs.edu.raf.banka1.requests.InitialActivationRequest;
 import rs.edu.raf.banka1.requests.createCustomerRequest.CreateCustomerRequest;
+import rs.edu.raf.banka1.responses.UserResponse;
 
 import java.util.Random;
 import java.util.UUID;
@@ -19,50 +21,39 @@ import java.util.UUID;
 @Service
 public class CustomerServiceImpl implements CustomerService{
 
-    private final BankAccountRepository bankAccountRepository;
-    private final UserRepository userRepository;
+
     private final CustomerRepository customerRepository;
-    private final CurrencyRepository currencyRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final CurrencyService currencyService;
+    private final UserService userService;
+    private final BankAccountService bankAccountService;
 
-    public CustomerServiceImpl(BankAccountRepository bankAccountRepository,
-                               UserRepository userRepository,
+    public CustomerServiceImpl(
                                CustomerRepository customerRepository,
-                               CurrencyRepository currencyRepository,
                                EmailService emailService,
-                               PasswordEncoder passwordEncoder) {
-        this.bankAccountRepository = bankAccountRepository;
-        this.userRepository = userRepository;
+                               PasswordEncoder passwordEncoder,
+                               CurrencyService currencyService,
+                               UserService userService,
+                               BankAccountService bankAccountService) {
         this.customerRepository = customerRepository;
-        this.currencyRepository = currencyRepository;
         this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
+        this.currencyService = currencyService;
+        this.userService = userService;
+        this.bankAccountService = bankAccountService;
     }
 
-    private String generateBankAccountNumber(){
-        Long start = 1312420L;
-        Random random = new Random();
-        while(true) {
-            Long mid = 100_000_000L + random.nextLong(900_000_000L);
-            Long generated = Long.parseLong(start.toString() + mid.toString()) * 100;
-            generated = generated + (98 - generated % 97);
-            String accountNumber = generated.toString();
-            if(bankAccountRepository.findBankAccountByAccountNumber(accountNumber).isEmpty()){
-                return accountNumber;
-            }
-        }
-    }
-
-    //dodaj proveru za racun da li vec postoji sa tim brojem
     @Override
     public Long createNewCustomer(CreateCustomerRequest createCustomerRequest) {
-        Currency currency = currencyRepository.findCurrencyByCurrencyCode(
-                createCustomerRequest.getAccountData().getCurrencyName()).orElse(null);
-        if(currency == null){
+        Currency currency;
+        try{
+            currency = currencyService.findCurrencyByCode(createCustomerRequest.getAccountData().getCurrencyName());
+        }
+        catch (RuntimeException runtimeException){
             return null;
         }
-        User employee;
+        UserResponse employee;
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // Check if the user is authenticated
@@ -70,7 +61,7 @@ public class CustomerServiceImpl implements CustomerService{
             // Assuming your UserDetails implementation has the email field
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String email = userDetails.getUsername();
-            employee = userRepository.findByEmail(email).orElse(null);
+            employee = userService.findByEmail(email);
             if(employee == null){
                 return null;
             }
@@ -80,12 +71,15 @@ public class CustomerServiceImpl implements CustomerService{
             customer.setActivationToken(activationToken);
             customer = customerRepository.save(customer);
 
-            BankAccount bankAccount = BankAccountMapper.generateBankAccount(
-                    createCustomerRequest.getAccountData(), currency,
-                    customer, employee.getUserId(), createCustomerRequest.getAccountData().getMaintenanceCost());
+            GenerateBankAccountRequest generateBankAccountRequest = new GenerateBankAccountRequest();
+            generateBankAccountRequest.setCurrency(currency);
+            generateBankAccountRequest.setCustomer(customer);
+            generateBankAccountRequest.setEmployeeId(employee.getUserId());
+            generateBankAccountRequest.setMaintananceFee(createCustomerRequest.getAccountData().getMaintenanceCost());
+            generateBankAccountRequest.setAccountData(createCustomerRequest.getAccountData());
 
-            bankAccount.setAccountNumber(generateBankAccountNumber());
-            bankAccountRepository.save(bankAccount);
+            BankAccount bankAccount = bankAccountService.generateBankAccount(generateBankAccountRequest);
+
 
             String to = customer.getEmail();
             String subject = "Account activation";
@@ -98,9 +92,8 @@ public class CustomerServiceImpl implements CustomerService{
 
     @Override
     public boolean initialActivation(InitialActivationRequest createCustomerRequest) {
-        BankAccount bankAccount = bankAccountRepository
-                .findBankAccountByAccountNumber(createCustomerRequest.getAccountNumber())
-                .orElse(null);
+        BankAccount bankAccount = bankAccountService
+                .findBankAccountByAccountNumber(createCustomerRequest.getAccountNumber());
         if(bankAccount == null){
             return false;
         }
@@ -125,9 +118,7 @@ public class CustomerServiceImpl implements CustomerService{
         customer.setActive(true);
         customer.setPassword(passwordEncoder.encode(password));
         customer = customerRepository.save(customer);
-        BankAccount bankAccount = customer.getAccountIds().get(0);
-        bankAccount.setAccountStatus("ACTIVE");
-        bankAccountRepository.save(bankAccount);
+        bankAccountService.activateBankAccount(customer.getAccountIds().get(0));
         return customer.getUserId();
     }
 }

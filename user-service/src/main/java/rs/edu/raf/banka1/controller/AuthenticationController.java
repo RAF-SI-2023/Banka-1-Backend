@@ -57,7 +57,7 @@ public class AuthenticationController {
             if (user == null) {
                 Customer customer = customerRepository.findCustomerByEmail(loginRequest.getEmail()).orElse(null);
                 if(customer == null) {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
                 }
                 LoginResponse loginResponse = this.authenticationService.generateLoginResponse(loginRequest);
                 return ResponseEntity.ok(loginResponse);
