@@ -230,7 +230,7 @@ public class UserServiceImplTest {
         editUserRequest.setEmail("noreply.rafbanka1@gmail.com");
         editUserRequest.setFirstName("asdf");
         editUserRequest.setLastName("asdf");
-        editUserRequest.setJmbg("1234");
+//        editUserRequest.setJmbg("1234");
         editUserRequest.setPosition("asdf");
         editUserRequest.setPhoneNumber("1234");
         editUserRequest.setIsActive(false);
