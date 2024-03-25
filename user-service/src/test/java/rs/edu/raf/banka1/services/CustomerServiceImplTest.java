@@ -20,6 +20,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import rs.edu.raf.banka1.mapper.PermissionMapper;
+import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.CurrencyRepository;
@@ -42,22 +44,24 @@ import static org.mockito.Mockito.*;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class CustomerServiceImplTest {
     @Mock
-    private BankAccountRepository bankAccountRepository;
-    @Mock
-    private UserRepository userRepository;
-    @Mock
     private CustomerRepository customerRepository;
-    @Mock
-    private CurrencyRepository currencyRepository;
     @Mock
     private EmailService emailService;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private CurrencyService currencyService;
+    @Mock
+    private UserService userService;
+    @Mock
+    private BankAccountService bankAccountService;
 
     @InjectMocks
     private CustomerServiceImpl sut;
 
     private InitialActivationRequest initialActivationRequest;
+
+    private UserMapper userMapper = new UserMapper(new PermissionMapper());
 
     @BeforeEach
     public void setUp(){
@@ -89,8 +93,7 @@ public class CustomerServiceImplTest {
         createCustomerRequest.setCustomerData(customerData);
         createCustomerRequest.setAccountData(accountData);
 
-        when(currencyRepository.findCurrencyByCurrencyCode("RSD")).thenReturn(Optional.of(new Currency()));
-
+        when(currencyService.findCurrencyByCode("RSD")).thenReturn(new Currency());
         try (MockedStatic<SecurityContextHolder> securityContextHolderMockedStatic =
                      Mockito.mockStatic(SecurityContextHolder.class)) {
             Authentication authentication = mock(Authentication.class);
@@ -104,18 +107,20 @@ public class CustomerServiceImplTest {
 
             User user = new User();
             user.setUserId(1L);
-            when(userRepository.findByEmail("admin@admin.com")).thenReturn(Optional.of(user));
-
+            when(userService.findByEmail("admin@admin.com")).thenReturn(userMapper.userToUserResponse(user));
             Customer customer = new Customer();
             customer.setEmail("test@gmail.com");
             customer.setUserId(2L);
             when(customerRepository.save(any())).thenReturn(customer);
 
+            BankAccount bankAccount = new BankAccount();
+            bankAccount.setAccountNumber("3921893");
+            when(bankAccountService.generateBankAccount(any())).thenReturn(bankAccount);
+
             sut.createNewCustomer(createCustomerRequest);
 
             verify(customerRepository).save(any());
-            verify(bankAccountRepository).save(any());
-            verify(emailService).sendActivationEmail(anyString(), anyString(), anyString());
+            verify(emailService).sendEmail(anyString(), anyString(), anyString());
         }
     }
 
@@ -128,22 +133,22 @@ public class CustomerServiceImplTest {
         customer.setActivationToken("testactivationtoken");
         BankAccount bankAccount = new BankAccount();
         bankAccount.setCustomer(customer);
-        when(bankAccountRepository.findBankAccountByAccountNumber("123456789")).thenReturn(Optional.of(bankAccount));
+        when(bankAccountService.findBankAccountByAccountNumber("123456789")).thenReturn(bankAccount);
 
         boolean result = sut.initialActivation(initialActivationRequest);
 
         assertTrue(result);
-        verify(emailService).sendActivationEmail(eq("test@gmail.com"), anyString(), anyString());
+        verify(emailService).sendEmail(eq("test@gmail.com"), anyString(), anyString());
     }
 
     @Test
     public void initialActivationBankAccountDoesntExist(){
-        when(bankAccountRepository.findBankAccountByAccountNumber("123456789")).thenReturn(Optional.empty());
+        when(bankAccountService.findBankAccountByAccountNumber("123456789")).thenReturn(null);
 
         boolean result = sut.initialActivation(initialActivationRequest);
 
         assertFalse(result);
-        verify(emailService, never()).sendActivationEmail(anyString(), anyString(), anyString());
+        verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
     }
 
     @Test
@@ -154,12 +159,12 @@ public class CustomerServiceImplTest {
         customer.setActivationToken("testactivationtoken");
         BankAccount bankAccount = new BankAccount();
         bankAccount.setCustomer(customer);
-        when(bankAccountRepository.findBankAccountByAccountNumber("123456789")).thenReturn(Optional.of(bankAccount));
+        when(bankAccountService.findBankAccountByAccountNumber("123456789")).thenReturn(bankAccount);
 
         boolean result = sut.initialActivation(initialActivationRequest);
 
         assertFalse(result);
-        verify(emailService, never()).sendActivationEmail(anyString(), anyString(), anyString());
+        verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
     }
 
     @Test
@@ -170,12 +175,12 @@ public class CustomerServiceImplTest {
         customer.setActivationToken("testactivationtoken");
         BankAccount bankAccount = new BankAccount();
         bankAccount.setCustomer(customer);
-        when(bankAccountRepository.findBankAccountByAccountNumber("123456789")).thenReturn(Optional.of(bankAccount));
+        when(bankAccountService.findBankAccountByAccountNumber("123456789")).thenReturn(bankAccount);
 
         boolean result = sut.initialActivation(initialActivationRequest);
 
         assertFalse(result);
-        verify(emailService, never()).sendActivationEmail(anyString(), anyString(), anyString());
+        verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
     }
 
     @Test
@@ -196,10 +201,10 @@ public class CustomerServiceImplTest {
         assertTrue(customer.getActive());
         assertNull(customer.getActivationToken());
 
-        assertEquals(bankAccount.getAccountStatus(), "ACTIVE");
+        //assertEquals("ACTIVE", bankAccount.getAccountStatus());
 
         verify(customerRepository).save(customer);
-        verify(bankAccountRepository).save(bankAccount);
+        verify(bankAccountService).activateBankAccount(bankAccount);
     }
 
     @Test
@@ -210,6 +215,6 @@ public class CustomerServiceImplTest {
 
         assertNull(result);
         verify(customerRepository, never()).save(any());
-        verify(bankAccountRepository, never()).save(any());
+        verify(bankAccountService, never()).activateBankAccount(any());
     }
 }

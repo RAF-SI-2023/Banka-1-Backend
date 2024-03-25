@@ -84,7 +84,7 @@ public class CustomerServiceImpl implements CustomerService{
             String to = customer.getEmail();
             String subject = "Account activation";
             String text = bankAccount.getAccountNumber();
-            emailService.sendActivationEmail(to, subject, text);
+            emailService.sendEmail(to, subject, text);
             return customer.getUserId();
         }
         return null;
@@ -102,7 +102,7 @@ public class CustomerServiceImpl implements CustomerService{
             String to = bankAccount.getCustomer().getEmail();
             String subject = "Account activation";
             String text = "localhost:4200/activateCustomer/" + bankAccount.getCustomer().getActivationToken(); //TODO: napravi da radi sa env var
-            emailService.sendActivationEmail(to, subject, text);
+            emailService.sendEmail(to, subject, text);
             return true;
         }
         return false;

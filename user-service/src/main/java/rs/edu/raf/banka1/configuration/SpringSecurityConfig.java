@@ -50,6 +50,8 @@ public class SpringSecurityConfig {
                                         .requestMatchers(antMatcher("/permission/**")).permitAll()
                                         .requestMatchers(antMatcher("/customer/initialActivation")).permitAll()
                                         .requestMatchers(antMatcher("/customer/activate/**")).permitAll()
+                                        .requestMatchers(antMatcher("/user/newpassword/**")).permitAll()
+                                        .requestMatchers(antMatcher("/user/reset/**")).permitAll()
                                         .anyRequest().authenticated()
 
                 )
