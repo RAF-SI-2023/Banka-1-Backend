@@ -17,4 +17,17 @@ public class OptionsMapper {
 
         return optionsDto;
     }
+
+    public OptionsModel optionsDtoToOptionsModel(OptionsDto optionsDto) {
+        OptionsModel optionsModel = new OptionsModel();
+        optionsModel.setOptionType(optionsDto.getOptionType());
+        optionsModel.setCurrency(optionsDto.getCurrency());
+        optionsModel.setTicker(optionsDto.getTicker());
+        optionsModel.setOpenInterest(optionsDto.getOpenInterest());
+        optionsModel.setStrikePrice(optionsDto.getStrikePrice());
+        optionsModel.setExpirationDate(optionsDto.getExpirationDate());
+        optionsModel.setImpliedVolatility(optionsDto.getImpliedVolatility());
+
+        return optionsModel;
+    }
 }

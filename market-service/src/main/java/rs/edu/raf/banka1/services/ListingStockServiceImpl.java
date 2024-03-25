@@ -174,7 +174,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     private void runFetchBackground(){
         Thread thread = new Thread(new FetchingThread(this.stockRepository,
                 this.getAllStocks(), this.updateListingApiUrl, this.alphaVantageAPIToken));
-        thread.run();
+        thread.start();
 
         try {
             thread.join();

@@ -3,14 +3,21 @@ package rs.edu.raf.banka1.services;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import rs.edu.raf.banka1.exceptions.OptionsException;
 import rs.edu.raf.banka1.mapper.OptionsMapper;
 import rs.edu.raf.banka1.model.OptionsModel;
 import rs.edu.raf.banka1.model.dtos.OptionsDto;
 import rs.edu.raf.banka1.model.enums.OptionType;
 import rs.edu.raf.banka1.repositories.OptionsRepository;
+
+import rs.edu.raf.banka1.threads.OptionsThread;
+
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.io.File;
@@ -19,11 +26,14 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Service
 public class OptionsServiceImpl implements OptionsService{
     private ObjectMapper objectMapper = new ObjectMapper();
+
+    private EntityManager entityManager;
     private HttpClient httpClient = HttpClient.newHttpClient();
     private HttpRequest httpRequest;
     private String cookie = null;
@@ -41,6 +51,7 @@ public class OptionsServiceImpl implements OptionsService{
         this.optionsMapper = optionsMapper;
     }
 
+
     @Override
     public List<OptionsDto> fetchOptions() {
         if (cookie == null || crumb == null) {
@@ -53,15 +64,17 @@ public class OptionsServiceImpl implements OptionsService{
 
         List<OptionsDto> optionsModels = new ArrayList<>();
         try{
-            List<String> tickers = fetchTickers();
-//             Constants.tickersForTestingOptions
-            for (String ticker : tickers)
+          //  List<String> tickers = fetchTickers();
+           // List<String> tickers = Constants.tickersForTestingOptions;
+            for (String ticker : Constants.tickersForTestingOptions) {
                 optionsModels.addAll(fetchOptionsForTicker(ticker, optionsUrl + ticker + "?crumb=" + crumb));
+                System.out.println(optionsUrl + ticker + "?crumb=" + crumb);
+                System.out.println(fetchOptionsForTicker(ticker, optionsUrl + ticker + "?crumb=" + crumb));
+            }
 
             // Uncomment when filling the options.json
 //            File file = new File(Constants.optionsFilePath);
 //            objectMapper.writeValue(file, optionsModels);
-
             return optionsModels;
         }catch (Exception e) {
             e.printStackTrace();
@@ -89,7 +102,6 @@ public class OptionsServiceImpl implements OptionsService{
         }
     }
 
-
     @Override
     public List<OptionsDto> fetchOptionsForTicker(String ticker, String url) {
         httpRequest = HttpRequest.newBuilder()
@@ -98,7 +110,8 @@ public class OptionsServiceImpl implements OptionsService{
                 .GET()
                 .build();
 
-        List<OptionsModel> options = new ArrayList<>();
+        List<OptionsModel> options = new CopyOnWriteArrayList<>();
+        System.out.println("COOKIE ----------------------"+cookie);
 
         try {
             // Send the request to retrieve data with crumb value
@@ -238,6 +251,30 @@ public class OptionsServiceImpl implements OptionsService{
 
     public void setCrumb(String crumb) {
         this.crumb = crumb;
+    }
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void truncateAndFetch(){
+        truncateTable();
+        fetchOptions();
+    }
+
+    @Override
+    public void truncateTable() {
+        this.optionsRepository.truncateTable();
+
+    }
+
+    @Scheduled(fixedDelay = 900000)
+    public void runFetchBackground(){
+        Thread thread = new Thread(new OptionsThread(this));
+        thread.start();
+
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 

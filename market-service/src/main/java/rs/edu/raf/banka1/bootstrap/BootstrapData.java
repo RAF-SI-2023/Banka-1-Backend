@@ -8,6 +8,7 @@ import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
+import rs.edu.raf.banka1.model.dtos.OptionsDto;
 import rs.edu.raf.banka1.services.CurrencyService;
 import rs.edu.raf.banka1.services.ListingStockService;
 import rs.edu.raf.banka1.services.ForexService;
@@ -115,6 +116,7 @@ public class BootstrapData implements CommandLineRunner {
 
 
 
-    }
 
 
+
+}

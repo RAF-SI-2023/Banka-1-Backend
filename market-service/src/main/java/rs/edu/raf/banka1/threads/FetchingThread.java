@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.exceptions.APIException;
+import rs.edu.raf.banka1.repositories.OptionsRepository;
 import rs.edu.raf.banka1.repositories.StockRepository;
 import rs.edu.raf.banka1.services.ListingStockService;
 import rs.edu.raf.banka1.utils.Requests;
@@ -15,6 +16,7 @@ import java.util.List;
 
 public class FetchingThread implements Runnable{
     private StockRepository stockRepository;
+
     private final ObjectMapper objectMapper;
 
     private String updateListingApiUrl;
