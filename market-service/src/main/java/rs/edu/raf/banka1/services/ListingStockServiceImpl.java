@@ -167,7 +167,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     }
 
     @Scheduled(fixedDelay = 900000)
-    private void runFetchBackground() {
+    public void runFetchBackground() {
         Thread thread = new Thread(new FetchingThread(this.stockRepository,
                 this.getAllStocks(), this.requests, this.updateListingApiUrl, this.alphaVantageAPIToken));
         thread.start();

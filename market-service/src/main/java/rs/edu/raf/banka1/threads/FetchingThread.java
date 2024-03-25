@@ -39,8 +39,8 @@ public class FetchingThread implements Runnable  {
         valuesForConstantUpdating();
     }
 
-    private void valuesForConstantUpdating() {
-        System.out.println("[CHRON] USAO SAM OVDE " + this.updateListingApiUrl);
+    public void valuesForConstantUpdating() {
+      //  System.out.println("[CHRON] USAO SAM OVDE " + this.updateListingApiUrl);
         try {
             for (ListingStock curr : this.listingStocks) {
                 String response = requests.sendRequest(this.updateListingApiUrl +
@@ -49,6 +49,7 @@ public class FetchingThread implements Runnable  {
                         this.alphaVantageAPIToken);
 
                 JsonNode rootNode = objectMapper.readTree(response);
+                rootNode = rootNode.get("Global Quote");
                 //prvo setovanje nekih vrednosti ako api vrati null da se ne bi u bazi cuvala null vrednost
                 double high = curr.getHigh();
                 double low = curr.getLow();
@@ -84,5 +85,6 @@ public class FetchingThread implements Runnable  {
             System.out.println("[ListingStockServiceImpl] Error occured when calling valuesForConstantUpdating " + e.getMessage() + " Cause: " + e.getCause());
         }
     }
+
 
 }
