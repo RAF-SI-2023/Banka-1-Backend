@@ -45,9 +45,11 @@ public class SpringSecurityConfig {
                                                 antMatcher("/swagger-ui.html"),
                                                 antMatcher("/swagger-ui/**"),
                                                 antMatcher("/v3/api-docs/**"),
-                                                antMatcher("/planning/")).permitAll()
-                                        .requestMatchers(antMatcher("/user/activate/**")).permitAll()
-                                        .requestMatchers(antMatcher("/permission/**")).permitAll()
+                                                antMatcher("/planning/"),
+                                                antMatcher("/user/activate/**"),
+                                                antMatcher("/permission/**"),
+                                                antMatcher("/user/newpassword/**"),
+                                                antMatcher("/user/reset/**")).permitAll()
                                         .anyRequest().authenticated()
 
                 )

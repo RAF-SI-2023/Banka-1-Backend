@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.Permission;
@@ -21,6 +22,7 @@ import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Optional;
@@ -53,6 +55,9 @@ public class UserServiceImplTest {
 
     @MockBean
     private PermissionMapper permissionMapper;
+
+    @MockBean
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     @Autowired
@@ -137,7 +142,7 @@ public class UserServiceImplTest {
         createUserRequest.setActive(true);
         userService.createUser(createUserRequest);
 
-        verify(emailService, times(1)).sendActivationEmail(eq(createUserRequest.getEmail()), any(), any());
+        verify(emailService, times(1)).sendEmail(eq(createUserRequest.getEmail()), any(), any());
         verify(userRepository, times(1)).save(any());
     }
 
@@ -151,6 +156,53 @@ public class UserServiceImplTest {
         userService.activateAccount(token, password);
         verify(userRepository, times(1)).findByActivationToken(token);
         verify(userRepository, times(1)).save(any());
+    }
+
+    @Test
+    void sendResetPasswordEmail() {
+        String email = "1234";
+        when(userRepository.findByEmail(any()))
+                .thenReturn(Optional.of(mockUser));
+        when(emailService.sendEmail(eq(email), any(), any()))
+                .thenReturn(true);
+
+        assertEquals(userService.sendResetPasswordEmail(email), true);
+        verify(emailService, times(1)).sendEmail(eq(email), any(), any());
+    }
+
+    @Test
+    void sendResetPasswordEmailUserNotFound() {
+        String email = "1234";
+        when(userRepository.findByEmail(any()))
+                .thenReturn(Optional.empty());
+        when(emailService.sendEmail(eq(email), any(), any()))
+                .thenReturn(true);
+
+        assertEquals(userService.sendResetPasswordEmail(email), false);
+        verify(emailService, times(0)).sendEmail(eq(email), any(), any());
+    }
+
+    @Test
+    void setNewPassword() {
+        when(userRepository.findByResetPasswordToken(any()))
+                .thenReturn(Optional.of(mockUser));
+
+        String token = "1234";
+        String password = "1234";
+        userService.setNewPassword(token, password);
+        verify(userRepository, times(1)).findByResetPasswordToken(token);
+        verify(userRepository, times(1)).save(any());
+    }
+
+    @Test
+    void setNewPasswordUserNotFound() {
+        when(userRepository.findByResetPasswordToken(any())).thenReturn(Optional.empty());
+
+        String token = "1234";
+        String password = "1234";
+        userService.setNewPassword(token, password);
+        verify(userRepository, times(1)).findByResetPasswordToken(token);
+        verify(userRepository, times(0)).save(any());
     }
 
     @Test
