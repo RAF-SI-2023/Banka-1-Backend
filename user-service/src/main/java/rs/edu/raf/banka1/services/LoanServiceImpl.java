@@ -1,7 +1,6 @@
 package rs.edu.raf.banka1.services;
 
 import org.springframework.stereotype.Service;
-import org.webjars.NotFoundException;
 import rs.edu.raf.banka1.dtos.LoanDto;
 import rs.edu.raf.banka1.dtos.LoanFullDto;
 import rs.edu.raf.banka1.mapper.LoanMapper;
@@ -32,19 +31,19 @@ public class LoanServiceImpl implements LoanService{
     }
 
     @Override
-    public List<LoanDto> getLoansForUser(Long userId) {
+    public List<LoanDto> getLoansForUser(final Long userId) {
         return loanRepository.findByUser(userId)
             .stream().map(loanMapper::loanToLoanDto).toList();
     }
 
     @Override
-    public List<LoanDto> getLoansForAccount(String accountNumber) {
+    public List<LoanDto> getLoansForAccount(final String accountNumber) {
         return loanRepository.findByAccountNumber(accountNumber)
             .stream().map(loanMapper::loanToLoanDto).toList();
     }
 
     @Override
-    public LoanFullDto getLoanDetails(Long id) {
+    public LoanFullDto getLoanDetails(final Long id) {
         return loanRepository.findById(id)
             .map(loanMapper::loanToLoanFullDto)
             .orElseThrow(NoSuchElementException::new);
