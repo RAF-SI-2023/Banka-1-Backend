@@ -24,7 +24,7 @@ public class StockMapper {
         return stock;
     }
 
-    public void miniListingStock(String symbol,Double price, Double high, Double low, Double priceChange, Integer volume){
+    public void miniListingStock(String symbol, Double price, Double high, Double low, Double priceChange, Integer volume ){
 
     }
     public void updateListingStock(ListingStock oldStock, ListingStock newStock) {

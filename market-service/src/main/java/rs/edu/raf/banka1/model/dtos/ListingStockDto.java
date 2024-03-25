@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ListingStockDto extends ListingBaseDto{
+public class ListingStockDto extends ListingBaseDto {
     private Integer outstandingShares;
     private Double dividendYield;
 }

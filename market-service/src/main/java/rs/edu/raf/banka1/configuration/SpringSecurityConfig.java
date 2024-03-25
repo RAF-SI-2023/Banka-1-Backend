@@ -43,7 +43,7 @@ public class SpringSecurityConfig {
                                 authz
                                     .requestMatchers(antMatcher("/swagger-ui.html")).permitAll()
                                     .requestMatchers(antMatcher("/swagger-ui/**")).permitAll()
-                                    .requestMatchers( antMatcher("/v3/api-docs/**")).permitAll()
+                                    .requestMatchers(antMatcher("/v3/api-docs/**")).permitAll()
                                     .anyRequest().authenticated()
                 )
 //                .cors().configurationSource(corsConfigurationSource())

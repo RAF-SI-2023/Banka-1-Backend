@@ -29,7 +29,6 @@ import java.io.IOException;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -98,9 +97,9 @@ public class ListingStockServiceImpl implements ListingStockService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } catch (APIException apiException){
+        } catch (APIException apiException) {
             System.out.println(apiException.getMessage());
-        } catch (Exception e){
+        } catch (Exception e) {
             //e.printStackTrace();
             System.err.println("[generateJSONSymbols] Exception occured:" + e.getMessage());
         }
@@ -121,8 +120,8 @@ public class ListingStockServiceImpl implements ListingStockService {
             for (JsonNode node : rootNode) {
                 String symbol = node.path("symbol").asText();
                 ListingStock listingStock = createListingStock(symbol);
-                if (listingStock != null) listingStocks.add(listingStock);
-                if (i++ > n) break;
+                if (listingStock != null) {listingStocks.add(listingStock);}
+                if (i++ > n) {break;}
             }
             return listingStocks;
 
@@ -157,20 +156,20 @@ public class ListingStockServiceImpl implements ListingStockService {
             Integer outstandingShares=jsonArray.get("SharesOutstanding").asInt();
             String exchange=jsonArray.get("Exchange").asText();
 
-            return stockMapper.createListingStock(symbol,name,exchange,price,high,low,change,volume,outstandingShares,dividendYield);
+            return stockMapper.createListingStock(symbol, name , exchange , price, high ,low ,change ,volume ,outstandingShares ,dividendYield );
 
-        } catch (APIException apiException){
+        } catch (APIException apiException) {
             System.out.println(apiException.getMessage());
-        } catch (Exception e){
+        } catch (Exception e) {
             System.out.println(symbol + " not found on alphavantage");
         }
         return null;
     }
 
     @Scheduled(fixedDelay = 900000)
-    private void runFetchBackground(){
+    private void runFetchBackground() {
         Thread thread = new Thread(new FetchingThread(this.stockRepository,
-                this.getAllStocks(),this.requests, this.updateListingApiUrl, this.alphaVantageAPIToken));
+                this.getAllStocks(), this.requests, this.updateListingApiUrl, this.alphaVantageAPIToken));
         thread.start();
 
         try {
@@ -196,9 +195,9 @@ public class ListingStockServiceImpl implements ListingStockService {
     @Override
     public List<ListingHistory> fetchNListingsHistory(int n) {
         try{
-            List<ListingStock> listingStocks = fetchNStocks(n);
+             List<ListingStock> listingStocks = fetchNStocks(n);
             List<ListingHistory> listingHistories = new ArrayList<>();
-            for (ListingStock stock : listingStocks){
+            for (ListingStock stock : listingStocks) {
                 List<ListingHistory> singleStockHistory = fetchSingleListingHistory(stock.getTicker());
                 listingHistories.addAll(singleStockHistory);
             }

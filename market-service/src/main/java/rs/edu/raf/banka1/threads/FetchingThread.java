@@ -3,17 +3,14 @@ package rs.edu.raf.banka1.threads;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.exceptions.APIException;
 import rs.edu.raf.banka1.repositories.StockRepository;
-import rs.edu.raf.banka1.services.ListingStockService;
 import rs.edu.raf.banka1.utils.Requests;
 
 import java.util.List;
 
-public class FetchingThread implements Runnable{
+public class FetchingThread implements Runnable  {
     private StockRepository stockRepository;
     private final ObjectMapper objectMapper;
 
@@ -27,7 +24,7 @@ public class FetchingThread implements Runnable{
                           List<ListingStock> listingStocks,
                           Requests requests,
                           String updateListingApiUrl,
-                          String alphaVantageAPIToken){
+                          String alphaVantageAPIToken) {
         this.stockRepository = stockRepository;
         this.listingStocks = listingStocks;
         this.requests = requests;
@@ -42,10 +39,10 @@ public class FetchingThread implements Runnable{
         valuesForConstantUpdating();
     }
 
-    private void valuesForConstantUpdating(){
+    private void valuesForConstantUpdating() {
         System.out.println("[CHRON] USAO SAM OVDE " + this.updateListingApiUrl);
-        try{
-            for(ListingStock curr : this.listingStocks){
+        try {
+            for (ListingStock curr : this.listingStocks) {
                 String response = requests.sendRequest(this.updateListingApiUrl +
                         curr.getTicker() +
                         "&apikey=" +
@@ -59,26 +56,31 @@ public class FetchingThread implements Runnable{
                 double change = curr.getPriceChange();
                 int volume = curr.getVolume();
 
-                if(rootNode.get("03. high") != null)
+                if (rootNode.get("03. high") != null) {
                     high = rootNode.get("03. high").asDouble();
+                }
 
-                if(rootNode.get("04. low") != null)
+                if (rootNode.get("04. low") != null) {
                     low = rootNode.get("04. low").asDouble();
+                }
 
-                if(rootNode.get("05. price") != null)
+                if (rootNode.get("05. price") != null) {
                     price = rootNode.get("05. price").asDouble();
+                }
 
-                if(rootNode.get("06. volume") != null)
+                if (rootNode.get("06. volume") != null) {
                     volume = rootNode.get("06. volume").asInt();
+                }
 
-                if(rootNode.get("09. change") != null)
+                if (rootNode.get("09. change") != null) {
                     change = rootNode.get("09. change").asDouble();
+                }
 
                 this.stockRepository.updateFreshValuesStock(high, low, price, volume, change, curr.getListingId(), (int) (System.currentTimeMillis() / 1000L));
             }
-        }catch (APIException apiException){
+        } catch (APIException apiException) {
             System.out.println("[ListingStockServiceImpl] Error occured when calling api " + apiException.getMessage());
-        } catch(Exception e){
+        } catch (Exception e) {
             System.out.println("[ListingStockServiceImpl] Error occured when calling valuesForConstantUpdating " + e.getMessage() + " Cause: " + e.getCause());
         }
     }

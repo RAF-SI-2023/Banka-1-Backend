@@ -11,7 +11,7 @@ import rs.edu.raf.banka1.model.ListingStock;
 import java.util.Optional;
 
 @Repository
-public interface StockRepository extends JpaRepository<ListingStock,Long> {
+public interface StockRepository extends JpaRepository<ListingStock ,Long> {
     Optional<ListingStock> findByTicker(String ticker);
 
     @Transactional

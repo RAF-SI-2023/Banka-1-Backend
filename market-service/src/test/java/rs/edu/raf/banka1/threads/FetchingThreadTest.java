@@ -5,14 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import rs.edu.raf.banka1.mapper.ForexMapper;
 import rs.edu.raf.banka1.mapper.StockMapper;
-import rs.edu.raf.banka1.model.ListingStock;
-import rs.edu.raf.banka1.repositories.ForexRepository;
+import rs.edu.raf.banka1.model.ListingStock;;
 import rs.edu.raf.banka1.repositories.StockRepository;
-import rs.edu.raf.banka1.services.ForexServiceImpl;
 import rs.edu.raf.banka1.services.ListingStockServiceImpl;
 import rs.edu.raf.banka1.utils.Requests;
 
@@ -85,4 +81,4 @@ class FetchingThreadTest {
     }
 }
 
- */
+*/
