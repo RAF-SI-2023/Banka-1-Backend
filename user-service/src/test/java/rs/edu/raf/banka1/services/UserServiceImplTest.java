@@ -163,8 +163,10 @@ public class UserServiceImplTest {
         String email = "1234";
         when(userRepository.findByEmail(any()))
                 .thenReturn(Optional.of(mockUser));
+        when(emailService.sendEmail(eq(email), any(), any()))
+                .thenReturn(true);
 
-        userService.sendResetPasswordEmail(email);
+        assertEquals(userService.sendResetPasswordEmail(email), true);
         verify(emailService, times(1)).sendEmail(eq(email), any(), any());
     }
 
@@ -173,8 +175,10 @@ public class UserServiceImplTest {
         String email = "1234";
         when(userRepository.findByEmail(any()))
                 .thenReturn(Optional.empty());
+        when(emailService.sendEmail(eq(email), any(), any()))
+                .thenReturn(true);
 
-        userService.sendResetPasswordEmail(email);
+        assertEquals(userService.sendResetPasswordEmail(email), false);
         verify(emailService, times(0)).sendEmail(eq(email), any(), any());
     }
 
@@ -192,17 +196,13 @@ public class UserServiceImplTest {
 
     @Test
     void setNewPasswordUserNotFound() {
-        // Mocking userRepository behavior
         when(userRepository.findByResetPasswordToken(any())).thenReturn(Optional.empty());
 
         String token = "1234";
         String password = "1234";
-
-        // Using lambda expression for assertThrows
-        assertThrows(NoSuchElementException.class, () -> userService.setNewPassword(token, password));
-
-        // Verifying that findByResetPasswordToken was called with the specified token
+        userService.setNewPassword(token, password);
         verify(userRepository, times(1)).findByResetPasswordToken(token);
+        verify(userRepository, times(0)).save(any());
     }
 
     @Test

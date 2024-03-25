@@ -1,8 +1,10 @@
 package rs.edu.raf.banka1.responses;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class NewPasswordResponse {
     private Long userId;
 

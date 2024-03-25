@@ -162,8 +162,9 @@ public class UserController {
                         schema = @Schema(implementation = ActivateAccountResponse.class))}),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Boolean> sendResetPasswordEmail(@PathVariable String email) {
-        return new ResponseEntity<>(userService.sendResetPasswordEmail(email), HttpStatus.OK);
+    public ResponseEntity<Void> sendResetPasswordEmail(@PathVariable String email) {
+        userService.sendResetPasswordEmail(email);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping(value = "/newpassword/{token}")
@@ -177,7 +178,8 @@ public class UserController {
     })
     public ResponseEntity<NewPasswordResponse> setNewPassword(@PathVariable String token, @RequestBody NewPasswordRequest newPasswordRequest) {
         String password = newPasswordRequest.getPassword();
-        return new ResponseEntity<>(userService.setNewPassword(token, password), HttpStatus.OK);
+        NewPasswordResponse newPasswordResponse = userService.setNewPassword(token, password);
+        return new ResponseEntity<>(newPasswordResponse, newPasswordResponse.getUserId() != null ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
 
     @PutMapping()

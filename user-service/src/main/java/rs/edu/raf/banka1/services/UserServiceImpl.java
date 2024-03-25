@@ -216,9 +216,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public NewPasswordResponse setNewPassword(String token, String password) throws NoSuchElementException {
-        User user = userRepository.findByResetPasswordToken(token).orElseThrow();
-        user.setActivationToken(null);
+    public NewPasswordResponse setNewPassword(String token, String password) {
+        Optional<User> optionalUser = userRepository.findByResetPasswordToken(token);
+        if (optionalUser.isEmpty()) {
+            return new NewPasswordResponse();
+        }
+        User user = optionalUser.get();
+        user.setResetPasswordToken(null);
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
         return new NewPasswordResponse(user.getUserId());
