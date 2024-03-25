@@ -42,9 +42,7 @@ public class BootstrapData implements CommandLineRunner {
     private OptionsService optionsService;
 
     @Override
-    public void run(String... args) throws Exception {
-        long start = System.currentTimeMillis();
-
+    public void run(String... args) {
         System.out.println("Loading Data...");
 
         ExecutorService executorService = Executors.newFixedThreadPool(5);
@@ -55,21 +53,24 @@ public class BootstrapData implements CommandLineRunner {
             System.out.println("Currency Data Loaded!");
         });
 
-////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
         // Since JSON symbols are available in repo, and the API key needs to be replaced or paid,
         // we only need to call the function below every once in a while
         // listingStockService.generateJSONSymbols();
+
         // STOCK
         // Populate stock and stock history
         executorService.submit(() -> {
             List<ListingStock> listingStocks = listingStockService.fetchNListingStocks(maxStockListings);
             listingStockService.addAllListingStocks(listingStocks);
+            System.out.println("Stock done");
         });
         executorService.submit(() -> {
             List<ListingHistory> listingHistories = listingStockService.fetchNListingsHistory(maxStockListingsHistory);
             listingStockService.addAllListingsToHistory(listingHistories);
+            System.out.println("Stock listing history done");
         });
-        ////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
         // FOREX
 
         executorService.submit(() -> {
@@ -81,7 +82,7 @@ public class BootstrapData implements CommandLineRunner {
             // Warning: in the production we should update all forex pairs
             List<ListingForex> updated = forexService.updateAllPrices(listingForexList.subList(0, 10));
             // saves forex data to database (only after update)
-            // because update uses other API which doesn't support all forex names, so we need to save only available forexs
+            // because update uses other API which doesn't support all forex names, so we need to save only available forexes
             // first you need to save forexes and after that histories because histories need forex ids from database
             forexService.saveAllForexes(updated);
 
@@ -89,29 +90,16 @@ public class BootstrapData implements CommandLineRunner {
             // Warning: agreement was to add just histories for 10 forexes
             List<ListingHistory> histories = forexService.getAllForexHistories(updated);
             listingStockService.addAllListingsToHistory(histories);
+            System.out.println("Forex done");
         });
-        ////////////////////////////////////////////////////////////////
-
+////////////////////////////////////////////////////////////////
+        // OPTIONS
         executorService.submit(() -> {
             optionsService.fetchOptions();
+            System.out.println("Options done");
         });
 
-
-        // Close the ExecutorService
-//        if(currencyFuture.isDone() && stockFuture.isDone() && listingHistoriesStockFuture.isDone() &&
-//                forexFuture.isDone() && savingListingHistoriesFuture.isDone() && optionsFuture.isDone()) {
-//            System.out.println("all is null");
-//            executorService.shutdown();
-//            System.out.println("All Data loaded!");
-//            long finish = System.currentTimeMillis();
-//            System.out.println("Time: " + (finish - start));
-//        }
-//        executorService.shutdown();
-
-
         System.out.println("All Data loaded!");
-        long finish = System.currentTimeMillis();
-        System.out.println("Time: " + (finish - start));
     }
 
     public List<CurrencyDto> loadCurrencies() {
