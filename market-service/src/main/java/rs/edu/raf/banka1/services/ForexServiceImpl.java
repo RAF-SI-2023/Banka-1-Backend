@@ -55,7 +55,7 @@ public class ForexServiceImpl implements ForexService {
     private String forexDailyApiUrl;
 
 
-    public ForexServiceImpl(/*ListingHistoryRepository listingHistoryRepository*/) {
+    public ForexServiceImpl() {
         this.objectMapper = new ObjectMapper();
     }
 
@@ -229,8 +229,8 @@ public class ForexServiceImpl implements ForexService {
 
 //        return all timestamps
         if(from == null && to == null){
-            if(!existingHistory.isEmpty()) {
-                listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+            if(listingHistories.isEmpty()) {
+                listingHistories = existingHistory;
             }
         }
 //        return all timestamps before given timestamp

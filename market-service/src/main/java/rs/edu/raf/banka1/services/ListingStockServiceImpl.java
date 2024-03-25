@@ -400,8 +400,8 @@ public class ListingStockServiceImpl implements ListingStockService {
         }
 //        return all timestamps
         if(from == null && to == null){
-            if(!existingHistory.isEmpty()) {
-                listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+            if(listingHistories.isEmpty()) {
+                listingHistories = existingHistory;
             }
         }
 //        return all timestamps before given timestamp
