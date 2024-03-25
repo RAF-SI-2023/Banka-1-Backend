@@ -10,12 +10,6 @@ import java.util.List;
 
 public interface BankAccountService {
 
-    ForeignCurrencyAccountResponse getForeignCurrencyAccountById(Long id);
-
-    List<ForeignCurrencyAccountResponse> getAllForeignCurrencyAccounts();
-
-    CreateForeignCurrencyAccountResponse createForeignCurrencyAccount(ForeignCurrencyAccountRequest foreignCurrencyAccountRequest);
-
     BankAccount generateBankAccount(GenerateBankAccountRequest generateBankAccountRequest);
 
     BankAccount findBankAccountByAccountNumber(String accountNumber);
