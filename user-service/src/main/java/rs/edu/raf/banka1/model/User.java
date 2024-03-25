@@ -53,6 +53,9 @@ public class User {
     @Column
     private String activationToken;
 
+    @Column
+    private String resetPasswordToken;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_permissions",

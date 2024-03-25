@@ -453,7 +453,7 @@ public class UserControllerSteps {
 
     @Then("email should be sent to me")
     public void emailShouldBeSentToMe() {
-        verify(emailService).sendActivationEmail(eq(createUserRequest.getEmail()), anyString(), anyString());
+        verify(emailService).sendEmail(eq(createUserRequest.getEmail()), anyString(), anyString());
     }
 
     @Given("user provides email {string}")
