@@ -4,34 +4,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import rs.edu.raf.banka1.model.ForeignCurrencyAccount;
 import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
-import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
+import rs.edu.raf.banka1.repositories.CurrencyRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.*;
 
 @Component
 public class BootstrapData implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PermissionRepository permissionRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
+    private final CurrencyRepository currencyRepository;
 
     @Autowired
     public BootstrapData(UserRepository userRepository,
                          PasswordEncoder passwordEncoder,
                          PermissionRepository permissionRepository,
-                         ForeignCurrencyAccountRepository foreignCurrencyAccountRepository) {
+                         CurrencyRepository currencyRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
-        this.foreignCurrencyAccountRepository = foreignCurrencyAccountRepository;
+        this.currencyRepository = currencyRepository;
     }
 
     @Override
@@ -55,37 +51,31 @@ public class BootstrapData implements CommandLineRunner {
         userRepository.save(user1);
         userRepository.save(client);
 
-        ForeignCurrencyAccount account1 = createForeignCurrencyAccount(client, user1);
-
         userRepository.save(client);
-        foreignCurrencyAccountRepository.save(account1);
+//        foreignCurrencyAccountRepository.save(account1);
+
+        //loading currencies
+        Set<Currency> currencies = Currency.getAvailableCurrencies();
+        for(Currency currency : currencies) {
+            if(currencyRepository.findCurrencyByCurrencyCode(currency.getCurrencyCode()).isPresent()) {
+                continue;
+            }
+            rs.edu.raf.banka1.model.Currency myCurrency = new rs.edu.raf.banka1.model.Currency();
+            myCurrency.setCurrencyName(currency.getDisplayName());
+            myCurrency.setCurrencyCode(currency.getCurrencyCode());
+            myCurrency.setCurrencySymbol(currency.getSymbol());
+            myCurrency.setActive(true);
+
+            Locale locale = new Locale("", currency.getCurrencyCode());
+            String country = locale.getDisplayCountry();
+
+            myCurrency.setCountry(country);
+
+            currencyRepository.save(myCurrency);
+
+        }
 
         System.out.println("Data loaded!");
-    }
-
-    private static ForeignCurrencyAccount createForeignCurrencyAccount(User client, User user1) {
-        ForeignCurrencyAccount account1 = new ForeignCurrencyAccount();
-        String creationDate = "2024-03-18";
-        String expirationDate = "2024-03-18";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate localDateCreation = LocalDate.parse(creationDate, formatter);
-        LocalDate localDateExpiration = LocalDate.parse(expirationDate, formatter);
-        int dateIntegerCreation = (int) localDateCreation.toEpochDay();
-        int dateIntegerExpiration = (int) localDateExpiration.toEpochDay();
-
-        account1.setOwnerId(client.getUserId());
-        account1.setCreatedByAgentId(user1.getUserId());
-        account1.setAccountNumber("ACC123456789");
-        account1.setBalance(1000.0);
-        account1.setAvailableBalance(900.0);
-        account1.setCreationDate(dateIntegerCreation);
-        account1.setExpirationDate(dateIntegerExpiration);
-        account1.setCurrency("USD");
-        account1.setAccountStatus("ACTIVE");
-        account1.setSubtypeOfAccount("LICNI");
-        account1.setAccountMaintenance(10.0);
-        account1.setDefaultCurrency(true);
-        return account1;
     }
 
     private void seedPermissions() {

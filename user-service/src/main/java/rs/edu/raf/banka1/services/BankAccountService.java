@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.services;
 
+import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.requests.ForeignCurrencyAccountRequest;
+import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
 import rs.edu.raf.banka1.responses.CreateForeignCurrencyAccountResponse;
 import rs.edu.raf.banka1.responses.ForeignCurrencyAccountResponse;
 
@@ -8,11 +10,9 @@ import java.util.List;
 
 public interface BankAccountService {
 
-    ForeignCurrencyAccountResponse getForeignCurrencyAccountById(Long id);
+    BankAccount generateBankAccount(GenerateBankAccountRequest generateBankAccountRequest);
 
-    List<ForeignCurrencyAccountResponse> getAllForeignCurrencyAccounts();
+    BankAccount findBankAccountByAccountNumber(String accountNumber);
 
-    CreateForeignCurrencyAccountResponse createForeignCurrencyAccount(ForeignCurrencyAccountRequest foreignCurrencyAccountRequest);
-
-
+    void activateBankAccount(BankAccount bankAccount);
 }
