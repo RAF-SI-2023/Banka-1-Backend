@@ -26,13 +26,10 @@ import rs.edu.raf.banka1.utils.Requests;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-
+import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -173,7 +170,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     @Scheduled(fixedDelay = 900000)
     private void runFetchBackground(){
         Thread thread = new Thread(new FetchingThread(this.stockRepository,
-                this.getAllStocks(), this.updateListingApiUrl, this.alphaVantageAPIToken));
+                this.getAllStocks(),this.requests, this.updateListingApiUrl, this.alphaVantageAPIToken));
         thread.start();
 
         try {

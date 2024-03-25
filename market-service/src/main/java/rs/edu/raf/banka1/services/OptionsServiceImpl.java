@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 public class OptionsServiceImpl implements OptionsService{
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private EntityManager entityManager;
     private HttpClient httpClient = HttpClient.newHttpClient();
     private HttpRequest httpRequest;
     private String cookie = null;

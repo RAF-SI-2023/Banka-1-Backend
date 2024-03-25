@@ -17,13 +17,6 @@ public interface OptionsRepository extends JpaRepository<OptionsModel, Long> {
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE OptionsModel " +
-            "SET openInterest = :openInterest " +
-            "WHERE id = :id")
-    void updateFreshValuesOptions(@Param("id") Long id,@Param("openInterest") int openInterest);
-
-    @Transactional
-    @Modifying
     @Query(value = "TRUNCATE TABLE options_model",nativeQuery = true)
     void truncateTable();
 

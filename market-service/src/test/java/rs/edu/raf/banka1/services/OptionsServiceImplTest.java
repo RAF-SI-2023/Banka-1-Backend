@@ -15,8 +15,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class OptionsServiceImplTest {
     private OptionsServiceImpl optionsService;
@@ -113,4 +112,21 @@ class OptionsServiceImplTest {
         Assertions.assertTrue(options.isEmpty());
 //        Assertions.assertThrows(OptionsException.class, () -> optionsService.fetchOptionsForTicker("NLOK", url));
     }
+
+    @Test
+    public void truncateTableTest(){
+        optionsService.truncateTable();
+        verify(optionsRepository, times(1)).truncateTable();
+    }
+
+    @Test
+    public void testTruncateAndFetch() {
+        // Mock the behavior of optionsRepository.truncateTable() and optionsRepository.fetchOptions()
+        Mockito.doNothing().when(optionsRepository).truncateTable();
+        // Call the method to be tested
+        optionsService.truncateAndFetch();
+        // Verify that the methods were called once
+        verify(optionsRepository, times(1)).truncateTable();
+    }
+
 }
