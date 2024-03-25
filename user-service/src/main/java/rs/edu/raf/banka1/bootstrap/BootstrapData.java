@@ -24,10 +24,12 @@ public class BootstrapData implements CommandLineRunner {
     private final ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
 
     @Autowired
-    public BootstrapData(UserRepository userRepository,
-                         PasswordEncoder passwordEncoder,
-                         PermissionRepository permissionRepository,
-                         ForeignCurrencyAccountRepository foreignCurrencyAccountRepository) {
+    public BootstrapData(
+        final UserRepository userRepository,
+        final PasswordEncoder passwordEncoder,
+        final PermissionRepository permissionRepository,
+        final ForeignCurrencyAccountRepository foreignCurrencyAccountRepository
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
@@ -63,7 +65,10 @@ public class BootstrapData implements CommandLineRunner {
         System.out.println("Data loaded!");
     }
 
-    private static ForeignCurrencyAccount createForeignCurrencyAccount(User client, User user1) {
+    private static ForeignCurrencyAccount createForeignCurrencyAccount(
+        final User client,
+        final User user1
+    ) {
         ForeignCurrencyAccount account1 = new ForeignCurrencyAccount();
         String creationDate = "2024-03-18";
         String expirationDate = "2024-03-18";
@@ -89,7 +94,9 @@ public class BootstrapData implements CommandLineRunner {
     }
 
     private void seedPermissions() {
-        for(String s : Arrays.asList("addUser", "modifyUser", "deleteUser", "readUser")) {
+        for(String s : Arrays.asList("addUser", "modifyUser", "deleteUser", "readUser",
+            "manage_loans", "manage_loan_requests"
+            )) {
             if(permissionRepository.findByName(s).isPresent()) {
                 continue;
             }
