@@ -49,7 +49,7 @@ public class CustomerServiceImplTest {
     private UserService userService;
 
     @Mock
-    CustomerMapper customerMapper;
+    private CustomerMapper customerMapper;
     @Mock
     private BankAccountService bankAccountService;
 
