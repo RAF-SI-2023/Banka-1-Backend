@@ -3,32 +3,19 @@ package rs.edu.raf.banka1.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.BankAccountMapper;
-import rs.edu.raf.banka1.mapper.ForeignCurrencyAccountMapper;
 import rs.edu.raf.banka1.model.BankAccount;
-import rs.edu.raf.banka1.model.ForeignCurrencyAccount;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
-import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
-import rs.edu.raf.banka1.requests.ForeignCurrencyAccountRequest;
 import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
-import rs.edu.raf.banka1.responses.CreateForeignCurrencyAccountResponse;
-import rs.edu.raf.banka1.responses.ForeignCurrencyAccountResponse;
 
-import java.util.List;
 import java.util.Random;
 
 @Service
 public class BankAccountServiceImpl implements BankAccountService {
-    private final ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
-    private final ForeignCurrencyAccountMapper foreignCurrencyAccountMapper;
     private final BankAccountMapper bankAccountMapper = new BankAccountMapper();
     private final BankAccountRepository bankAccountRepository;
 
     @Autowired
-    public BankAccountServiceImpl(ForeignCurrencyAccountRepository foreignCurrencyAccountRepository,
-                                  ForeignCurrencyAccountMapper foreignCurrencyAccountMapper,
-                                  BankAccountRepository bankAccountRepository) {
-        this.foreignCurrencyAccountRepository = foreignCurrencyAccountRepository;
-        this.foreignCurrencyAccountMapper = foreignCurrencyAccountMapper;
+    public BankAccountServiceImpl(BankAccountRepository bankAccountRepository) {
         this.bankAccountRepository = bankAccountRepository;
     }
 
@@ -43,29 +30,6 @@ public class BankAccountServiceImpl implements BankAccountService {
             if(bankAccountRepository.findBankAccountByAccountNumber(accountNumber).isEmpty()){
                 return accountNumber;
             }
-        }
-    }
-
-    public ForeignCurrencyAccountResponse getForeignCurrencyAccountById(Long id) {
-        return foreignCurrencyAccountRepository.findById(id).
-                map(foreignCurrencyAccountMapper::foreignCurrencyAccountToForeignCurrencyAccountResponse)
-                .orElse(null);
-    }
-
-    public List<ForeignCurrencyAccountResponse> getAllForeignCurrencyAccounts() {
-        return foreignCurrencyAccountRepository.findAll().stream()
-                .map(foreignCurrencyAccountMapper::foreignCurrencyAccountToForeignCurrencyAccountResponse).toList();
-    }
-
-    @Override
-    public CreateForeignCurrencyAccountResponse createForeignCurrencyAccount(ForeignCurrencyAccountRequest foreignCurrencyAccountRequest) {
-        ForeignCurrencyAccount foreignCurrencyAccount = foreignCurrencyAccountMapper
-                .createForeignCurrencyAccountRequestToForeignCurrencyAccount(foreignCurrencyAccountRequest);
-        if (foreignCurrencyAccount != null) {
-            foreignCurrencyAccountRepository.save(foreignCurrencyAccount);
-            return new CreateForeignCurrencyAccountResponse(foreignCurrencyAccount.getId());
-        }else {
-            return new CreateForeignCurrencyAccountResponse(-1L);
         }
     }
 

@@ -5,8 +5,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import rs.edu.raf.banka1.mapper.BankAccountMapper;
-import rs.edu.raf.banka1.mapper.CurrentAccountMapper;
 import rs.edu.raf.banka1.mapper.CustomerMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
@@ -15,7 +13,6 @@ import rs.edu.raf.banka1.requests.InitialActivationRequest;
 import rs.edu.raf.banka1.requests.createCustomerRequest.CreateCustomerRequest;
 import rs.edu.raf.banka1.responses.UserResponse;
 
-import java.util.Random;
 import java.util.UUID;
 
 @Service
