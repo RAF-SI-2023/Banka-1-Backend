@@ -21,6 +21,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static rs.edu.raf.banka1.utils.Constants.maxStockListings;
 import static rs.edu.raf.banka1.utils.Constants.maxStockListingsHistory;
@@ -41,53 +43,75 @@ public class BootstrapData implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        long start = System.currentTimeMillis();
 
         System.out.println("Loading Data...");
-        List<CurrencyDto> currencyList = loadCurrencies();
-        currencyService.addCurrencies(currencyList);
-        System.out.println("Currency Data Loaded!");
 
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
+
+        executorService.submit(() -> {
+            List<CurrencyDto> currencyList = loadCurrencies();
+            currencyService.addCurrencies(currencyList);
+            System.out.println("Currency Data Loaded!");
+        });
+
+////////////////////////////////////////////////////////////////////////////////////
         // Since JSON symbols are available in repo, and the API key needs to be replaced or paid,
         // we only need to call the function below every once in a while
         // listingStockService.generateJSONSymbols();
-
         // STOCK
         // Populate stock and stock history
-        List<ListingStock> listingStocks = listingStockService.fetchNListingStocks(maxStockListings);
-        listingStockService.addAllListingStocks(listingStocks);
-        List<ListingHistory> listingHistories = listingStockService.fetchNListingsHistory(maxStockListingsHistory);
-        listingStockService.addAllListingsToHistory(listingHistories);
-
+        executorService.submit(() -> {
+            List<ListingStock> listingStocks = listingStockService.fetchNListingStocks(maxStockListings);
+            listingStockService.addAllListingStocks(listingStocks);
+        });
+        executorService.submit(() -> {
+            List<ListingHistory> listingHistories = listingStockService.fetchNListingsHistory(maxStockListingsHistory);
+            listingStockService.addAllListingsToHistory(listingHistories);
+        });
         ////////////////////////////////////////////////////////////////
         // FOREX
 
-        // get initial forex names data (do it only once)
-        List<ListingForex> listingForexList = forexService.initializeForex();
+        executorService.submit(() -> {
+            // get initial forex names data (do it only once)
+            List<ListingForex> listingForexList = forexService.initializeForex();
 
-        // update forex prices (will be called every 15 minutes or so)
-        // Warning: for the testing purposes I only update first 10 forex pairs (API limitations)
-        // Warning: in the production we should update all forex pairs
-        List<ListingForex> updated = forexService.updateAllPrices(listingForexList.subList(0, 10));
-        // saves forex data to database (only after update)
-        // because update uses other API which doesn't support all forex names, so we need to save only available forexs
-        // first you need to save forexes and after that histories because histories need forex ids from database
-        forexService.saveAllForexes(updated);
+            // update forex prices (will be called every 15 minutes or so)
+            // Warning: for the testing purposes I only update first 10 forex pairs (API limitations)
+            // Warning: in the production we should update all forex pairs
+            List<ListingForex> updated = forexService.updateAllPrices(listingForexList.subList(0, 10));
+            // saves forex data to database (only after update)
+            // because update uses other API which doesn't support all forex names, so we need to save only available forexs
+            // first you need to save forexes and after that histories because histories need forex ids from database
+            forexService.saveAllForexes(updated);
 
-        // add forexes histories to database
-        // Warning: agreement was to add just histories for 10 forexes
-        List<ListingHistory> histories = forexService.getAllForexHistories(updated);
-        listingStockService.addAllListingsToHistory(histories);
+            // add forexes histories to database
+            // Warning: agreement was to add just histories for 10 forexes
+            List<ListingHistory> histories = forexService.getAllForexHistories(updated);
+            listingStockService.addAllListingsToHistory(histories);
+        });
         ////////////////////////////////////////////////////////////////
-        System.out.printf("Updated: " + updated.size());
-        System.out.println("Histories: " + histories.size());
 
-        Thread optionsThread = new Thread(()->{
+        executorService.submit(() -> {
             optionsService.fetchOptions();
         });
-        optionsThread.start();
-        optionsThread.join();
+
+
+        // Close the ExecutorService
+//        if(currencyFuture.isDone() && stockFuture.isDone() && listingHistoriesStockFuture.isDone() &&
+//                forexFuture.isDone() && savingListingHistoriesFuture.isDone() && optionsFuture.isDone()) {
+//            System.out.println("all is null");
+//            executorService.shutdown();
+//            System.out.println("All Data loaded!");
+//            long finish = System.currentTimeMillis();
+//            System.out.println("Time: " + (finish - start));
+//        }
+//        executorService.shutdown();
+
 
         System.out.println("All Data loaded!");
+        long finish = System.currentTimeMillis();
+        System.out.println("Time: " + (finish - start));
     }
 
     public List<CurrencyDto> loadCurrencies() {
