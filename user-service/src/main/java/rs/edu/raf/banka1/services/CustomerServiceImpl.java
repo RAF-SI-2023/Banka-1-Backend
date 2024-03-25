@@ -101,7 +101,7 @@ public class CustomerServiceImpl implements CustomerService{
                 && bankAccount.getCustomer().getPhoneNumber().equals(createCustomerRequest.getPhoneNumber())){
             String to = bankAccount.getCustomer().getEmail();
             String subject = "Account activation";
-            String text = "localhost:4200/activateCustomer/" + bankAccount.getCustomer().getActivationToken(); //TODO: napravi da radi sa env var
+            String text = "Your activation code: " + bankAccount.getCustomer().getActivationToken(); //TODO: napravi da radi sa env var
             emailService.sendEmail(to, subject, text);
             return true;
         }
