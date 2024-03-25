@@ -13,7 +13,6 @@ public class ListingBaseMapper {
         listingBaseDto.setListingType(listingBase.getListingType());
         listingBaseDto.setTicker(listingBase.getTicker());
         listingBaseDto.setName(listingBase.getName());
-        listingBaseDto.setExchange(listingBase.getExchange());
         listingBaseDto.setLastRefresh(listingBase.getLastRefresh());
         listingBaseDto.setPrice(listingBase.getPrice());
         listingBaseDto.setHigh(listingBase.getHigh());

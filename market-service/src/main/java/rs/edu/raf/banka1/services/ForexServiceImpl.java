@@ -106,7 +106,7 @@ public class ForexServiceImpl implements ForexService {
 
                 String name = element.get("description").asText();
 
-                ListingForex listingForex = forexMapper.createForex(displaySymbol, name, forex_place);
+                ListingForex listingForex = forexMapper.createForex(displaySymbol, name);
                 listingForexList.add(listingForex);
             }
 
