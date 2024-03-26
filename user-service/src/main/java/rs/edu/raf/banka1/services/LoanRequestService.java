@@ -15,7 +15,7 @@ public interface LoanRequestService {
 
     LoanRequestDto createRequest(final CreateLoanRequest createLoanRequest);
 
-    boolean changeRequestStatus(final Long id, final LoanRequestStatus loanRequestStatus);
+    void changeRequestStatus(final Long id, final LoanRequestStatus loanRequestStatus);
 
 
 

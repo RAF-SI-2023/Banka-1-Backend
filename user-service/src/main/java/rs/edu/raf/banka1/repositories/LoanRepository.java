@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface LoanRepository extends JpaRepository<Loan, Long>{
-    Optional<Loan> findByAccountNumber(final String accountNumber);
+    List<Loan> findByAccountNumber(final String accountNumber);
 
     @Query("SELECT l FROM Loan l WHERE l.accountNumber IN " +
         "(SELECT ca.accountNumber FROM BankAccount ca WHERE ca.customer.userId = :userId )")

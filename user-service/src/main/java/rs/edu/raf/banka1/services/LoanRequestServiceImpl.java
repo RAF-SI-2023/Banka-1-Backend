@@ -44,8 +44,7 @@ public class LoanRequestServiceImpl implements LoanRequestService{
     }
 
     @Override
-    public boolean changeRequestStatus(Long id, LoanRequestStatus loanRequestStatus) {
+    public void changeRequestStatus(Long id, LoanRequestStatus loanRequestStatus) {
         loanRequestRepository.changeStatusForLoan(id, loanRequestStatus);
-        return true;
     }
 }

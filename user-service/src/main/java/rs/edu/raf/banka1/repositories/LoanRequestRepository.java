@@ -8,11 +8,12 @@ import org.springframework.stereotype.Repository;
 import rs.edu.raf.banka1.model.LoanRequest;
 import rs.edu.raf.banka1.model.LoanRequestStatus;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface LoanRequestRepository extends JpaRepository<LoanRequest, Long> {
-    Optional<LoanRequest> findByAccountNumber(final String accountNumber);
+    List<LoanRequest> findByAccountNumber(final String accountNumber);
 
     @Transactional
     @Modifying

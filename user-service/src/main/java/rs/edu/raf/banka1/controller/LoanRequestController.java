@@ -59,14 +59,15 @@ public class LoanRequestController {
         @ApiResponse(responseCode = "404", description = "Loan not found"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Boolean> changeRequestStatus(
+    public ResponseEntity<Void> changeRequestStatus(
         @PathVariable(name = "loanRequestId") final Long id,
         @RequestBody final StatusRequest request
     ) {
-        return ResponseEntity.ok(loanRequestService.changeRequestStatus(
+        loanRequestService.changeRequestStatus(
             id,
             LoanRequestStatus.valueOf(request.getStatus())
-        ));
+        );
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
