@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import rs.edu.raf.banka1.model.Currency;
 import rs.edu.raf.banka1.model.Customer;
-import rs.edu.raf.banka1.requests.createCustomerRequest.AccountData;
+import rs.edu.raf.banka1.requests.customer.AccountData;
 
 @Getter
 @Setter

@@ -2,12 +2,8 @@ package rs.edu.raf.banka1.mapper;
 
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.dtos.BankAccountDto;
-import rs.edu.raf.banka1.model.AccountType;
 import rs.edu.raf.banka1.model.BankAccount;
-import rs.edu.raf.banka1.model.Currency;
-import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
-import rs.edu.raf.banka1.requests.createCustomerRequest.AccountData;
 
 @Component
 public class BankAccountMapper {

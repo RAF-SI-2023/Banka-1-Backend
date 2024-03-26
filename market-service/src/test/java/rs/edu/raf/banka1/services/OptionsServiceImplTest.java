@@ -22,6 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+
 
 class OptionsServiceImplTest {
     private OptionsServiceImpl optionsService;
@@ -37,7 +41,6 @@ class OptionsServiceImplTest {
     private String NLOK404error = "{\"finance\":{\"result\":null,\"error\":{\"code\":\"Not Found\",\"description\":\"Missing OptionType for {contract: NLOK250117C00032000 }, {tickerSymbol: NLOK }, {strike: 32.0 }, {expirationDate: 1737072000 }\"}}}";
     private HttpRequest httpRequestMock;
     private HttpResponse responseMock;
-
     private HttpResponse crumbResponseMock;
 
 
@@ -159,5 +162,21 @@ class OptionsServiceImplTest {
         // Verify the result
         assertNotNull(options);
         assertTrue(options.isEmpty());
+    }
+
+    @Test
+    public void truncateTableTest() {
+        optionsService.truncateTable();
+        verify(optionsRepository, times(1)).truncateTable();
+    }
+
+    @Test
+    public void testTruncateAndFetch() {
+        // Mock the behavior of optionsRepository.truncateTable() and optionsRepository.fetchOptions()
+        Mockito.doNothing().when(optionsRepository).truncateTable();
+        // Call the method to be tested
+        optionsService.truncateAndFetch();
+        // Verify that the methods were called once
+        verify(optionsRepository, times(1)).truncateTable();
     }
 }

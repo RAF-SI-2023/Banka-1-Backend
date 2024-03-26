@@ -105,8 +105,9 @@ public class ForexServiceImpl implements ForexService {
                 String right = displaySymbol.split("/")[1];
 
                 String name = element.get("description").asText();
+                String symbol = element.get("symbol").asText();
 
-                ListingForex listingForex = forexMapper.createForex(displaySymbol, name, forex_place);
+                ListingForex listingForex = forexMapper.createForex(displaySymbol, name, symbol);
                 listingForexList.add(listingForex);
             }
 

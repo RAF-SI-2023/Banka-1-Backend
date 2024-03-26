@@ -3,34 +3,28 @@ package rs.edu.raf.banka1.services;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import rs.edu.raf.banka1.mapper.CustomerMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.*;
-import rs.edu.raf.banka1.repositories.BankAccountRepository;
-import rs.edu.raf.banka1.repositories.CurrencyRepository;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
-import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.InitialActivationRequest;
-import rs.edu.raf.banka1.requests.createCustomerRequest.AccountData;
-import rs.edu.raf.banka1.requests.createCustomerRequest.CreateCustomerRequest;
-import rs.edu.raf.banka1.requests.createCustomerRequest.CustomerData;
+import rs.edu.raf.banka1.requests.customer.AccountData;
+import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
+import rs.edu.raf.banka1.requests.customer.CustomerData;
+import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +47,9 @@ public class CustomerServiceImplTest {
     private CurrencyService currencyService;
     @Mock
     private UserService userService;
+
+    @Mock
+    private CustomerMapper customerMapper;
     @Mock
     private BankAccountService bankAccountService;
 
@@ -216,5 +213,73 @@ public class CustomerServiceImplTest {
         assertNull(result);
         verify(customerRepository, never()).save(any());
         verify(bankAccountService, never()).activateBankAccount(any());
+    }
+
+    @Test
+    public void editUser_Successful() {
+        // Set EditeCustomerRequest
+        EditCustomerRequest editCustomerRequest = new EditCustomerRequest();
+        editCustomerRequest.setEmail("test@gmail.com");
+        editCustomerRequest.setFirstName("John");
+        editCustomerRequest.setLastName("Doe");
+        editCustomerRequest.setGender("Male");
+        editCustomerRequest.setAddress("123 Street");
+        editCustomerRequest.setPosition("Employee");
+        editCustomerRequest.setPhoneNumber("987654321");
+        editCustomerRequest.setIsActive(true);
+        editCustomerRequest.setPassword("newPassword"); // Set the password
+
+        // Mocking existing customer
+        Customer existingCustomer = new Customer();
+        existingCustomer.setEmail("test@gmail.com");
+
+        // Mocking customer returned by mapper
+        Customer mappedCustomer = new Customer();
+
+        // Mocking repository behavior
+        when(customerRepository.findCustomerByEmail("test@gmail.com")).thenReturn(Optional.of(existingCustomer));
+
+        // Mocking mapper behavior
+        when(customerMapper.editCustomerRequestToCustomer(existingCustomer, editCustomerRequest)).thenReturn(mappedCustomer);
+
+        // Mocking password encoding behavior
+//        when(passwordEncoder.encode("newPassword")).thenReturn("encodedPassword");
+
+        // Perform the method call
+        boolean result = sut.editCustomer(editCustomerRequest);
+
+        // Assertions
+        assertTrue(result);
+        Mockito.verify(customerRepository).findCustomerByEmail("test@gmail.com");
+        Mockito.verify(customerMapper).editCustomerRequestToCustomer(existingCustomer, editCustomerRequest);
+//        Mockito.verify(passwordEncoder).encode("newPassword");
+        Mockito.verify(customerRepository).save(mappedCustomer);
+    }
+
+    @Test
+    public void editUser_CustomerNotFound() {
+        // Set EditCustomerRequest
+        EditCustomerRequest editCustomerRequest = new EditCustomerRequest();
+        editCustomerRequest.setEmail("test@gmail.com");
+        editCustomerRequest.setFirstName("John");
+        editCustomerRequest.setLastName("Doe");
+        editCustomerRequest.setGender("Male");
+        editCustomerRequest.setAddress("123 Street");
+        editCustomerRequest.setPosition("Employee");
+        editCustomerRequest.setPhoneNumber("987654321");
+        editCustomerRequest.setIsActive(true);
+        editCustomerRequest.setPassword("newPassword"); // Set the password
+
+        // Mocking customer not found scenario
+        when(customerRepository.findCustomerByEmail("test@gmail.com")).thenReturn(Optional.empty());
+
+        // Perform the method call
+        boolean result = sut.editCustomer(editCustomerRequest);
+
+        // Assertions
+        assertFalse(result); // Expecting false because customer not found
+        Mockito.verify(customerRepository).findCustomerByEmail("test@gmail.com");
+        Mockito.verifyNoMoreInteractions(customerRepository); // Verify no other interactions with customerRepository
+        Mockito.verifyNoInteractions(customerMapper, passwordEncoder); // Verify no interactions with other mocks
     }
 }

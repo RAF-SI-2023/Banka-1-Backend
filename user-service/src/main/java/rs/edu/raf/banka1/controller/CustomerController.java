@@ -11,12 +11,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.requests.ActivateAccountRequest;
 import rs.edu.raf.banka1.requests.InitialActivationRequest;
-import rs.edu.raf.banka1.requests.createCustomerRequest.CreateCustomerRequest;
-import rs.edu.raf.banka1.responses.CreateUserResponse;
-import rs.edu.raf.banka1.responses.UserResponse;
+import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
+import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
+import rs.edu.raf.banka1.responses.EditUserResponse;
 import rs.edu.raf.banka1.services.CustomerService;
-
-import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -30,7 +28,7 @@ public class CustomerController {
 
     @PostMapping("/createNewCustomer")
     @PreAuthorize("hasAuthority('addUser')")
-    @Operation(summary = "Create new customer and bank account for customer", description = "Returns true if user is successfuly created," +
+    @Operation(summary = "Create new customer and bank account for customer", description = "Returns true if customer is successfully created," +
             "false otherwise.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Customer created successfully",
@@ -45,6 +43,21 @@ public class CustomerController {
             return ResponseEntity.ok(true);
         }
         return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+    }
+
+    @PutMapping()
+    @Operation(summary = "Admin edit customer", description = "Admin can edit a customer's info")
+    @PreAuthorize("hasAuthority('modifyCustomer')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Customer edited successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = EditUserResponse.class))}),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Boolean> editCustomer(@RequestBody EditCustomerRequest editCustomerRequest) {
+        boolean edited = customerService.editCustomer(editCustomerRequest);
+        return new ResponseEntity<>(edited, edited ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
     @PostMapping("/initialActivation")
