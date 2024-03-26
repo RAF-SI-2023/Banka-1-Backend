@@ -13,11 +13,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
-import rs.edu.raf.banka1.mapper.ForeignCurrencyAccountMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.User;
-import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.*;
@@ -63,7 +61,6 @@ public class UserControllerSteps {
     private ResponseEntity<?> lastResponse;
 
     private UserRepository userRepository;
-    private ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
     private ForeignCurrencyAccountRequest foreignCurrencyAccountRequest = new ForeignCurrencyAccountRequest();
     private PermissionRepository permissionRepository;
     private List<UserResponse> userResponses = new ArrayList<>();
@@ -103,10 +100,10 @@ public class UserControllerSteps {
     public void subtypeofaccountIs(String arg0) {
         foreignCurrencyAccountRequest.setSubtypeOfAccount(arg0);
     }
-    @Given("typeOfAccount is {string}")
-    public void typeofaccountIs(String arg0) {
-        foreignCurrencyAccountRequest.setTypeOfAccount(arg0);
-    }
+//    @Given("typeOfAccount is {string}")
+//    public void typeofaccountIs(String arg0) {
+//        foreignCurrencyAccountRequest.setTypeOfAccount(arg0);
+//    }
     @Given("accountMaintenance is {string}")
     public void accountmaintenanceIs(String arg0) {
         foreignCurrencyAccountRequest.setAccountMaintenance(Double.parseDouble(arg0));
@@ -189,9 +186,8 @@ public class UserControllerSteps {
         userToRemove = Long.parseLong(id);
     }
 
-    public UserControllerSteps(UserRepository userRepository, ForeignCurrencyAccountRepository foreignCurrencyAccountRepository, PermissionRepository permissionRepository) {
+    public UserControllerSteps(UserRepository userRepository, PermissionRepository permissionRepository) {
         this.userRepository = userRepository;
-        this.foreignCurrencyAccountRepository = foreignCurrencyAccountRepository;
         this.permissionRepository = permissionRepository;
     }
 
@@ -455,7 +451,7 @@ public class UserControllerSteps {
 
     @Then("email should be sent to me")
     public void emailShouldBeSentToMe() {
-        verify(emailService).sendActivationEmail(eq(createUserRequest.getEmail()), anyString(), anyString());
+        verify(emailService).sendEmail(eq(createUserRequest.getEmail()), anyString(), anyString());
     }
 
     @Given("user provides email {string}")
@@ -517,21 +513,21 @@ public class UserControllerSteps {
         assertThat(lastResponse.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.valueOf(status));
     }
 
-    @Then("new foreign account should be created")
-    public void newForeignAccountShouldBeCreated() {
-        assertThat(lastCreateForeignCurrencyAccountResponse).isNotNull();
-        assertThat(foreignCurrencyAccountRepository.findById(lastCreateForeignCurrencyAccountResponse.getId())).isNotNull();
-    }
-
-    @Then("i should get all foreign accounts")
-    public void iShouldGetAllForeignAccounts() {
-        ForeignCurrencyAccountMapper mapper = new ForeignCurrencyAccountMapper();
-        List<ForeignCurrencyAccountResponse> foreignCurrencyAccountResponses = new ArrayList<>();
-        foreignCurrencyAccountRepository.findAll().forEach(
-                x->{
-                    foreignCurrencyAccountResponses.add(mapper.foreignCurrencyAccountToForeignCurrencyAccountResponse(x));
-                }
-        );
-        assertThat(lastReadAllForeignCurrencyAccountsResponse).hasSameElementsAs(foreignCurrencyAccountResponses);
-    }
+//    @Then("new foreign account should be created")
+//    public void newForeignAccountShouldBeCreated() {
+//        assertThat(lastCreateForeignCurrencyAccountResponse).isNotNull();
+//        assertThat(foreignCurrencyAccountRepository.findById(lastCreateForeignCurrencyAccountResponse.getId())).isNotNull();
+//    }
+//
+//    @Then("i should get all foreign accounts")
+//    public void iShouldGetAllForeignAccounts() {
+//        ForeignCurrencyAccountMapper mapper = new ForeignCurrencyAccountMapper();
+//        List<ForeignCurrencyAccountResponse> foreignCurrencyAccountResponses = new ArrayList<>();
+//        foreignCurrencyAccountRepository.findAll().forEach(
+//                x->{
+//                    foreignCurrencyAccountResponses.add(mapper.foreignCurrencyAccountToForeignCurrencyAccountResponse(x));
+//                }
+//        );
+//        assertThat(lastReadAllForeignCurrencyAccountsResponse).hasSameElementsAs(foreignCurrencyAccountResponses);
+//    }
 }

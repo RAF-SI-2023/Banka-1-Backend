@@ -24,12 +24,13 @@ import java.util.*;
 public class ForexServiceImpl implements ForexService {
     private ObjectMapper objectMapper;
 
+
     @Autowired
     private ForexMapper forexMapper;
 
     @Autowired
     private ListingHistoryMapper listingHistoryMapper;
-
+    @Autowired
     private ListingHistoryRepository listingHistoryRepository;
 
     @Autowired
@@ -54,9 +55,8 @@ public class ForexServiceImpl implements ForexService {
     private String forexDailyApiUrl;
 
 
-    public ForexServiceImpl(ListingHistoryRepository listingHistoryRepository) {
+    public ForexServiceImpl() {
         this.objectMapper = new ObjectMapper();
-        this.listingHistoryRepository = listingHistoryRepository;
     }
 
     // Run only once to get all forex-pairs names (from diferent forex places)
@@ -221,20 +221,22 @@ public class ForexServiceImpl implements ForexService {
         }
 
         String ticker = forex.getTicker();
-//        return all timestamps
-        if(from == null && to == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+        listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+        if(listingHistories.isEmpty()) {
+            listingHistories = getForexHistory(forex);
+            listingHistoryRepository.saveAll(listingHistories);
         }
+
 //        return all timestamps before given timestamp
-        else if(from == null){
+        if(from == null && to != null){
             listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBefore(ticker, to);
         }
 //        return all timestamps after given timestamp
-        else if(to == null){
+        else if(from != null && to == null){
             listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateAfter(ticker, from);
         }
 //        return all timestamps between two timestamps
-        else{
+        else if(from != null && to != null){
             listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to);
         }
 

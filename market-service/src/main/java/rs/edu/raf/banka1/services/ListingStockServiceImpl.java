@@ -374,20 +374,22 @@ public class ListingStockServiceImpl implements ListingStockService {
             return listingHistories;
         }
         String ticker = stock.getTicker();
-//        return all timestamps
-        if(from == null && to == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+        listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+        if(listingHistories.isEmpty()) {
+            listingHistories = fetchSingleListingHistory(stock.getTicker());
+            listingHistoryRepository.saveAll(listingHistories);
         }
+
 //        return all timestamps before given timestamp
-        else if(from == null){
+        if(from == null && to != null){
             listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBefore(ticker, to);
         }
 //        return all timestamps after given timestamp
-        else if(to == null){
+        else if(from != null && to == null){
             listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateAfter(ticker, from);
         }
 //        return all timestamps between two timestamps
-        else{
+        else if(from != null && to != null){
             listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to);
         }
 

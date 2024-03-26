@@ -17,7 +17,6 @@ public class ForeignCurrencyAccountResponse {
     private Long ownerId;
     private Long createdByAgentId;
     private String currency;
-    private String typeOfAccount;
     private String subtypeOfAccount;
     private Double accountMaintenance;
     private Boolean defaultCurrency;
@@ -37,7 +36,6 @@ public class ForeignCurrencyAccountResponse {
         return Objects.equals(ownerId, that.ownerId)
                 && Objects.equals(createdByAgentId, that.createdByAgentId)
                 && Objects.equals(currency, that.currency)
-                && Objects.equals(typeOfAccount, that.typeOfAccount)
                 && Objects.equals(subtypeOfAccount, that.subtypeOfAccount)
                 && Objects.equals(accountMaintenance, that.accountMaintenance)
                 && Objects.equals(defaultCurrency, that.defaultCurrency);
@@ -45,6 +43,6 @@ public class ForeignCurrencyAccountResponse {
 
     @Override
     public int hashCode() {
-        return Objects.hash(ownerId, createdByAgentId, currency, typeOfAccount, subtypeOfAccount, accountMaintenance, defaultCurrency);
+        return Objects.hash(ownerId, createdByAgentId, currency, subtypeOfAccount, accountMaintenance, defaultCurrency);
     }
 }

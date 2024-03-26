@@ -3,7 +3,6 @@ package rs.edu.raf.banka1.services;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -36,8 +35,8 @@ import java.util.stream.Collectors;
 @Service
 public class OptionsServiceImpl implements OptionsService{
     private ObjectMapper objectMapper = new ObjectMapper();
-
     private HttpClient httpClient = HttpClient.newHttpClient();
+    private HttpClient crumbHttpClient = HttpClient.newHttpClient();
     private HttpRequest httpRequest;
     private String cookie = null;
     private String crumb = null;
@@ -54,7 +53,6 @@ public class OptionsServiceImpl implements OptionsService{
         this.optionsMapper = optionsMapper;
     }
 
-
     @Override
     public List<OptionsDto> fetchOptions() {
         if (cookie == null || crumb == null) {
@@ -67,13 +65,10 @@ public class OptionsServiceImpl implements OptionsService{
 
         List<OptionsDto> optionsModels = new ArrayList<>();
         try{
-          //  List<String> tickers = fetchTickers();
-           // List<String> tickers = Constants.tickersForTestingOptions;
-            for (String ticker : Constants.tickersForTestingOptions) {
+//            List<String> tickers = fetchTickers();
+//             Constants.tickersForTestingOptions
+            for (String ticker : Constants.tickersForTestingOptions)
                 optionsModels.addAll(fetchOptionsForTicker(ticker, optionsUrl + ticker + "?crumb=" + crumb));
-                System.out.println(optionsUrl + ticker + "?crumb=" + crumb);
-                System.out.println(fetchOptionsForTicker(ticker, optionsUrl + ticker + "?crumb=" + crumb));
-            }
 
             // Uncomment when filling the options.json
 //            File file = new File(Constants.optionsFilePath);
@@ -166,11 +161,20 @@ public class OptionsServiceImpl implements OptionsService{
 
     @Override
     public List<OptionsDto> getOptionsByTicker(String ticker) {
-        return this.optionsRepository.findByTicker(ticker).map(optionsModels ->
+        List<OptionsDto> options = this.optionsRepository.findByTicker(ticker).map(optionsModels ->
             optionsModels.stream()
                 .map(optionsMapper::optionsModelToOptionsDto)
                 .collect(Collectors.toList()))
             .orElse(Collections.emptyList());
+        if(options.isEmpty()) {
+            if(crumb != null) {
+                options = fetchOptionsForTicker(ticker, optionsUrl + ticker + "?crumb=" + crumb);
+            } else {
+                return new ArrayList<>();
+            }
+        }
+        optionsRepository.saveAll(options.stream().map(optionsMapper::optionsDtoToOptionsModel).toList());
+        return options;
     }
 
     private List<OptionsModel> parseOptions(JsonNode optionsNode, String ticker, OptionType optionType) {
@@ -191,7 +195,7 @@ public class OptionsServiceImpl implements OptionsService{
         return options;
     }
 
-    private boolean getCookieAndCrumb() {
+    boolean getCookieAndCrumb() {
         String initialUrl = "https://fc.yahoo.com";
         httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(initialUrl))
@@ -218,7 +222,7 @@ public class OptionsServiceImpl implements OptionsService{
                             .GET()
                             .build();
 
-                    HttpResponse<String> crumbResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+                    HttpResponse<String> crumbResponse = crumbHttpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
                     // Check if the crumb request is successful
                     if (crumbResponse.statusCode() == 200) {
                         crumb = crumbResponse.body();
@@ -253,6 +257,10 @@ public class OptionsServiceImpl implements OptionsService{
 
     public void setCrumb(String crumb) {
         this.crumb = crumb;
+    }
+
+    public void setCrumbHttpClient(HttpClient httpClient) {
+        this.crumbHttpClient = httpClient;
     }
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
