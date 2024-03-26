@@ -9,7 +9,7 @@ import java.time.Instant;
 
 @Component
 public class ForexMapper {
-    public ListingForex createForex(String ticker, String name) {
+    public ListingForex createForex(String ticker, String name, String displayName) {
         String[] symbolArr = ticker.split("/");
         String baseCurrency = symbolArr[0];
         String quoteCurrency = symbolArr[1];
@@ -18,6 +18,7 @@ public class ForexMapper {
         ListingForex forex = new ListingForex();
         forex.setTicker(ticker);
         forex.setName(name);
+        forex.setExchangeName(displayName);
         forex.setBaseCurrency(baseCurrency);
         forex.setQuoteCurrency(quoteCurrency);
         forex.setListingType("forex");

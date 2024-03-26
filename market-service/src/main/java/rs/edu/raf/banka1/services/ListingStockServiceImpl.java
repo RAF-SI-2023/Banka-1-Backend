@@ -160,9 +160,6 @@ public class ListingStockServiceImpl implements ListingStockService {
             String name = jsonArray.get("Name").asText();
             Double dividendYield=jsonArray.get("DividendYield").asDouble();
             Integer outstandingShares=jsonArray.get("SharesOutstanding").asInt();
-            String exchangeJson =jsonArray.get("Exchange").asText();
-
-//            System.out.println(exchangeJson);
 
             Exchange exchange = exchangeRepository.findByExchangeName(primaryExchange);
             if(exchange != null) {
