@@ -246,7 +246,7 @@ public class CustomerServiceImplTest {
 //        when(passwordEncoder.encode("newPassword")).thenReturn("encodedPassword");
 
         // Perform the method call
-        boolean result = sut.editUser(editCustomerRequest);
+        boolean result = sut.editCustomer(editCustomerRequest);
 
         // Assertions
         assertTrue(result);
@@ -274,7 +274,7 @@ public class CustomerServiceImplTest {
         when(customerRepository.findCustomerByEmail("test@gmail.com")).thenReturn(Optional.empty());
 
         // Perform the method call
-        boolean result = sut.editUser(editCustomerRequest);
+        boolean result = sut.editCustomer(editCustomerRequest);
 
         // Assertions
         assertFalse(result); // Expecting false because customer not found

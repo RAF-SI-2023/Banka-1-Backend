@@ -10,5 +10,5 @@ public interface CustomerService {
 
     Long activateNewCustomer(String token, String password);
 
-    boolean editUser(EditCustomerRequest editCustomerRequest);
+    boolean editCustomer(EditCustomerRequest editCustomerRequest);
 }

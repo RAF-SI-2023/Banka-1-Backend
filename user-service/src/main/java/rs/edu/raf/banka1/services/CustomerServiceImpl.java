@@ -127,7 +127,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public boolean editUser(EditCustomerRequest editCustomerRequest) {
+    public boolean editCustomer(EditCustomerRequest editCustomerRequest) {
         Optional<Customer> optCustomer = customerRepository.findCustomerByEmail(editCustomerRequest.getEmail());
         if (optCustomer.isEmpty()) return false;
         Customer newCustomer = customerMapper.editCustomerRequestToCustomer(optCustomer.get(), editCustomerRequest);
