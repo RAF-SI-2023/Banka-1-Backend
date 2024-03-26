@@ -13,4 +13,9 @@ public interface OptionsService {
     List<OptionsDto> fetchOptions();
     List<OptionsDto> fetchOptionsForTicker(String ticker, String url);
     List<OptionsDto> getOptionsByTicker(String ticker);
+
+    void truncateTable();
+
+    void truncateAndFetch();
+
 }

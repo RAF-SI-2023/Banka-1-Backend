@@ -23,6 +23,7 @@ public class StockMapper {
         stock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
         return stock;
     }
+
     public void updateListingStock(ListingStock oldStock, ListingStock newStock) {
         oldStock.setLow(newStock.getLow());
         oldStock.setHigh(newStock.getHigh());
