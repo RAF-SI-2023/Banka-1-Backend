@@ -15,7 +15,9 @@ import rs.edu.raf.banka1.model.ListingHistory;
 
 import rs.edu.raf.banka1.model.ListingStock;
 
+import rs.edu.raf.banka1.model.entities.Exchange;
 import rs.edu.raf.banka1.model.exceptions.APIException;
+import rs.edu.raf.banka1.repositories.ExchangeRepository;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 import rs.edu.raf.banka1.repositories.StockRepository;
 import rs.edu.raf.banka1.threads.FetchingThread;
@@ -46,6 +48,8 @@ public class ListingStockServiceImpl implements ListingStockService {
     private StockMapper stockMapper;
     @Autowired
     private ListingHistoryRepository listingHistoryRepository;
+    @Autowired
+    private ExchangeRepository exchangeRepository;
 
     private Requests requests;
     @Value("${listingAPItoken}")
@@ -119,9 +123,11 @@ public class ListingStockServiceImpl implements ListingStockService {
             // Iterate over n element in the listings JSON
             for (JsonNode node : rootNode) {
                 String symbol = node.path("symbol").asText();
-                ListingStock listingStock = createListingStock(symbol);
-                if (listingStock != null) {listingStocks.add(listingStock);}
-                if (i++ > n) {break;}
+                String companyName = node.path("companyName").asText();
+                String primaryExchange = node.path("primaryExchange").asText();
+                ListingStock listingStock = createListingStock(symbol, companyName, primaryExchange);
+                if (listingStock != null) listingStocks.add(listingStock);
+                if (i++ > n) break;
             }
             return listingStocks;
 
@@ -132,7 +138,7 @@ public class ListingStockServiceImpl implements ListingStockService {
 
     }
 
-    private ListingStock createListingStock(String symbol) {
+    private ListingStock createListingStock(String symbol, String companyName, String primaryExchange) {
         try {
             String listingBaseUrl = updateListingApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;
             String listingStockUrl = basicStockInfoApiUrl+symbol+"&apikey=" + alphaVantageAPIToken;
@@ -154,9 +160,11 @@ public class ListingStockServiceImpl implements ListingStockService {
             String name = jsonArray.get("Name").asText();
             Double dividendYield=jsonArray.get("DividendYield").asDouble();
             Integer outstandingShares=jsonArray.get("SharesOutstanding").asInt();
-            String exchange=jsonArray.get("Exchange").asText();
 
-            return stockMapper.createListingStock(symbol, name , exchange , price, high ,low ,change ,volume ,outstandingShares ,dividendYield );
+            Exchange exchange = exchangeRepository.findByExchangeName(primaryExchange);
+            if(exchange != null) {
+                return stockMapper.createListingStock(symbol, name, exchange, price, high, low, change, volume, outstandingShares, dividendYield);
+            }
 
         } catch (APIException apiException) {
             System.out.println(apiException.getMessage());

@@ -4,14 +4,17 @@ import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.dtos.ListingStockDto;
+import rs.edu.raf.banka1.model.entities.Exchange;
 
 @Component
 public class StockMapper {
-    public ListingStock createListingStock(String symbol, String name, String exchange, Double price, Double high, Double low, Double priceChange, Integer volume, Integer outstandingShare, Double dividendYield) {
+
+    public ListingStock createListingStock(String symbol, String name, Exchange exchange, Double price, Double high, Double low, Double priceChange, Integer volume, Integer outstandingShare, Double dividendYield) {
         ListingStock stock = new ListingStock();
         stock.setTicker(symbol);
         stock.setName(name);
         stock.setExchange(exchange);
+        stock.setExchangeName(exchange.getExchangeName());
         stock.setListingType("Stock");
         stock.setPrice(price);
         stock.setHigh(high);
@@ -21,6 +24,7 @@ public class StockMapper {
         stock.setOutstandingShares(outstandingShare);
         stock.setDividendYield(dividendYield);
         stock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
+
         return stock;
     }
 
@@ -32,6 +36,8 @@ public class StockMapper {
         oldStock.setOutstandingShares(newStock.getOutstandingShares());
         oldStock.setDividendYield(newStock.getDividendYield());
         oldStock.setName(newStock.getName());
+        oldStock.setExchange(newStock.getExchange());
+        oldStock.setExchangeName(newStock.getExchangeName());
         oldStock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
     }
     public ListingHistory createListingHistoryModel(String ticker, Integer date, double price, double ask, double bid, double changed, int volume) {
@@ -61,13 +67,14 @@ public class StockMapper {
         dto.setListingId(stock.getListingId());
         dto.setTicker(stock.getTicker());
         dto.setName(stock.getName());
-        dto.setExchange(stock.getExchange());
         dto.setListingType(stock.getListingType());
         dto.setPrice(stock.getPrice());
         dto.setHigh(stock.getHigh());
         dto.setLow(stock.getLow());
         dto.setPriceChange(stock.getPriceChange());
         dto.setVolume(stock.getVolume());
+        dto.setExchange(stock.getExchange());
+        dto.setExchangeName(stock.getExchangeName());
         dto.setOutstandingShares(stock.getOutstandingShares());
         dto.setDividendYield(stock.getDividendYield());
         dto.setLastRefresh(stock.getLastRefresh());
