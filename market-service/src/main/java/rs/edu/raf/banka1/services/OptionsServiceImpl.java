@@ -21,11 +21,15 @@ import rs.edu.raf.banka1.threads.OptionsThread;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.io.File;
-import java.net.*;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Iterator;
+import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -110,7 +114,6 @@ public class OptionsServiceImpl implements OptionsService{
                 .build();
 
         List<OptionsModel> options = new CopyOnWriteArrayList<>();
-        System.out.println("COOKIE ----------------------"+cookie);
 
         try {
             // Send the request to retrieve data with crumb value

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import rs.edu.raf.banka1.exceptions.OptionsException;
 import rs.edu.raf.banka1.mapper.OptionsMapper;
 import rs.edu.raf.banka1.model.dtos.OptionsDto;
 import rs.edu.raf.banka1.repositories.OptionsRepository;
@@ -15,7 +14,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+
 
 class OptionsServiceImplTest {
     private OptionsServiceImpl optionsService;
@@ -114,7 +117,7 @@ class OptionsServiceImplTest {
     }
 
     @Test
-    public void truncateTableTest(){
+    public void truncateTableTest() {
         optionsService.truncateTable();
         verify(optionsRepository, times(1)).truncateTable();
     }

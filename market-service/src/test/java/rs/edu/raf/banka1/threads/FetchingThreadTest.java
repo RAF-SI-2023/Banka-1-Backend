@@ -24,8 +24,10 @@ import java.util.ArrayList;
 
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 
@@ -40,7 +42,7 @@ class FetchingThreadTest {
     private ObjectMapper objectMapper;
     @Mock
     private Requests requests;
-    private String DTresponseMockGood= "{\n" +
+    private String DTresponseMockGood = "{\n" +
             "    \"Global Quote\": {\n" +
             "        \"01. symbol\": \"DT\",\n" +
             "        \"02. open\": \"46.4500\",\n" +
@@ -68,12 +70,12 @@ class FetchingThreadTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         listingStocks = new ArrayList<>();
-        fetchingThread = new FetchingThread(stockRepository, listingStocks, requests,updateListingApiUrl, alphaVantageAPIToken);
+        fetchingThread = new FetchingThread(stockRepository, listingStocks, requests, updateListingApiUrl, alphaVantageAPIToken);
     }
 
   @Test
-  public void happyTest() throws Exception,APIException {
-      try(MockedStatic<Requests> requests = Mockito.mockStatic(Requests.class)) {
+  public void happyTest() throws Exception, APIException {
+      try (MockedStatic<Requests> requests = Mockito.mockStatic(Requests.class)) {
           requests.when(() -> Requests.sendRequest(any())).thenReturn(DTresponseMockGood);
           ListingStock stock = new ListingStock();
           stock.setTicker("DT");
@@ -86,11 +88,31 @@ class FetchingThreadTest {
 
           fetchingThread.valuesForConstantUpdating();
 
-          verify(stockRepository).updateFreshValuesStock(eq(46.4800),eq(45.9500),eq(46.3300),eq(2370338),eq(-0.1100),any(),anyInt());
+          verify(stockRepository).updateFreshValuesStock(eq(46.4800), eq(45.9500), eq(46.3300), eq(2370338), eq(-0.1100), any(), anyInt());
 
       }
 
+  }
 
+  @Test
+  public void apiExceptionTest() throws Exception {
+      try (MockedStatic<Requests> requests = Mockito.mockStatic(Requests.class)) {
+          requests.when(() -> Requests.sendRequest(any())).thenThrow(new APIException("Api call failed"));
+
+          ListingStock stock = new ListingStock();
+          stock.setTicker("DT");
+          stock.setHigh(48.6900);
+          stock.setLow(48.9500);
+          stock.setPrice(48.3300);
+          stock.setVolume(2370338);
+          stock.setPriceChange(-0.1100);
+          listingStocks.add(stock);
+
+          fetchingThread.valuesForConstantUpdating();
+
+          verify(stockRepository, never()).updateFreshValuesStock(anyDouble(), anyDouble(), anyDouble(), anyInt(), anyDouble(), any(), any());
+
+      }
   }
 }
 
