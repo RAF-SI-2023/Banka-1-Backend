@@ -44,4 +44,5 @@ public class ListingBase {
 
     @Column
     private Integer volume;
+
 }
