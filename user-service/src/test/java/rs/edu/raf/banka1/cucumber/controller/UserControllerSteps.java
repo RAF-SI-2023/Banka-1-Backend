@@ -13,9 +13,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
+//import rs.edu.raf.banka1.mapper.ForeignCurrencyAccountMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.User;
+//import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.*;
@@ -48,8 +50,8 @@ public class UserControllerSteps {
     private UserResponse lastReadUserResponse;
     private List<UserResponse> lastReadAllUsersResponse;
     private CreateUserResponse lastCreateUserResponse;
-    private CreateForeignCurrencyAccountResponse lastCreateForeignCurrencyAccountResponse;
-    private List<ForeignCurrencyAccountResponse> lastReadAllForeignCurrencyAccountsResponse;
+//    private CreateForeignCurrencyAccountResponse lastCreateForeignCurrencyAccountResponse;
+//    private List<ForeignCurrencyAccountResponse> lastReadAllForeignCurrencyAccountsResponse;
     private EditUserResponse lastEditUserResponse;
     private ActivateAccountResponse lastActivateAccountResponse;
     private User activatedUser;
@@ -61,7 +63,8 @@ public class UserControllerSteps {
     private ResponseEntity<?> lastResponse;
 
     private UserRepository userRepository;
-    private ForeignCurrencyAccountRequest foreignCurrencyAccountRequest = new ForeignCurrencyAccountRequest();
+//    private ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
+//    private ForeignCurrencyAccountRequest foreignCurrencyAccountRequest = new ForeignCurrencyAccountRequest();
     private PermissionRepository permissionRepository;
     private List<UserResponse> userResponses = new ArrayList<>();
     //private final String url = "http://localhost:";
@@ -81,43 +84,43 @@ public class UserControllerSteps {
 
     private SearchFilter searchFilter = new SearchFilter();
 
-    @Given("ownerId is {string}")
-    public void owneridIs(String arg0) {
-        foreignCurrencyAccountRequest.setOwnerId(Long.parseLong(arg0));
-    }
-
-    @Given("createdByAgentId is {string}")
-    public void createdbyagentidIs(String arg0) {
-        foreignCurrencyAccountRequest.setCreatedByAgentId(Long.parseLong(arg0));
-    }
-
-    @Given("currency is {string}")
-    public void currencyIs(String arg0) {
-        foreignCurrencyAccountRequest.setCurrency(arg0);
-    }
-
-    @Given("subtypeOfAccount is {string}")
-    public void subtypeofaccountIs(String arg0) {
-        foreignCurrencyAccountRequest.setSubtypeOfAccount(arg0);
-    }
-//    @Given("typeOfAccount is {string}")
-//    public void typeofaccountIs(String arg0) {
-//        foreignCurrencyAccountRequest.setTypeOfAccount(arg0);
+//    @Given("ownerId is {string}")
+//    public void owneridIs(String arg0) {
+//        foreignCurrencyAccountRequest.setOwnerId(Long.parseLong(arg0));
 //    }
-    @Given("accountMaintenance is {string}")
-    public void accountmaintenanceIs(String arg0) {
-        foreignCurrencyAccountRequest.setAccountMaintenance(Double.parseDouble(arg0));
-    }
-    @Given("defaultCurrency is {string}")
-    public void defaultcurrencyIs(String arg0) {
-        foreignCurrencyAccountRequest.setDefaultCurrency(Boolean.valueOf(arg0));
-    }
-    @Given("allowedCurrencies is {string}")
-    public void allowedcurrenciesIs(String arg0) {
-        List<String> allowedCurrencies = new ArrayList<>();
-        allowedCurrencies.add(arg0);
-        foreignCurrencyAccountRequest.setAllowedCurrencies(allowedCurrencies);
-    }
+//
+//    @Given("createdByAgentId is {string}")
+//    public void createdbyagentidIs(String arg0) {
+//        foreignCurrencyAccountRequest.setCreatedByAgentId(Long.parseLong(arg0));
+//    }
+//
+//    @Given("currency is {string}")
+//    public void currencyIs(String arg0) {
+//        foreignCurrencyAccountRequest.setCurrency(arg0);
+//    }
+//
+//    @Given("subtypeOfAccount is {string}")
+//    public void subtypeofaccountIs(String arg0) {
+//        foreignCurrencyAccountRequest.setSubtypeOfAccount(arg0);
+//    }
+////    @Given("typeOfAccount is {string}")
+////    public void typeofaccountIs(String arg0) {
+////        foreignCurrencyAccountRequest.setTypeOfAccount(arg0);
+////    }
+//    @Given("accountMaintenance is {string}")
+//    public void accountmaintenanceIs(String arg0) {
+//        foreignCurrencyAccountRequest.setAccountMaintenance(Double.parseDouble(arg0));
+//    }
+//    @Given("defaultCurrency is {string}")
+//    public void defaultcurrencyIs(String arg0) {
+//        foreignCurrencyAccountRequest.setDefaultCurrency(Boolean.valueOf(arg0));
+//    }
+//    @Given("allowedCurrencies is {string}")
+//    public void allowedcurrenciesIs(String arg0) {
+//        List<String> allowedCurrencies = new ArrayList<>();
+//        allowedCurrencies.add(arg0);
+//        foreignCurrencyAccountRequest.setAllowedCurrencies(allowedCurrencies);
+//    }
 
     @Given("i am logged in with email {string} and password {string}")
     public void iAmLoggedIn(String email, String password) {
@@ -371,10 +374,10 @@ public class UserControllerSteps {
             else if (path.equals("/balance/foreign_currency/100")) {
                 getBody(url + port + path);
             }
-            else if (path.equals("/balance/foreign_currency")) {
-                lastReadAllForeignCurrencyAccountsResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<ForeignCurrencyAccountResponse>>() {
-                });
-            }
+//            else if (path.equals("/balance/foreign_currency")) {
+//                lastReadAllForeignCurrencyAccountsResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<ForeignCurrencyAccountResponse>>() {
+//                });
+//            }
             else if (path.startsWith("/user/")) {
                 lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), UserResponse.class);
                 String[] split = path.split("/");
@@ -394,9 +397,10 @@ public class UserControllerSteps {
             if (path.equals("/user/createUser")) {
                 String tmp = post(url + port + path, createUserRequest);
                 lastCreateUserResponse = objectMapper.readValue(tmp, CreateUserResponse.class);
-            } else if (path.equals("/balance/foreign_currency/create")) {
-                lastCreateForeignCurrencyAccountResponse = objectMapper.readValue(post(url + port + path, foreignCurrencyAccountRequest), CreateForeignCurrencyAccountResponse.class);
             }
+//            else if (path.equals("/balance/foreign_currency/create")) {
+//                lastCreateForeignCurrencyAccountResponse = objectMapper.readValue(post(url + port + path, foreignCurrencyAccountRequest), CreateForeignCurrencyAccountResponse.class);
+//            }
         }
         catch (Exception e){
             e.printStackTrace();
