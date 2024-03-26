@@ -10,6 +10,7 @@ public class ListingBaseMapper {
     public static ListingBaseDto toDto(ListingBase listingBase) {
         ListingBaseDto listingBaseDto = new ListingBaseDto();
         listingBaseDto.setListingId(listingBase.getListingId());
+        listingBaseDto.setExchange(listingBase.getExchange());
         listingBaseDto.setListingType(listingBase.getListingType());
         listingBaseDto.setTicker(listingBase.getTicker());
         listingBaseDto.setName(listingBase.getName());

@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import rs.edu.raf.banka1.model.entities.Exchange;
 
 @Getter
 @Setter
@@ -20,6 +21,10 @@ public class ListingBase {
 
     @Column
     private String name;
+
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "exchange_id", referencedColumnName = "id")
+    private Exchange exchange;
 
     @Column
     private Integer lastRefresh;
