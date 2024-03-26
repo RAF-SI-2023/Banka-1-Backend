@@ -8,6 +8,7 @@ import rs.edu.raf.banka1.mapper.BankAccountMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
+import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;

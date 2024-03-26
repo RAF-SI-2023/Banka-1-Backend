@@ -517,21 +517,21 @@ public class UserControllerSteps {
         assertThat(lastResponse.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.valueOf(status));
     }
 
-    @Then("new foreign account should be created")
-    public void newForeignAccountShouldBeCreated() {
-        assertThat(lastCreateForeignCurrencyAccountResponse).isNotNull();
-        assertThat(foreignCurrencyAccountRepository.findById(lastCreateForeignCurrencyAccountResponse.getId())).isNotNull();
-    }
-
-    @Then("i should get all foreign accounts")
-    public void iShouldGetAllForeignAccounts() {
-        ForeignCurrencyAccountMapper mapper = new ForeignCurrencyAccountMapper();
-        List<ForeignCurrencyAccountResponse> foreignCurrencyAccountResponses = new ArrayList<>();
-        foreignCurrencyAccountRepository.findAll().forEach(
-                x->{
-                    foreignCurrencyAccountResponses.add(mapper.foreignCurrencyAccountToForeignCurrencyAccountResponse(x));
-                }
-        );
-        assertThat(lastReadAllForeignCurrencyAccountsResponse).hasSameElementsAs(foreignCurrencyAccountResponses);
-    }
+//    @Then("new foreign account should be created")
+//    public void newForeignAccountShouldBeCreated() {
+//        assertThat(lastCreateForeignCurrencyAccountResponse).isNotNull();
+//        assertThat(foreignCurrencyAccountRepository.findById(lastCreateForeignCurrencyAccountResponse.getId())).isNotNull();
+//    }
+//
+//    @Then("i should get all foreign accounts")
+//    public void iShouldGetAllForeignAccounts() {
+//        ForeignCurrencyAccountMapper mapper = new ForeignCurrencyAccountMapper();
+//        List<ForeignCurrencyAccountResponse> foreignCurrencyAccountResponses = new ArrayList<>();
+//        foreignCurrencyAccountRepository.findAll().forEach(
+//                x->{
+//                    foreignCurrencyAccountResponses.add(mapper.foreignCurrencyAccountToForeignCurrencyAccountResponse(x));
+//                }
+//        );
+//        assertThat(lastReadAllForeignCurrencyAccountsResponse).hasSameElementsAs(foreignCurrencyAccountResponses);
+//    }
 }

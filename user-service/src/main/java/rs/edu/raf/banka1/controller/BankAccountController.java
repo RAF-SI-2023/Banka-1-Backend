@@ -79,17 +79,11 @@ public class BankAccountController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                 content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class,
                         subTypes = {BankAccountDto.class}))}),
-
-            @ApiResponse(responseCode = "404", description = "No bank accounts found"),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
 
     public ResponseEntity<List<BankAccountDto>> getBankAccountsByCustomerId(@PathVariable(name = "customerId") Long customerId) {
             List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCustomer(customerId);
-            if (bankAccounts.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-
             return new ResponseEntity<>(bankAccounts.stream().map(bankAccountMapper::toDto).toList(), HttpStatus.OK);
     }
 
@@ -99,17 +93,11 @@ public class BankAccountController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class,
                             subTypes = {BankAccountDto.class}))}),
-
-            @ApiResponse(responseCode = "404", description = "No bank accounts found"),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
 
     public ResponseEntity<List<BankAccountDto>> getBankAccountsByCompanyId(@PathVariable(name = "companyId") Long companyId) {
         List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCompany(companyId);
-        if (bankAccounts.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
         return ResponseEntity.ok(bankAccounts.stream().map(bankAccountMapper::toDto).toList());
     }
 
@@ -119,16 +107,11 @@ public class BankAccountController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class,
                             subTypes = {BankAccountDto.class}))}),
-            @ApiResponse(responseCode = "404", description = "No bank accounts found"),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
 
     public ResponseEntity<List<BankAccountDto>> getBankAccountsByCreatorId(@PathVariable(name = "userId") Long userId) {
         List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByAgent(userId);
-
-        if(bankAccounts.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
         return ResponseEntity.ok(bankAccounts.stream().map(bankAccountMapper::toDto).toList());
     }
 }

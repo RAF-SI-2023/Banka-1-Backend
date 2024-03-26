@@ -3,8 +3,6 @@ package rs.edu.raf.banka1.services;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rs.edu.raf.banka1.model.BankAccount;
@@ -17,7 +15,6 @@ import rs.edu.raf.banka1.repositories.CurrencyRepository;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
