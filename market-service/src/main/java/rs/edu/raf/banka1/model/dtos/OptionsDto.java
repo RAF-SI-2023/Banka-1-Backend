@@ -3,7 +3,6 @@ package rs.edu.raf.banka1.model.dtos;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import rs.edu.raf.banka1.model.enums.OptionType;
 
 @Data
 @AllArgsConstructor
