@@ -4,21 +4,31 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import rs.edu.raf.banka1.exceptions.OptionsException;
 import rs.edu.raf.banka1.mapper.OptionsMapper;
 import rs.edu.raf.banka1.model.OptionsModel;
 import rs.edu.raf.banka1.model.dtos.OptionsDto;
 import rs.edu.raf.banka1.model.enums.OptionType;
 import rs.edu.raf.banka1.repositories.OptionsRepository;
+
+import rs.edu.raf.banka1.threads.OptionsThread;
+
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.io.File;
-import java.net.*;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Iterator;
+import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -63,7 +73,6 @@ public class OptionsServiceImpl implements OptionsService{
             // Uncomment when filling the options.json
 //            File file = new File(Constants.optionsFilePath);
 //            objectMapper.writeValue(file, optionsModels);
-
             return optionsModels;
         }catch (Exception e) {
             e.printStackTrace();
@@ -90,7 +99,6 @@ public class OptionsServiceImpl implements OptionsService{
             return new ArrayList<>();
         }
     }
-
 
     @Override
     public List<OptionsDto> fetchOptionsForTicker(String ticker, String url) {
@@ -253,6 +261,30 @@ public class OptionsServiceImpl implements OptionsService{
 
     public void setCrumbHttpClient(HttpClient httpClient) {
         this.crumbHttpClient = httpClient;
+    }
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void truncateAndFetch(){
+        truncateTable();
+        fetchOptions();
+    }
+
+    @Override
+    public void truncateTable() {
+        this.optionsRepository.truncateTable();
+
+    }
+
+    @Scheduled(fixedDelay = 900000)
+    public void runFetchBackground(){
+        Thread thread = new Thread(new OptionsThread(this));
+        thread.start();
+
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 
