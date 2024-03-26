@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -6,7 +6,6 @@ import rs.edu.raf.banka1.model.dtos.ListingBaseDto;
 
 @Component
 public class ListingBaseMapper {
-
     public static ListingBaseDto toDto(ListingBase listingBase) {
         ListingBaseDto listingBaseDto = new ListingBaseDto();
         listingBaseDto.setListingId(listingBase.getListingId());

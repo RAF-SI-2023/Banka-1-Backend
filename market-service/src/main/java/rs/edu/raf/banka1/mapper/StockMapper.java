@@ -23,6 +23,7 @@ public class StockMapper extends ListingBaseMapper{
         stock.setOutstandingShares(outstandingShare);
         stock.setDividendYield(dividendYield);
         stock.setLastRefresh((int) (System.currentTimeMillis() / 1000));
+
         return stock;
     }
 
