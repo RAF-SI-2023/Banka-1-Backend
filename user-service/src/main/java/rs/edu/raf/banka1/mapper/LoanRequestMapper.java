@@ -25,6 +25,7 @@ public class LoanRequestMapper {
         loanRequestDto.setBranchOffice(loanRequest.getBranchOffice());
         loanRequestDto.setPhoneNumber(loanRequest.getPhoneNumber());
         loanRequestDto.setAccountNumber(loanRequest.getAccountNumber());
+        loanRequestDto.setStatus(loanRequest.getStatus());
         return loanRequestDto;
     }
 
