@@ -31,7 +31,7 @@ public class LoanRequestController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all loan requests", description = "Get all loan requests")
-    @PreAuthorize("hasAuthority('manage_loan_requests')")
+    @PreAuthorize("hasAuthority('manageLoanRequests')")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
             content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class))}),
@@ -50,7 +50,7 @@ public class LoanRequestController {
 
     @PutMapping(value = "/{loanRequestId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "change loan request status", description = "change loan request status")
-    @PreAuthorize("hasAuthority('manage_loan_requests')")
+    @PreAuthorize("hasAuthority('manageLoanRequests')")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
         content = {@Content(mediaType = "application/json",
@@ -72,7 +72,7 @@ public class LoanRequestController {
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create loan request", description = "Create loan request")
-    @PreAuthorize("hasAuthority('manage_loan_requests')")
+    @PreAuthorize("hasAuthority('manageLoanRequests')")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
             content = {@Content(mediaType = "application/json",
