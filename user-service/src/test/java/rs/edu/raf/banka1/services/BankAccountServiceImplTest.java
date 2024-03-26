@@ -9,9 +9,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Company;
+import rs.edu.raf.banka1.model.Currency;
 import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.CompanyRepository;
+import rs.edu.raf.banka1.repositories.CurrencyRepository;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 
@@ -33,11 +35,13 @@ public class BankAccountServiceImplTest {
         CustomerRepository customerRepository = mock(CustomerRepository.class);
         CompanyRepository companyRepository = mock(CompanyRepository.class);
         BankAccountRepository bankAccountRepository = mock(BankAccountRepository.class);
+        CurrencyRepository currencyRepository = mock(CurrencyRepository.class);
         CardService cardService = mock(CardService.class);
         bankAccountService.setCustomerRepository(customerRepository);
         bankAccountService.setCompanyRepository(companyRepository);
         bankAccountService.setBankAccountRepository(bankAccountRepository);
         bankAccountService.setCardService(cardService);
+        bankAccountService.setCurrencyRepository(currencyRepository);
     }
 
     @Test
@@ -72,7 +76,12 @@ public class BankAccountServiceImplTest {
         createRequest.setBalance(1000.0);
         createRequest.setAvailableBalance(900.0);
         createRequest.setCreatedByAgentId(1L);
-        createRequest.setCurrency("USD");
+        String curr = "USD";
+        createRequest.setCurrency(curr);
+        Currency currency = new Currency();
+        currency.setCurrencyCode(curr);
+
+        when(bankAccountService.getCurrencyRepository().findCurrencyByCurrencyCode(curr)).thenReturn(Optional.of(currency));
 
         when(bankAccountService.getCompanyRepository().findById(createRequest.getCompanyId())).thenReturn(Optional.of(company));
 
@@ -83,7 +92,7 @@ public class BankAccountServiceImplTest {
         assertEquals(bankAccount.getBalance(), createRequest.getBalance());
         assertEquals(bankAccount.getAvailableBalance(), createRequest.getAvailableBalance());
         assertEquals(bankAccount.getCreatedByAgentId(), createRequest.getCreatedByAgentId());
-        assertEquals(bankAccount.getCurrency(), createRequest.getCurrency());
+        assertEquals(bankAccount.getCurrency().getCurrencyCode(), createRequest.getCurrency());
         assertTrue(bankAccount.getAccountStatus());
         assertNull(bankAccount.getCustomer());
         assertNull(bankAccount.getSubtypeOfAccount());
@@ -101,9 +110,15 @@ public class BankAccountServiceImplTest {
         createRequest.setBalance(1000.0);
         createRequest.setAvailableBalance(900.0);
         createRequest.setCreatedByAgentId(1L);
-        createRequest.setCurrency("USD");
         createRequest.setAccountMaintenance(10.0);
         createRequest.setSubtypeOfAccount("CERN_GATE");
+
+        String curr = "USD";
+        createRequest.setCurrency(curr);
+        Currency currency = new Currency();
+        currency.setCurrencyCode(curr);
+
+        when(bankAccountService.getCurrencyRepository().findCurrencyByCurrencyCode(curr)).thenReturn(Optional.of(currency));
 
         when(bankAccountService.getCustomerRepository().findById(createRequest.getCustomerId())).thenReturn(Optional.of(customer));
 
@@ -114,7 +129,7 @@ public class BankAccountServiceImplTest {
         assertEquals(bankAccount.getBalance(), createRequest.getBalance());
         assertEquals(bankAccount.getAvailableBalance(), createRequest.getAvailableBalance());
         assertEquals(bankAccount.getCreatedByAgentId(), createRequest.getCreatedByAgentId());
-        assertEquals(bankAccount.getCurrency(), createRequest.getCurrency());
+        assertEquals(bankAccount.getCurrency().getCurrencyCode(), createRequest.getCurrency());
         assertTrue(bankAccount.getAccountStatus());
         assertNull(bankAccount.getCompany());
     }

@@ -30,7 +30,11 @@ public class BankAccount {
     private Long createdByAgentId;
     private Long creationDate;
     private Long expirationDate;
-    private String currency;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "currency_id", referencedColumnName = "id")
+    private Currency currency;
+
     private Boolean accountStatus;
 
 //    Only for current_account and foreign_currency_account

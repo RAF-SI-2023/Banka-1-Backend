@@ -15,7 +15,7 @@ public class BankAccountMapper {
         } else {
             bankAccountDto.setAccountStatus("INACTIVE");
         }
-        bankAccountDto.setCurrency(bankAccount.getCurrency());
+        bankAccountDto.setCurrency(bankAccount.getCurrency().getCurrencyCode());
         bankAccountDto.setBalance(bankAccount.getBalance());
         bankAccountDto.setAvailableBalance(bankAccount.getAvailableBalance());
 

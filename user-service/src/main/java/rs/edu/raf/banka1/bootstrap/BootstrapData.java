@@ -5,14 +5,13 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.*;
-import rs.edu.raf.banka1.repositories.CompanyRepository;
-import rs.edu.raf.banka1.repositories.CustomerRepository;
-import rs.edu.raf.banka1.repositories.PermissionRepository;
-import rs.edu.raf.banka1.repositories.UserRepository;
+import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
 import java.util.Arrays;
+import java.util.Currency;
 import java.util.HashSet;
+import java.util.*;
 
 @Component
 public class BootstrapData implements CommandLineRunner {
@@ -22,19 +21,22 @@ public class BootstrapData implements CommandLineRunner {
     private final BankAccountService bankAccountService;
     private final CompanyRepository companyRepository;
     private final CustomerRepository customerRepository;
+    private final CurrencyRepository currencyRepository;
 
     @Autowired
     public BootstrapData(UserRepository userRepository,
                          PasswordEncoder passwordEncoder,
                          PermissionRepository permissionRepository,
                          CustomerRepository customerRepository,
-                         BankAccountService bankAccountService, CompanyRepository companyRepository) {
+                         BankAccountService bankAccountService, CompanyRepository companyRepository,
+                         CurrencyRepository currencyRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
         this.customerRepository = customerRepository;
         this.bankAccountService = bankAccountService;
         this.companyRepository = companyRepository;
+        this.currencyRepository = currencyRepository;
     }
 
     @Override
@@ -60,6 +62,7 @@ public class BootstrapData implements CommandLineRunner {
 
         userRepository.save(client);
 
+        seedCurencies();
 
         Company company = createCompany();
         companyRepository.save(company);
@@ -94,6 +97,29 @@ public class BootstrapData implements CommandLineRunner {
             permissionRepository.save(permission);
         }
 
+    }
+
+    private void seedCurencies() {
+        //loading currencies
+        Set<Currency> currencies = Currency.getAvailableCurrencies();
+        for(Currency currency : currencies) {
+            if(currencyRepository.findCurrencyByCurrencyCode(currency.getCurrencyCode()).isPresent()) {
+                continue;
+            }
+            rs.edu.raf.banka1.model.Currency myCurrency = new rs.edu.raf.banka1.model.Currency();
+            myCurrency.setCurrencyName(currency.getDisplayName());
+            myCurrency.setCurrencyCode(currency.getCurrencyCode());
+            myCurrency.setCurrencySymbol(currency.getSymbol());
+            myCurrency.setActive(true);
+
+            Locale locale = new Locale("", currency.getCurrencyCode());
+            String country = locale.getDisplayCountry();
+
+            myCurrency.setCountry(country);
+
+            currencyRepository.save(myCurrency);
+
+        }
     }
 
     private BankAccount createBankAccount(User customer, User creator){

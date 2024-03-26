@@ -26,6 +26,8 @@ public class BankAccountServiceImpl implements BankAccountService {
     private BankAccountRepository bankAccountRepository;
     @Autowired
     private CardService cardService;
+    @Autowired
+    private CurrencyRepository currencyRepository;
 
 
     @Override
@@ -75,7 +77,8 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccount.setBalance(createRequest.getBalance());
         bankAccount.setAvailableBalance(createRequest.getAvailableBalance());
         bankAccount.setCreatedByAgentId(createRequest.getCreatedByAgentId());
-        bankAccount.setCurrency(createRequest.getCurrency());
+        Currency currency = currencyRepository.findCurrencyByCurrencyCode(createRequest.getCurrency()).orElse(null);
+        bankAccount.setCurrency(currency);
         bankAccount.setAccountStatus(true);
 
         return bankAccount;
