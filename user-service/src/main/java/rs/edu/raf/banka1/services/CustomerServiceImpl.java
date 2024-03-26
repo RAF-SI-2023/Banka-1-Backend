@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,14 +11,15 @@ import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
 import rs.edu.raf.banka1.requests.InitialActivationRequest;
-import rs.edu.raf.banka1.requests.createCustomerRequest.CreateCustomerRequest;
+import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
+import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
 import rs.edu.raf.banka1.responses.UserResponse;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class CustomerServiceImpl implements CustomerService{
-
+public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
     private final EmailService emailService;
@@ -26,19 +28,24 @@ public class CustomerServiceImpl implements CustomerService{
     private final UserService userService;
     private final BankAccountService bankAccountService;
 
+    private final CustomerMapper customerMapper;
+
+    @Autowired
     public CustomerServiceImpl(
                                CustomerRepository customerRepository,
                                EmailService emailService,
                                PasswordEncoder passwordEncoder,
                                CurrencyService currencyService,
                                UserService userService,
-                               BankAccountService bankAccountService) {
+                               BankAccountService bankAccountService,
+                               CustomerMapper customerMapper) {
         this.customerRepository = customerRepository;
         this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
         this.currencyService = currencyService;
         this.userService = userService;
         this.bankAccountService = bankAccountService;
+        this.customerMapper = customerMapper;
     }
 
     @Override
@@ -117,5 +124,14 @@ public class CustomerServiceImpl implements CustomerService{
         customer = customerRepository.save(customer);
         bankAccountService.activateBankAccount(customer.getAccountIds().get(0));
         return customer.getUserId();
+    }
+
+    @Override
+    public boolean editCustomer(EditCustomerRequest editCustomerRequest) {
+        Optional<Customer> optCustomer = customerRepository.findCustomerByEmail(editCustomerRequest.getEmail());
+        if (optCustomer.isEmpty()) return false;
+        Customer newCustomer = customerMapper.editCustomerRequestToCustomer(optCustomer.get(), editCustomerRequest);
+        customerRepository.save(newCustomer);
+        return true;
     }
 }

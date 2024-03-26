@@ -1,4 +1,4 @@
-package rs.edu.raf.banka1.requests.createCustomerRequest;
+package rs.edu.raf.banka1.requests.customer;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.CurrencyRepository;
+import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 
@@ -19,15 +21,19 @@ public class BootstrapData implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final CurrencyRepository currencyRepository;
 
+    private final CustomerRepository customerRepository;
+
     @Autowired
     public BootstrapData(UserRepository userRepository,
                          PasswordEncoder passwordEncoder,
                          PermissionRepository permissionRepository,
-                         CurrencyRepository currencyRepository) {
+                         CurrencyRepository currencyRepository,
+                         CustomerRepository customerRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
         this.currencyRepository = currencyRepository;
+        this.customerRepository = customerRepository;
     }
 
     @Override
@@ -35,7 +41,27 @@ public class BootstrapData implements CommandLineRunner {
         System.out.println("Loading Data...");
 
         seedPermissions();
+        seedUsers();
+        seedCustomers();
+        seedCurrencies();
 
+        System.out.println("Data loaded!");
+    }
+
+    private void seedPermissions() {
+        for(String s : Arrays.asList("addUser", "modifyUser", "deleteUser", "readUser", "modifyCustomer")) {
+            if(permissionRepository.findByName(s).isPresent()) {
+                continue;
+            }
+
+            Permission permission = new Permission();
+            permission.setName(s);
+            permission.setDescription(s);
+            permissionRepository.save(permission);
+        }
+    }
+
+    private void seedUsers() {
         User user1 = new User();
         user1.setEmail("admin");
         user1.setPassword(passwordEncoder.encode("user1"));
@@ -52,8 +78,18 @@ public class BootstrapData implements CommandLineRunner {
         userRepository.save(client);
 
         userRepository.save(client);
-//        foreignCurrencyAccountRepository.save(account1);
+    }
 
+    private void seedCustomers() {
+        Customer customer = new Customer();
+        customer.setEmail("customer@gmail.com");
+        customer.setPassword(passwordEncoder.encode("customer"));
+        customer.setFirstName("CustomerName");
+        customer.setLastName("CustomerLastName");
+        customerRepository.save(customer);
+    }
+
+    private void seedCurrencies() {
         //loading currencies
         Set<Currency> currencies = Currency.getAvailableCurrencies();
         for(Currency currency : currencies) {
@@ -72,24 +108,6 @@ public class BootstrapData implements CommandLineRunner {
             myCurrency.setCountry(country);
 
             currencyRepository.save(myCurrency);
-
         }
-
-        System.out.println("Data loaded!");
     }
-
-    private void seedPermissions() {
-        for(String s : Arrays.asList("addUser", "modifyUser", "deleteUser", "readUser")) {
-            if(permissionRepository.findByName(s).isPresent()) {
-                continue;
-            }
-
-            Permission permission = new Permission();
-            permission.setName(s);
-            permission.setDescription(s);
-            permissionRepository.save(permission);
-        }
-
-    }
-
 }
