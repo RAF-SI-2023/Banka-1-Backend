@@ -184,16 +184,15 @@ public class UserControllerSteps {
         userToRemove = user.getUserId();
     }
 
-//    @Given("admin wants to remove user with id {string}")
-//    public void adminWantsToRemoveUserWithId(String id) {
-//        userToRemove = Long.parseLong(id);
-//    }
-//
-//    public UserControllerSteps(UserRepository userRepository, ForeignCurrencyAccountRepository foreignCurrencyAccountRepository, PermissionRepository permissionRepository) {
-//        this.userRepository = userRepository;
-//        this.foreignCurrencyAccountRepository = foreignCurrencyAccountRepository;
-//        this.permissionRepository = permissionRepository;
-//    }
+    @Given("admin wants to remove user with id {string}")
+    public void adminWantsToRemoveUserWithId(String id) {
+        userToRemove = Long.parseLong(id);
+    }
+
+    public UserControllerSteps(UserRepository userRepository, PermissionRepository permissionRepository) {
+        this.userRepository = userRepository;
+        this.permissionRepository = permissionRepository;
+    }
 
     @Given("i have email {string}")
     public void iHaveEmail(String email123) {
@@ -456,7 +455,7 @@ public class UserControllerSteps {
 
     @Then("email should be sent to me")
     public void emailShouldBeSentToMe() {
-        verify(emailService).sendActivationEmail(eq(createUserRequest.getEmail()), anyString(), anyString());
+        verify(emailService).sendEmail(eq(createUserRequest.getEmail()), anyString(), anyString());
     }
 
     @Given("user provides email {string}")
@@ -518,21 +517,21 @@ public class UserControllerSteps {
         assertThat(lastResponse.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.valueOf(status));
     }
 
-//    @Then("new foreign account should be created")
-//    public void newForeignAccountShouldBeCreated() {
-//        assertThat(lastCreateForeignCurrencyAccountResponse).isNotNull();
-//        assertThat(foreignCurrencyAccountRepository.findById(lastCreateForeignCurrencyAccountResponse.getId())).isNotNull();
-//    }
-//
-//    @Then("i should get all foreign accounts")
-//    public void iShouldGetAllForeignAccounts() {
-//        ForeignCurrencyAccountMapper mapper = new ForeignCurrencyAccountMapper();
-//        List<ForeignCurrencyAccountResponse> foreignCurrencyAccountResponses = new ArrayList<>();
-//        foreignCurrencyAccountRepository.findAll().forEach(
-//                x->{
-//                    foreignCurrencyAccountResponses.add(mapper.foreignCurrencyAccountToForeignCurrencyAccountResponse(x));
-//                }
-//        );
-//        assertThat(lastReadAllForeignCurrencyAccountsResponse).hasSameElementsAs(foreignCurrencyAccountResponses);
-//    }
+    @Then("new foreign account should be created")
+    public void newForeignAccountShouldBeCreated() {
+        assertThat(lastCreateForeignCurrencyAccountResponse).isNotNull();
+        assertThat(foreignCurrencyAccountRepository.findById(lastCreateForeignCurrencyAccountResponse.getId())).isNotNull();
+    }
+
+    @Then("i should get all foreign accounts")
+    public void iShouldGetAllForeignAccounts() {
+        ForeignCurrencyAccountMapper mapper = new ForeignCurrencyAccountMapper();
+        List<ForeignCurrencyAccountResponse> foreignCurrencyAccountResponses = new ArrayList<>();
+        foreignCurrencyAccountRepository.findAll().forEach(
+                x->{
+                    foreignCurrencyAccountResponses.add(mapper.foreignCurrencyAccountToForeignCurrencyAccountResponse(x));
+                }
+        );
+        assertThat(lastReadAllForeignCurrencyAccountsResponse).hasSameElementsAs(foreignCurrencyAccountResponses);
+    }
 }

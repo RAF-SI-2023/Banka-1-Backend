@@ -28,6 +28,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String username);
     Optional<User> findByActivationToken(String activationToken);
 
+    Optional<User> findByResetPasswordToken(String token);
+
     @Transactional
     @Modifying
     @Query("update User u set u.active = false where u.userId = :userId")

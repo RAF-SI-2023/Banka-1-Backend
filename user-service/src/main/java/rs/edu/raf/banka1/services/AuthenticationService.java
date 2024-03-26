@@ -30,4 +30,10 @@ public class AuthenticationService {
             user.getPermissions().stream().map(PermissionDto::getName).collect(Collectors.toList())
         );
     }
+
+    public LoginResponse generateLoginResponse(LoginRequest loginRequest) {
+        return new LoginResponse(
+                jwtUtil.generateToken(loginRequest.getEmail(), new ArrayList<>()),
+                new ArrayList<>());
+    }
 }
