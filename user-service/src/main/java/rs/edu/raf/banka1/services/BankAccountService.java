@@ -13,4 +13,8 @@ public interface BankAccountService {
     List<BankAccount> getBankAccountsByCustomer(Long customerId);
     List<BankAccount> getBankAccountsByCompany(Long companyId);
     List<BankAccount> getBankAccountsByAgent(Long agentId);
+
+    BankAccount generateBankAccount(GenerateBankAccountRequest generateBankAccountRequest);
+    BankAccount findBankAccountByAccountNumber(String accountNumber);
+    void activateBankAccount(BankAccount bankAccount);
 }

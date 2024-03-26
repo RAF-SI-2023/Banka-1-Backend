@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.mapper.BankAccountMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 
 @Getter
@@ -28,6 +30,10 @@ public class BankAccountServiceImpl implements BankAccountService {
     private CardService cardService;
     @Autowired
     private CurrencyRepository currencyRepository;
+    @Autowired
+    private BankAccountMapper bankAccountMapper;
+
+    public static final int years_to_expire = 5;
 
 
     @Override
@@ -41,7 +47,7 @@ public class BankAccountServiceImpl implements BankAccountService {
         }
         bankAccount.setAccountType(AccountType.valueOf(createRequest.getAccountType().toUpperCase()));
 
-        bankAccount.setAccountNumber(createUniqueAccNumber());
+        bankAccount.setAccountNumber(generateBankAccountNumber());
 
         boolean should_exit = true;
 
@@ -69,7 +75,7 @@ public class BankAccountServiceImpl implements BankAccountService {
         long creationDate = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toEpochSecond();
 
 //      expiration date is 5 years from now
-        long expirationDate = LocalDate.now().plusYears(5).atStartOfDay(ZoneOffset.UTC).toEpochSecond();
+        long expirationDate = LocalDate.now().plusYears(years_to_expire).atStartOfDay(ZoneOffset.UTC).toEpochSecond();
 
         bankAccount.setCreationDate(creationDate);
         bankAccount.setExpirationDate(expirationDate);
@@ -79,26 +85,10 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccount.setCreatedByAgentId(createRequest.getCreatedByAgentId());
         Currency currency = currencyRepository.findCurrencyByCurrencyCode(createRequest.getCurrency()).orElse(null);
         bankAccount.setCurrency(currency);
-        bankAccount.setAccountStatus(true);
 
         return bankAccount;
     }
 
-
-    private String createUniqueAccNumber() {
-        // generate unique account number of 18 digits
-        StringBuilder accNumber = new StringBuilder();
-        for (int i = 0; i < 18; i++) {
-            accNumber.append((int) (Math.random() * 10));
-        }
-
-//        check if card number already exists in database
-        if (bankAccountRepository.findByAccountNumber(accNumber.toString()).isEmpty()) {
-            return accNumber.toString();
-        }
-
-        return createUniqueAccNumber();
-    }
 
     @Override
     public List<BankAccount> getBankAccountsByCustomer(Long customerId) {
@@ -132,6 +122,41 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccountRepository.save(bankAccount);
         cardService.saveCard(cardService.createCard("VISA", "VisaCard", bankAccount.getAccountNumber(), 1000));
         cardService.saveCard(cardService.createCard("MASTER", "MasterCard", bankAccount.getAccountNumber(), 10000));
+    }
 
+    private String generateBankAccountNumber(){
+        Long start = 1312420L;
+        Random random = new Random();
+        while(true) {
+            Long mid = 100_000_000L + random.nextLong(900_000_000L);
+            Long generated = Long.parseLong(start.toString() + mid.toString()) * 100;
+            generated = generated + (98 - generated % 97);
+            String accountNumber = generated.toString();
+            if(bankAccountRepository.findBankAccountByAccountNumber(accountNumber).isEmpty()){
+                return accountNumber;
+            }
+        }
+    }
+
+    @Override
+    public BankAccount generateBankAccount(GenerateBankAccountRequest generateBankAccountRequest) {
+        BankAccount bankAccount = bankAccountMapper.generateBankAccount(generateBankAccountRequest);
+        bankAccount.setAccountNumber(generateBankAccountNumber());
+
+        saveBankAccount(bankAccount);
+        return bankAccount;
+    }
+
+    @Override
+    public BankAccount findBankAccountByAccountNumber(String accountNumber) {
+        return bankAccountRepository
+                .findBankAccountByAccountNumber(accountNumber)
+                .orElse(null);
+    }
+
+    @Override
+    public void activateBankAccount(BankAccount bankAccount) {
+        bankAccount.setAccountStatus(true);
+        bankAccountRepository.save(bankAccount);
     }
 }

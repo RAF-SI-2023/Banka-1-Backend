@@ -93,7 +93,6 @@ public class BankAccountServiceImplTest {
         assertEquals(bankAccount.getAvailableBalance(), createRequest.getAvailableBalance());
         assertEquals(bankAccount.getCreatedByAgentId(), createRequest.getCreatedByAgentId());
         assertEquals(bankAccount.getCurrency().getCurrencyCode(), createRequest.getCurrency());
-        assertTrue(bankAccount.getAccountStatus());
         assertNull(bankAccount.getCustomer());
         assertNull(bankAccount.getSubtypeOfAccount());
         assertNull(bankAccount.getAccountMaintenance());
@@ -130,7 +129,6 @@ public class BankAccountServiceImplTest {
         assertEquals(bankAccount.getAvailableBalance(), createRequest.getAvailableBalance());
         assertEquals(bankAccount.getCreatedByAgentId(), createRequest.getCreatedByAgentId());
         assertEquals(bankAccount.getCurrency().getCurrencyCode(), createRequest.getCurrency());
-        assertTrue(bankAccount.getAccountStatus());
         assertNull(bankAccount.getCompany());
     }
 

@@ -44,6 +44,7 @@ public class BootstrapData implements CommandLineRunner {
         System.out.println("Loading Data...");
 
         seedPermissions();
+        seedCurencies();
 
         User user1 = new User();
         user1.setEmail("admin");
@@ -62,7 +63,6 @@ public class BootstrapData implements CommandLineRunner {
 
         userRepository.save(client);
 
-        seedCurencies();
 
         Company company = createCompany();
         companyRepository.save(company);
