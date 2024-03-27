@@ -13,4 +13,5 @@ public class ListingFutureDto extends ListingBaseDto {
     private Integer openInterest;
     private Integer settlementDate;
     private Double lastPrice;
+    private String alternativeTicker;
 }

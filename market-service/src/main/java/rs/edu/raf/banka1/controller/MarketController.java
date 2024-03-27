@@ -18,14 +18,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import rs.edu.raf.banka1.mapper.ForexMapper;
+import rs.edu.raf.banka1.mapper.FutureMapper;
 import rs.edu.raf.banka1.mapper.ListingHistoryMapper;
 import rs.edu.raf.banka1.mapper.StockMapper;
 import rs.edu.raf.banka1.model.ListingForex;
+import rs.edu.raf.banka1.model.ListingFuture;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.dtos.*;
 import rs.edu.raf.banka1.services.ExchangeService;
 import rs.edu.raf.banka1.services.ForexService;
+import rs.edu.raf.banka1.services.FuturesService;
 import rs.edu.raf.banka1.services.ListingStockService;
 
 import java.net.URLDecoder;
@@ -42,20 +45,24 @@ public class MarketController {
 
     private final ExchangeService exchangeService;
     private final ForexService forexService;
+    private final FuturesService futuresService;
     private final ListingStockService listingStockService;
     private final ListingHistoryMapper listingHistoryMapper;
     private final ForexMapper forexMapper;
     private final StockMapper stockMapper;
+    private final FutureMapper futureMapper;
 
     @Autowired
-    public MarketController(ExchangeService exchangeService, ForexService forexService, ListingStockService listingStockService,
-                            ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper, StockMapper stockMapper) {
+    public MarketController(ExchangeService exchangeService, ForexService forexService, ListingStockService listingStockService, FuturesService futuresService,
+                            ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper, StockMapper stockMapper, FutureMapper futureMapper) {
         this.exchangeService = exchangeService;
         this.forexService = forexService;
         this.listingStockService = listingStockService;
+        this.futuresService = futuresService;
         this.listingHistoryMapper = listingHistoryMapper;
         this.forexMapper = forexMapper;
         this.stockMapper = stockMapper;
+        this.futureMapper = futureMapper;
     }
 
     @GetMapping(value = "/exchange", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -216,6 +223,24 @@ public class MarketController {
         }
         ListingForexDto listingForexDto = forexMapper.toDto(forex);
         return new ResponseEntity<>(listingForexDto, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/listing/future/{futureId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get future by id", description = "Returns future by id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ListingForexDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Future not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ListingFutureDto> getFutureById(@PathVariable Long futureId) {
+        ListingFuture future = futuresService.findById(futureId).orElse(null);
+        if (future == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        ListingFutureDto listingFutureDto = futureMapper.toDto(future);
+        return new ResponseEntity<>(listingFutureDto, HttpStatus.OK);
     }
 
 }

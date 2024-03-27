@@ -5,69 +5,32 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.FutureMapper;
+import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingFuture;
+import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.dtos.ListingFutureDto;
 import rs.edu.raf.banka1.repositories.FutureRepository;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
 
 @Service
 public class FuturesServiceImpl implements FuturesService {
-    private WebDriver driver;
     private final Map<String, String> monthsCode = new HashMap<>();
-
     private final FutureRepository futureRepository;
     private final FutureMapper futureMapper;
+    private final ChromeOptions options;
     @Autowired
     public FuturesServiceImpl(FutureRepository futureRepository, FutureMapper futureMapper) {
         this.futureRepository = futureRepository;
         this.futureMapper = futureMapper;
-    }
 
-    @Override
-    public List<ListingFuture> fetchNFutures(int n) {
-        initializeScraper();
-        // Instantiate ChromeDriver
-        driver = new ChromeDriver();
-
-        var rows = scrapeFuturesTable().subList(0, n);
-        var futureUrls = extractFutureUrls(rows).subList(0, n);
-        var futureTickers = extractFutureTickers(rows).subList(0, n);
-        var futureNames = extractFutureNames(rows).subList(0, n);
-        var futurePrices = extractFuturePrices(rows).subList(0, n);
-
-        List<ListingFutureDto> listingFutureDtos = new ArrayList<>();
-        for (String url : futureUrls) {
-            ListingFutureDto listingFutureDto = scrapeFuture(url);
-            listingFutureDtos.add(listingFutureDto);
-        }
-
-        int i = 0;
-        for (var listingFutureDto : listingFutureDtos) {
-            listingFutureDto.setTicker(futureTickers.get(i));
-            listingFutureDto.setPrice(futurePrices.get(i));
-            listingFutureDto.setPriceChange(futurePrices.get(i) - listingFutureDto.getLastPrice());
-            listingFutureDto.setName(futureNames.get(i));
-            reformatTicker(listingFutureDto);
-            truncateName(listingFutureDto);
-            i++;
-        }
-
-        // Close the WebDriver
-        driver.quit();
-        List<ListingFuture> listingFutures = new ArrayList<>();
-        for (var dto : listingFutureDtos) {
-            var listingFuture = futureMapper.futureDtoToFutureModel(dto);
-            listingFutures.add(listingFuture);
-        }
-        return listingFutures;
-    }
-
-    void initializeScraper() {
         // Use WebDriverManager to setup ChromeDriver
         WebDriverManager.chromedriver().setup();
 
@@ -83,9 +46,51 @@ public class FuturesServiceImpl implements FuturesService {
         monthsCode.put("Oct", "V");
         monthsCode.put("Nov", "X");
         monthsCode.put("Dec", "Z");
+        options = new ChromeOptions();
+        options.addArguments("--headless");
     }
 
-    private List<WebElement> scrapeFuturesTable() {
+
+    @Override
+    public List<ListingFuture> fetchNFutures(int n) {
+
+        WebDriver driver = new ChromeDriver(options);
+
+        var rows = scrapeFuturesTable(driver).subList(0, n);
+        var futureUrls = extractFutureUrls(rows).subList(0, n);
+        var futureTickers = extractFutureTickers(rows).subList(0, n);
+        var futureNames = extractFutureNames(rows).subList(0, n);
+        var futurePrices = extractFuturePrices(rows).subList(0, n);
+
+        List<ListingFutureDto> listingFutureDtos = new ArrayList<>();
+        for (String url : futureUrls) {
+            ListingFutureDto listingFutureDto = scrapeFuture(url, driver);
+            listingFutureDtos.add(listingFutureDto);
+        }
+
+        int i = 0;
+        for (var listingFutureDto : listingFutureDtos) {
+            listingFutureDto.setTicker(futureTickers.get(i));
+            listingFutureDto.setAlternativeTicker(futureTickers.get(i));
+            listingFutureDto.setPrice(futurePrices.get(i));
+            listingFutureDto.setPriceChange(futurePrices.get(i) - listingFutureDto.getLastPrice());
+            listingFutureDto.setName(futureNames.get(i));
+            reformatTicker(listingFutureDto);
+            truncateName(listingFutureDto);
+            i++;
+        }
+
+        List<ListingFuture> listingFutures = new ArrayList<>();
+        for (var dto : listingFutureDtos) {
+            var listingFuture = futureMapper.futureDtoToFutureModel(dto);
+            listingFutures.add(listingFuture);
+        }
+
+        driver.quit();
+        return listingFutures;
+    }
+
+    private List<WebElement> scrapeFuturesTable(WebDriver driver) {
         // Navigate to the webpage
         driver.get("https://finance.yahoo.com/commodities/");
 
@@ -134,7 +139,7 @@ public class FuturesServiceImpl implements FuturesService {
         return prices;
     }
 
-    private ListingFutureDto scrapeFuture(String url) {
+    private ListingFutureDto scrapeFuture(String url, WebDriver driver) {
         // Navigate to the webpage
         driver.get(url);
 
@@ -151,7 +156,6 @@ public class FuturesServiceImpl implements FuturesService {
         String lastPrice = rightSummaryTable.findElement(By.cssSelector("[data-test=LAST_PRICE-value]")).getText();
         String volume = rightSummaryTable.findElement(By.cssSelector("[data-test=TD_VOLUME-value]")).getText();
         String ask = rightSummaryTable.findElement(By.cssSelector("[data-test=ASK-value]")).getText();
-
 
         ListingFutureDto listingFutureDto = new ListingFutureDto();
         listingFutureDto.setHigh(Double.parseDouble(ask.replaceAll(",", "")));
@@ -199,6 +203,7 @@ public class FuturesServiceImpl implements FuturesService {
             if (name.endsWith(",")) {
                 name = name.substring(0, name.length() - 1);
             }
+            name = name.trim();
         }
         listingFutureDto.setName(name);
     }
@@ -207,6 +212,7 @@ public class FuturesServiceImpl implements FuturesService {
     public int addAllFutures(List<ListingFuture> futures) {
         return futures.stream().mapToInt(this::addFuture).sum();
     }
+
     @Override
     public int addFuture(ListingFuture future) {
         Optional<ListingFuture> optionalFuture = futureRepository.findByTicker(future.getTicker());
@@ -215,9 +221,63 @@ public class FuturesServiceImpl implements FuturesService {
             futureMapper.updateFuture(oldFuture, future);
             futureRepository.save(oldFuture);
             return 0;
-        }else{
+        }
+        else{
             futureRepository.save(future);
             return 1;
         }
+    }
+
+    @Override
+    public List<ListingHistory> fetchNFutureHistories(List<ListingFuture> listingFutures, int n) {
+        WebDriver driver = new ChromeDriver(options);
+        List<ListingHistory> histories = new ArrayList<>();
+        for (var future: listingFutures) {
+            histories.addAll(Objects.requireNonNull(fetchNSingleFutureHistory(future, n, driver)));
+        }
+        driver.quit();
+        return histories;
+    }
+
+    private List<ListingHistory> fetchNSingleFutureHistory(ListingFuture future, int n, WebDriver driver) {
+        String url = "https://finance.yahoo.com/quote/" + future.getAlternativeTicker().replace("=", "%3D") + "/history";
+        driver.get(url);
+        WebElement table = driver.findElement(By.className("W(100%)"));
+        List<WebElement> rows = table.findElements(By.tagName("tr"));
+        rows.removeFirst();
+        rows = rows.subList(0, n);
+
+        List<ListingHistory> history = new ArrayList<>();
+        for (WebElement row : rows) {
+            ArrayList<String> cells = new ArrayList<>();
+            for (WebElement cell : row.findElements(By.tagName("td"))) {
+                cells.add(cell.getText());
+            }
+            ListingHistory singleHistory = new ListingHistory();
+
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy");
+                Date date = sdf.parse(cells.getFirst());
+                long millis = date.getTime();
+                singleHistory.setDate(millis);
+            }
+            catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            singleHistory.setTicker(future.getTicker());
+            singleHistory.setPrice(Double.parseDouble(cells.get(1).replaceAll(",", "")));
+            singleHistory.setHigh(Double.parseDouble(cells.get(2).replaceAll(",", "")));
+            singleHistory.setLow(Double.parseDouble(cells.get(3).replaceAll(",", "")));
+            singleHistory.setChanged(Double.parseDouble(cells.get(4).replaceAll(",", "")) - Double.parseDouble(cells.get(1).replaceAll(",", "")));
+            singleHistory.setVolume(Integer.parseInt(cells.get(6).replaceAll(",", "")));
+            history.add(singleHistory);
+        }
+        return history;
+    }
+
+    @Override
+    public Optional<ListingFuture> findById(Long id) {
+        return futureRepository.findById(id);
     }
 }

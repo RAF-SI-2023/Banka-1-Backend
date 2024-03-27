@@ -48,11 +48,13 @@ public class BootstrapData implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         System.out.println("Loading Data...");
-        ExecutorService executorService = Executors.newFixedThreadPool(5);
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
 
         executorService.submit(() -> {
             List<ListingFuture> listingFutures = futuresService.fetchNFutures(10);
+            List<ListingHistory> futureHistories = futuresService.fetchNFutureHistories(listingFutures, 20);
             futuresService.addAllFutures(listingFutures);
+            listingStockService.addAllListingsToHistory(futureHistories);
             System.out.println("Futures data loaded!");
         });
 
