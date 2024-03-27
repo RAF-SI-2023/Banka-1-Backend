@@ -7,6 +7,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.FutureMapper;
 import rs.edu.raf.banka1.model.ListingFuture;
@@ -14,6 +15,8 @@ import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.dtos.ListingFutureDto;
 import rs.edu.raf.banka1.repositories.FutureRepository;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
+import rs.edu.raf.banka1.threads.FutureThread;
+import rs.edu.raf.banka1.threads.OptionsThread;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -326,5 +329,17 @@ public class FuturesServiceImpl implements FuturesService {
     @Override
     public Optional<ListingFuture> findByTicker(String ticker) {
         return futureRepository.findByTicker(ticker);
+    }
+
+    @Scheduled(fixedDelay = 900000)
+    public void runFetchBackground(){
+        Thread thread = new Thread(new FutureThread(this, listingStockService));
+        thread.start();
+
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
