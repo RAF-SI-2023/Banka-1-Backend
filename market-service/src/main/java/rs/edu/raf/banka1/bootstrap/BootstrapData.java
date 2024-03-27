@@ -47,12 +47,7 @@ public class BootstrapData implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         System.out.println("Loading Data...");
-        ExecutorService executorService = Executors.newFixedThreadPool(5);
-
-        executorService.submit(() -> {
-            exchangeService.seedDatabase();
-            System.out.println("Exchange data loaded!");
-        });
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
 
         executorService.submit(() -> {
             List<CurrencyDto> currencyList = loadCurrencies();
@@ -67,6 +62,11 @@ public class BootstrapData implements CommandLineRunner {
         // STOCK
         // Populate stock and stock history
         executorService.submit(() -> {
+            // EXCHANGE
+            exchangeService.seedDatabase();
+            System.out.println("Exchange data loaded!");
+
+            // STOCK
             List<ListingStock> listingStocks = listingStockService.fetchNListingStocks(maxStockListings);
             listingStockService.addAllListingStocks(listingStocks);
             List<ListingHistory> listingHistories = listingStockService.fetchNListingsHistory(maxStockListingsHistory);
