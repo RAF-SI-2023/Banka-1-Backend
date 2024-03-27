@@ -127,12 +127,12 @@ public class MarketController {
         if (listingType.equalsIgnoreCase("forex")) {
             return new ResponseEntity<>(forexService.getAllForexes().stream().map(forexMapper::toDto).toList(), HttpStatus.OK);
         }
-        else if(listingType.equalsIgnoreCase("stock"))
+        else if(listingType.equalsIgnoreCase("stock")) {
             return new ResponseEntity<>(listingStockService.getAllStocks().stream().map(stockMapper::stockDto), HttpStatus.OK);
-//        uncomment this and add dtos when merging (only leave futures commented becasue we don't have futures in this sprint)
-
-//        else if(listingType.equalsIgnoreCase("futures"))
-//            return new ResponseEntity<>(this.futuresService.getAllFutures(), HttpStatus.OK);
+        }
+        else if(listingType.equalsIgnoreCase("futures")) {
+            return new ResponseEntity<>(this.futuresService.getAllFutures(), HttpStatus.OK);
+        }
         else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -182,6 +182,31 @@ public class MarketController {
 
         List<ListingHistory> listingHistories = forexService.
                 getListingHistoriesByTimestamp(forexId, timestampFrom, timestampTo);
+        if (listingHistories.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(listingHistories.stream().map(listingHistoryMapper::toDto).toList(), HttpStatus.OK);
+        }
+    }
+
+    @GetMapping(value = "/listing/history/future/{futureId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get history by future id", description = "Returns List of histories for given future id, "
+            + "timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is "
+            + "provided it's exclusive)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {ListingHistoryDto.class}))}),
+            @ApiResponse(responseCode = "404", description = "Listing not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<ListingHistoryDto>> getListingsHistoryByFutureId(@PathVariable Long futureId,
+                                                                               @RequestParam(required = false) Integer timestampFrom,
+                                                                               @RequestParam(required = false) Integer timestampTo) {
+
+        List<ListingHistory> listingHistories = futuresService.
+                getListingHistoriesByTimestamp(futureId, timestampFrom, timestampTo);
         if (listingHistories.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {

@@ -12,8 +12,10 @@ import rs.edu.raf.banka1.mapper.FutureMapper;
 import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingFuture;
 import rs.edu.raf.banka1.model.ListingHistory;
+import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.dtos.ListingFutureDto;
 import rs.edu.raf.banka1.repositories.FutureRepository;
+import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -24,12 +26,16 @@ import java.util.*;
 public class FuturesServiceImpl implements FuturesService {
     private final Map<String, String> monthsCode = new HashMap<>();
     private final FutureRepository futureRepository;
+    private final ListingHistoryRepository listingHistoryRepository;
     private final FutureMapper futureMapper;
     private final ChromeOptions options;
+    private final ListingStockService listingStockService;
     @Autowired
-    public FuturesServiceImpl(FutureRepository futureRepository, FutureMapper futureMapper) {
+    public FuturesServiceImpl(FutureRepository futureRepository, ListingHistoryRepository listingHistoryRepository, FutureMapper futureMapper, ListingStockService listingStockService) {
         this.futureRepository = futureRepository;
+        this.listingHistoryRepository = listingHistoryRepository;
         this.futureMapper = futureMapper;
+        this.listingStockService = listingStockService;
 
         // Use WebDriverManager to setup ChromeDriver
         WebDriverManager.chromedriver().setup();
@@ -166,16 +172,16 @@ public class FuturesServiceImpl implements FuturesService {
 
         String pageSource = driver.getPageSource();
         if (pageSource.contains("NY Mercantile")) {
-            listingFutureDto.setExchange("NYMEX");
+            listingFutureDto.setExchangeName("NYMEX");
         }
         if (pageSource.contains("CME")) {
-            listingFutureDto.setExchange("CME");
+            listingFutureDto.setExchangeName("CME");
         }
         if (pageSource.contains("CBOT")) {
-            listingFutureDto.setExchange("CBOT");
+            listingFutureDto.setExchangeName("CBOT");
         }
         if (pageSource.contains("COMEX")) {
-            listingFutureDto.setExchange("COMEX");
+            listingFutureDto.setExchangeName("COMEX");
         }
 
         return listingFutureDto;
@@ -279,5 +285,43 @@ public class FuturesServiceImpl implements FuturesService {
     @Override
     public Optional<ListingFuture> findById(Long id) {
         return futureRepository.findById(id);
+    }
+
+    @Override
+    public List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to) {
+        List<ListingHistory> listingHistories = new ArrayList<>();
+        ListingFuture future = futureRepository.findById(id).orElse(null);
+        if(future == null){
+            return listingHistories;
+        }
+
+        String ticker = future.getTicker();
+        listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
+        if(listingHistories.isEmpty()) {
+            WebDriver driver = new ChromeDriver(options);
+            listingHistories = fetchNSingleFutureHistory(future, 20, driver);
+            driver.quit();
+            listingStockService.addAllListingsToHistory(listingHistories);
+        }
+
+//        return all timestamps before given timestamp
+        if(from == null && to != null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBefore(ticker, to);
+        }
+//        return all timestamps after given timestamp
+        else if(from != null && to == null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateAfter(ticker, from);
+        }
+//        return all timestamps between two timestamps
+        else if(from != null && to != null){
+            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to);
+        }
+
+        return listingHistories;
+    }
+
+    @Override
+    public List<ListingFuture> getAllFutures(){
+        return futureRepository.findAll();
     }
 }

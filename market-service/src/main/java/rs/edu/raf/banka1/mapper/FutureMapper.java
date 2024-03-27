@@ -23,7 +23,7 @@ public class FutureMapper {
     public ListingFuture futureDtoToFutureModel(ListingFutureDto futureDto) {
         ListingFuture listingFuture = new ListingFuture();
         listingFuture.setVolume(futureDto.getVolume());
-        listingFuture.setExchange(futureDto.getExchange());
+        listingFuture.setExchangeName(futureDto.getExchangeName());
         listingFuture.setHigh(futureDto.getHigh());
         listingFuture.setLow(futureDto.getLow());
         listingFuture.setTicker(futureDto.getTicker());
@@ -57,7 +57,7 @@ public class FutureMapper {
         dto.setListingType(listingFuture.getListingType());
         dto.setTicker(listingFuture.getTicker());
         dto.setName(listingFuture.getName());
-        dto.setExchange(listingFuture.getExchange());
+        dto.setExchangeName(listingFuture.getExchangeName());
         dto.setLastRefresh(listingFuture.getLastRefresh());
         dto.setPrice(listingFuture.getPrice());
         dto.setHigh(listingFuture.getHigh());
