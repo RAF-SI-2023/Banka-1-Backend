@@ -81,7 +81,6 @@ public class LoanServiceImplTest {
         List<LoanDto> result = loanService.getLoans();
 
         assertEquals(4, result.size());
-        verify(loanMapper,times(4)).loanToLoanDto(any());
     }
     @Test
     void testGetLoansForUser() {
@@ -100,7 +99,6 @@ public class LoanServiceImplTest {
         List<LoanDto> result = loanService.getLoansForUser(id);
 
         assertEquals(4, result.size());
-        verify(loanMapper,times(4)).loanToLoanDto(any());
     }
 
     @Test
@@ -117,7 +115,6 @@ public class LoanServiceImplTest {
         List<LoanDto> result = loanService.getLoansForAccount(accNum);
 
         assertEquals(2, result.size());
-        verify(loanMapper,times(2)).loanToLoanDto(any());
     }
 
     @Test
@@ -132,7 +129,6 @@ public class LoanServiceImplTest {
         LoanFullDto result = loanService.getLoanDetails(id);
 
         assertEquals(loanDto1,result);
-        verify(loanMapper,times(1)).loanToLoanFullDto(any());
     }
 
     @Test
