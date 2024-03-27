@@ -46,7 +46,7 @@ public class Constants {
         try {
             Resource resource = new ClassPathResource(relativePath);
             if (resource.exists()) {
-                return resource.getURL().getPath();
+                return resource.getURL().getPath().replaceAll("%20", " ");
             } else {
                 System.out.println("[Constants getAbsoluteFilePath] Resource does not exist: " + relativePath);
             }

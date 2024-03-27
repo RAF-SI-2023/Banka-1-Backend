@@ -5,14 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.ListingForex;
+import rs.edu.raf.banka1.model.ListingFuture;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
-import rs.edu.raf.banka1.services.CurrencyService;
-import rs.edu.raf.banka1.services.ForexService;
-import rs.edu.raf.banka1.services.ListingStockService;
-import rs.edu.raf.banka1.services.OptionsService;
-import rs.edu.raf.banka1.services.ExchangeService;
+import rs.edu.raf.banka1.services.*;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.io.BufferedReader;
@@ -41,13 +38,23 @@ public class BootstrapData implements CommandLineRunner {
     private OptionsService optionsService;
 
     @Autowired
+    private FuturesService futuresService;
+
+    @Autowired
     private final ExchangeService exchangeService;
+
 
     @Override
     public void run(String... args) throws Exception {
 
         System.out.println("Loading Data...");
         ExecutorService executorService = Executors.newFixedThreadPool(5);
+
+        executorService.submit(() -> {
+            List<ListingFuture> listingFutures = futuresService.fetchNFutures(10);
+            futuresService.addAllFutures(listingFutures);
+            System.out.println("Futures data loaded!");
+        });
 
         executorService.submit(() -> {
             exchangeService.seedDatabase();
