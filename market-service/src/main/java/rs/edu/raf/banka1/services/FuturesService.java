@@ -22,4 +22,5 @@ public interface FuturesService {
 
     List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to);
 
+    Optional<ListingFuture> findByTicker(String ticker);
 }

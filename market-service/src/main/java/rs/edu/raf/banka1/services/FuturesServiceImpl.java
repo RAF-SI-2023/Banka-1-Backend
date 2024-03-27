@@ -9,10 +9,8 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.FutureMapper;
-import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingFuture;
 import rs.edu.raf.banka1.model.ListingHistory;
-import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.dtos.ListingFutureDto;
 import rs.edu.raf.banka1.repositories.FutureRepository;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
@@ -323,5 +321,10 @@ public class FuturesServiceImpl implements FuturesService {
     @Override
     public List<ListingFuture> getAllFutures(){
         return futureRepository.findAll();
+    }
+
+    @Override
+    public Optional<ListingFuture> findByTicker(String ticker) {
+        return futureRepository.findByTicker(ticker);
     }
 }
