@@ -59,7 +59,7 @@ public class FuturesServiceImplTest {
     @Test
     public void addListingStockNotPresentTest(){
         when(futuresService.findByTicker("ESM24")).thenReturn(Optional.empty());
-        assertEquals(1, futuresService.addFuture(future1));
+        assertEquals(true, futuresService.addFuture(future1));
     }
 
     @Test
@@ -68,7 +68,7 @@ public class FuturesServiceImplTest {
         updateFuture.setTicker("ESM24");
         updateFuture.setPrice(101.0);
         when(futuresService.findByTicker("ESM24")).thenReturn(Optional.of(future1));
-        assertEquals(0, futuresService.addFuture(updateFuture));
+        assertEquals(false, futuresService.addFuture(updateFuture));
     }
 
     @Test

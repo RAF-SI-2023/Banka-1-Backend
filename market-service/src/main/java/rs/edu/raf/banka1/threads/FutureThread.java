@@ -1,9 +1,13 @@
 package rs.edu.raf.banka1.threads;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import rs.edu.raf.banka1.model.ListingFuture;
+import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.services.FuturesService;
 import rs.edu.raf.banka1.services.ListingStockService;
 import rs.edu.raf.banka1.services.OptionsService;
+
+import java.util.List;
 
 public class FutureThread implements Runnable {
     private final FuturesService futuresService;
@@ -16,9 +20,9 @@ public class FutureThread implements Runnable {
 
     @Override
     public void run() {
-        var futures = futuresService.fetchNFutures(10);
+        List<ListingFuture> futures = futuresService.fetchNFutures(10);
         futuresService.addAllFutures(futures);
-        var histories = futuresService.fetchNFutureHistories(futures, 20);
+        List<ListingHistory> histories = futuresService.fetchNFutureHistories(futures, 20);
         listingStockService.addAllListingsToHistory(histories);
     }
 }

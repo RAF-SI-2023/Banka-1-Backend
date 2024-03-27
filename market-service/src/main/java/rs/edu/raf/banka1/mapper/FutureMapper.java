@@ -11,13 +11,14 @@ import rs.edu.raf.banka1.model.dtos.ListingFutureDto;
 import rs.edu.raf.banka1.model.dtos.OptionsDto;
 @Component
 public class FutureMapper {
-    public void updateFuture(ListingFuture oldFuture, ListingFuture newFuture) {
+    public ListingFuture updateFuture(ListingFuture oldFuture, ListingFuture newFuture) {
         oldFuture.setLow(newFuture.getLow());
         oldFuture.setHigh(newFuture.getHigh());
         oldFuture.setPrice(newFuture.getPrice());
         oldFuture.setVolume(newFuture.getVolume());
         oldFuture.setName(newFuture.getName());
         oldFuture.setLastRefresh((int) (System.currentTimeMillis() / 1000));
+        return oldFuture;
     }
 
     public ListingFuture futureDtoToFutureModel(ListingFutureDto futureDto) {

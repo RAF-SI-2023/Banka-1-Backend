@@ -20,8 +20,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static rs.edu.raf.banka1.utils.Constants.maxStockListings;
-import static rs.edu.raf.banka1.utils.Constants.maxStockListingsHistory;
+import static rs.edu.raf.banka1.utils.Constants.*;
 
 @Component
 @AllArgsConstructor
@@ -50,16 +49,11 @@ public class BootstrapData implements CommandLineRunner {
         ExecutorService executorService = Executors.newFixedThreadPool(10);
 
         executorService.submit(() -> {
-            List<ListingFuture> listingFutures = futuresService.fetchNFutures(10);
-            List<ListingHistory> futureHistories = futuresService.fetchNFutureHistories(listingFutures, 20);
+            List<ListingFuture> listingFutures = futuresService.fetchNFutures(maxFutures);
+            List<ListingHistory> futureHistories = futuresService.fetchNFutureHistories(listingFutures, maxFutureHistories);
             futuresService.addAllFutures(listingFutures);
             listingStockService.addAllListingsToHistory(futureHistories);
             System.out.println("Futures data loaded!");
-        });
-
-        executorService.submit(() -> {
-            exchangeService.seedDatabase();
-            System.out.println("Exchange data loaded!");
         });
 
         executorService.submit(() -> {
@@ -72,13 +66,11 @@ public class BootstrapData implements CommandLineRunner {
         // we only need to call the function below every once in a while
         // listingStockService.generateJSONSymbols();
 
+        exchangeService.seedDatabase();
+        System.out.println("Exchange data loaded!");
         // STOCK
         // Populate stock and stock history
         executorService.submit(() -> {
-            // EXCHANGE
-            exchangeService.seedDatabase();
-            System.out.println("Exchange data loaded!");
-
             // STOCK
             List<ListingStock> listingStocks = listingStockService.fetchNListingStocks(maxStockListings);
             listingStockService.addAllListingStocks(listingStocks);

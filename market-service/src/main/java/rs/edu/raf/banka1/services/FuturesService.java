@@ -15,7 +15,7 @@ public interface FuturesService {
 
     int addAllFutures(List<ListingFuture> futures);
 
-    int addFuture(ListingFuture future);
+    Boolean addFuture(ListingFuture future);
 
     List<ListingFuture> getAllFutures();
     Optional<ListingFuture> findById(Long id);

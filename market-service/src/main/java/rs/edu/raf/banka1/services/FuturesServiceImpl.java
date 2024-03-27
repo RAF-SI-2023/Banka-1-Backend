@@ -23,6 +23,8 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
 
+import static rs.edu.raf.banka1.utils.Constants.maxFutureHistories;
+
 @Service
 public class FuturesServiceImpl implements FuturesService {
     private final Map<String, String> monthsCode = new HashMap<>();
@@ -217,21 +219,21 @@ public class FuturesServiceImpl implements FuturesService {
 
     @Override
     public int addAllFutures(List<ListingFuture> futures) {
-        return futures.stream().mapToInt(this::addFuture).sum();
+        return (int) futures.stream().filter(this::addFuture).count();
     }
 
     @Override
-    public int addFuture(ListingFuture future) {
+    public Boolean addFuture(ListingFuture future) {
         Optional<ListingFuture> optionalFuture = futureRepository.findByTicker(future.getTicker());
         if (optionalFuture.isPresent()) {
             var oldFuture = optionalFuture.get();
-            futureMapper.updateFuture(oldFuture, future);
+            oldFuture = futureMapper.updateFuture(oldFuture, future);
             futureRepository.save(oldFuture);
-            return 0;
+            return false;
         }
         else{
             futureRepository.save(future);
-            return 1;
+            return true;
         }
     }
 
@@ -300,7 +302,7 @@ public class FuturesServiceImpl implements FuturesService {
         listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
         if(listingHistories.isEmpty()) {
             WebDriver driver = new ChromeDriver(options);
-            listingHistories = fetchNSingleFutureHistory(future, 20, driver);
+            listingHistories = fetchNSingleFutureHistory(future, maxFutureHistories, driver);
             driver.quit();
             listingStockService.addAllListingsToHistory(listingHistories);
         }
