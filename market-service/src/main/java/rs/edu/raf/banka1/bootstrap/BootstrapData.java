@@ -43,7 +43,6 @@ public class BootstrapData implements CommandLineRunner {
     @Autowired
     private final ExchangeService exchangeService;
 
-
     @Override
     public void run(String... args) throws Exception {
 
@@ -76,6 +75,11 @@ public class BootstrapData implements CommandLineRunner {
         // STOCK
         // Populate stock and stock history
         executorService.submit(() -> {
+            // EXCHANGE
+            exchangeService.seedDatabase();
+            System.out.println("Exchange data loaded!");
+
+            // STOCK
             List<ListingStock> listingStocks = listingStockService.fetchNListingStocks(maxStockListings);
             listingStockService.addAllListingStocks(listingStocks);
             List<ListingHistory> listingHistories = listingStockService.fetchNListingsHistory(maxStockListingsHistory);

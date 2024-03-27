@@ -19,7 +19,7 @@ import java.util.Set;
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "userId")
 public class Customer extends User {
-//    @Id
+    //    @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
 //    private Long userId;
 //
@@ -43,13 +43,13 @@ public class Customer extends User {
 //
     @Column
     private Long dateOfBirth;
-//
+    //
     @Column
     private String gender;
-//
+    //
     @Column
     private String address;
-//
+    //
 //    @Column
 //    private String phoneNumber;
 //
