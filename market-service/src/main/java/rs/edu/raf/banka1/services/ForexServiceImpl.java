@@ -35,6 +35,8 @@ public class ForexServiceImpl implements ForexService {
 
     @Autowired
     private ForexRepository forexRepository;
+    @Autowired
+    private ListingStockService listingStockService;
 
     @Value("${alphaVantageAPIToken}")
     private String alphaVantageAPIToken;
@@ -225,7 +227,7 @@ public class ForexServiceImpl implements ForexService {
         listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
         if(listingHistories.isEmpty()) {
             listingHistories = getForexHistory(forex);
-            listingHistoryRepository.saveAll(listingHistories);
+            listingStockService.addAllListingsToHistory(listingHistories);
         }
 
 //        return all timestamps before given timestamp
