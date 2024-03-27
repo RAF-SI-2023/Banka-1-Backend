@@ -24,12 +24,15 @@ public class BootstrapData implements CommandLineRunner {
     private final CurrencyRepository currencyRepository;
 
     @Autowired
-    public BootstrapData(UserRepository userRepository,
-                         PasswordEncoder passwordEncoder,
-                         PermissionRepository permissionRepository,
-                         CustomerRepository customerRepository,
-                         BankAccountService bankAccountService, CompanyRepository companyRepository,
-                         CurrencyRepository currencyRepository) {
+    public BootstrapData(
+        final UserRepository userRepository,
+        final PasswordEncoder passwordEncoder,
+        final PermissionRepository permissionRepository,
+        final CurrencyRepository currencyRepository,
+        final CompanyRepository companyRepository,
+        final BankAccountService bankAccountService,
+        final CustomerRepository customerRepository
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
@@ -86,7 +89,10 @@ public class BootstrapData implements CommandLineRunner {
 
 
     private void seedPermissions() {
-        for(String s : Arrays.asList("addUser", "modifyUser", "deleteUser", "readUser", "modifyCustomer")) {
+        for(String s : Arrays.asList(
+            "addUser", "modifyUser", "deleteUser", "readUser",
+            "manageLoans", "manageLoanRequests", "modifyCustomer")
+        ) {
             if(permissionRepository.findByName(s).isPresent()) {
                 continue;
             }

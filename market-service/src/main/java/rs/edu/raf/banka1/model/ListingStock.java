@@ -1,10 +1,6 @@
 package rs.edu.raf.banka1.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
