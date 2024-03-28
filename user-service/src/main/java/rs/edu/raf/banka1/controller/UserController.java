@@ -146,11 +146,12 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Account activated successfully",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ActivateAccountResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Invalid token"),
+            @ApiResponse(responseCode = "400", description = "Invalid token or password"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<ActivateAccountResponse> activateAccount(@PathVariable String token, @RequestBody ActivateAccountRequest activateAccountRequest) {
         String password = activateAccountRequest.getPassword();
+        if (password.length() < 4) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(userService.activateAccount(token, password), HttpStatus.OK);
     }
 
@@ -178,6 +179,7 @@ public class UserController {
     })
     public ResponseEntity<NewPasswordResponse> setNewPassword(@PathVariable String token, @RequestBody NewPasswordRequest newPasswordRequest) {
         String password = newPasswordRequest.getPassword();
+        if (password.length() < 4) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         NewPasswordResponse newPasswordResponse = userService.setNewPassword(token, password);
         return new ResponseEntity<>(newPasswordResponse, newPasswordResponse.getUserId() != null ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
