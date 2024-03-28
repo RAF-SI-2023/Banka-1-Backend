@@ -174,7 +174,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Account activated successfully",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ActivateAccountResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Invalid token"),
+            @ApiResponse(responseCode = "400", description = "Invalid token or password"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<NewPasswordResponse> setNewPassword(@PathVariable String token, @RequestBody NewPasswordRequest newPasswordRequest) {
