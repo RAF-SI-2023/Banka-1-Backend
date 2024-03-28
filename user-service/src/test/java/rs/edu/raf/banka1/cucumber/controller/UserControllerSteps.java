@@ -364,7 +364,7 @@ public class UserControllerSteps {
                 lastReadAllUsersResponse = objectMapper.readValue(getFiltered(url + port + path), new TypeReference<List<UserResponse>>() {
                 });
                 userRepository.findAll().forEach(user -> {
-                    if (!user.getActive()) return;
+                    if (user.getActive() == null || !user.getActive()) return;
                     if (searchFilter.getEmail() != null && !user.getEmail().equals(searchFilter.getEmail())) return;
                     if (searchFilter.getFirstName() != null && !user.getFirstName().equalsIgnoreCase(searchFilter.getFirstName()))
                         return;
