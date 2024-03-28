@@ -170,7 +170,7 @@ public class FuturesServiceImpl implements FuturesService {
         listingFutureDto.setHigh(Double.parseDouble(ask.replaceAll(",", "")));
         listingFutureDto.setLow(Double.parseDouble(bid.replaceAll(",", "")));
         listingFutureDto.setSettlementDate((int) LocalDate.parse(settlementDate).atStartOfDay(ZoneOffset.UTC).toEpochSecond());
-        listingFutureDto.setVolume(Integer.parseInt(volume.replaceAll(",", "")));
+        listingFutureDto.setVolume(Integer.parseInt(volume.replaceAll(",", "").replaceAll("-", "0")));
         listingFutureDto.setLastPrice(Double.parseDouble(lastPrice.replaceAll(",", "")));
 
         String pageSource = driver.getPageSource();
@@ -279,7 +279,7 @@ public class FuturesServiceImpl implements FuturesService {
             singleHistory.setHigh(Double.parseDouble(cells.get(2).replaceAll(",", "")));
             singleHistory.setLow(Double.parseDouble(cells.get(3).replaceAll(",", "")));
             singleHistory.setChanged(Double.parseDouble(cells.get(4).replaceAll(",", "")) - Double.parseDouble(cells.get(1).replaceAll(",", "")));
-            singleHistory.setVolume(Integer.parseInt(cells.get(6).replaceAll(",", "")));
+            singleHistory.setVolume(Integer.parseInt(cells.get(6).replaceAll(",", "").replaceAll("-", "0")));
             history.add(singleHistory);
         }
         return history;
