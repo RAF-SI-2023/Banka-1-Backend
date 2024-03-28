@@ -13,8 +13,10 @@ import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
 import rs.edu.raf.banka1.requests.InitialActivationRequest;
 import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
+import rs.edu.raf.banka1.responses.CustomerResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -124,6 +126,11 @@ public class CustomerServiceImpl implements CustomerService {
         customer = customerRepository.save(customer);
         bankAccountService.activateBankAccount(customer.getAccountIds().get(0));
         return customer.getUserId();
+    }
+
+    @Override
+    public List<CustomerResponse> findAll() {
+        return customerRepository.findAll().stream().map(customerMapper::customerToCustomerResponse).toList();
     }
 
     @Override
