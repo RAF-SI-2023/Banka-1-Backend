@@ -5,14 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.ListingForex;
+import rs.edu.raf.banka1.model.ListingFuture;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
-import rs.edu.raf.banka1.services.CurrencyService;
-import rs.edu.raf.banka1.services.ForexService;
-import rs.edu.raf.banka1.services.ListingStockService;
-import rs.edu.raf.banka1.services.OptionsService;
-import rs.edu.raf.banka1.services.ExchangeService;
+import rs.edu.raf.banka1.services.*;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.io.BufferedReader;
@@ -23,8 +20,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static rs.edu.raf.banka1.utils.Constants.maxStockListings;
-import static rs.edu.raf.banka1.utils.Constants.maxStockListingsHistory;
+import static rs.edu.raf.banka1.utils.Constants.*;
 
 @Component
 @AllArgsConstructor
@@ -41,13 +37,24 @@ public class BootstrapData implements CommandLineRunner {
     private OptionsService optionsService;
 
     @Autowired
+    private FuturesService futuresService;
+
+    @Autowired
     private final ExchangeService exchangeService;
 
     @Override
     public void run(String... args) throws Exception {
 
         System.out.println("Loading Data...");
-        ExecutorService executorService = Executors.newFixedThreadPool(4);
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+        executorService.submit(() -> {
+            List<ListingFuture> listingFutures = futuresService.fetchNFutures(maxFutures);
+            List<ListingHistory> futureHistories = futuresService.fetchNFutureHistories(listingFutures, maxFutureHistories);
+            futuresService.addAllFutures(listingFutures);
+            listingStockService.addAllListingsToHistory(futureHistories);
+            System.out.println("Futures data loaded!");
+        });
 
         executorService.submit(() -> {
             List<CurrencyDto> currencyList = loadCurrencies();
@@ -59,13 +66,11 @@ public class BootstrapData implements CommandLineRunner {
         // we only need to call the function below every once in a while
         // listingStockService.generateJSONSymbols();
 
+        exchangeService.seedDatabase();
+        System.out.println("Exchange data loaded!");
         // STOCK
         // Populate stock and stock history
         executorService.submit(() -> {
-            // EXCHANGE
-            exchangeService.seedDatabase();
-            System.out.println("Exchange data loaded!");
-
             // STOCK
             List<ListingStock> listingStocks = listingStockService.fetchNListingStocks(maxStockListings);
             listingStockService.addAllListingStocks(listingStocks);
@@ -127,10 +132,4 @@ public class BootstrapData implements CommandLineRunner {
 
         return currencyList;
     }
-
-
-
-
-
-
 }

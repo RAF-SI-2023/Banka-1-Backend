@@ -1,22 +1,17 @@
-package rs.edu.raf.banka1.model;
+package rs.edu.raf.banka1.model.dtos;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
+import java.util.Map;
+
 @Getter
 @Setter
-public class ListingFuture extends ListingBase {
-    @Column
+public class ListingFutureDto extends ListingBaseDto {
     private Integer contractSize;
-    @Column
     private String contractUnit;
-    @Column
     private Integer openInterest;
-    @Column
     private Integer settlementDate;
-    @Column
+    private Double lastPrice;
     private String alternativeTicker;
 }
