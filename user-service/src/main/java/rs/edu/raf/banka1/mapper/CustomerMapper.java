@@ -36,6 +36,7 @@ public class CustomerMapper {
         customer.setPhoneNumber(createCustomerRequest.getPhoneNumber());
         customer.setAddress(createCustomerRequest.getAddress());
         customer.setActive(false);
+        customer.setPosition("customer");
         customer.setPassword(UUID.randomUUID().toString());
         customer.setJmbg(createCustomerRequest.getJmbg());
         return customer;
