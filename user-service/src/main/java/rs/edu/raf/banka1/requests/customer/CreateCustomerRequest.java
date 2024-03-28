@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateCustomerRequest {
-    private CustomerData customerData;
-    private AccountData accountData;
+    private CustomerData customer;
+    private AccountData account;
 }

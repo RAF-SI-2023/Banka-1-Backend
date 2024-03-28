@@ -87,8 +87,8 @@ public class CustomerServiceImplTest {
         accountData.setMaintenanceCost(123.0);
 
         CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest();
-        createCustomerRequest.setCustomerData(customerData);
-        createCustomerRequest.setAccountData(accountData);
+        createCustomerRequest.setCustomer(customerData);
+        createCustomerRequest.setAccount(accountData);
 
         when(currencyService.findCurrencyByCode("RSD")).thenReturn(new Currency());
         try (MockedStatic<SecurityContextHolder> securityContextHolderMockedStatic =
