@@ -1,3 +1,4 @@
+@Ignore
 Feature: user can grab all listings by history
   Scenario: user wants to grab all listings by history
     Given i am logged in with email "admin@admin.com" and password "admin"

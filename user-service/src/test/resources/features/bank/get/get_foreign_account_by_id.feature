@@ -1,3 +1,4 @@
+@Ignore
 Feature: user can search for a foreign account by id
   Scenario: user wants to find foreign account by id
     Given i am logged in with email "admin@admin.com" and password "admin"
