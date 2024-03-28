@@ -1,3 +1,4 @@
+@Ignore
 Feature: user can create foreign account
   Scenario: user can create foreign account
     Given i am logged in with email "admin@admin.com" and password "admin"

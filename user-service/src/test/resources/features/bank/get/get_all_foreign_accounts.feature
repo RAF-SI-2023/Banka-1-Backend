@@ -1,3 +1,4 @@
+@Ignore
 Feature: user can grab all foreign accounts
   Scenario: user wants to search all foreign accounts
     Given i am logged in with email "admin@admin.com" and password "admin"

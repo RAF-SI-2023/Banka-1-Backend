@@ -11,6 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
 //import rs.edu.raf.banka1.mapper.ForeignCurrencyAccountMapper;
@@ -36,6 +38,8 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerSteps {
+
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     private EmailService emailService;
@@ -189,9 +193,12 @@ public class UserControllerSteps {
         userToRemove = Long.parseLong(id);
     }
 
-    public UserControllerSteps(UserRepository userRepository, PermissionRepository permissionRepository) {
+    public UserControllerSteps(UserRepository userRepository,
+                               PermissionRepository permissionRepository,
+                               PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Given("i have email {string}")
@@ -233,7 +240,7 @@ public class UserControllerSteps {
         User user = new User();
         user.setActivationToken("testtoken");
         user.setEmail("testemail");
-        user.setPassword("testpassword");
+        user.setPassword("password");
         user.setActive(true);
         userRepository.save(user);
     }
@@ -497,8 +504,8 @@ public class UserControllerSteps {
 
     @Then("I should have my password set to {string}")
     public void iShouldHaveMyPasswordSetTo(String password) {
-        activatedUser = userRepository.findById(activatedUser.getUserId()).get();
-        assertThat(activatedUser.getPassword()).isEqualTo(password);
+        activatedUser = userRepository.findById(lastActivateAccountResponse.getUserId()).get();
+        assertThat(passwordEncoder.matches(password, activatedUser.getPassword())).isTrue();
     }
 
     @Then("user with email {string} has his first name changed to {string}")
