@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +14,12 @@ import rs.edu.raf.banka1.requests.ActivateAccountRequest;
 import rs.edu.raf.banka1.requests.InitialActivationRequest;
 import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
+import rs.edu.raf.banka1.responses.CustomerResponse;
 import rs.edu.raf.banka1.responses.EditUserResponse;
+import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.CustomerService;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -43,6 +48,20 @@ public class CustomerController {
             return ResponseEntity.ok(true);
         }
         return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+    }
+
+    @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all customers", description = "Returns all customers")
+//    @PreAuthorize("hasAuthority('readUser')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {CustomerResponse.class}))}),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<CustomerResponse>> readAllCustomers() {
+        return new ResponseEntity<>(this.customerService.findAll(), HttpStatus.OK);
     }
 
     @PutMapping()

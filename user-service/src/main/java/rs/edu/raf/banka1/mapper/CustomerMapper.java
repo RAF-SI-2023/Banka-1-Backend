@@ -7,6 +7,7 @@ import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.requests.customer.CustomerData;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
+import rs.edu.raf.banka1.responses.CustomerResponse;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -18,9 +19,11 @@ public class CustomerMapper {
     private PasswordEncoder passwordEncoder;
 
     private PermissionRepository permissionRepository;
+    private BankAccountMapper bankAccountMapper;
 
-    public CustomerMapper(PermissionMapper permissionMapper) {
+    public CustomerMapper(PermissionMapper permissionMapper, BankAccountMapper bankAccountMapper) {
         this.permissionMapper = permissionMapper;
+        this.bankAccountMapper = bankAccountMapper;
     }
 
     public static Customer customerDataToCustomer(CustomerData createCustomerRequest){
@@ -71,6 +74,32 @@ public class CustomerMapper {
             );
         }
         return customer;
+    }
+
+    public CustomerResponse customerToCustomerResponse(Customer customer) {
+        CustomerResponse customerResponse = new CustomerResponse();
+        customerResponse.setUserId(customer.getUserId());
+        customerResponse.setUserId(customer.getUserId());
+        customerResponse.setFirstName(customer.getFirstName());
+        customerResponse.setLastName(customer.getLastName());
+        customerResponse.setEmail(customer.getEmail());
+        customerResponse.setJmbg(customer.getJmbg());
+        customerResponse.setPosition(customer.getPosition());
+        customerResponse.setPhoneNumber(customer.getPhoneNumber());
+        customerResponse.setActive(customer.getActive());
+        customerResponse.setPermissions(customer.getPermissions()
+                .stream()
+                .map(permissionMapper::permissionToPermissionDto)
+                .collect(Collectors.toList())
+        );
+
+        customerResponse.setDateOfBirth(customer.getDateOfBirth());
+        customerResponse.setGender(customer.getGender());
+        customerResponse.setAddress(customer.getAddress());
+        customerResponse.setAccountIds(customer.getAccountIds().stream().
+                map(bankAccountMapper::toDto).collect(Collectors.toList()));
+
+        return customerResponse;
     }
 
     @Autowired
