@@ -47,7 +47,7 @@ public class User {
     @Column
     private String phoneNumber;
 
-    @Column
+    @Column(nullable = false)
     private Boolean active;
 
     @Column
@@ -64,4 +64,21 @@ public class User {
     )
     private Set<Permission> permissions = new HashSet<>();
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "userId=" + userId +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", jmbg='" + jmbg + '\'' +
+                ", position='" + position + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", active=" + active +
+                ", activationToken='" + activationToken + '\'' +
+                ", resetPasswordToken='" + resetPasswordToken + '\'' +
+                ", permissions=" + permissions +
+                '}';
+    }
 }

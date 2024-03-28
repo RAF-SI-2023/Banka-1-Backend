@@ -39,20 +39,6 @@ public class UserMapper {
         return userResponse;
     }
 
-    public User userResponseToUser(UserResponse userResponse) {
-        User user = new User();
-        user.setUserId(userResponse.getUserId());
-        user.setFirstName(userResponse.getFirstName());
-        user.setLastName(userResponse.getLastName());
-        user.setEmail(userResponse.getEmail());
-        user.setPhoneNumber(userResponse.getPhoneNumber());
-        user.setPosition(userResponse.getPosition());
-        user.setActive(userResponse.getActive());
-        user.setPermissions(userResponse.getPermissions().stream().map(permissionMapper::permissionDtoToPermission).
-                collect(Collectors.toSet()));
-        return user;
-    }
-
     public User createUserRequestToUser(CreateUserRequest createUserRequest) {
         User user = new User();
         user.setFirstName(createUserRequest.getFirstName());
@@ -61,7 +47,12 @@ public class UserMapper {
         user.setJmbg(createUserRequest.getJmbg());
         user.setPhoneNumber(createUserRequest.getPhoneNumber());
         user.setPosition(createUserRequest.getPosition());
-        user.setActive(createUserRequest.getActive());
+        if(createUserRequest.getActive() == null) {
+            createUserRequest.setActive(false);
+        }
+        else {
+            user.setActive(createUserRequest.getActive());
+        }
         user.setPassword(UUID.randomUUID().toString());
         return user;
     }
