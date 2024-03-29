@@ -31,6 +31,8 @@ public class ForexServiceImplTest {
     private ForexRepository forexRepository;
     @Mock
     private JsonNode dataNode;
+    @Mock
+    private ListingStockService listingStockService;
 
     @BeforeEach
     public void setUp() {
@@ -42,6 +44,7 @@ public class ForexServiceImplTest {
         forexService.setForexMapper(forexMapper);
         forexService.setListingHistoryMapper(listingHistoryMapper);
         forexService.setForexRepository(forexRepository);
+        forexService.setListingStockService(listingStockService);
     }
     @Test
     public void parseHistoryTest() {
