@@ -19,6 +19,8 @@ public class Constants {
             "Technology", "Electronic Technology", "Health Technology", "Health Services", "Finance", "Energy");
     public static final int maxStockListings = 20;
     public static final int maxStockListingsHistory = 10;
+    public static final int maxFutures = 10;
+    public static final int maxFutureHistories = 20;
     public static String optionsFilePath = getAbsoluteFilePath(
             "options.json");
     //    public static final List<String> sectors = List.of("Technology");
@@ -46,7 +48,7 @@ public class Constants {
         try {
             Resource resource = new ClassPathResource(relativePath);
             if (resource.exists()) {
-                return resource.getURL().getPath();
+                return resource.getURL().getPath().replaceAll("%20", " ");
             } else {
                 System.out.println("[Constants getAbsoluteFilePath] Resource does not exist: " + relativePath);
             }

@@ -18,14 +18,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import rs.edu.raf.banka1.mapper.ForexMapper;
+import rs.edu.raf.banka1.mapper.FutureMapper;
 import rs.edu.raf.banka1.mapper.ListingHistoryMapper;
 import rs.edu.raf.banka1.mapper.StockMapper;
 import rs.edu.raf.banka1.model.ListingForex;
+import rs.edu.raf.banka1.model.ListingFuture;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.dtos.*;
 import rs.edu.raf.banka1.services.ExchangeService;
 import rs.edu.raf.banka1.services.ForexService;
+import rs.edu.raf.banka1.services.FuturesService;
 import rs.edu.raf.banka1.services.ListingStockService;
 
 import java.net.URLDecoder;
@@ -42,20 +45,24 @@ public class MarketController {
 
     private final ExchangeService exchangeService;
     private final ForexService forexService;
+    private final FuturesService futuresService;
     private final ListingStockService listingStockService;
     private final ListingHistoryMapper listingHistoryMapper;
     private final ForexMapper forexMapper;
     private final StockMapper stockMapper;
+    private final FutureMapper futureMapper;
 
     @Autowired
-    public MarketController(ExchangeService exchangeService, ForexService forexService, ListingStockService listingStockService,
-                            ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper, StockMapper stockMapper) {
+    public MarketController(ExchangeService exchangeService, ForexService forexService, ListingStockService listingStockService, FuturesService futuresService,
+                            ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper, StockMapper stockMapper, FutureMapper futureMapper) {
         this.exchangeService = exchangeService;
         this.forexService = forexService;
         this.listingStockService = listingStockService;
+        this.futuresService = futuresService;
         this.listingHistoryMapper = listingHistoryMapper;
         this.forexMapper = forexMapper;
         this.stockMapper = stockMapper;
+        this.futureMapper = futureMapper;
     }
 
     @GetMapping(value = "/exchange", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -120,12 +127,12 @@ public class MarketController {
         if (listingType.equalsIgnoreCase("forex")) {
             return new ResponseEntity<>(forexService.getAllForexes().stream().map(forexMapper::toDto).toList(), HttpStatus.OK);
         }
-        else if(listingType.equalsIgnoreCase("stock"))
+        else if(listingType.equalsIgnoreCase("stock")) {
             return new ResponseEntity<>(listingStockService.getAllStocks().stream().map(stockMapper::stockDto), HttpStatus.OK);
-//        uncomment this and add dtos when merging (only leave futures commented becasue we don't have futures in this sprint)
-
-//        else if(listingType.equalsIgnoreCase("futures"))
-//            return new ResponseEntity<>(this.futuresService.getAllFutures(), HttpStatus.OK);
+        }
+        else if(listingType.equalsIgnoreCase("futures")) {
+            return new ResponseEntity<>(this.futuresService.getAllFutures(), HttpStatus.OK);
+        }
         else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -182,6 +189,31 @@ public class MarketController {
         }
     }
 
+    @GetMapping(value = "/listing/history/future/{futureId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get history by future id", description = "Returns List of histories for given future id, "
+            + "timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is "
+            + "provided it's exclusive)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {ListingHistoryDto.class}))}),
+            @ApiResponse(responseCode = "404", description = "Listing not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<ListingHistoryDto>> getListingsHistoryByFutureId(@PathVariable Long futureId,
+                                                                               @RequestParam(required = false) Integer timestampFrom,
+                                                                               @RequestParam(required = false) Integer timestampTo) {
+
+        List<ListingHistory> listingHistories = futuresService.
+                getListingHistoriesByTimestamp(futureId, timestampFrom, timestampTo);
+        if (listingHistories.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(listingHistories.stream().map(listingHistoryMapper::toDto).toList(), HttpStatus.OK);
+        }
+    }
+
     @GetMapping(value = "/listing/stock/{stockId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get stock by id", description = "Returns stock by id")
     @ApiResponses({
@@ -216,6 +248,24 @@ public class MarketController {
         }
         ListingForexDto listingForexDto = forexMapper.toDto(forex);
         return new ResponseEntity<>(listingForexDto, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/listing/future/{futureId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get future by id", description = "Returns future by id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ListingForexDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Future not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ListingFutureDto> getFutureById(@PathVariable Long futureId) {
+        ListingFuture future = futuresService.findById(futureId).orElse(null);
+        if (future == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        ListingFutureDto listingFutureDto = futureMapper.toDto(future);
+        return new ResponseEntity<>(listingFutureDto, HttpStatus.OK);
     }
 
 }

@@ -13,8 +13,10 @@ import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
 import rs.edu.raf.banka1.requests.InitialActivationRequest;
 import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
+import rs.edu.raf.banka1.responses.CustomerResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -52,7 +54,7 @@ public class CustomerServiceImpl implements CustomerService {
     public Long createNewCustomer(CreateCustomerRequest createCustomerRequest) {
         Currency currency;
         try{
-            currency = currencyService.findCurrencyByCode(createCustomerRequest.getAccountData().getCurrencyName());
+            currency = currencyService.findCurrencyByCode(createCustomerRequest.getAccount().getCurrencyName());
         }
         catch (RuntimeException runtimeException){
             return null;
@@ -70,7 +72,7 @@ public class CustomerServiceImpl implements CustomerService {
                 return null;
             }
 
-            Customer customer = CustomerMapper.customerDataToCustomer(createCustomerRequest.getCustomerData());
+            Customer customer = CustomerMapper.customerDataToCustomer(createCustomerRequest.getCustomer());
             String activationToken = UUID.randomUUID().toString();
             customer.setActivationToken(activationToken);
             customer = customerRepository.save(customer);
@@ -79,8 +81,8 @@ public class CustomerServiceImpl implements CustomerService {
             generateBankAccountRequest.setCurrency(currency);
             generateBankAccountRequest.setCustomer(customer);
             generateBankAccountRequest.setEmployeeId(employee.getUserId());
-            generateBankAccountRequest.setMaintananceFee(createCustomerRequest.getAccountData().getMaintenanceCost());
-            generateBankAccountRequest.setAccountData(createCustomerRequest.getAccountData());
+            generateBankAccountRequest.setMaintananceFee(createCustomerRequest.getAccount().getMaintenanceCost());
+            generateBankAccountRequest.setAccountData(createCustomerRequest.getAccount());
 
             BankAccount bankAccount = bankAccountService.generateBankAccount(generateBankAccountRequest);
 
@@ -124,6 +126,11 @@ public class CustomerServiceImpl implements CustomerService {
         customer = customerRepository.save(customer);
         bankAccountService.activateBankAccount(customer.getAccountIds().get(0));
         return customer.getUserId();
+    }
+
+    @Override
+    public List<CustomerResponse> findAll() {
+        return customerRepository.findAll().stream().map(customerMapper::customerToCustomerResponse).toList();
     }
 
     @Override

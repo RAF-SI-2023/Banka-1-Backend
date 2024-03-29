@@ -34,9 +34,9 @@ public class Country {
     @Temporal(TemporalType.TIME)
     private Date closeTime;
 
-    @OneToMany(mappedBy = "country")
-    private Set<Holiday> holidays = new HashSet<>();
+//    @OneToMany(mappedBy = "country")
+//    private Set<Holiday> holidays = new HashSet<>();
 
-    @OneToMany(mappedBy = "country")
-    private List<Exchange> exchanges = new ArrayList<>();
+//    @OneToMany(mappedBy = "country")
+//    private List<Exchange> exchanges = new ArrayList<>();
 }

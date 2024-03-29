@@ -54,12 +54,14 @@ public class BootstrapData implements CommandLineRunner {
         user1.setPassword(passwordEncoder.encode("user1"));
         user1.setFirstName("User1");
         user1.setLastName("User1Prezime");
+        user1.setActive(true);
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
 
         User client = new User();
         client.setEmail("client@gmail.com");
         client.setPassword(passwordEncoder.encode("client"));
         client.setFirstName("Client");
+        client.setActive(true);
         client.setLastName("ClientPrezime");
         userRepository.save(user1);
         userRepository.save(client);
@@ -74,15 +76,16 @@ public class BootstrapData implements CommandLineRunner {
         customer.setFirstName("Customer1");
         customer.setEmail("customer@gmail.com");
         customer.setPassword(passwordEncoder.encode("customer"));
+        customer.setActive(true);
         customerRepository.save(customer);
 
-        BankAccount bankAccount = createBankAccount(customer, user1);
-        BankAccount bankAccount1 = createBusinessAccount(company, user1);
+//        BankAccount bankAccount = createBankAccount(customer, user1);
+//        BankAccount bankAccount1 = createBusinessAccount(company, user1);
 
 
 //        this automatically creates 2 cards for each bank account
-        bankAccountService.saveBankAccount(bankAccount);
-        bankAccountService.saveBankAccount(bankAccount1);
+//        bankAccountService.saveBankAccount(bankAccount);
+//        bankAccountService.saveBankAccount(bankAccount1);
 
         System.out.println("Data loaded!");
     }
@@ -128,31 +131,31 @@ public class BootstrapData implements CommandLineRunner {
         }
     }
 
-    private BankAccount createBankAccount(User customer, User creator){
-        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
-        createBankAccountRequest.setAccountType("FOREIGN_CURRENCY");
-        createBankAccountRequest.setCustomerId(customer.getUserId());
-        createBankAccountRequest.setBalance(1000.0);
-        createBankAccountRequest.setAvailableBalance(900.0);
-        createBankAccountRequest.setCreatedByAgentId(creator.getUserId());
-        createBankAccountRequest.setCurrency("USD");
-        createBankAccountRequest.setSubtypeOfAccount("LICNI");
-        createBankAccountRequest.setAccountMaintenance(10.0);
-
-        return bankAccountService.createBankAccount(createBankAccountRequest);
-    }
-
-    private BankAccount createBusinessAccount(Company company, User creator){
-        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
-        createBankAccountRequest.setAccountType("BUSINESS");
-        createBankAccountRequest.setCompanyId(company.getId());
-        createBankAccountRequest.setBalance(1000.0);
-        createBankAccountRequest.setAvailableBalance(900.0);
-        createBankAccountRequest.setCreatedByAgentId(creator.getUserId());
-        createBankAccountRequest.setCurrency("USD");
-
-        return bankAccountService.createBankAccount(createBankAccountRequest);
-    }
+//    private BankAccount createBankAccountBootstrap(User customer, User creator){
+//        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
+//        createBankAccountRequest.getAccount().setAccountType("FOREIGN_CURRENCY");
+//        createBankAccountRequest.setCustomerId(customer.getUserId());
+//        createBankAccountRequest.getAccount().setBalance(1000.0);
+//        createBankAccountRequest.getAccount().setAvailableBalance(900.0);
+//        createBankAccountRequest.setCreatedByAgentId(creator.getUserId());
+//        createBankAccountRequest.getAccount().setCurrencyName("USD");
+//        createBankAccountRequest.getAccount().setSubtypeOfAccount("LICNI");
+//        createBankAccountRequest.getAccount().setMaintenanceCost(10.0);
+//
+//        return bankAccountService.createBankAccount(createBankAccountRequest);
+//    }
+//
+//    private BankAccount createBusinessAccount(Company company, User creator){
+//        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
+//        createBankAccountRequest.getAccount().setAccountType("BUSINESS");
+//        createBankAccountRequest.setCompanyId(company.getId());
+//        createBankAccountRequest.getAccount().setBalance(1000.0);
+//        createBankAccountRequest.getAccount().setAvailableBalance(900.0);
+//        createBankAccountRequest.getAccount().setCreatedByAgentId(creator.getUserId());
+//        createBankAccountRequest.getAccount().setCurrencyName("USD");
+//
+//        return bankAccountService.createBankAccount(createBankAccountRequest);
+//    }
 
     private Company createCompany() {
         Company company = new Company();
