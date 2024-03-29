@@ -54,6 +54,7 @@ public class BootstrapData implements CommandLineRunner {
         user1.setPassword(passwordEncoder.encode("user1"));
         user1.setFirstName("User1");
         user1.setLastName("User1Prezime");
+        user1.setPosition("admin");
         user1.setActive(true);
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
 
@@ -62,6 +63,7 @@ public class BootstrapData implements CommandLineRunner {
         client.setPassword(passwordEncoder.encode("client"));
         client.setFirstName("Client");
         client.setActive(true);
+        user1.setPosition("employee");
         client.setLastName("ClientPrezime");
         userRepository.save(user1);
         userRepository.save(client);
@@ -76,6 +78,7 @@ public class BootstrapData implements CommandLineRunner {
         customer.setFirstName("Customer1");
         customer.setEmail("customer@gmail.com");
         customer.setPassword(passwordEncoder.encode("customer"));
+        customer.setPosition("customer");
         customer.setActive(true);
         customerRepository.save(customer);
 

@@ -101,6 +101,8 @@ public class BankAccountServiceImpl implements BankAccountService {
         Currency currency = currencyRepository.findCurrencyByCurrencyCode(createRequest.getAccount().getCurrencyName()).orElse(null);
         bankAccount.setCurrency(currency);
 
+        saveBankAccount(bankAccount);
+
         return bankAccount;
     }
 
