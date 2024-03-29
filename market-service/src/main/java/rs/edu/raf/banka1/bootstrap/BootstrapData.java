@@ -94,10 +94,7 @@ public class BootstrapData implements CommandLineRunner {
         String line = "";
         String csvSplitBy = ",";
 
-        InputStream currencyFile =
-                BootstrapData.class.getClassLoader().getResourceAsStream(Constants.currencyFilePath);
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(currencyFile))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(Constants.currencyFilePath))) {
             br.readLine();
 
             while ((line = br.readLine()) != null) {
