@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.bootstrap;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
@@ -14,9 +15,7 @@ import rs.edu.raf.banka1.services.ForexService;
 import rs.edu.raf.banka1.services.OptionsService;
 import rs.edu.raf.banka1.utils.Constants;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -95,7 +94,10 @@ public class BootstrapData implements CommandLineRunner {
         String line = "";
         String csvSplitBy = ",";
 
-        try (BufferedReader br = new BufferedReader(new FileReader(Constants.currencyFilePath))) {
+        InputStream currencyFile =
+                BootstrapData.class.getClassLoader().getResourceAsStream(Constants.currencyFilePath);
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(currencyFile))) {
             br.readLine();
 
             while ((line = br.readLine()) != null) {

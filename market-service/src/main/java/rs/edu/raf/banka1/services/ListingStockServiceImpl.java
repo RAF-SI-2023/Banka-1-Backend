@@ -108,7 +108,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     @Override
     public List<ListingStock> fetchNListingStocks(int n) {
         try {
-            File file = new File(Constants.listingsFilePath);
+            File file = new File(String.valueOf(ListingStockServiceImpl.class.getClassLoader().getResource(Constants.listingsFilePath)));
 
             // Read JSON data from the file
             JsonNode rootNode = objectMapper.readTree(file);
