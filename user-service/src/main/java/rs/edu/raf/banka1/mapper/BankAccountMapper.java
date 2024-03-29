@@ -27,7 +27,7 @@ public class BankAccountMapper {
         return bankAccountDto;
     }
 
-    public BankAccount generateBankAccount(GenerateBankAccountRequest generateBankAccountRequest){
+    public BankAccount generateBankAccount(GenerateBankAccountRequest generateBankAccountRequest) {
         BankAccount currentAccount = new BankAccount();
         currentAccount.setBalance(0.0);
         currentAccount.setAvailableBalance(0.0);
@@ -37,7 +37,7 @@ public class BankAccountMapper {
         currentAccount.setCreationDate(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toEpochSecond());
         currentAccount.setExpirationDate(LocalDate.now().plusYears(BankAccountServiceImpl.years_to_expire).atStartOfDay(ZoneOffset.UTC).toEpochSecond());
         currentAccount.setCurrency(generateBankAccountRequest.getCurrency());
-        currentAccount.setAccountMaintenance(generateBankAccountRequest.getMaintananceFee());
+        currentAccount.setMaintenanceCost(generateBankAccountRequest.getMaintananceFee());
         return currentAccount;
     }
 

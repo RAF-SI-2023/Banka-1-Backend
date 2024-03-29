@@ -39,5 +39,5 @@ public class BankAccount {
 
 //    Only for current_account and foreign_currency_account
     private String subtypeOfAccount;
-    private Double accountMaintenance;
+    private Double maintenanceCost;
 }

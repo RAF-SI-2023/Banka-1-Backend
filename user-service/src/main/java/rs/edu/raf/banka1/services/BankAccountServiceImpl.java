@@ -3,12 +3,16 @@ package rs.edu.raf.banka1.services;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.BankAccountMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
+import rs.edu.raf.banka1.responses.UserResponse;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -33,20 +37,27 @@ public class BankAccountServiceImpl implements BankAccountService {
     private CurrencyRepository currencyRepository;
     @Autowired
     private BankAccountMapper bankAccountMapper;
+    @Autowired UserService userService;
 
     public static final int years_to_expire = 5;
 
 
     @Override
     public BankAccount createBankAccount(CreateBankAccountRequest createRequest) {
+
+        ///// TODO privremeno!!!
+        createRequest.getAccount().setBalance(0.0);
+        createRequest.getAccount().setAvailableBalance(0.0);
+        createRequest.getAccount().setSubtypeOfAccount("");
+
         BankAccount bankAccount = new BankAccount();
         AccountType type = null;
         try {
-            type = AccountType.valueOf(createRequest.getAccountType().toUpperCase());
+            type = AccountType.valueOf(createRequest.getAccount().getAccountType().toUpperCase());
         } catch (IllegalArgumentException e) {
             return null;
         }
-        bankAccount.setAccountType(AccountType.valueOf(createRequest.getAccountType().toUpperCase()));
+        bankAccount.setAccountType(AccountType.valueOf(createRequest.getAccount().getAccountType().toUpperCase()));
 
         bankAccount.setAccountNumber(generateBankAccountNumber());
 
@@ -56,8 +67,8 @@ public class BankAccountServiceImpl implements BankAccountService {
             Customer customer = customerRepository.findById(createRequest.getCustomerId()).orElse(null);
             if (customer != null) {
             bankAccount.setCustomer(customer);
-            bankAccount.setSubtypeOfAccount(createRequest.getSubtypeOfAccount());
-            bankAccount.setAccountMaintenance(createRequest.getAccountMaintenance());
+            bankAccount.setSubtypeOfAccount(createRequest.getAccount().getSubtypeOfAccount());
+            bankAccount.setMaintenanceCost(createRequest.getAccount().getMaintenanceCost());
             should_exit = false;
             }
         }
@@ -81,10 +92,13 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccount.setCreationDate(creationDate);
         bankAccount.setExpirationDate(expirationDate);
 
-        bankAccount.setBalance(createRequest.getBalance());
-        bankAccount.setAvailableBalance(createRequest.getAvailableBalance());
-        bankAccount.setCreatedByAgentId(createRequest.getCreatedByAgentId());
-        Currency currency = currencyRepository.findCurrencyByCurrencyCode(createRequest.getCurrency()).orElse(null);
+        bankAccount.setBalance(createRequest.getAccount().getBalance());
+        bankAccount.setAvailableBalance(createRequest.getAccount().getAvailableBalance());
+
+
+
+        bankAccount.setCreatedByAgentId(getEmployeeId());
+        Currency currency = currencyRepository.findCurrencyByCurrencyCode(createRequest.getAccount().getCurrencyName()).orElse(null);
         bankAccount.setCurrency(currency);
 
         return bankAccount;
@@ -159,5 +173,21 @@ public class BankAccountServiceImpl implements BankAccountService {
     public void activateBankAccount(BankAccount bankAccount) {
         bankAccount.setAccountStatus(true);
         bankAccountRepository.save(bankAccount);
+    }
+
+    private Long getEmployeeId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // Check if the user is authenticated
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            // Assuming your UserDetails implementation has the email field
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String email = userDetails.getUsername();
+            UserResponse employee = userService.findByEmail(email);
+            if (employee == null) {
+                return null;
+            }
+            return employee.getUserId();
+        }
+        return null;
     }
 }
