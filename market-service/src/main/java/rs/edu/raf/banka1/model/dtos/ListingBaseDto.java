@@ -11,7 +11,7 @@ public class ListingBaseDto {
     private String listingType;
     private String ticker;
     private String name;
-    private String exchange;
+    private String exchangeName;
     private Integer lastRefresh;
     private Double price;
     private Double high;

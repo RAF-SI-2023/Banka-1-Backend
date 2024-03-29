@@ -17,4 +17,6 @@ public class ListingFuture extends ListingBase {
     private Integer openInterest;
     @Column
     private Integer settlementDate;
+    @Column
+    private String alternativeTicker;
 }

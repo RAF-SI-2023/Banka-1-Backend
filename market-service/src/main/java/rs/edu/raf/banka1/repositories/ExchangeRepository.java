@@ -7,4 +7,7 @@ import rs.edu.raf.banka1.model.entities.Exchange;
 
 @Repository
 public interface ExchangeRepository extends JpaRepository<Exchange, Long> {
+
+    Exchange findByExchangeName(String exchangeName);
+
 }

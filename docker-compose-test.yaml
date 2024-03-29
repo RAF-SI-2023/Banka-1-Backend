@@ -18,10 +18,10 @@ services:
       interval: 20s
       timeout: 30s
       retries: 100
-#    security_opt:
-#      - seccomp:unconfined
-#    volumes:
-#        - ./inittest.sql:/docker-entrypoint-initdb.d/inittest.sql
+  #    security_opt:
+  #      - seccomp:unconfined
+  #    volumes:
+  #        - ./inittest.sql:/docker-entrypoint-initdb.d/inittest.sql
 
   user-service:
     build:

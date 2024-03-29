@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.mapper.CurrencyMapper;
 import rs.edu.raf.banka1.mapper.ExchangeMapper;
+import rs.edu.raf.banka1.model.ListingBase;
 import rs.edu.raf.banka1.model.dtos.*;
 import rs.edu.raf.banka1.model.entities.Currency;
 import rs.edu.raf.banka1.model.entities.Exchange;
@@ -44,6 +45,8 @@ public class MarketControllerSteps {
     private List<InflationDto> lastInflationDtos;
     private Object lastObject;
     private List<OptionsDto> lastOptionsResponse;
+    private List<ListingForexDto> lastForexResponse;
+    private List<ListingBaseDto> lastListingResponse;
 
     private List<Inflation> lastInflationResponse;
 
@@ -133,6 +136,12 @@ public class MarketControllerSteps {
             }
             else if(url.equals("/market/currency/100000/inflation")){
                 lastInflationDtos = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<List<InflationDto>>() {});
+            }
+            else if(url.equalsIgnoreCase("/market/listing/get/forex")){
+                lastForexResponse = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<List<ListingForexDto>>() {});
+            }
+            else if(url.equals("/market/listing")){
+                lastListingResponse = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<List<ListingBaseDto>>() {});
             }
         }
         catch (Exception e){

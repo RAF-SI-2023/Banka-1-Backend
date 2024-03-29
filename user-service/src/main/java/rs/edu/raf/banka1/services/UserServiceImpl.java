@@ -21,16 +21,12 @@ import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.requests.ModifyPermissionsRequest;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
+import rs.edu.raf.banka1.responses.NewPasswordResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -105,7 +101,7 @@ public class UserServiceImpl implements UserService {
             user.setPermissions(new HashSet<>(permissionRepository.findAll()));
         }
         userRepository.save(user);
-        emailService.sendActivationEmail(createUserRequest.getEmail(), "RAF Banka - User activation",
+        emailService.sendEmail(createUserRequest.getEmail(), "RAF Banka - User activation",
                 "Visit this URL to activate your account: http://localhost:" + frontPort + "/user/set-password/" + activationToken);
         return new CreateUserResponse(user.getUserId());
     }
@@ -135,7 +131,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> optUser = userRepository.findById(id);
         if (optUser.isPresent()) {
             User user = optUser.get();
-            if (user.getActive()) {
+            if (user.getActive() != null && user.getActive()) {
                 userRepository.deactivateUser(user.getUserId());
                 return true;
             }
@@ -205,5 +201,30 @@ public class UserServiceImpl implements UserService {
     private List<PermissionDto> extractPermissionsFromUser(User user) {
         return user.getPermissions().stream().
                 map(permissionMapper::permissionToPermissionDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public Boolean sendResetPasswordEmail(String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isEmpty()) return false;
+        User user = optionalUser.get();
+        String resetPasswordToken = UUID.randomUUID().toString();
+        user.setResetPasswordToken(resetPasswordToken);
+        userRepository.save(user);
+        return emailService.sendEmail(email, "RAF Banka - Password reset",
+                "Visit this URL to reset your password: http://localhost:" + frontPort + "/user/reset-password/" + resetPasswordToken);
+    }
+
+    @Override
+    public NewPasswordResponse setNewPassword(String token, String password) {
+        Optional<User> optionalUser = userRepository.findByResetPasswordToken(token);
+        if (optionalUser.isEmpty()) {
+            return new NewPasswordResponse();
+        }
+        User user = optionalUser.get();
+        user.setResetPasswordToken(null);
+        user.setPassword(passwordEncoder.encode(password));
+        userRepository.save(user);
+        return new NewPasswordResponse(user.getUserId());
     }
 }

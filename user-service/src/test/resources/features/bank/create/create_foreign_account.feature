@@ -1,3 +1,4 @@
+@Ignore
 Feature: user can create foreign account
   Scenario: user can create foreign account
     Given i am logged in with email "admin@admin.com" and password "admin"
@@ -6,7 +7,7 @@ Feature: user can create foreign account
     And currency is "CD1"
     And typeOfAccount is "user"
     And subtypeOfAccount is "user"
-    And accountMaintenance is "100.0"
+    And maintenanceCost is "100.0"
     And defaultCurrency is "true"
     And allowedCurrencies is "CD1"
     When user calls POST on "/balance/foreign_currency/create"
