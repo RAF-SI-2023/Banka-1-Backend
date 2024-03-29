@@ -1,8 +1,13 @@
 package rs.edu.raf.banka1;
 
 import io.cucumber.java.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -14,19 +19,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
 //@SpringBootTest()
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
 public class EmailServiceTests {
 
-    @MockBean
+    @Mock
     private JavaMailSender javaMailSender;
 
-    @Autowired
     @InjectMocks
     private EmailServiceImpl emailService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
 //        MockitoAnnotations.initMocks(this); // Initialize mocks
+        emailService = new EmailServiceImpl(javaMailSender); // Inject mock into service
     }
 
     @Test

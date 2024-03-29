@@ -13,6 +13,7 @@ import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.CompanyRepository;
 import rs.edu.raf.banka1.repositories.CurrencyRepository;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
+import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 
 import java.util.List;
@@ -44,6 +45,7 @@ public class BankAccountServiceImplTest {
     @Test
     public void createBankAccountTestNoCompanyInDatabase(){
         CreateBankAccountRequest createRequest = new CreateBankAccountRequest();
+        createRequest.setAccount(new BankAccountRequest());
         createRequest.getAccount().setAccountType("BUSINESS");
         createRequest.setCompanyId(1L);
         when(bankAccountService.getCompanyRepository().findById(createRequest.getCompanyId())).thenReturn(Optional.empty());
@@ -54,6 +56,7 @@ public class BankAccountServiceImplTest {
     @Test
     public void createBankAccountTestNoCustomerInDatabase(){
         CreateBankAccountRequest createRequest = new CreateBankAccountRequest();
+        createRequest.setAccount(new BankAccountRequest());
         createRequest.getAccount().setAccountType("CURRENT");
         createRequest.setCustomerId(1L);
         when(bankAccountService.getCustomerRepository().findById(createRequest.getCustomerId())).thenReturn(Optional.empty());
@@ -132,6 +135,7 @@ public class BankAccountServiceImplTest {
     @Test
     public void CreateBankAccountTestNonExistingAccountType() {
         CreateBankAccountRequest createRequest = new CreateBankAccountRequest();
+        createRequest.setAccount(new BankAccountRequest());
         createRequest.getAccount().setAccountType("INVALID");
         assertNull(bankAccountService.createBankAccount(createRequest));
     }
