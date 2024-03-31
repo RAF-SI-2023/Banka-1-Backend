@@ -16,7 +16,6 @@ public class BankAccount {
 
     private String accountNumber;
 
-
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "userId")
     private Customer customer;

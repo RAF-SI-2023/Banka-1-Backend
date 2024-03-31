@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
+import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
 import java.util.Arrays;
@@ -63,15 +64,21 @@ public class BootstrapData implements CommandLineRunner {
         client.setPassword(passwordEncoder.encode("client"));
         client.setFirstName("Client");
         client.setActive(true);
-        user1.setPosition("employee");
+        client.setPosition("employee");
         client.setLastName("ClientPrezime");
+
         userRepository.save(user1);
         userRepository.save(client);
 
-        userRepository.save(client);
 
-
-        Company company = createCompany();
+        Company company = new Company();
+        company.setCompanyName("Sony");
+        company.setTelephoneNumber("123456789");
+        company.setFaxNumber("987654321");
+        company.setPib("123456789");
+        company.setIdNumber("987654321");
+        company.setJobId("123456789");
+        company.setRegistrationNumber("987654321");
         companyRepository.save(company);
 
         Customer customer = new Customer();
@@ -82,8 +89,20 @@ public class BootstrapData implements CommandLineRunner {
         customer.setActive(true);
         customerRepository.save(customer);
 
-//        BankAccount bankAccount = createBankAccount(customer, user1);
-//        BankAccount bankAccount1 = createBusinessAccount(company, user1);
+        BankAccountRequest bankAccountRequest = new BankAccountRequest();
+        bankAccountRequest.setAccountType(AccountType.FOREIGN_CURRENCY);
+        bankAccountRequest.setBalance(1000.0);
+        bankAccountRequest.setAvailableBalance(900.0);
+        bankAccountRequest.setCurrencyCode("USD");
+        bankAccountRequest.setSubtypeOfAccount("LICNI");
+        bankAccountRequest.setMaintenanceCost(10.0);
+
+        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
+        createBankAccountRequest.setCustomerId(customer.getUserId());
+        createBankAccountRequest.setAccount(bankAccountRequest);
+
+        BankAccount noviAcc1 = bankAccountService.createBankAccount(createBankAccountRequest);
+        bankAccountService.saveBankAccount(noviAcc1);
 
 
 //        this automatically creates 2 cards for each bank account
@@ -134,32 +153,9 @@ public class BootstrapData implements CommandLineRunner {
         }
     }
 
-//    private BankAccount createBankAccountBootstrap(User customer, User creator){
-//        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
-//        createBankAccountRequest.getAccount().setAccountType("FOREIGN_CURRENCY");
-//        createBankAccountRequest.setCustomerId(customer.getUserId());
-//        createBankAccountRequest.getAccount().setBalance(1000.0);
-//        createBankAccountRequest.getAccount().setAvailableBalance(900.0);
-//        createBankAccountRequest.setCreatedByAgentId(creator.getUserId());
-//        createBankAccountRequest.getAccount().setCurrencyName("USD");
-//        createBankAccountRequest.getAccount().setSubtypeOfAccount("LICNI");
-//        createBankAccountRequest.getAccount().setMaintenanceCost(10.0);
-//
-//        return bankAccountService.createBankAccount(createBankAccountRequest);
-//    }
-//
-//    private BankAccount createBusinessAccount(Company company, User creator){
-//        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
-//        createBankAccountRequest.getAccount().setAccountType("BUSINESS");
-//        createBankAccountRequest.setCompanyId(company.getId());
-//        createBankAccountRequest.getAccount().setBalance(1000.0);
-//        createBankAccountRequest.getAccount().setAvailableBalance(900.0);
-//        createBankAccountRequest.getAccount().setCreatedByAgentId(creator.getUserId());
-//        createBankAccountRequest.getAccount().setCurrencyName("USD");
-//
-//        return bankAccountService.createBankAccount(createBankAccountRequest);
-//    }
 
+
+    /*
     private Company createCompany() {
         Company company = new Company();
         company.setCompanyName("Sony");
@@ -172,5 +168,7 @@ public class BootstrapData implements CommandLineRunner {
 
         return company;
     }
+
+     */
 
 }

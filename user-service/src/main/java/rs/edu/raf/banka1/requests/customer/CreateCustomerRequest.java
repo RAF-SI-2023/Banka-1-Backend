@@ -12,4 +12,5 @@ import lombok.Setter;
 public class CreateCustomerRequest {
     private CustomerData customer;
     private AccountData account;
+    //private BankAccountRequest account;
 }
