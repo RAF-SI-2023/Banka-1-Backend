@@ -16,6 +16,8 @@ public interface ListingStockService {
     //    returns how many new listings were added
     int addAllListingStocks(List<ListingStock> listingStocks);
 
+    void saveAllListingStocks(List<ListingStock> listingStocks);
+
     //    return 1 if it's a new listing, 0 if it's just an update
     int addListingStock(ListingStock listingStock);
 

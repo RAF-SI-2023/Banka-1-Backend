@@ -12,12 +12,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EditUserRequest {
-    private Long userId;
     private String email;
     private String password;
     private String firstName;
     private String lastName;
-    private String jmbg;
     private String position;
     private String phoneNumber;
     private Boolean isActive;
