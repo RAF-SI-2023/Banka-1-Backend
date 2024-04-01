@@ -30,11 +30,9 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
-    private final JwtUtil jwtUtil;
 
-    public OrderController(OrderService orderService, JwtUtil jwtUtil) {
+    public OrderController(OrderService orderService) {
         this.orderService = orderService;
-        this.jwtUtil = jwtUtil;
     }
 
     @PutMapping(value = "/{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
