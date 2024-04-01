@@ -15,6 +15,7 @@ public class MarketOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long stockId;
+    private Long userId;
     private OrderType orderType;
     private OrderStatus status;
     private Long contractSize;

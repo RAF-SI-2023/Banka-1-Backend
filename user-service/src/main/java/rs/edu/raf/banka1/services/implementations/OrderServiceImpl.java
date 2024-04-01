@@ -1,5 +1,7 @@
 package rs.edu.raf.banka1.services.implementations;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.ListingBaseDto;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.MarketOrder;
@@ -11,25 +13,26 @@ import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.OrderService;
 
 import java.util.Random;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+
+@Service
 public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
     private final MarketService marketService;
-    private final ScheduledExecutorService executorService;
+    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 
     public OrderServiceImpl(
         final OrderMapper orderMapper,
         final OrderRepository orderRepository,
-        final MarketService marketService,
-        final ScheduledExecutorService executorService
+        final MarketService marketService
     ) {
         this.orderMapper = orderMapper;
         this.orderRepository = orderRepository;
         this.marketService = marketService;
-        this.executorService = executorService;
     }
 
     @Override
@@ -85,6 +88,11 @@ public class OrderServiceImpl implements OrderService {
         long timeInterval = random.nextLong(24*60/(volume/remainingQuantity));
         timeInterval = workingHours.equals(WorkingHoursStatus.AFTER_HOURS) ? timeInterval + 30*60 : timeInterval;
         executorService.schedule(() -> startOrder(orderId), timeInterval, TimeUnit.MINUTES);
+    }
+
+    @Override
+    public void changeStatus(final Long id, final OrderStatus orderStatus) {
+        orderRepository.changeStatus(id, orderStatus);
     }
 
 //    private void processOrder(
