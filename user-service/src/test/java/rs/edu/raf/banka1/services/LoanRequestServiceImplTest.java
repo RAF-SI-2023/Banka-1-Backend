@@ -9,24 +9,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import rs.edu.raf.banka1.dtos.LoanDto;
-import rs.edu.raf.banka1.dtos.LoanFullDto;
 import rs.edu.raf.banka1.dtos.LoanRequestDto;
-import rs.edu.raf.banka1.generators.LoanGenerators;
 import rs.edu.raf.banka1.generators.LoanRequestGenerator;
-import rs.edu.raf.banka1.mapper.LoanMapper;
 import rs.edu.raf.banka1.mapper.LoanRequestMapper;
-import rs.edu.raf.banka1.model.Loan;
 import rs.edu.raf.banka1.model.LoanRequest;
-import rs.edu.raf.banka1.model.LoanRequestStatus;
-import rs.edu.raf.banka1.repositories.LoanRepository;
 import rs.edu.raf.banka1.repositories.LoanRequestRepository;
 import rs.edu.raf.banka1.requests.CreateLoanRequest;
+import rs.edu.raf.banka1.services.implementations.LoanRequestServiceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;

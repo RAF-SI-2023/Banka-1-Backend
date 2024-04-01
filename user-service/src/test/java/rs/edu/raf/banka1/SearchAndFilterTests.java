@@ -11,7 +11,7 @@ import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.UserService;
-import rs.edu.raf.banka1.services.UserServiceImpl;
+import rs.edu.raf.banka1.services.implementations.UserServiceImpl;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
 import java.util.Arrays;
