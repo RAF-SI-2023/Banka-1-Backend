@@ -1,4 +1,4 @@
-package rs.edu.raf.banka1.services;
+package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -6,6 +6,7 @@ import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
+import rs.edu.raf.banka1.services.PermissionService;
 
 import java.util.Arrays;
 import java.util.List;

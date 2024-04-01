@@ -1,16 +1,17 @@
-package rs.edu.raf.banka1.services;
+package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.LoanDto;
 import rs.edu.raf.banka1.dtos.LoanFullDto;
 import rs.edu.raf.banka1.mapper.LoanMapper;
 import rs.edu.raf.banka1.repositories.LoanRepository;
+import rs.edu.raf.banka1.services.LoanService;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
-public class LoanServiceImpl implements LoanService{
+public class LoanServiceImpl implements LoanService {
 
     private final LoanRepository loanRepository;
     private final LoanMapper loanMapper;

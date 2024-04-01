@@ -1,8 +1,9 @@
-package rs.edu.raf.banka1.services;
+package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.model.Currency;
 import rs.edu.raf.banka1.repositories.CurrencyRepository;
+import rs.edu.raf.banka1.services.CurrencyService;
 
 @Service
 public class CurrencyServiceImpl implements CurrencyService {
