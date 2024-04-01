@@ -24,6 +24,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final MarketService marketService;
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+    private final Random random = new Random();
 
     public OrderServiceImpl(
         final OrderMapper orderMapper,
@@ -68,7 +69,7 @@ public class OrderServiceImpl implements OrderService {
             return;
 
         final ListingBaseDto listingBaseDto = marketService.getStock(marketOrder.getStockId());
-        Random random = new Random();
+
 
         if(marketOrder.getAllOrNone()){
             marketOrder.setProcessedNumber(marketOrder.getContractSize());
