@@ -376,11 +376,12 @@ public class ListingStockServiceImpl implements ListingStockService {
 
     @Override
     public String getWorkingTimeById(Long id) {
-        Optional<Exchange> optionalExchange = exchangeRepository.findById(id);
-        if (!optionalExchange.isPresent())
-            return "Exchange not found";
-        Exchange exchange = optionalExchange.get();
+        Optional<ListingStock> optionalListingStock = stockRepository.findById(id);
+        if (!optionalListingStock.isPresent())
+            return "Stock not found";
+        ListingStock listingStock = optionalListingStock.get();
 
+        Exchange exchange = listingStock.getExchange();
 
         Optional<Country> optionalCountry = countryRepository.findById(exchange.getCountry().getId());
         if (!optionalCountry.isPresent())
