@@ -235,7 +235,7 @@ public class MarketController {
         return new ResponseEntity<>(listingStockDto, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/listing/stock/{stockId}/time", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/exchange/stock/{stockId}/time", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get working time of exchange center", description = "Returns working time of exchange by stock id")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
