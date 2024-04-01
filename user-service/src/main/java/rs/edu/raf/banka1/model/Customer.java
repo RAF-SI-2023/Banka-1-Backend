@@ -18,6 +18,7 @@ import java.util.Set;
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "userId")
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class Customer extends User {
     //    @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,4 +66,11 @@ public class Customer extends User {
     )
     private List<BankAccount> accountIds;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "customer_permissions",
+            joinColumns = @JoinColumn(name = "customer_id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id")
+    )
+    private Set<Permission> permissions = new HashSet<>();
 }

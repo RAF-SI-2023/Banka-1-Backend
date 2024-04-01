@@ -15,7 +15,8 @@ import java.util.*;
 
 @Component
 public class BootstrapData implements CommandLineRunner {
-    private final UserRepository userRepository;
+//    private final UserRepository userRepository;
+    private final EmployeeRepository employeeRepository;
     private final PermissionRepository permissionRepository;
     private final PasswordEncoder passwordEncoder;
     private final BankAccountService bankAccountService;
@@ -25,7 +26,7 @@ public class BootstrapData implements CommandLineRunner {
 
     @Autowired
     public BootstrapData(
-        final UserRepository userRepository,
+        final EmployeeRepository userRepository,
         final PasswordEncoder passwordEncoder,
         final PermissionRepository permissionRepository,
         final CurrencyRepository currencyRepository,
@@ -33,7 +34,7 @@ public class BootstrapData implements CommandLineRunner {
         final BankAccountService bankAccountService,
         final CustomerRepository customerRepository
     ) {
-        this.userRepository = userRepository;
+        this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
         this.customerRepository = customerRepository;
@@ -49,26 +50,24 @@ public class BootstrapData implements CommandLineRunner {
         seedPermissions();
         seedCurencies();
 
-        User user1 = new User();
+        Employee user1 = new Employee();
         user1.setEmail("admin");
         user1.setPassword(passwordEncoder.encode("user1"));
         user1.setFirstName("User1");
         user1.setLastName("User1Prezime");
-        user1.setPosition("admin");
+//        user1.setPosition("admin");
         user1.setActive(true);
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
+        employeeRepository.save(user1);
 
-        User client = new User();
+        Customer client = new Customer();
         client.setEmail("client@gmail.com");
         client.setPassword(passwordEncoder.encode("client"));
         client.setFirstName("Client");
         client.setActive(true);
-        user1.setPosition("employee");
+//        user1.setPosition("employee");
         client.setLastName("ClientPrezime");
-        userRepository.save(user1);
-        userRepository.save(client);
-
-        userRepository.save(client);
+        customerRepository.save(client);
 
 
         Company company = createCompany();
@@ -78,7 +77,7 @@ public class BootstrapData implements CommandLineRunner {
         customer.setFirstName("Customer1");
         customer.setEmail("customer@gmail.com");
         customer.setPassword(passwordEncoder.encode("customer"));
-        customer.setPosition("customer");
+//        customer.setPosition("customer");
         customer.setActive(true);
         customerRepository.save(customer);
 

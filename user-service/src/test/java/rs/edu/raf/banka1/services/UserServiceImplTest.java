@@ -12,12 +12,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
+import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
+import rs.edu.raf.banka1.mapper.EmployeeMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
+import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.repositories.EmployeeRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
-import rs.edu.raf.banka1.repositories.UserRepository;
+//import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.utils.JwtUtil;
@@ -34,15 +39,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
-@SpringBootTest(classes = {UserServiceImpl.class})
+@SpringBootTest(classes = {EmployeeServiceImpl.class})
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class UserServiceImplTest {
     @MockBean
-    private UserRepository userRepository;
+    private EmployeeRepository employeeRepository;
 
     @MockBean
-    private UserMapper userMapper;
+    private EmployeeMapper userMapper;
 
     @MockBean
     private PermissionRepository permissionRepository;
@@ -61,30 +66,30 @@ public class UserServiceImplTest {
 
     @InjectMocks
     @Autowired
-    private UserServiceImpl userService;
+    private EmployeeServiceImpl userService;
 
     @InjectMocks
     @Autowired
     private EmailServiceImpl emailService;
 
-    private User mockUser;
+    private Employee mockUser;
     private Permission mockPermission;
 
     @BeforeEach
     public void setUp() {
         this.mockPermission = new Permission();
-        this.mockUser = new User();
+        this.mockUser = new Employee();
     }
 
     @Test
     public void testLoadUserByUsernameNoAuthorities() {
-        User user = new User();
+        Employee user = new Employee();
         String email = "user1";
         user.setUserId(1L);
         user.setEmail(email);
         user.setPassword("password");
 
-        when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.of(user));
+        when(employeeRepository.findByEmail(email)).thenReturn(java.util.Optional.of(user));
 
         UserDetails userDetails = userService.loadUserByUsername(email);
         assertEquals(userDetails.getUsername(), email);
@@ -95,7 +100,7 @@ public class UserServiceImplTest {
 
     @Test
     public void testLoadUserByUsernameAuthorities() {
-        User user = new User();
+        Employee user = new Employee();
         String email = "user1";
         user.setUserId(1L);
         user.setEmail(email);
@@ -110,7 +115,7 @@ public class UserServiceImplTest {
         permissionSet.add(permission2);
         user.setPermissions(permissionSet);
 
-        when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.of(user));
+        when(employeeRepository.findByEmail(email)).thenReturn(java.util.Optional.of(user));
 
         UserDetails userDetails = userService.loadUserByUsername(email);
         assertEquals(userDetails.getUsername(), email);
@@ -122,7 +127,7 @@ public class UserServiceImplTest {
     @Test
     public void testLoadUserByUsernameNoUser() {
         String email = "user1";
-        when(userRepository.findByEmail(email)).thenReturn(java.util.Optional.empty());
+        when(employeeRepository.findByEmail(email)).thenReturn(java.util.Optional.empty());
         assertThrows(org.springframework.security.core.userdetails.UsernameNotFoundException.class, () -> {
             userService.loadUserByUsername(email);
         });
@@ -130,9 +135,9 @@ public class UserServiceImplTest {
 
     @Test
     void createUser() {
-        when(userMapper.createUserRequestToUser(any()))
+        when(userMapper.createEmployeeDtoToEmployee(any()))
                 .thenReturn(mockUser);
-        CreateUserRequest createUserRequest = new CreateUserRequest();
+        CreateEmployeeDto createUserRequest = new CreateEmployeeDto();
         createUserRequest.setEmail("noreply.rafbanka1@gmail.com");
         createUserRequest.setFirstName("asdf");
         createUserRequest.setLastName("asdf");
@@ -143,25 +148,25 @@ public class UserServiceImplTest {
         userService.createUser(createUserRequest);
 
         verify(emailService, times(1)).sendEmail(eq(createUserRequest.getEmail()), any(), any());
-        verify(userRepository, times(1)).save(any());
+        verify(employeeRepository, times(1)).save(any());
     }
 
     @Test
     void activateAccount() {
-        when(userRepository.findByActivationToken(any()))
+        when(employeeRepository.findByActivationToken(any()))
                 .thenReturn(Optional.of(mockUser));
 
         String token = "1234";
         String password = "1234";
         userService.activateAccount(token, password);
-        verify(userRepository, times(1)).findByActivationToken(token);
-        verify(userRepository, times(1)).save(any());
+        verify(employeeRepository, times(1)).findByActivationToken(token);
+        verify(employeeRepository, times(1)).save(any());
     }
 
     @Test
     void sendResetPasswordEmail() {
         String email = "1234";
-        when(userRepository.findByEmail(any()))
+        when(employeeRepository.findByEmail(any()))
                 .thenReturn(Optional.of(mockUser));
         when(emailService.sendEmail(eq(email), any(), any()))
                 .thenReturn(true);
@@ -173,7 +178,7 @@ public class UserServiceImplTest {
     @Test
     void sendResetPasswordEmailUserNotFound() {
         String email = "1234";
-        when(userRepository.findByEmail(any()))
+        when(employeeRepository.findByEmail(any()))
                 .thenReturn(Optional.empty());
         when(emailService.sendEmail(eq(email), any(), any()))
                 .thenReturn(true);
@@ -184,39 +189,39 @@ public class UserServiceImplTest {
 
     @Test
     void setNewPassword() {
-        when(userRepository.findByResetPasswordToken(any()))
+        when(employeeRepository.findByResetPasswordToken(any()))
                 .thenReturn(Optional.of(mockUser));
 
         String token = "1234";
         String password = "1234";
         userService.setNewPassword(token, password);
-        verify(userRepository, times(1)).findByResetPasswordToken(token);
-        verify(userRepository, times(1)).save(any());
+        verify(employeeRepository, times(1)).findByResetPasswordToken(token);
+        verify(employeeRepository, times(1)).save(any());
     }
 
     @Test
     void setNewPasswordUserNotFound() {
-        when(userRepository.findByResetPasswordToken(any())).thenReturn(Optional.empty());
+        when(employeeRepository.findByResetPasswordToken(any())).thenReturn(Optional.empty());
 
         String token = "1234";
         String password = "1234";
         userService.setNewPassword(token, password);
-        verify(userRepository, times(1)).findByResetPasswordToken(token);
-        verify(userRepository, times(0)).save(any());
+        verify(employeeRepository, times(1)).findByResetPasswordToken(token);
+        verify(employeeRepository, times(0)).save(any());
     }
 
     @Test
     void editUser() {
-        when(userRepository.findByEmail(any()))
+        when(employeeRepository.findByEmail(any()))
                 .thenReturn(Optional.of(mockUser));
         when(permissionRepository.findByName(any()))
                 .thenReturn(Optional.of(mockPermission));
-        when(userMapper.createUserRequestToUser(any()))
+        when(userMapper.createEmployeeDtoToEmployee(any()))
                 .thenReturn(mockUser);
-        when(userMapper.editUserRequestToUser(any(), any()))
+        when(userMapper.editEmployeeDtoToEmployee(any()))
                 .thenReturn(mockUser);
 
-        CreateUserRequest createUserRequest = new CreateUserRequest();
+        CreateEmployeeDto createUserRequest = new CreateEmployeeDto();
         createUserRequest.setEmail("noreply.rafbanka1@gmail.com");
         createUserRequest.setFirstName("asdf");
         createUserRequest.setLastName("asdf");
@@ -226,7 +231,7 @@ public class UserServiceImplTest {
         createUserRequest.setActive(true);
         userService.createUser(createUserRequest);
 
-        EditUserRequest editUserRequest = new EditUserRequest();
+        EditEmployeeDto editUserRequest = new EditEmployeeDto();
         editUserRequest.setEmail("noreply.rafbanka1@gmail.com");
         editUserRequest.setFirstName("asdf");
         editUserRequest.setLastName("asdf");
@@ -240,8 +245,8 @@ public class UserServiceImplTest {
         editUserRequest.setPermissions(permissions.stream().toList());
         userService.editUser(editUserRequest);
 
-        verify(userRepository, times(2)).save(any());
-        verify(userRepository, times(1)).findByEmail(editUserRequest.getEmail());
+        verify(employeeRepository, times(2)).save(any());
+        verify(employeeRepository, times(1)).findByEmail(editUserRequest.getEmail());
     }
 
 }

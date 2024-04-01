@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.mapper.BankAccountMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
@@ -37,7 +38,7 @@ public class BankAccountServiceImpl implements BankAccountService {
     private CurrencyRepository currencyRepository;
     @Autowired
     private BankAccountMapper bankAccountMapper;
-    @Autowired UserService userService;
+    @Autowired EmployeeService userService;
 
     public static final int years_to_expire = 5;
 
@@ -184,7 +185,7 @@ public class BankAccountServiceImpl implements BankAccountService {
             // Assuming your UserDetails implementation has the email field
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String email = userDetails.getUsername();
-            UserResponse employee = userService.findByEmail(email);
+            EmployeeDto employee = userService.findByEmail(email);
             if (employee == null) {
                 return null;
             }

@@ -2,10 +2,13 @@ package rs.edu.raf.banka1.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.mapper.CustomerMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
@@ -19,6 +22,7 @@ import rs.edu.raf.banka1.responses.UserResponse;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -27,7 +31,7 @@ public class CustomerServiceImpl implements CustomerService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final CurrencyService currencyService;
-    private final UserService userService;
+    private final EmployeeService userService;
     private final BankAccountService bankAccountService;
 
     private final CustomerMapper customerMapper;
@@ -38,7 +42,7 @@ public class CustomerServiceImpl implements CustomerService {
                                EmailService emailService,
                                PasswordEncoder passwordEncoder,
                                CurrencyService currencyService,
-                               UserService userService,
+                               EmployeeService userService,
                                BankAccountService bankAccountService,
                                CustomerMapper customerMapper) {
         this.customerRepository = customerRepository;
@@ -59,7 +63,7 @@ public class CustomerServiceImpl implements CustomerService {
         catch (RuntimeException runtimeException){
             return null;
         }
-        UserResponse employee;
+        EmployeeDto employee;
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // Check if the user is authenticated
@@ -140,5 +144,25 @@ public class CustomerServiceImpl implements CustomerService {
         Customer newCustomer = customerMapper.editCustomerRequestToCustomer(optCustomer.get(), editCustomerRequest);
         customerRepository.save(newCustomer);
         return true;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<Customer> myCustomer = this.customerRepository.findCustomerByEmail(username);
+
+        if (myCustomer.isEmpty()) {
+            throw new UsernameNotFoundException("Email " + username + " not found");
+        }
+
+        Customer customer = myCustomer.get();
+
+        List<SimpleGrantedAuthority> authorities = customer.getPermissions()
+                .stream()
+                .map((permission -> new SimpleGrantedAuthority(permission.getName())))
+                .collect(Collectors.toList());
+
+        return new org.springframework.security.core.userdetails.User(customer.getEmail(),
+                customer.getPassword(),
+                authorities);
     }
 }
