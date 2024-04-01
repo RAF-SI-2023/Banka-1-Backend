@@ -1,4 +1,4 @@
-package rs.edu.raf.banka1.services;
+package rs.edu.raf.banka1.services.implementations;
 
 
 import lombok.Getter;
@@ -12,6 +12,7 @@ import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.CardRepository;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
+import rs.edu.raf.banka1.services.CardService;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -22,7 +23,7 @@ import java.util.List;
 @Getter
 @Setter
 @Service
-public class CardServiceImlp implements CardService{
+public class CardServiceImlp implements CardService {
     @Autowired
     private CardRepository cardRepository;
     @Autowired

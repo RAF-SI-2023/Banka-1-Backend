@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.dtos.BankAccountDto;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
-import rs.edu.raf.banka1.services.BankAccountServiceImpl;
+import rs.edu.raf.banka1.services.implementations.BankAccountServiceImpl;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
