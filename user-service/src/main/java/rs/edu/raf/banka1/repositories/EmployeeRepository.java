@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import rs.edu.raf.banka1.model.Employee;
-import rs.edu.raf.banka1.model.User;
 
 import java.util.List;
 import java.util.Optional;

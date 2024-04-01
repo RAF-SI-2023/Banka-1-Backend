@@ -2,7 +2,6 @@ package rs.edu.raf.banka1.configuration.authproviders;
 
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,7 +14,7 @@ public class CustomAuthProvider implements AuthenticationProvider {
     private final UserDetailsService customerDetailsService;
 
     public CustomAuthProvider(UserDetailsService employeeDetailsService,
-                              UserDetailsService customerDetailsService){
+                              UserDetailsService customerDetailsService) {
         this.employeeDetailsService = employeeDetailsService;
         this.customerDetailsService = customerDetailsService;
     }
@@ -30,10 +29,10 @@ public class CustomAuthProvider implements AuthenticationProvider {
                         null,
                         customerDetails.getAuthorities());
             }
-        }catch (UsernameNotFoundException e){
-            try{
+        } catch (UsernameNotFoundException e) {
+            try {
                 return authenticateEmployee(authentication);
-            }catch (UsernameNotFoundException unf){
+            } catch (UsernameNotFoundException unf){
                 throw unf;
             }
         }
@@ -44,8 +43,9 @@ public class CustomAuthProvider implements AuthenticationProvider {
     private Authentication authenticateEmployee(Authentication authentication) throws UsernameNotFoundException {
         UserDetails employeeDetails = this.employeeDetailsService.loadUserByUsername(authentication.getName());
 
-        if(employeeDetails == null)
+        if (employeeDetails == null) {
             throw new UsernameNotFoundException("User with email " + authentication.getName() + " cannot be found");
+        }
 
         Authentication auth = new UsernamePasswordAuthenticationToken(employeeDetails.getUsername(),
                     null,

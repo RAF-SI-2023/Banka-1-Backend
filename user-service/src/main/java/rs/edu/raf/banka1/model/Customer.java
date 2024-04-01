@@ -68,8 +68,8 @@ public class Customer extends User {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "customer_permissions",
-            joinColumns = @JoinColumn(name = "customer_id"),
+            name = "user_permissions",
+            joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     private Set<Permission> permissions = new HashSet<>();

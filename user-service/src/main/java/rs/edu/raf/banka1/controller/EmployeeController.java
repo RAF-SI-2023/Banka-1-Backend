@@ -34,13 +34,13 @@ public class EmployeeController {
     private final PasswordEncoder passwordEncoder;
 
     public EmployeeController(EmployeeService employeeService,
-                              PasswordEncoder passwordEncoder){
+                              PasswordEncoder passwordEncoder) {
         this.employeeService = employeeService;
         this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all users", description = "Returns all users")
+    @Operation(summary = "Get all employees", description = "Returns all employees")
     @PreAuthorize("hasAuthority('readUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -49,26 +49,26 @@ public class EmployeeController {
                                     subTypes = {UserResponse.class}))}),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<EmployeeDto>> readAllUsers() {
+    public ResponseEntity<List<EmployeeDto>> readAllEmployees() {
         return new ResponseEntity<>(this.employeeService.findAll(), HttpStatus.OK);
     }
 
     @GetMapping(value = "/get/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get user by email", description = "Returns user by email")
+    @Operation(summary = "Get employee by email", description = "Returns employee by email")
     @PreAuthorize("hasAuthority('readUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = EmployeeDto.class))}),
-            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<EmployeeDto> readUser(@PathVariable String email) {
+    public ResponseEntity<EmployeeDto> readEmployee(@PathVariable String email) {
         return new ResponseEntity<>(this.employeeService.findByEmail(email), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get user by id", description = "Returns user by id")
+    @Operation(summary = "Get employee by id", description = "Returns employee by id")
     @PreAuthorize("hasAuthority('readUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -77,20 +77,20 @@ public class EmployeeController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<EmployeeDto> readUser(@PathVariable Long id) {
+    public ResponseEntity<EmployeeDto> readEmployee(@PathVariable Long id) {
         return new ResponseEntity<>(this.employeeService.findById(id), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/getUser", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get user by jwt", description = "Returns user by jwt")
+    @GetMapping(value = "/getEmployee", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get user by jwt", description = "Returns employee by jwt")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = EmployeeDto.class))}),
-            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<EmployeeDto> readUserFromJwt() {
+    public ResponseEntity<EmployeeDto> readEmployeeFromJwt() {
         EmployeeDto employeeDto = this.employeeService.findByJwt();
         if (employeeDto == null) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -100,7 +100,7 @@ public class EmployeeController {
     }
 
     @GetMapping(value = "/search")
-    @Operation(summary = "Search and filter users", description = "Returns users by e-mail, last name and/or position.")
+    @Operation(summary = "Search and filter employees", description = "Returns employees by e-mail, last name and/or position.")
     @PreAuthorize("hasAuthority('readUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -109,7 +109,7 @@ public class EmployeeController {
                                     subTypes = {EmployeeDto.class}))}),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<EmployeeDto>> searchUsers(
+    public ResponseEntity<List<EmployeeDto>> searchEmployees(
             @RequestParam(name = "email", required = false) String email,
             @RequestParam(name = "firstName", required = false) String firstName,
             @RequestParam(name = "lastName", required = false) String lastName,
@@ -118,17 +118,17 @@ public class EmployeeController {
         return new ResponseEntity<>(this.employeeService.search(email, firstName, lastName, position), HttpStatus.OK);
     }
 
-    @PostMapping(value = "/createUser")
-    @Operation(summary = "Admin create user", description = "Creates a new user with the specified params, and forwards an activation mail to the user.")
+    @PostMapping(value = "/createEmployee")
+    @Operation(summary = "Admin create employee", description = "Creates a new employee with the specified params, and forwards an activation mail to the user.")
     @PreAuthorize("hasAuthority('addUser')")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User created successfully",
+            @ApiResponse(responseCode = "200", description = "Employee created successfully",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Long.class))}),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<CreateUserResponse> createUser(@RequestBody CreateEmployeeDto createEmployeeDto) {
-        return new ResponseEntity<CreateUserResponse>(employeeService.createUser(createEmployeeDto), HttpStatus.OK);
+    public ResponseEntity<CreateUserResponse> createEmployee(@RequestBody CreateEmployeeDto createEmployeeDto) {
+        return new ResponseEntity<CreateUserResponse>(employeeService.createEmployee(createEmployeeDto), HttpStatus.OK);
     }
 
     @PostMapping(value = "/activate/{token}")
@@ -142,7 +142,9 @@ public class EmployeeController {
     })
     public ResponseEntity<ActivateAccountResponse> activateAccount(@PathVariable String token, @RequestBody ActivateAccountRequest activateAccountRequest) {
         String password = activateAccountRequest.getPassword();
-        if (password.length() < 4) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (password.length() < 4) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         return new ResponseEntity<>(employeeService.activateAccount(token, password), HttpStatus.OK);
     }
 
@@ -170,27 +172,29 @@ public class EmployeeController {
     })
     public ResponseEntity<NewPasswordResponse> setNewPassword(@PathVariable String token, @RequestBody NewPasswordRequest newPasswordRequest) {
         String password = newPasswordRequest.getPassword();
-        if (password.length() < 4) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (password.length() < 4) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         NewPasswordResponse newPasswordResponse = employeeService.setNewPassword(token, password);
         return new ResponseEntity<>(newPasswordResponse, newPasswordResponse.getUserId() != null ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
 
     @PutMapping("/")
-    @Operation(summary = "Admin edit user", description = "Admin can edit a user's info")
+    @Operation(summary = "Admin edit employee", description = "Admin can edit a employee's info")
     @PreAuthorize("hasAuthority('modifyUser')")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User edited successfully",
+            @ApiResponse(responseCode = "200", description = "Employee edited successfully",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = EditEmployeeDto.class))}),
-            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Boolean> editUser(@RequestBody EditEmployeeDto editUserRequest) {
-        boolean edited = employeeService.editUser(editUserRequest);
+    public ResponseEntity<Boolean> editEmployee(@RequestBody EditEmployeeDto editUserRequest) {
+        boolean edited = employeeService.editEmployee(editUserRequest);
         return new ResponseEntity<>(edited, edited ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping(value = "permission/{userId}")
+    @PostMapping(value = "/permission/{employeeId}")
     @Operation(summary = "Change permissions to user", description = "Change permissions to user")
     @PreAuthorize("hasAuthority('modifyUser')")
     @ApiResponses({
@@ -200,29 +204,29 @@ public class EmployeeController {
             @ApiResponse(responseCode = "404", description = "Bad request"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Boolean> changePermissions(@PathVariable Long userId,
+    public ResponseEntity<Boolean> changePermissions(@PathVariable Long employeeId,
                                                      @RequestBody ModifyPermissionsRequest request) {
-        boolean changed = employeeService.modifyUserPermissions(request, userId);
+        boolean changed = employeeService.modifyEmployeePermissions(request, employeeId);
         return new ResponseEntity<>(changed, changed ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping(value = "/remove/{id}")
-    @Operation(summary = "Admin delete user", description = "Admin can delete a user")
+    @Operation(summary = "Admin delete employee", description = "Admin can employee a user")
     @PreAuthorize("hasAuthority('deleteUser')")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User deleted successfully",
+            @ApiResponse(responseCode = "200", description = "Employee deleted successfully",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Boolean.class))}),
-            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Boolean> deleteUser(@PathVariable Long id) {
-        Boolean deleted = employeeService.deleteUser(id);
+    public ResponseEntity<Boolean> deleteEmployee(@PathVariable Long id) {
+        Boolean deleted = employeeService.deleteEmployee(id);
         return new ResponseEntity<>(deleted, deleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping(value = "/permissions/userId/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all permissions of user", description = "Returns all permissions")
+    @GetMapping(value = "/permissions/employeeId/{employeeId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all permissions of employee", description = "Returns all permissions")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -231,8 +235,8 @@ public class EmployeeController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<PermissionDto>> readAllPermissions(@PathVariable Long userId) {
-        return new ResponseEntity<>(this.employeeService.findPermissions(userId), HttpStatus.OK);
+    public ResponseEntity<List<PermissionDto>> readAllPermissions(@PathVariable Long employeeId) {
+        return new ResponseEntity<>(this.employeeService.findPermissions(employeeId), HttpStatus.OK);
     }
 
 

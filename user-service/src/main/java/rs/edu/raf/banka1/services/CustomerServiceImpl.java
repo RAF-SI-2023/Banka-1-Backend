@@ -10,14 +10,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.mapper.CustomerMapper;
-import rs.edu.raf.banka1.model.*;
-import rs.edu.raf.banka1.repositories.*;
+import rs.edu.raf.banka1.model.BankAccount;
+import rs.edu.raf.banka1.model.Currency;
+import rs.edu.raf.banka1.model.Customer;
+import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
 import rs.edu.raf.banka1.requests.InitialActivationRequest;
 import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
 import rs.edu.raf.banka1.responses.CustomerResponse;
-import rs.edu.raf.banka1.responses.UserResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -57,10 +58,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Long createNewCustomer(CreateCustomerRequest createCustomerRequest) {
         Currency currency;
-        try{
+        try {
             currency = currencyService.findCurrencyByCode(createCustomerRequest.getAccount().getCurrencyName());
-        }
-        catch (RuntimeException runtimeException){
+        } catch (RuntimeException runtimeException) {
             return null;
         }
         EmployeeDto employee;
@@ -72,7 +72,7 @@ public class CustomerServiceImpl implements CustomerService {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String email = userDetails.getUsername();
             employee = userService.findByEmail(email);
-            if(employee == null){
+            if (employee == null) {
                 return null;
             }
 
@@ -104,11 +104,11 @@ public class CustomerServiceImpl implements CustomerService {
     public boolean initialActivation(InitialActivationRequest createCustomerRequest) {
         BankAccount bankAccount = bankAccountService
                 .findBankAccountByAccountNumber(createCustomerRequest.getAccountNumber());
-        if(bankAccount == null){
+        if (bankAccount == null) {
             return false;
         }
-        if(bankAccount.getCustomer().getEmail().equals(createCustomerRequest.getEmail())
-                && bankAccount.getCustomer().getPhoneNumber().equals(createCustomerRequest.getPhoneNumber())){
+        if (bankAccount.getCustomer().getEmail().equals(createCustomerRequest.getEmail())
+                && bankAccount.getCustomer().getPhoneNumber().equals(createCustomerRequest.getPhoneNumber())) {
             String to = bankAccount.getCustomer().getEmail();
             String subject = "Account activation";
             String text = "Your activation code: " + bankAccount.getCustomer().getActivationToken(); //TODO: napravi da radi sa env var
@@ -121,7 +121,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Long activateNewCustomer(String token, String password) {
         Customer customer = customerRepository.findCustomerByActivationToken(token).orElse(null);
-        if(customer == null){
+        if (customer == null) {
             return null;
         }
         customer.setActivationToken(null);

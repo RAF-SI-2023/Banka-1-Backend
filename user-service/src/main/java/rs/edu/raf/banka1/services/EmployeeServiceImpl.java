@@ -99,7 +99,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public CreateUserResponse createUser(CreateEmployeeDto createEmployeeDto) {
+    public CreateUserResponse createEmployee(CreateEmployeeDto createEmployeeDto) {
         Employee employee = this.employeeMapper.createEmployeeDtoToEmployee(createEmployeeDto);
 
         String activationToken = UUID.randomUUID().toString();
@@ -126,7 +126,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public boolean editUser(EditEmployeeDto editEmployeeDto) {
+    public boolean editEmployee(EditEmployeeDto editEmployeeDto) {
         Optional<Employee> employee = this.employeeRepository.findByEmail(editEmployeeDto.getEmail());
 
         if (employee.isEmpty())
@@ -141,7 +141,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Boolean deleteUser(Long id) {
+    public Boolean deleteEmployee(Long id) {
         Optional<Employee> employee = this.employeeRepository.findById(id);
 
         if(employee.isEmpty())
@@ -159,18 +159,18 @@ public class EmployeeServiceImpl implements EmployeeService {
     public List<PermissionDto> findPermissions(Long userId) {
         Employee employee = this.employeeRepository.findById(userId).orElse(null);
 
-        return employee == null ? new ArrayList<PermissionDto>() : extractPermissionsFromUser(employee);
+        return employee == null ? new ArrayList<PermissionDto>() : extractPermissionsFromEmployee(employee);
     }
 
     @Override
     public List<PermissionDto> findPermissions(String email) {
         Employee employee = this.employeeRepository.findByEmail(email).orElse(null);
 
-        return employee == null ? new ArrayList<PermissionDto>() : extractPermissionsFromUser(employee);
+        return employee == null ? new ArrayList<PermissionDto>() : extractPermissionsFromEmployee(employee);
     }
 
     @Override
-    public Boolean modifyUserPermissions(ModifyPermissionsRequest request, Long userId) {
+    public Boolean modifyEmployeePermissions(ModifyPermissionsRequest request, Long userId) {
         Employee employee = this.employeeRepository.findById(userId).orElse(null);
 
         if(employee == null)
@@ -271,7 +271,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return dbEmployee;
     }
 
-    private List<PermissionDto> extractPermissionsFromUser(Employee employee) {
+    private List<PermissionDto> extractPermissionsFromEmployee(Employee employee) {
         return employee.getPermissions()
                 .stream()
                 .map(this.permissionMapper::permissionToPermissionDto)

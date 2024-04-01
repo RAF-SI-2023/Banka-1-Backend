@@ -21,16 +21,16 @@ public interface EmployeeService extends UserDetailsService {
     EmployeeDto findById(Long id);
     EmployeeDto findByJwt();
     List<EmployeeDto> search(String email, String firstName, String lastName, String position);
-    CreateUserResponse createUser(CreateEmployeeDto createEmployeeDto);
+    CreateUserResponse createEmployee(CreateEmployeeDto createEmployeeDto);
     ActivateAccountResponse activateAccount(String token, String password);
-    boolean editUser(EditEmployeeDto editEmployeeDto);
-    Boolean deleteUser(Long id);
+    boolean editEmployee(EditEmployeeDto editEmployeeDto);
+    Boolean deleteEmployee(Long id);
 
     List<PermissionDto> findPermissions(Long userId);
 
     List<PermissionDto> findPermissions(String email);
 
-    Boolean modifyUserPermissions(ModifyPermissionsRequest request, Long userId);
+    Boolean modifyEmployeePermissions(ModifyPermissionsRequest request, Long userId);
 
     Boolean sendResetPasswordEmail(String email);
     NewPasswordResponse setNewPassword(String token, String password);

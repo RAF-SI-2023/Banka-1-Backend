@@ -16,18 +16,12 @@ import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
-import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.Permission;
-import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.EmployeeRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
-//import rs.edu.raf.banka1.repositories.UserRepository;
-import rs.edu.raf.banka1.requests.CreateUserRequest;
-import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Optional;
@@ -145,7 +139,7 @@ public class UserServiceImplTest {
         createUserRequest.setPosition("asdf");
         createUserRequest.setPhoneNumber("1234");
         createUserRequest.setActive(true);
-        userService.createUser(createUserRequest);
+        userService.createEmployee(createUserRequest);
 
         verify(emailService, times(1)).sendEmail(eq(createUserRequest.getEmail()), any(), any());
         verify(employeeRepository, times(1)).save(any());
@@ -229,7 +223,7 @@ public class UserServiceImplTest {
         createUserRequest.setPosition("asdf");
         createUserRequest.setPhoneNumber("1234");
         createUserRequest.setActive(true);
-        userService.createUser(createUserRequest);
+        userService.createEmployee(createUserRequest);
 
         EditEmployeeDto editUserRequest = new EditEmployeeDto();
         editUserRequest.setEmail("noreply.rafbanka1@gmail.com");
@@ -243,7 +237,7 @@ public class UserServiceImplTest {
         Set<String> permissions = new HashSet<>();
         permissions.add(perm);
         editUserRequest.setPermissions(permissions.stream().toList());
-        userService.editUser(editUserRequest);
+        userService.editEmployee(editUserRequest);
 
         verify(employeeRepository, times(2)).save(any());
         verify(employeeRepository, times(1)).findByEmail(editUserRequest.getEmail());

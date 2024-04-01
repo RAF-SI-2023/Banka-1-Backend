@@ -8,10 +8,8 @@ import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Card;
 import rs.edu.raf.banka1.model.Customer;
-import rs.edu.raf.banka1.model.User;
 import rs.edu.raf.banka1.repositories.CardRepository;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
-import rs.edu.raf.banka1.repositories.UserRepository;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;

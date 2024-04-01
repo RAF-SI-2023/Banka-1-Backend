@@ -29,7 +29,7 @@ public class EmployeeMapper {
         this.permissionRepository = permissionRepository;
     }
 
-    public EmployeeDto employeeToEmployeeDto(Employee employee){
+    public EmployeeDto employeeToEmployeeDto(Employee employee) {
         EmployeeDto employeeDto = new EmployeeDto();
         employeeDto.setEmail(employee.getEmail());
         employeeDto.setFirstName(employee.getFirstName());
@@ -40,7 +40,7 @@ public class EmployeeMapper {
 
         List<PermissionDto> permissionDtoList = new ArrayList<>();
 
-        for(Permission permission : employee.getPermissions()){
+        for (Permission permission : employee.getPermissions()) {
             permissionDtoList.add(permissionMapper.permissionToPermissionDto(permission));
         }
 
@@ -49,7 +49,7 @@ public class EmployeeMapper {
         return employeeDto;
     }
 
-    public Employee createEmployeeDtoToEmployee(CreateEmployeeDto createEmployeeDto){
+    public Employee createEmployeeDtoToEmployee(CreateEmployeeDto createEmployeeDto) {
         Employee employee = new Employee();
         employee.setEmail(createEmployeeDto.getEmail());
         employee.setFirstName(createEmployeeDto.getFirstName());
@@ -62,7 +62,7 @@ public class EmployeeMapper {
         return employee;
     }
 
-    public Employee editEmployeeDtoToEmployee(EditEmployeeDto employeeDto){
+    public Employee editEmployeeDtoToEmployee(EditEmployeeDto employeeDto) {
         Employee employee = new Employee();
         employee.setEmail(employeeDto.getEmail());
         employee.setPassword(employeeDto.getPassword());
@@ -79,7 +79,7 @@ public class EmployeeMapper {
         return employee;
     }
 
-    public EditEmployeeDto employeeToEditEmployeeDto(Employee employee){
+    public EditEmployeeDto employeeToEditEmployeeDto(Employee employee) {
         EditEmployeeDto editEmployeeDto = new EditEmployeeDto();
         editEmployeeDto.setEmail(employee.getEmail());
         editEmployeeDto.setFirstName(employee.getFirstName());
@@ -96,7 +96,7 @@ public class EmployeeMapper {
         return editEmployeeDto;
     }
 
-    public CreateEmployeeDto employeeToCreateEmployeeDto(Employee employee){
+    public CreateEmployeeDto employeeToCreateEmployeeDto(Employee employee) {
         CreateEmployeeDto createEmployeeDto = new CreateEmployeeDto();
         createEmployeeDto.setFirstName(employee.getFirstName());
         createEmployeeDto.setLastName(employee.getLastName());
