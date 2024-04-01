@@ -8,8 +8,29 @@ on:
       - sprint-3
       - sprint-4
       - main
+  pull_request:
+    types: [opened, synchronize, closed]
 
 jobs:
+  test:
+    if: ${{github.event_name == 'pull_request'}}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+        with:
+          ref: ${{secrets.CURRENT_BRANCH}}
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '21'
+
+      - name: Run tests
+        run: mvn -B clean package -Dcheckstyle.skip=true -DskipTests=false
+
   build:
     runs-on: ubuntu-latest
 
