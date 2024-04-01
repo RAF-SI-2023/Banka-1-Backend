@@ -1,4 +1,4 @@
-package rs.edu.raf.banka1.services;
+package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.LoanRequestDto;
@@ -6,11 +6,12 @@ import rs.edu.raf.banka1.mapper.LoanRequestMapper;
 import rs.edu.raf.banka1.model.LoanRequestStatus;
 import rs.edu.raf.banka1.repositories.LoanRequestRepository;
 import rs.edu.raf.banka1.requests.CreateLoanRequest;
+import rs.edu.raf.banka1.services.LoanRequestService;
 
 import java.util.List;
 
 @Service
-public class LoanRequestServiceImpl implements LoanRequestService{
+public class LoanRequestServiceImpl implements LoanRequestService {
 
     private final LoanRequestRepository loanRequestRepository;
     private final LoanRequestMapper loanRequestMapper;

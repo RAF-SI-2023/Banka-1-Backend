@@ -1,4 +1,4 @@
-package rs.edu.raf.banka1.services;
+package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -15,6 +15,7 @@ import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
 import rs.edu.raf.banka1.responses.CustomerResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
+import rs.edu.raf.banka1.services.*;
 
 import java.util.List;
 import java.util.Optional;

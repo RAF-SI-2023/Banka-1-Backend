@@ -1,4 +1,4 @@
-package rs.edu.raf.banka1.services;
+package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +23,8 @@ import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
 import rs.edu.raf.banka1.responses.NewPasswordResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
+import rs.edu.raf.banka1.services.EmailService;
+import rs.edu.raf.banka1.services.UserService;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
 import java.util.*;

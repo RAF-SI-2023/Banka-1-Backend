@@ -20,9 +20,10 @@ import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.EditUserRequest;
+import rs.edu.raf.banka1.services.implementations.EmailServiceImpl;
+import rs.edu.raf.banka1.services.implementations.UserServiceImpl;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Optional;
