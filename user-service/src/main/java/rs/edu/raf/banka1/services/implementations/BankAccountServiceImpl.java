@@ -1,4 +1,4 @@
-package rs.edu.raf.banka1.services;
+package rs.edu.raf.banka1.services.implementations;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +14,9 @@ import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
 import rs.edu.raf.banka1.responses.UserResponse;
+import rs.edu.raf.banka1.services.BankAccountService;
+import rs.edu.raf.banka1.services.CardService;
+import rs.edu.raf.banka1.services.UserService;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -38,7 +41,8 @@ public class BankAccountServiceImpl implements BankAccountService {
     private CurrencyRepository currencyRepository;
     @Autowired
     private BankAccountMapper bankAccountMapper;
-    @Autowired UserService userService;
+    @Autowired
+    UserService userService;
 
     public static final int years_to_expire = 5;
 

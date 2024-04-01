@@ -8,7 +8,7 @@ import rs.edu.raf.banka1.repositories.CompanyRepository;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
-import rs.edu.raf.banka1.services.BankAccountServiceImpl;
+import rs.edu.raf.banka1.services.implementations.BankAccountServiceImpl;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;

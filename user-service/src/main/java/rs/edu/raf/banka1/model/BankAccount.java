@@ -3,7 +3,7 @@ package rs.edu.raf.banka1.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -42,6 +42,6 @@ public class BankAccount {
     private String subtypeOfAccount;
     private Double maintenanceCost;
 
-//    @OneToMany(mappedBy = "bankAccount", cascade = CascadeType.ALL)
-//    private List<Card> cards;
+//    @OneToMany(mappedBy = "bankAccount", cascade = CascadeType.ALL,orphanRemoval = true)
+//    private Set<Card> cards;
 }

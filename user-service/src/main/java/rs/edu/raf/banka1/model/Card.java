@@ -27,7 +27,6 @@ public class Card {
     private Boolean isActivated;
 
 //    @ManyToOne
-//    @JoinColumn(name = "accountNumber")
 //    private BankAccount bankAccount;
 
 
