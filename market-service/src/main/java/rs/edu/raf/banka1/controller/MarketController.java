@@ -25,14 +25,17 @@ import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingFuture;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
-import rs.edu.raf.banka1.model.dtos.*;
+import rs.edu.raf.banka1.model.dtos.ExchangeDto;
+import rs.edu.raf.banka1.model.dtos.ListingBaseDto;
+import rs.edu.raf.banka1.model.dtos.ListingForexDto;
+import rs.edu.raf.banka1.model.dtos.ListingFutureDto;
+import rs.edu.raf.banka1.model.dtos.ListingHistoryDto;
+import rs.edu.raf.banka1.model.dtos.ListingStockDto;
 import rs.edu.raf.banka1.services.ExchangeService;
 import rs.edu.raf.banka1.services.ForexService;
 import rs.edu.raf.banka1.services.FuturesService;
 import rs.edu.raf.banka1.services.ListingStockService;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -232,6 +235,24 @@ public class MarketController {
         return new ResponseEntity<>(listingStockDto, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/listing/stock/{stockId}/time", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get working time of exchange center", description = "Returns working time of exchange by stock id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "404", description = "Stock working time not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<String> getStockWorkingTime(@PathVariable Long stockId) {
+        String workingTime = listingStockService.getWorkingTimeById(stockId);
+
+        if (workingTime == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(workingTime, HttpStatus.OK);
+    }
+
     @GetMapping(value = "/listing/forex/{forexId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get forex by id", description = "Returns forex by id")
     @ApiResponses({
@@ -267,5 +288,7 @@ public class MarketController {
         ListingFutureDto listingFutureDto = futureMapper.toDto(future);
         return new ResponseEntity<>(listingFutureDto, HttpStatus.OK);
     }
+
+
 
 }
