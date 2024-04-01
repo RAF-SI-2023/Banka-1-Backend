@@ -88,6 +88,7 @@ public class CustomerServiceImplTest {
         accountData.setBalance(1000.0);
         accountData.setAvailableBalance(1000.0);
         accountData.setSubtypeOfAccount("Personal");
+        accountData.setAccountName("Probni");
 
         CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest();
         createCustomerRequest.setCustomer(customerData);

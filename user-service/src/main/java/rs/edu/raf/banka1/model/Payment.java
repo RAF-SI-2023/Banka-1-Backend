@@ -27,7 +27,4 @@ public class Payment {
     private String purposeOfPayment;
     private Long paymentDate;
 
-
-
-
 }

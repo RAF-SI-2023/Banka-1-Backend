@@ -56,6 +56,7 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccount.setAccountType(type);
 
         bankAccount.setAccountNumber(generateBankAccountNumber());
+        bankAccount.setAccountName(createRequest.getAccount().getAccountName());
 
         boolean should_exit = true;
 

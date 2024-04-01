@@ -10,6 +10,7 @@ import rs.edu.raf.banka1.model.Customer;
 @Setter
 public class BankAccountRequest {
     private AccountType accountType;
+    private String accountName;
     private Double balance;
     private Double availableBalance;
     private String currencyCode;

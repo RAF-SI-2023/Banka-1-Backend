@@ -74,7 +74,7 @@ public class BankAccountServiceImplTest {
         createRequest.setCustomerId(null);
         createRequest.getAccount().setBalance(1000.0);
         createRequest.getAccount().setAvailableBalance(900.0);
-      //  createRequest.getAccount().setCreatedByAgentId(1L);
+        createRequest.getAccount().setAccountName("Probni");
         String curr = "USD";
         createRequest.getAccount().setCurrencyCode(curr);
         Currency currency = new Currency();
@@ -90,8 +90,8 @@ public class BankAccountServiceImplTest {
         assertEquals(bankAccount.getCompany().getId(), company.getId());
         assertEquals(bankAccount.getBalance(), createRequest.getAccount().getBalance());
         assertEquals(bankAccount.getAvailableBalance(), createRequest.getAccount().getAvailableBalance());
-       // assertEquals(bankAccount.getCreatedByAgentId(), createRequest.getCreatedByAgentId());
         assertEquals(bankAccount.getCurrency().getCurrencyCode(), createRequest.getAccount().getCurrencyCode());
+        assertEquals(bankAccount.getAccountName(),createRequest.getAccount().getAccountName());
         assertNull(bankAccount.getCustomer());
         assertNull(bankAccount.getSubtypeOfAccount());
         assertNull(bankAccount.getMaintenanceCost());
@@ -109,9 +109,9 @@ public class BankAccountServiceImplTest {
         createRequest.setCustomerId(customer.getUserId());
         createRequest.getAccount().setBalance(1000.0);
         createRequest.getAccount().setAvailableBalance(900.0);
-       // createRequest.getsetCreatedByAgentId(1L);
         createRequest.getAccount().setMaintenanceCost(10.0);
         createRequest.getAccount().setSubtypeOfAccount("CERN_GATE");
+        createRequest.getAccount().setAccountName("Probni");
 
         String curr = "USD";
         createRequest.getAccount().setCurrencyCode(curr);
@@ -130,6 +130,7 @@ public class BankAccountServiceImplTest {
         assertEquals(bankAccount.getAvailableBalance(), createRequest.getAccount().getAvailableBalance());
         //assertEquals(bankAccount.getCreatedByAgentId(), createRequest.getCreatedByAgentId());
         assertEquals(bankAccount.getCurrency().getCurrencyCode(), createRequest.getAccount().getCurrencyCode());
+        assertEquals(bankAccount.getAccountName(),createRequest.getAccount().getAccountName());
         assertNull(bankAccount.getCompany());
     }
 

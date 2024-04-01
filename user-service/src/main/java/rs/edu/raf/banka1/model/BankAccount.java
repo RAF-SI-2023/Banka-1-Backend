@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import java.util.List;
 
 @Entity
 @Getter
@@ -15,6 +16,7 @@ public class BankAccount {
     private AccountType accountType;
 
     private String accountNumber;
+    private String accountName;
 
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "userId")
@@ -39,4 +41,7 @@ public class BankAccount {
 //    Only for current_account and foreign_currency_account
     private String subtypeOfAccount;
     private Double maintenanceCost;
+
+//    @OneToMany(mappedBy = "bankAccount", cascade = CascadeType.ALL)
+//    private List<Card> cards;
 }

@@ -89,6 +89,11 @@ public class BootstrapData implements CommandLineRunner {
         customer.setActive(true);
         customerRepository.save(customer);
 
+        Card card = new Card();
+        card.setCardName("VISA");
+        card.setCardLimit(900);
+        card.setCardNumber("11111");
+
         BankAccountRequest bankAccountRequest = new BankAccountRequest();
         bankAccountRequest.setAccountType(AccountType.FOREIGN_CURRENCY);
         bankAccountRequest.setBalance(1000.0);
@@ -154,21 +159,5 @@ public class BootstrapData implements CommandLineRunner {
     }
 
 
-
-    /*
-    private Company createCompany() {
-        Company company = new Company();
-        company.setCompanyName("Sony");
-        company.setTelephoneNumber("123456789");
-        company.setFaxNumber("987654321");
-        company.setPib("123456789");
-        company.setIdNumber("987654321");
-        company.setJobId("123456789");
-        company.setRegistrationNumber("987654321");
-
-        return company;
-    }
-
-     */
 
 }

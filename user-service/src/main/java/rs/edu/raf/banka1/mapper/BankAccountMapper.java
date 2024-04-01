@@ -20,6 +20,7 @@ public class BankAccountMapper {
         BankAccountDto bankAccountDto = new BankAccountDto();
         bankAccountDto.setAccountType(bankAccount.getAccountType().name());
         bankAccountDto.setAccountNumber(bankAccount.getAccountNumber());
+        bankAccountDto.setAccountName(bankAccount.getAccountName());
         if(bankAccount.getAccountStatus() != null && bankAccount.getAccountStatus()) {
             bankAccountDto.setAccountStatus("ACTIVE");
         } else {
@@ -31,21 +32,6 @@ public class BankAccountMapper {
 
         return bankAccountDto;
     }
-
-    //ne bi trebalo ovo u mapper vec u service-u
-//    public BankAccount generateBankAccount(GenerateBankAccountRequest generateBankAccountRequest) {
-//        BankAccount currentAccount = new BankAccount();
-//        currentAccount.setBalance(0.0);
-//        currentAccount.setAvailableBalance(0.0);
-//        currentAccount.setCustomer(generateBankAccountRequest.getCustomer());
-//        currentAccount.setAccountType(generateBankAccountRequest.getAccountData().getAccountType());
-//        currentAccount.setCreatedByAgentId(generateBankAccountRequest.getEmployeeId());
-//        currentAccount.setCreationDate(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toEpochSecond());
-//        currentAccount.setExpirationDate(LocalDate.now().plusYears(BankAccountServiceImpl.years_to_expire).atStartOfDay(ZoneOffset.UTC).toEpochSecond());
-//        currentAccount.setCurrency(generateBankAccountRequest.getCurrency());
-//        currentAccount.setMaintenanceCost(generateBankAccountRequest.getMaintananceFee());
-//        return currentAccount;
-//    }
 
 
 }
