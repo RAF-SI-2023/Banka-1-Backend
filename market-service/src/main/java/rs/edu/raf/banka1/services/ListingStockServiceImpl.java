@@ -381,6 +381,7 @@ public class ListingStockServiceImpl implements ListingStockService {
             return "Exchange not found";
         Exchange exchange = optionalExchange.get();
 
+
         Optional<Country> optionalCountry = countryRepository.findById(exchange.getCountry().getId());
         if (!optionalCountry.isPresent())
             return "Country not found";
