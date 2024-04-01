@@ -1,6 +1,5 @@
 package rs.edu.raf.banka1.services.implementations;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.ListingBaseDto;
 import rs.edu.raf.banka1.mapper.OrderMapper;
@@ -41,7 +40,7 @@ public class OrderServiceImpl implements OrderService {
         MarketOrder marketOrder = orderMapper.requestToMarketOrder(request);
         final ListingBaseDto listingBaseDto = marketService.getStock(request.getStockId());
         marketOrder.setPrice(calculatePrice(listingBaseDto.getPrice(), request.getContractSize()));
-        marketOrder.setFee(calculateFee(request.getLimitValue(),marketOrder.getPrice()));
+        marketOrder.setFee(calculateFee(request.getLimitValue(), marketOrder.getPrice()));
         // dok ne implementiramo approvovanje ordera
         marketOrder.setStatus(OrderStatus.APPROVED);
         marketOrder = orderRepository.save(marketOrder);

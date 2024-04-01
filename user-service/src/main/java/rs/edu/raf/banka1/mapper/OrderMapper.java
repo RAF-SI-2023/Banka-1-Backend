@@ -9,17 +9,17 @@ import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 public class OrderMapper {
 
     public MarketOrder requestToMarketOrder(CreateOrderRequest request) {
-        MarketOrder order = new MarketOrder();
-        order.setStockId(request.getStockId());
-        order.setUserId(request.getUserId());
-        order.setOrderType(request.getOrderType());
-        order.setStatus(OrderStatus.PROCESSING);
-        order.setContractSize(request.getContractSize());
-        order.setProcessedNumber(0L);
-        order.setLimitValue(request.getLimitValue());
-        order.setStopValue(request.getStopValue());
-        order.setAllOrNone(request.getAllOrNone());
-        return order;
+        MarketOrder marketOrder = new MarketOrder();
+        marketOrder.setStockId(request.getStockId());
+        marketOrder.setAgentId(request.getUserId());
+        marketOrder.setOrderType(request.getOrderType());
+        marketOrder.setStatus(OrderStatus.PROCESSING);
+        marketOrder.setContractSize(request.getContractSize());
+        marketOrder.setProcessedNumber(0L);
+        marketOrder.setLimitValue(request.getLimitValue());
+        marketOrder.setStopValue(request.getStopValue());
+        marketOrder.setAllOrNone(request.getAllOrNone());
+        return marketOrder;
     }
 
 
