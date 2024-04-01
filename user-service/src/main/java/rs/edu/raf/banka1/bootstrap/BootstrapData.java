@@ -28,6 +28,8 @@ public class BootstrapData implements CommandLineRunner {
     private final LoanRequestRepository loanRequestRepository;
     private final LoanRepository loanRepository;
 
+    private final CardRepository cardRepository;
+
     @Autowired
     public BootstrapData(
         final UserRepository userRepository,
@@ -38,7 +40,8 @@ public class BootstrapData implements CommandLineRunner {
         final BankAccountService bankAccountService,
         final CustomerRepository customerRepository,
         final LoanRequestRepository loanRequestRepository,
-        final LoanRepository loanRepository
+        final LoanRepository loanRepository,
+        final CardRepository cardRepository
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -49,6 +52,7 @@ public class BootstrapData implements CommandLineRunner {
         this.currencyRepository = currencyRepository;
         this.loanRequestRepository = loanRequestRepository;
         this.loanRepository = loanRepository;
+        this.cardRepository = cardRepository;
     }
 
     @Override
@@ -95,25 +99,58 @@ public class BootstrapData implements CommandLineRunner {
         customer.setActive(true);
         customerRepository.save(customer);
 
-        Card card = new Card();
-        card.setCardName("VISA");
-        card.setCardLimit(900);
-        card.setCardNumber("11111");
 
-        BankAccountRequest bankAccountRequest = new BankAccountRequest();
-        bankAccountRequest.setAccountType(AccountType.FOREIGN_CURRENCY);
-        bankAccountRequest.setBalance(1000.0);
-        bankAccountRequest.setAvailableBalance(900.0);
-        bankAccountRequest.setCurrencyCode("USD");
-        bankAccountRequest.setSubtypeOfAccount("LICNI");
-        bankAccountRequest.setMaintenanceCost(10.0);
+//
+//        BankAccount bankAccount1 = new BankAccount();
+//        bankAccount1.setAccountType(AccountType.CURRENT); // Assuming AccountType is an enum with values like CURRENT_ACCOUNT, SAVINGS_ACCOUNT, etc.
+//        bankAccount1.setAccountNumber("1234567890");
+//        bankAccount1.setAccountName("John Doe");
+//        bankAccount1.setBalance(5000.0);
+//        bankAccount1.setAvailableBalance(4500.0);
+//        bankAccount1.setCreatedByAgentId(1L);
+//        bankAccount1.setCreationDate(System.currentTimeMillis());
+//        bankAccount1.setExpirationDate(System.currentTimeMillis() + 31536000000L); // Adding 1 year (in milliseconds) to the current time// Assuming you have a Currency object
+//        bankAccount1.setSubtypeOfAccount("Regular");
+//        bankAccount1.setMaintenanceCost(10.0);
+//
+//        Card card1 = new Card();
+//        card1.setCardNumber("1111222233334444");
+//        card1.setCardType("Credit");
+//        card1.setCardName("John Doe's Credit Card");; // Adding 30 days (in milliseconds) to the current time
+//         // Linking the card to bankAccount1
+//        card1.setCvv("123");
+//        card1.setCardLimit(1000);
+//
+//
+//        Card card = new Card();
+//        card.setCardName("VISA");
+//        card.setCardLimit(900);
+//        card.setCardNumber("11111");
+//        card.setAccountNumber(bankAccount1.getAccountNumber());
+//        card1.setAccountNumber(bankAccount1.getAccountNumber());
+//
+//        bankAccount1.getCards().add(card1);
+//        bankAccount1.getCards().add(card);
+//
+//        bankAccountService.saveBankAccount(bankAccount1);
+//        cardRepository.save(card);
+//        cardRepository.save(card1);
 
-        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
-        createBankAccountRequest.setCustomerId(customer.getUserId());
-        createBankAccountRequest.setAccount(bankAccountRequest);
+//        BankAccountRequest bankAccountRequest = new BankAccountRequest();
+//        bankAccountRequest.setAccountType(AccountType.FOREIGN_CURRENCY);
+//        bankAccountRequest.setBalance(1000.0);
+//        bankAccountRequest.setAvailableBalance(900.0);
+//        bankAccountRequest.setCurrencyCode("USD");
+//        bankAccountRequest.setSubtypeOfAccount("LICNI");
+//        bankAccountRequest.setMaintenanceCost(10.0);
+//
+//        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
+//        createBankAccountRequest.setCustomerId(customer.getUserId());
+//        createBankAccountRequest.setAccount(bankAccountRequest);
+//
+//        BankAccount noviAcc1 = bankAccountService.createBankAccount(createBankAccountRequest);
 
-        BankAccount noviAcc1 = bankAccountService.createBankAccount(createBankAccountRequest);
-        bankAccountService.saveBankAccount(noviAcc1);
+
 
 
         seedLoan();
@@ -174,45 +211,6 @@ public class BootstrapData implements CommandLineRunner {
         }
     }
 
-//    private BankAccount createBankAccountBootstrap(User customer, User creator){
-//        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
-//        createBankAccountRequest.getAccount().setAccountType("FOREIGN_CURRENCY");
-//        createBankAccountRequest.setCustomerId(customer.getUserId());
-//        createBankAccountRequest.getAccount().setBalance(1000.0);
-//        createBankAccountRequest.getAccount().setAvailableBalance(900.0);
-//        createBankAccountRequest.setCreatedByAgentId(creator.getUserId());
-//        createBankAccountRequest.getAccount().setCurrencyName("USD");
-//        createBankAccountRequest.getAccount().setSubtypeOfAccount("LICNI");
-//        createBankAccountRequest.getAccount().setMaintenanceCost(10.0);
-//
-//        return bankAccountService.createBankAccount(createBankAccountRequest);
-//    }
-//
-//    private BankAccount createBusinessAccount(Company company, User creator){
-//        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
-//        createBankAccountRequest.getAccount().setAccountType("BUSINESS");
-//        createBankAccountRequest.setCompanyId(company.getId());
-//        createBankAccountRequest.getAccount().setBalance(1000.0);
-//        createBankAccountRequest.getAccount().setAvailableBalance(900.0);
-//        createBankAccountRequest.getAccount().setCreatedByAgentId(creator.getUserId());
-//        createBankAccountRequest.getAccount().setCurrencyName("USD");
-//
-//        return bankAccountService.createBankAccount(createBankAccountRequest);
-//    }
-
-    private Company createCompany() {
-        Company company = new Company();
-        company.setCompanyName("Sony");
-        company.setTelephoneNumber("123456789");
-        company.setFaxNumber("987654321");
-        company.setPib("123456789");
-        company.setIdNumber("987654321");
-        company.setJobId("123456789");
-        company.setRegistrationNumber("987654321");
-
-        return company;
-    }
-
     private static final Random random = new Random();
 
     private LoanRequest generateLoanRequest() {
@@ -233,24 +231,6 @@ public class BootstrapData implements CommandLineRunner {
         return loanRequest;
     }
 
-    private LoanRequest generateLoanRequest(final String curNum) {
-        LoanRequest loanRequest = new LoanRequest();
-        loanRequest.setLoanType(generateRandomLoanType());
-        loanRequest.setLoanAmount(generateRandomLoanAmount());
-        loanRequest.setCurrency("RSD");
-        loanRequest.setLoanPurpose("Some purpose");
-        loanRequest.setMonthlyIncomeAmount(generateRandomIncomeAmount());
-        loanRequest.setMonthlyIncomeCurrency("RSD");
-        loanRequest.setPermanentEmployee(random.nextBoolean());
-        loanRequest.setEmploymentPeriod(generateRandomEmploymentPeriod());
-        loanRequest.setLoanTerm(generateRandomLoanTerm());
-        loanRequest.setBranchOffice("Branch");
-        loanRequest.setPhoneNumber("123456789");
-        loanRequest.setAccountNumber(curNum);
-        loanRequest.setStatus(LoanRequestStatus.PENDING);
-        return loanRequest;
-    }
-
     private static double generateRandomIncomeAmount() {
         return 40000 + 100000 * random.nextDouble();
     }
@@ -267,23 +247,6 @@ public class BootstrapData implements CommandLineRunner {
         Loan loan = new Loan();
         loan.setLoanType(generateRandomLoanType());
         loan.setAccountNumber(generateRandomAccountNumber());
-        loan.setLoanAmount(generateRandomLoanAmount());
-        loan.setRepaymentPeriod(generateRandomRepaymentPeriod());
-        loan.setNominalInterestRate(generateRandomInterestRate());
-        loan.setEffectiveInterestRate(generateRandomInterestRate());
-        loan.setAgreementDate(generateRandomInstant());
-        loan.setMaturityDate(generateRandomInstant());
-        loan.setInstallmentAmount(generateRandomLoanAmount());
-        loan.setNextInstallmentDate(generateRandomInstant());
-        loan.setRemainingDebt(generateRandomLoanAmount());
-        loan.setCurrency("RSD");
-        return loan;
-    }
-
-    private Loan generateLoan(final String accountNumber) {
-        Loan loan = new Loan();
-        loan.setLoanType(generateRandomLoanType());
-        loan.setAccountNumber(accountNumber);
         loan.setLoanAmount(generateRandomLoanAmount());
         loan.setRepaymentPeriod(generateRandomRepaymentPeriod());
         loan.setNominalInterestRate(generateRandomInterestRate());

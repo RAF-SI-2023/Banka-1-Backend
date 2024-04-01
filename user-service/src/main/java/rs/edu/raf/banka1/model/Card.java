@@ -21,13 +21,10 @@ public class Card {
     private Long expirationDate;
 
     private String accountNumber;
+
     @Column(length = 3)
     private String cvv;
     private Integer cardLimit;
     private Boolean isActivated;
-
-//    @ManyToOne
-//    private BankAccount bankAccount;
-
 
 }
