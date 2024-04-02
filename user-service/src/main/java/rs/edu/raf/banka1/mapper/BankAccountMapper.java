@@ -8,6 +8,7 @@ import rs.edu.raf.banka1.services.implementations.BankAccountServiceImpl;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 
 @Component
 public class BankAccountMapper {
@@ -38,6 +39,7 @@ public class BankAccountMapper {
         currentAccount.setExpirationDate(LocalDate.now().plusYears(BankAccountServiceImpl.years_to_expire).atStartOfDay(ZoneOffset.UTC).toEpochSecond());
         currentAccount.setCurrency(generateBankAccountRequest.getCurrency());
         currentAccount.setMaintenanceCost(generateBankAccountRequest.getMaintananceFee());
+        currentAccount.setPayments(new ArrayList<>());
         return currentAccount;
     }
 

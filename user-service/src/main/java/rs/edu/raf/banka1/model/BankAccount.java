@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -36,6 +38,9 @@ public class BankAccount {
     private Currency currency;
 
     private Boolean accountStatus;
+
+    @OneToMany(mappedBy = "senderBankAccount")
+    private List<Payment> payments;
 
 //    Only for current_account and foreign_currency_account
     private String subtypeOfAccount;
