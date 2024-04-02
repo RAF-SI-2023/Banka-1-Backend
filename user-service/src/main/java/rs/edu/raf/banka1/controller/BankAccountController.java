@@ -52,8 +52,8 @@ public class BankAccountController {
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
     public ResponseEntity<List<CardDto>> getCardsByAccountNumber(@PathVariable(name = "accountNumber") String accountNumber) {
-        List<Card> cards = cardService.getAllCardsByAccountNumber(accountNumber);
-        return ResponseEntity.ok(cards.stream().map(cardMapper::toDto).toList());
+       List<Card> cards = cardService.getAllCardsByAccountNumber(accountNumber);
+       return ResponseEntity.ok(cards.stream().map(cardMapper::toDto).toList());
     }
 
     @GetMapping(value = "/getAllCards/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
