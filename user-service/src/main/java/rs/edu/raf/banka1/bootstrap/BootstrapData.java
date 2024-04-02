@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.tinylog.Logger;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
+import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
 
@@ -28,6 +29,8 @@ public class BootstrapData implements CommandLineRunner {
     private final LoanRequestRepository loanRequestRepository;
     private final LoanRepository loanRepository;
 
+    private final CardRepository cardRepository;
+
     @Autowired
     public BootstrapData(
         final UserRepository userRepository,
@@ -38,7 +41,8 @@ public class BootstrapData implements CommandLineRunner {
         final BankAccountService bankAccountService,
         final CustomerRepository customerRepository,
         final LoanRequestRepository loanRequestRepository,
-        final LoanRepository loanRepository
+        final LoanRepository loanRepository,
+        final CardRepository cardRepository
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -49,6 +53,7 @@ public class BootstrapData implements CommandLineRunner {
         this.currencyRepository = currencyRepository;
         this.loanRequestRepository = loanRequestRepository;
         this.loanRepository = loanRepository;
+        this.cardRepository = cardRepository;
     }
 
     @Override
@@ -57,7 +62,6 @@ public class BootstrapData implements CommandLineRunner {
 
         seedPermissions();
         seedCurencies();
-
 
         User user1 = new User();
         user1.setEmail("admin");
@@ -73,15 +77,19 @@ public class BootstrapData implements CommandLineRunner {
         client.setPassword(passwordEncoder.encode("client"));
         client.setFirstName("Client");
         client.setActive(true);
-        user1.setPosition("employee");
+        client.setPosition("employee");
         client.setLastName("ClientPrezime");
         userRepository.save(user1);
         userRepository.save(client);
 
-        userRepository.save(client);
-
-
-        Company company = createCompany();
+        Company company = new Company();
+        company.setCompanyName("Sony");
+        company.setTelephoneNumber("123456789");
+        company.setFaxNumber("987654321");
+        company.setPib("123456789");
+        company.setIdNumber("987654321");
+        company.setJobId("123456789");
+        company.setRegistrationNumber("987654321");
         companyRepository.save(company);
 
         Customer customer = new Customer();
@@ -92,18 +100,29 @@ public class BootstrapData implements CommandLineRunner {
         customer.setActive(true);
         customerRepository.save(customer);
 
+
+        BankAccountRequest bankAccountRequest = new BankAccountRequest();
+        bankAccountRequest.setAccountType(AccountType.FOREIGN_CURRENCY);
+        bankAccountRequest.setBalance(1000.0);
+        bankAccountRequest.setAvailableBalance(900.0);
+        bankAccountRequest.setCurrencyCode("USD");
+        bankAccountRequest.setSubtypeOfAccount("LICNI");
+        bankAccountRequest.setMaintenanceCost(10.0);
+
+        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
+        createBankAccountRequest.setCustomerId(customer.getUserId());
+        createBankAccountRequest.setAccount(bankAccountRequest);
+        //BITNO!
+        // createBankAccount unutar sebe pozove saveBankAccount koji unutar sebe pozove createCard
+        // na ovaj nacin se dodaju 2 kartice za svaki bankAcc
+        bankAccountService.createBankAccount(createBankAccountRequest);
+
+
         seedLoan();
         seedLoanRequest();
 
-//        BankAccount bankAccount = createBankAccount(customer, user1);
-//        BankAccount bankAccount1 = createBusinessAccount(company, user1);
-//
-//
-//        this automatically creates 2 cards for each bank account
-//        bankAccountService.saveBankAccount(bankAccount);
-//        bankAccountService.saveBankAccount(bankAccount1);
-
         Logger.info("Data loaded!");
+
     }
 
     private void seedLoanRequest() {
@@ -158,45 +177,6 @@ public class BootstrapData implements CommandLineRunner {
         }
     }
 
-//    private BankAccount createBankAccountBootstrap(User customer, User creator){
-//        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
-//        createBankAccountRequest.getAccount().setAccountType("FOREIGN_CURRENCY");
-//        createBankAccountRequest.setCustomerId(customer.getUserId());
-//        createBankAccountRequest.getAccount().setBalance(1000.0);
-//        createBankAccountRequest.getAccount().setAvailableBalance(900.0);
-//        createBankAccountRequest.setCreatedByAgentId(creator.getUserId());
-//        createBankAccountRequest.getAccount().setCurrencyName("USD");
-//        createBankAccountRequest.getAccount().setSubtypeOfAccount("LICNI");
-//        createBankAccountRequest.getAccount().setMaintenanceCost(10.0);
-//
-//        return bankAccountService.createBankAccount(createBankAccountRequest);
-//    }
-//
-//    private BankAccount createBusinessAccount(Company company, User creator){
-//        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
-//        createBankAccountRequest.getAccount().setAccountType("BUSINESS");
-//        createBankAccountRequest.setCompanyId(company.getId());
-//        createBankAccountRequest.getAccount().setBalance(1000.0);
-//        createBankAccountRequest.getAccount().setAvailableBalance(900.0);
-//        createBankAccountRequest.getAccount().setCreatedByAgentId(creator.getUserId());
-//        createBankAccountRequest.getAccount().setCurrencyName("USD");
-//
-//        return bankAccountService.createBankAccount(createBankAccountRequest);
-//    }
-
-    private Company createCompany() {
-        Company company = new Company();
-        company.setCompanyName("Sony");
-        company.setTelephoneNumber("123456789");
-        company.setFaxNumber("987654321");
-        company.setPib("123456789");
-        company.setIdNumber("987654321");
-        company.setJobId("123456789");
-        company.setRegistrationNumber("987654321");
-
-        return company;
-    }
-
     private static final Random random = new Random();
 
     private LoanRequest generateLoanRequest() {
@@ -217,24 +197,6 @@ public class BootstrapData implements CommandLineRunner {
         return loanRequest;
     }
 
-    private LoanRequest generateLoanRequest(final String curNum) {
-        LoanRequest loanRequest = new LoanRequest();
-        loanRequest.setLoanType(generateRandomLoanType());
-        loanRequest.setLoanAmount(generateRandomLoanAmount());
-        loanRequest.setCurrency("RSD");
-        loanRequest.setLoanPurpose("Some purpose");
-        loanRequest.setMonthlyIncomeAmount(generateRandomIncomeAmount());
-        loanRequest.setMonthlyIncomeCurrency("RSD");
-        loanRequest.setPermanentEmployee(random.nextBoolean());
-        loanRequest.setEmploymentPeriod(generateRandomEmploymentPeriod());
-        loanRequest.setLoanTerm(generateRandomLoanTerm());
-        loanRequest.setBranchOffice("Branch");
-        loanRequest.setPhoneNumber("123456789");
-        loanRequest.setAccountNumber(curNum);
-        loanRequest.setStatus(LoanRequestStatus.PENDING);
-        return loanRequest;
-    }
-
     private static double generateRandomIncomeAmount() {
         return 40000 + 100000 * random.nextDouble();
     }
@@ -251,23 +213,6 @@ public class BootstrapData implements CommandLineRunner {
         Loan loan = new Loan();
         loan.setLoanType(generateRandomLoanType());
         loan.setAccountNumber(generateRandomAccountNumber());
-        loan.setLoanAmount(generateRandomLoanAmount());
-        loan.setRepaymentPeriod(generateRandomRepaymentPeriod());
-        loan.setNominalInterestRate(generateRandomInterestRate());
-        loan.setEffectiveInterestRate(generateRandomInterestRate());
-        loan.setAgreementDate(generateRandomInstant());
-        loan.setMaturityDate(generateRandomInstant());
-        loan.setInstallmentAmount(generateRandomLoanAmount());
-        loan.setNextInstallmentDate(generateRandomInstant());
-        loan.setRemainingDebt(generateRandomLoanAmount());
-        loan.setCurrency("RSD");
-        return loan;
-    }
-
-    private Loan generateLoan(final String accountNumber) {
-        Loan loan = new Loan();
-        loan.setLoanType(generateRandomLoanType());
-        loan.setAccountNumber(accountNumber);
         loan.setLoanAmount(generateRandomLoanAmount());
         loan.setRepaymentPeriod(generateRandomRepaymentPeriod());
         loan.setNominalInterestRate(generateRandomInterestRate());

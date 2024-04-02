@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.CustomerMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
-import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
+import rs.edu.raf.banka1.requests.BankAccountRequest;
+import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.requests.InitialActivationRequest;
 import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
@@ -55,7 +56,7 @@ public class CustomerServiceImpl implements CustomerService {
     public Long createNewCustomer(CreateCustomerRequest createCustomerRequest) {
         Currency currency;
         try{
-            currency = currencyService.findCurrencyByCode(createCustomerRequest.getAccount().getCurrencyName());
+            currency = currencyService.findCurrencyByCode(createCustomerRequest.getAccount().getCurrencyCode());
         }
         catch (RuntimeException runtimeException){
             return null;
@@ -78,15 +79,23 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setActivationToken(activationToken);
             customer = customerRepository.save(customer);
 
-            GenerateBankAccountRequest generateBankAccountRequest = new GenerateBankAccountRequest();
-            generateBankAccountRequest.setCurrency(currency);
-            generateBankAccountRequest.setCustomer(customer);
-            generateBankAccountRequest.setEmployeeId(employee.getUserId());
-            generateBankAccountRequest.setMaintananceFee(createCustomerRequest.getAccount().getMaintenanceCost());
-            generateBankAccountRequest.setAccountData(createCustomerRequest.getAccount());
 
-            BankAccount bankAccount = bankAccountService.generateBankAccount(generateBankAccountRequest);
+            CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
+            BankAccountRequest bankAccountRequest = new BankAccountRequest();
+            createBankAccountRequest.setAccount(bankAccountRequest);
 
+            createBankAccountRequest.setCustomerId(customer.getUserId());
+
+            createBankAccountRequest.getAccount().setCurrencyCode(currency.getCurrencyCode());
+            createBankAccountRequest.getAccount().setAccountType(createCustomerRequest.getAccount().getAccountType());
+            createBankAccountRequest.getAccount().setMaintenanceCost(createCustomerRequest.getAccount().getMaintenanceCost());
+            createBankAccountRequest.getAccount().setCurrencyCode(currency.getCurrencyCode());
+            createBankAccountRequest.getAccount().setBalance(createCustomerRequest.getAccount().getBalance());
+            createBankAccountRequest.getAccount().setAvailableBalance(createCustomerRequest.getAccount().getAvailableBalance());
+            createBankAccountRequest.getAccount().setSubtypeOfAccount(createCustomerRequest.getAccount().getSubtypeOfAccount());
+            createBankAccountRequest.getAccount().setAccountName(createCustomerRequest.getAccount().getAccountName());
+
+            BankAccount bankAccount = bankAccountService.createBankAccount(createBankAccountRequest);
 
             String to = customer.getEmail();
             String subject = "Account activation";
@@ -96,7 +105,6 @@ public class CustomerServiceImpl implements CustomerService {
         }
         return null;
     }
-
     @Override
     public boolean initialActivation(InitialActivationRequest createCustomerRequest) {
         BankAccount bankAccount = bankAccountService

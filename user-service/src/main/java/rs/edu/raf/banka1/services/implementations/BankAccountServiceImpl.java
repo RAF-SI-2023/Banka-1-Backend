@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.BankAccountMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
+import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
 import rs.edu.raf.banka1.responses.UserResponse;
@@ -49,21 +50,17 @@ public class BankAccountServiceImpl implements BankAccountService {
     @Override
     public BankAccount createBankAccount(CreateBankAccountRequest createRequest) {
 
-        ///// TODO privremeno!!!
-        createRequest.getAccount().setBalance(0.0);
-        createRequest.getAccount().setAvailableBalance(0.0);
-        createRequest.getAccount().setSubtypeOfAccount("");
-
         BankAccount bankAccount = new BankAccount();
         AccountType type = null;
         try {
-            type = AccountType.valueOf(createRequest.getAccount().getAccountType().toUpperCase());
+            type =createRequest.getAccount().getAccountType();
         } catch (IllegalArgumentException e) {
             return null;
         }
-        bankAccount.setAccountType(AccountType.valueOf(createRequest.getAccount().getAccountType().toUpperCase()));
+        bankAccount.setAccountType(type);
 
         bankAccount.setAccountNumber(generateBankAccountNumber());
+        bankAccount.setAccountName(createRequest.getAccount().getAccountName());
 
         boolean should_exit = true;
 
@@ -100,10 +97,11 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccount.setAvailableBalance(createRequest.getAccount().getAvailableBalance());
 
 
-
         bankAccount.setCreatedByAgentId(getEmployeeId());
-        Currency currency = currencyRepository.findCurrencyByCurrencyCode(createRequest.getAccount().getCurrencyName()).orElse(null);
+        Currency currency = currencyRepository.findCurrencyByCurrencyCode(createRequest.getAccount().getCurrencyCode()).orElse(null);
         bankAccount.setCurrency(currency);
+
+        bankAccount.setAccountStatus(false);
 
         saveBankAccount(bankAccount);
 
@@ -159,14 +157,6 @@ public class BankAccountServiceImpl implements BankAccountService {
         }
     }
 
-    @Override
-    public BankAccount generateBankAccount(GenerateBankAccountRequest generateBankAccountRequest) {
-        BankAccount bankAccount = bankAccountMapper.generateBankAccount(generateBankAccountRequest);
-        bankAccount.setAccountNumber(generateBankAccountNumber());
-
-        saveBankAccount(bankAccount);
-        return bankAccount;
-    }
 
     @Override
     public BankAccount findBankAccountByAccountNumber(String accountNumber) {
