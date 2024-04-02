@@ -100,57 +100,21 @@ public class BootstrapData implements CommandLineRunner {
         customerRepository.save(customer);
 
 
-//
-//        BankAccount bankAccount1 = new BankAccount();
-//        bankAccount1.setAccountType(AccountType.CURRENT); // Assuming AccountType is an enum with values like CURRENT_ACCOUNT, SAVINGS_ACCOUNT, etc.
-//        bankAccount1.setAccountNumber("1234567890");
-//        bankAccount1.setAccountName("John Doe");
-//        bankAccount1.setBalance(5000.0);
-//        bankAccount1.setAvailableBalance(4500.0);
-//        bankAccount1.setCreatedByAgentId(1L);
-//        bankAccount1.setCreationDate(System.currentTimeMillis());
-//        bankAccount1.setExpirationDate(System.currentTimeMillis() + 31536000000L); // Adding 1 year (in milliseconds) to the current time// Assuming you have a Currency object
-//        bankAccount1.setSubtypeOfAccount("Regular");
-//        bankAccount1.setMaintenanceCost(10.0);
-//
-//        Card card1 = new Card();
-//        card1.setCardNumber("1111222233334444");
-//        card1.setCardType("Credit");
-//        card1.setCardName("John Doe's Credit Card");; // Adding 30 days (in milliseconds) to the current time
-//         // Linking the card to bankAccount1
-//        card1.setCvv("123");
-//        card1.setCardLimit(1000);
-//
-//
-//        Card card = new Card();
-//        card.setCardName("VISA");
-//        card.setCardLimit(900);
-//        card.setCardNumber("11111");
-//        card.setAccountNumber(bankAccount1.getAccountNumber());
-//        card1.setAccountNumber(bankAccount1.getAccountNumber());
-//
-//        bankAccount1.getCards().add(card1);
-//        bankAccount1.getCards().add(card);
-//
-//        bankAccountService.saveBankAccount(bankAccount1);
-//        cardRepository.save(card);
-//        cardRepository.save(card1);
+        BankAccountRequest bankAccountRequest = new BankAccountRequest();
+        bankAccountRequest.setAccountType(AccountType.FOREIGN_CURRENCY);
+        bankAccountRequest.setBalance(1000.0);
+        bankAccountRequest.setAvailableBalance(900.0);
+        bankAccountRequest.setCurrencyCode("USD");
+        bankAccountRequest.setSubtypeOfAccount("LICNI");
+        bankAccountRequest.setMaintenanceCost(10.0);
 
-//        BankAccountRequest bankAccountRequest = new BankAccountRequest();
-//        bankAccountRequest.setAccountType(AccountType.FOREIGN_CURRENCY);
-//        bankAccountRequest.setBalance(1000.0);
-//        bankAccountRequest.setAvailableBalance(900.0);
-//        bankAccountRequest.setCurrencyCode("USD");
-//        bankAccountRequest.setSubtypeOfAccount("LICNI");
-//        bankAccountRequest.setMaintenanceCost(10.0);
-//
-//        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
-//        createBankAccountRequest.setCustomerId(customer.getUserId());
-//        createBankAccountRequest.setAccount(bankAccountRequest);
-//
-//        BankAccount noviAcc1 = bankAccountService.createBankAccount(createBankAccountRequest);
-
-
+        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
+        createBankAccountRequest.setCustomerId(customer.getUserId());
+        createBankAccountRequest.setAccount(bankAccountRequest);
+        //BITNO!
+        // createBankAccount unutar sebe pozove saveBankAccount koji unutar sebe pozove createCard
+        // na ovaj nacin se dodaju 2 kartice za svaki bankAcc
+        bankAccountService.createBankAccount(createBankAccountRequest);
 
 
         seedLoan();
