@@ -22,5 +22,4 @@ public class Agent extends User {
     //
     @Column
     private Boolean requireApproval;
-
 }

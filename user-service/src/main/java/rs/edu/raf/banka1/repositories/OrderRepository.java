@@ -13,7 +13,4 @@ public interface OrderRepository extends JpaRepository<MarketOrder, Long> {
     @Modifying
     @Query("UPDATE MarketOrder mo SET mo.status = :orderStatus WHERE mo.id = :orderId")
     void changeStatus(final Long orderId, final OrderStatus orderStatus);
-
-
-
 }

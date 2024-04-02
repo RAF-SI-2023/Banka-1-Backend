@@ -1,16 +1,18 @@
 package rs.edu.raf.banka1.services.implementations;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.ListingBaseDto;
 import rs.edu.raf.banka1.mapper.OrderMapper;
-import rs.edu.raf.banka1.model.MarketOrder;
-import rs.edu.raf.banka1.model.OrderStatus;
-import rs.edu.raf.banka1.model.WorkingHoursStatus;
+import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.OrderRepository;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.OrderService;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,8 +43,14 @@ public class OrderServiceImpl implements OrderService {
         final ListingBaseDto listingBaseDto = marketService.getStock(request.getStockId());
         marketOrder.setPrice(calculatePrice(listingBaseDto.getPrice(), request.getContractSize()));
         marketOrder.setFee(calculateFee(request.getLimitValue(), marketOrder.getPrice()));
-        // dok ne implementiramo approvovanje ordera
-        marketOrder.setStatus(OrderStatus.APPROVED);
+
+        if (!orderRequiresApprove()) {
+            marketOrder.setStatus(OrderStatus.APPROVED);
+            marketOrder.setDone(true);
+        } else {
+            marketOrder.setStatus(OrderStatus.PROCESSING);
+            marketOrder.setDone(false);
+        }
         marketOrder = orderRepository.save(marketOrder);
         startOrder(marketOrder.getId());
     }
@@ -64,7 +72,9 @@ public class OrderServiceImpl implements OrderService {
         }
         WorkingHoursStatus workingHours = marketService.getWorkingHours(marketOrder.getStockId());
 
-        if(workingHours==WorkingHoursStatus.CLOSED || marketOrder.getStatus().equals(OrderStatus.DONE))
+//        if(workingHours==WorkingHoursStatus.CLOSED || marketOrder.getStatus().equals(OrderStatus.DONE))
+//            return;
+        if(workingHours==WorkingHoursStatus.CLOSED || marketOrder.getDone())
             return;
 
         final ListingBaseDto listingBaseDto = marketService.getStock(marketOrder.getStockId());
@@ -78,7 +88,8 @@ public class OrderServiceImpl implements OrderService {
         }
 
         if(marketOrder.getContractSize().equals(marketOrder.getProcessedNumber())) {
-            marketOrder.setStatus(OrderStatus.DONE);
+//            marketOrder.setStatus(OrderStatus.DONE);
+            marketOrder.setDone(true);
         }
         orderRepository.save(marketOrder);
 
@@ -91,8 +102,69 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void changeStatus(final Long id, final OrderStatus orderStatus) {
-        orderRepository.changeStatus(id, orderStatus);
+    public boolean changeStatus(final Long id, final OrderStatus orderStatus) {
+        Optional<MarketOrder> optOrder = this.orderRepository.findById(id);
+        if (optOrder.isEmpty()) return false;
+        MarketOrder order = optOrder.get();
+        order.setStatus(orderStatus);
+        order.setDone(true); // Status changed
+        order.setLastModifiedDate(System.currentTimeMillis() / 1000);
+        this.orderRepository.save(order);
+        return true;
+    }
+
+    private User getLoggedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Check if the user is authenticated
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            // Assuming your UserDetails implementation has the email field
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String email = userDetails.getUsername();
+            //return this.agentRepository.findByEmail(email);
+            //TODO waiting for agent implementation
+        }
+
+        return null;
+    }
+
+    private boolean orderRequiresApprove() {
+        User loggedUser = this.getLoggedUser();
+        if (loggedUser instanceof Agent) {
+            Agent agent = (Agent) loggedUser;
+            if (agent.getRequireApproval()) { // Agent requires every approval
+                return true;
+            }
+            if (agent.getLimitNow() >= agent.getOrderlimit()) { // Limit exceeded
+                return true;
+            }
+            if (agent.getLimitNow() == 0) { // Agent wasted his given limit
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean approveOrder(Long id) {
+        Optional<MarketOrder> optOrder = this.orderRepository.findById(id);
+        if (optOrder.isEmpty()) return false;
+        MarketOrder order = optOrder.get();
+        order.setStatus(OrderStatus.APPROVED);
+        order.setApprovedBy(this.getLoggedUser());
+        order.setLastModifiedDate(System.currentTimeMillis() / 1000);
+        order.setDone(true);
+        this.orderRepository.save(order);
+        return true;
+    }
+
+    @Override
+    public boolean settlementDateExpired(Long id) {
+        Optional<MarketOrder> optOrder = this.orderRepository.findById(id);
+        if (optOrder.isEmpty()) return false;
+        MarketOrder order = optOrder.get();
+        // TODO Kako se vezuju ListingFuture i Order??
+        return false;
     }
 
 //    private void processOrder(

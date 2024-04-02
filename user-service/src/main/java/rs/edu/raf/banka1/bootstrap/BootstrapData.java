@@ -120,7 +120,8 @@ public class BootstrapData implements CommandLineRunner {
     private void seedPermissions() {
         for(String s : Arrays.asList(
             "addUser", "modifyUser", "deleteUser", "readUser",
-            "manageLoans", "manageLoanRequests", "modifyCustomer")
+            "manageLoans", "manageLoanRequests", "modifyCustomer",
+            "manageOrderRequests")
         ) {
             if(permissionRepository.findByName(s).isPresent()) {
                 continue;

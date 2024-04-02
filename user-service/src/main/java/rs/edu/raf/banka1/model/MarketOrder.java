@@ -1,9 +1,6 @@
 package rs.edu.raf.banka1.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,5 +22,9 @@ public class MarketOrder {
     private Double fee;
     private Double price;
     private Boolean allOrNone;
-
+    private Long lastModifiedDate;
+    private Boolean done;
+    @ManyToOne
+    @JoinColumn(name = "approved_by_id")
+    private User approvedBy;
 }

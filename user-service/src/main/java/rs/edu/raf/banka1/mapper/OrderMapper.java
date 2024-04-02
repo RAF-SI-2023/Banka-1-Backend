@@ -21,6 +21,4 @@ public class OrderMapper {
         marketOrder.setAllOrNone(request.getAllOrNone());
         return marketOrder;
     }
-
-
 }
