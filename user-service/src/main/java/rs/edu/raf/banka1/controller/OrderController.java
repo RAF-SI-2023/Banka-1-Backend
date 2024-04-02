@@ -83,18 +83,17 @@ public class OrderController {
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create order request", description = "Create order request")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Successful operation",
-            content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))}),
         @ApiResponse(responseCode = "403", description = "You aren't authorized to create order request"),
         @ApiResponse(responseCode = "404", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Void> createOrderRequest(
+    public ResponseEntity<Boolean> createOrderRequest(
         @RequestBody final CreateOrderRequest request
     ) {
-        orderService.createOrder(request);
-        return ResponseEntity.ok().build();
+        boolean ok = orderService.createOrder(request);
+        return new ResponseEntity<>(ok, ok ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
-
-
 }

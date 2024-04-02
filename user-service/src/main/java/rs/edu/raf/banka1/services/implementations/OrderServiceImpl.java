@@ -38,7 +38,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void createOrder(final CreateOrderRequest request) {
+    public boolean createOrder(final CreateOrderRequest request) {
         MarketOrder marketOrder = orderMapper.requestToMarketOrder(request);
         final ListingBaseDto listingBaseDto = marketService.getStock(request.getStockId());
         marketOrder.setPrice(calculatePrice(listingBaseDto.getPrice(), request.getContractSize()));
@@ -53,6 +53,7 @@ public class OrderServiceImpl implements OrderService {
         }
         marketOrder = orderRepository.save(marketOrder);
         startOrder(marketOrder.getId());
+        return true;
     }
 
     private Double calculatePrice(final Double price, final Long contractSize) {
