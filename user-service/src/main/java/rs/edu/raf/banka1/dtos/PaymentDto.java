@@ -11,6 +11,7 @@ import rs.edu.raf.banka1.model.TransactionStatus;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentDto {
+    private Long id;
     private String senderAccountOwnerName;
     private String senderAccountNumber;
     private String recipientAccountOwnerName;

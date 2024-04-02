@@ -24,6 +24,7 @@ public class PaymentMapper {
 
     public PaymentDto paymentToPaymentDto(Payment payment) {
         PaymentDto paymentDto = new PaymentDto();
+        paymentDto.setId(payment.getId());
         paymentDto.setSenderAccountOwnerName(
                 payment.getSenderBankAccount().getCustomer().getFirstName()
                     + " "

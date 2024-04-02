@@ -45,4 +45,10 @@ public class PaymentServiceImpl implements PaymentService {
                 .map(paymentMapper::paymentToPaymentDto)
                 .collect(Collectors.toList())).orElseGet(ArrayList::new);
     }
+
+    @Override
+    public PaymentDto getPaymentById(Long id) {
+        Optional<Payment> paymentOpt = paymentRepository.findById(id);
+        return paymentOpt.map(paymentMapper::paymentToPaymentDto).orElse(null);
+    }
 }

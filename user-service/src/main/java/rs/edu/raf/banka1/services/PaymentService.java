@@ -9,4 +9,6 @@ public interface PaymentService {
     Boolean createPayment(CreatePaymentRequest request);
 
     List<PaymentDto> getAllPaymentsForAccountNumber(String accountNumber);
+
+    PaymentDto getPaymentById(Long id);
 }
