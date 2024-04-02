@@ -6,6 +6,4 @@ import java.util.List;
 
 public interface ExchangeService {
     void seedDatabase();
-    List<ExchangeDto> getAllExchanges();
-    ExchangeDto getExchangeById(Long id);
 }

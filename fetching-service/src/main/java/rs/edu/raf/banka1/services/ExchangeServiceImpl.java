@@ -55,16 +55,6 @@ public class ExchangeServiceImpl implements ExchangeService {
         parseCsv(countryIsoToBusinessHoursMap, countryIsoToCountryMap);
     }
 
-    @Override
-    public List<ExchangeDto> getAllExchanges() {
-        return exchangeRepository.findAll().stream().map(exchangeMapper::exchangeToExchangeDto).toList();
-    }
-
-    @Override
-    public ExchangeDto getExchangeById(Long id) {
-        return this.exchangeRepository.findById(id).map(exchangeMapper::exchangeToExchangeDto).orElse(null);
-    }
-
     private void parseCsv(Map<String, BusinessHoursDto> countryIsoToBusinessHoursMap, Map<String, Country> countryIsoToCountryMap) {
         try (CSVReader reader = new CSVReader(new FileReader(Constants.micCsvFilePath))) {
             // e.g. 17:00:00

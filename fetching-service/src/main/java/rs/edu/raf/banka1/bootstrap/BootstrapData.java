@@ -22,21 +22,11 @@ import static rs.edu.raf.banka1.utils.Constants.*;
 @Component
 @AllArgsConstructor
 public class BootstrapData implements CommandLineRunner {
-
     private final CurrencyService currencyService;
-
-    @Autowired
     private ListingStockService listingStockService;
-
     private ForexService forexService;
-
-    @Autowired
     private OptionsService optionsService;
-
-    @Autowired
     private FuturesService futuresService;
-
-    @Autowired
     private final ExchangeService exchangeService;
 
     @Override
