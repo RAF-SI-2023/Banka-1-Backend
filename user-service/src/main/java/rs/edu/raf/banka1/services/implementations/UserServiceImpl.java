@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.yaml.snakeyaml.scanner.Constant;
 import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
@@ -25,6 +26,7 @@ import rs.edu.raf.banka1.responses.NewPasswordResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.UserService;
+import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
 import java.util.*;
@@ -102,10 +104,19 @@ public class UserServiceImpl implements UserService {
         if (createUserRequest.getPosition().equalsIgnoreCase("admin")) {
             user.setPermissions(new HashSet<>(permissionRepository.findAll()));
         }
+        if (!this.userHasValidPosition(createUserRequest)) {
+            return new CreateUserResponse(null, "User has not valid position.");
+        }
         userRepository.save(user);
         emailService.sendEmail(createUserRequest.getEmail(), "RAF Banka - User activation",
                 "Visit this URL to activate your account: http://localhost:" + frontPort + "/user/set-password/" + activationToken);
-        return new CreateUserResponse(user.getUserId());
+        return new CreateUserResponse(user.getUserId(), "User created successfully.");
+    }
+
+    private boolean userHasValidPosition(CreateUserRequest createUserRequest) {
+        return (createUserRequest.getPosition().equalsIgnoreCase(Constants.AGENT) ||
+                createUserRequest.getPosition().equalsIgnoreCase(Constants.SUPERVIZOR) ||
+                createUserRequest.getPosition().equalsIgnoreCase(Constants.EMPLOYEE));
     }
 
     @Override

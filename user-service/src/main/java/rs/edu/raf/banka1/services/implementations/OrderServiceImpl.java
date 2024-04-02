@@ -8,9 +8,11 @@ import rs.edu.raf.banka1.dtos.ListingBaseDto;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.OrderRepository;
+import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.OrderService;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.Optional;
 import java.util.Random;
@@ -23,18 +25,21 @@ import java.util.concurrent.TimeUnit;
 public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
     private final MarketService marketService;
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private final Random random = new Random();
 
     public OrderServiceImpl(
-        final OrderMapper orderMapper,
-        final OrderRepository orderRepository,
-        final MarketService marketService
+            OrderMapper orderMapper,
+            OrderRepository orderRepository,
+            MarketService marketService,
+            UserRepository userRepository
     ) {
         this.orderMapper = orderMapper;
         this.orderRepository = orderRepository;
         this.marketService = marketService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -116,30 +121,30 @@ public class OrderServiceImpl implements OrderService {
 
     private User getLoggedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         // Check if the user is authenticated
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
             // Assuming your UserDetails implementation has the email field
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String email = userDetails.getUsername();
-            //return this.agentRepository.findByEmail(email);
-            //TODO waiting for agent implementation
+            Optional<User> optUser = this.userRepository.findByEmail(email);
+            if (optUser.isPresent()) {
+                return optUser.get();
+            }
         }
-
         return null;
     }
 
     private boolean orderRequiresApprove() {
         User loggedUser = this.getLoggedUser();
-        if (loggedUser instanceof Agent) {
-            Agent agent = (Agent) loggedUser;
-            if (agent.getRequireApproval()) { // Agent requires every approval
+        if (loggedUser == null) return false;
+        if (loggedUser.getPosition().equalsIgnoreCase(Constants.AGENT)) {
+            if (loggedUser.getRequireApproval()) { // Agent requires every approval
                 return true;
             }
-            if (agent.getLimitNow() >= agent.getOrderlimit()) { // Limit exceeded
+            if (loggedUser.getLimitNow() >= loggedUser.getOrderlimit()) { // Limit exceeded
                 return true;
             }
-            if (agent.getLimitNow() == 0) { // Agent wasted his given limit
+            if (loggedUser.getLimitNow() == 0) { // Agent wasted his given limit
                 return true;
             }
         }
@@ -147,11 +152,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public boolean approveOrder(Long id) {
+    public boolean decideOrder(Long id, OrderStatus orderStatus) {
         Optional<MarketOrder> optOrder = this.orderRepository.findById(id);
         if (optOrder.isEmpty()) return false;
         MarketOrder order = optOrder.get();
-        order.setStatus(OrderStatus.APPROVED);
+        order.setStatus(orderStatus);
         order.setApprovedBy(this.getLoggedUser());
         order.setLastModifiedDate(System.currentTimeMillis() / 1000);
         order.setDone(true);
@@ -160,12 +165,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public boolean settlementDateExpired(Long id) {
+    public boolean checkOrderOwner(Long id) {
         Optional<MarketOrder> optOrder = this.orderRepository.findById(id);
         if (optOrder.isEmpty()) return false;
         MarketOrder order = optOrder.get();
-        // TODO Kako se vezuju ListingFuture i Order??
-        return false;
+
+        // Check order owner
+        User loggedUser = this.getLoggedUser();
+        if (loggedUser == null) return false;
+        Optional<User> optOrderOwner = this.userRepository.findById(order.getOwnerId());
+        if (optOrderOwner.isEmpty()) return false;
+        // Check if logged user and order owner are the same person
+        return loggedUser.getUserId().equals(optOrderOwner.get().getUserId());
     }
 
 //    private void processOrder(

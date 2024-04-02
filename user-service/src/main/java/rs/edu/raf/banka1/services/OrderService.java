@@ -7,9 +7,9 @@ public interface OrderService {
     boolean createOrder(final CreateOrderRequest request);
     void startOrder(final Long orderId);
 
-    boolean changeStatus(final Long id, final OrderStatus orderStatus);
+    boolean changeStatus(Long id, OrderStatus orderStatus);
 
-    boolean approveOrder(Long id);
+    boolean decideOrder(Long id, OrderStatus orderStatus);
 
-    boolean settlementDateExpired(Long id);
+    boolean checkOrderOwner(Long id);
 }

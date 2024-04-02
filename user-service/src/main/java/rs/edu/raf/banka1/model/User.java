@@ -56,6 +56,16 @@ public class User {
     @Column
     private String resetPasswordToken;
 
+    // Agent fields
+    @Column
+    private Double limitNow;
+
+    @Column
+    private Double orderlimit;
+
+    @Column
+    private Boolean requireApproval;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_permissions",
