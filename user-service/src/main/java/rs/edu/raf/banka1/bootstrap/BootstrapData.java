@@ -76,7 +76,6 @@ public class BootstrapData implements CommandLineRunner {
         user1.setPosition("employee");
         client.setLastName("ClientPrezime");
         userRepository.save(user1);
-        userRepository.save(client);
 
         userRepository.save(client);
 
@@ -91,6 +90,12 @@ public class BootstrapData implements CommandLineRunner {
         customer.setPosition("customer");
         customer.setActive(true);
         customerRepository.save(customer);
+
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("1234");
+        bankAccount.setAvailableBalance(10000.0);
+        bankAccount.setCustomer(customer);
+        bankAccountService.saveBankAccount(bankAccount);
 
         seedLoan();
         seedLoanRequest();
