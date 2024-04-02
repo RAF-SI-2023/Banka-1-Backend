@@ -134,4 +134,36 @@ public class OrderController {
         boolean ok = orderService.createOrder(request);
         return new ResponseEntity<>(ok, ok ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
+
+    @PostMapping(value = "/limit", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Create limit order request", description = "Create limit order request")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to create limit order request"),
+            @ApiResponse(responseCode = "404", description = "Bad Request"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> createLimitOrderRequest(
+            @RequestBody CreateOrderRequest request
+    ) {
+        orderService.createLimitOrder(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping(value = "/stop", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Create stop order request", description = "Create stop order request")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to create limit order request"),
+            @ApiResponse(responseCode = "404", description = "Bad Request"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> createStopOrderRequest(
+            @RequestBody CreateOrderRequest request
+    ) {
+        orderService.createStopOrder(request);
+        return ResponseEntity.ok().build();
+    }
 }
