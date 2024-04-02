@@ -29,6 +29,8 @@ public class BootstrapData implements CommandLineRunner {
     private final LoanRequestRepository loanRequestRepository;
     private final LoanRepository loanRepository;
 
+    private final OrderRepository orderRepository;
+
     private final CardRepository cardRepository;
 
     @Autowired
@@ -42,7 +44,8 @@ public class BootstrapData implements CommandLineRunner {
         final CustomerRepository customerRepository,
         final LoanRequestRepository loanRequestRepository,
         final LoanRepository loanRepository,
-        final CardRepository cardRepository
+        final CardRepository cardRepository,
+        final OrderRepository orderRepository
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -54,6 +57,7 @@ public class BootstrapData implements CommandLineRunner {
         this.loanRequestRepository = loanRequestRepository;
         this.loanRepository = loanRepository;
         this.cardRepository = cardRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -121,8 +125,25 @@ public class BootstrapData implements CommandLineRunner {
         seedLoan();
         seedLoanRequest();
 
+        createTestOrders();
+
         Logger.info("Data loaded!");
 
+    }
+
+    private void createTestOrders() {
+        MarketOrder order = new MarketOrder();
+        order.setId(1L);
+        order.setOwnerId(1L);
+        order.setStatus(OrderStatus.PROCESSING);
+
+        MarketOrder order2 = new MarketOrder();
+        order2.setStatus(OrderStatus.APPROVED);
+        order2.setId(2L);
+        order2.setOwnerId(2L);
+
+        orderRepository.save(order);
+        orderRepository.save(order2);
     }
 
     private void seedLoanRequest() {
