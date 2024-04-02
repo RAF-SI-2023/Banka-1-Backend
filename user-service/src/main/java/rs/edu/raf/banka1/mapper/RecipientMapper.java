@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.PaymentRecipient;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.requests.CreatePaymentRecipientRequest;
-import rs.edu.raf.banka1.requests.EditPaymentRecipientRequest;
+import rs.edu.raf.banka1.dtos.PaymentRecipientDto;
 
 @Component
 public class RecipientMapper {
@@ -27,7 +27,7 @@ public class RecipientMapper {
         return recipient;
     }
 
-    public PaymentRecipient editRecipientRequestToRecipient(PaymentRecipient paymentRecipient, EditPaymentRecipientRequest request) {
+    public PaymentRecipient PaymentRecipientDtoToRecipient(PaymentRecipient paymentRecipient, PaymentRecipientDto request) {
         if (request.getBankAccountNumber() != null) {
             paymentRecipient.setRecipientAccountNumber(request.getBankAccountNumber());
         }
@@ -39,5 +39,15 @@ public class RecipientMapper {
         }
 
         return paymentRecipient;
+    }
+
+    public PaymentRecipientDto recipientToRecipientDto(PaymentRecipient paymentRecipient) {
+        PaymentRecipientDto dto = new PaymentRecipientDto();
+        dto.setId(paymentRecipient.getId());
+        dto.setFirstName(paymentRecipient.getFirstName());
+        dto.setLastName(paymentRecipient.getLastName());
+        dto.setBankAccountNumber(paymentRecipient.getRecipientAccountNumber());
+
+        return dto;
     }
 }

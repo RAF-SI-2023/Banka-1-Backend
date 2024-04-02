@@ -1,4 +1,4 @@
-package rs.edu.raf.banka1.requests;
+package rs.edu.raf.banka1.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EditPaymentRecipientRequest {
+public class PaymentRecipientDto {
     private Long id;
     private String firstName;
     private String lastName;

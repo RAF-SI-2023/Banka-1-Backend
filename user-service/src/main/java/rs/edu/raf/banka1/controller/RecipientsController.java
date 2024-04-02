@@ -9,10 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.dtos.PaymentDto;
 import rs.edu.raf.banka1.requests.CreatePaymentRecipientRequest;
-import rs.edu.raf.banka1.requests.EditPaymentRecipientRequest;
+import rs.edu.raf.banka1.dtos.PaymentRecipientDto;
 import rs.edu.raf.banka1.services.RecipientsService;
 import rs.edu.raf.banka1.services.UserService;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -41,7 +44,7 @@ public class RecipientsController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/edit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Edit recipient", description = "Edit recipient")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -50,8 +53,23 @@ public class RecipientsController {
             @ApiResponse(responseCode = "403", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Boolean> editPaymentRecipient(@RequestBody EditPaymentRecipientRequest request) {
+    public ResponseEntity<Boolean> editPaymentRecipient(@RequestBody PaymentRecipientDto request) {
         boolean edited = recipientsService.editRecipient(request);
         return ResponseEntity.ok(edited);
+    }
+
+    @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all recipients for customer from jwt", description = "Get all recipients for customer from jwt")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {PaymentRecipientDto.class}))}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<PaymentRecipientDto>> getAllRecipientsForCustomer() {
+        Long customerId = userService.findByJwt().getUserId();
+        return ResponseEntity.ok(recipientsService.getAllRecipientsForCustomer(customerId));
     }
 }
