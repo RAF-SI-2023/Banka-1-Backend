@@ -50,7 +50,7 @@ public class UserController {
 
     @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all users", description = "Returns all users")
-//    @PreAuthorize("hasAuthority('readUser')")
+    @PreAuthorize("hasAuthority('readUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
