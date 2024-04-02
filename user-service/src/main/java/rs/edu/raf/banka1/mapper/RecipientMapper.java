@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.PaymentRecipient;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.requests.CreatePaymentRecipientRequest;
+import rs.edu.raf.banka1.requests.EditPaymentRecipientRequest;
 
 @Component
 public class RecipientMapper {
@@ -24,5 +25,19 @@ public class RecipientMapper {
         recipient.setLastName(request.getLastName());
 
         return recipient;
+    }
+
+    public PaymentRecipient editRecipientRequestToRecipient(PaymentRecipient paymentRecipient, EditPaymentRecipientRequest request) {
+        if (request.getBankAccountNumber() != null) {
+            paymentRecipient.setRecipientAccountNumber(request.getBankAccountNumber());
+        }
+        if (request.getFirstName() != null) {
+            paymentRecipient.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            paymentRecipient.setLastName(request.getLastName());
+        }
+
+        return paymentRecipient;
     }
 }

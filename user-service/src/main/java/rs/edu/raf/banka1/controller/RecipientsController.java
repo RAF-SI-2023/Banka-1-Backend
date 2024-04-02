@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.requests.CreatePaymentRecipientRequest;
+import rs.edu.raf.banka1.requests.EditPaymentRecipientRequest;
 import rs.edu.raf.banka1.services.RecipientsService;
 import rs.edu.raf.banka1.services.UserService;
 
@@ -26,8 +27,22 @@ public class RecipientsController {
         this.userService = userService;
     }
 
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create new recipient", description = "Create new recipient")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> createPaymentRecipient(@RequestBody CreatePaymentRecipientRequest request) {
+        Long customerId = userService.findByJwt().getUserId();
+        recipientsService.createRecipient(customerId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping(value = "edit", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Edit recipient", description = "Edit recipient")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -35,9 +50,8 @@ public class RecipientsController {
             @ApiResponse(responseCode = "403", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Void> createPayment(@RequestBody CreatePaymentRecipientRequest request) {
-        Long customerId = userService.findByJwt().getUserId();
-        recipientsService.createRecipient(customerId, request);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Boolean> editPaymentRecipient(@RequestBody EditPaymentRecipientRequest request) {
+        boolean edited = recipientsService.editRecipient(request);
+        return ResponseEntity.ok(edited);
     }
 }
