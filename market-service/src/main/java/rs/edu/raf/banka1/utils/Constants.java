@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.utils;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.util.List;
@@ -50,10 +51,10 @@ public class Constants {
             if (resource.exists()) {
                 return resource.getURL().getPath().replaceAll("%20", " ");
             } else {
-                System.out.println("[Constants getAbsoluteFilePath] Resource does not exist: " + relativePath);
+                Logger.warn("Resource does not exist: " + relativePath);
             }
         } catch (IOException e) {
-            System.err.println("[Constants getAbsoluteFilePath] Cannot load resource whose relative path is " + relativePath);
+            Logger.error(e, "Cannot load resource whose relative path is " + relativePath);
         }
         return null;
     }

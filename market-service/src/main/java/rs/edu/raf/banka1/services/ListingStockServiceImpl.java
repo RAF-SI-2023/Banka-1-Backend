@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import org.tinylog.Logger;
 import rs.edu.raf.banka1.mapper.StockMapper;
 import rs.edu.raf.banka1.model.ListingHistory;
 
@@ -53,8 +54,6 @@ public class ListingStockServiceImpl implements ListingStockService {
     private CountryRepository countryRepository;
     @Autowired
     private HolidayRepository holidayRepository;
-
-
 
     private Requests requests;
     @Value("${listingAPItoken}")
@@ -107,10 +106,10 @@ public class ListingStockServiceImpl implements ListingStockService {
                 e.printStackTrace();
             }
         } catch (APIException apiException) {
-            System.out.println(apiException.getMessage());
+            Logger.error("Error occured when calling api: " + apiException.getMessage());
         } catch (Exception e) {
             //e.printStackTrace();
-            System.err.println("[generateJSONSymbols] Exception occured:" + e.getMessage());
+            Logger.error("Exception occured: " + e.getMessage());
         }
 
     }
@@ -172,9 +171,9 @@ public class ListingStockServiceImpl implements ListingStockService {
             }
 
         } catch (APIException apiException) {
-            System.out.println(apiException.getMessage());
+            Logger.error("Error occured when calling api: " + apiException.getMessage());
         } catch (Exception e) {
-            System.out.println(symbol + " not found on alphavantage");
+            Logger.error(symbol + " not found on alphavantage");
         }
         return null;
     }
@@ -420,7 +419,6 @@ public class ListingStockServiceImpl implements ListingStockService {
             if (now.isAfter(closingTime) && now.isBefore(closingTime.plusHours(4))) {
                 return "AFTER_HOURS";
             }
-            System.out.println();
             return "CLOSED";
         }
         return "OPENED";
