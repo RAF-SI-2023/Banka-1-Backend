@@ -9,22 +9,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import rs.edu.raf.banka1.requests.CreatePaymentRequest;
-import rs.edu.raf.banka1.services.PaymentService;
+import rs.edu.raf.banka1.requests.CreatePaymentRecipientRequest;
+import rs.edu.raf.banka1.services.RecipientsService;
+import rs.edu.raf.banka1.services.UserService;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/payment")
-public class PaymentController {
-    private final PaymentService paymentService;
+@RequestMapping("/recipients")
+public class RecipientsController {
+    private final RecipientsService recipientsService;
+    private final UserService userService;
 
     @Autowired
-    public PaymentController(PaymentService paymentService) {
-        this.paymentService = paymentService;
+    public RecipientsController(RecipientsService recipientsService, UserService userService) {
+        this.recipientsService = recipientsService;
+        this.userService = userService;
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Create new payment", description = "Create new payment")
+    @Operation(summary = "Create new recipient", description = "Create new recipient")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -32,9 +35,9 @@ public class PaymentController {
             @ApiResponse(responseCode = "403", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Boolean> createPayment(@RequestBody CreatePaymentRequest request) {
-        return ResponseEntity.ok(paymentService.createPayment(request));
+    public ResponseEntity<Void> createPayment(@RequestBody CreatePaymentRecipientRequest request) {
+        Long customerId = userService.findByJwt().getUserId();
+        recipientsService.createRecipient(customerId, request);
+        return ResponseEntity.ok().build();
     }
-
-
 }
