@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.tinylog.Logger;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
@@ -52,7 +53,7 @@ public class BootstrapData implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("Loading Data...");
+        Logger.info("Loading Data...");
 
         seedPermissions();
         seedCurencies();
@@ -102,7 +103,7 @@ public class BootstrapData implements CommandLineRunner {
 //        bankAccountService.saveBankAccount(bankAccount);
 //        bankAccountService.saveBankAccount(bankAccount1);
 
-        System.out.println("Data loaded!");
+        Logger.info("Data loaded!");
     }
 
     private void seedLoanRequest() {
