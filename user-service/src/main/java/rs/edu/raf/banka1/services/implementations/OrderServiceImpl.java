@@ -32,10 +32,10 @@ public class OrderServiceImpl implements OrderService {
     private final Random random = new Random();
 
     public OrderServiceImpl(
-            OrderMapper orderMapper,
-            OrderRepository orderRepository,
-            MarketService marketService,
-            UserRepository userRepository
+            final OrderMapper orderMapper,
+            final OrderRepository orderRepository,
+            final MarketService marketService,
+            final UserRepository userRepository
     ) {
         this.orderMapper = orderMapper;
         this.orderRepository = orderRepository;
@@ -81,7 +81,7 @@ public class OrderServiceImpl implements OrderService {
 
 //        if(workingHours==WorkingHoursStatus.CLOSED || marketOrder.getStatus().equals(OrderStatus.DONE))
 //            return;
-        if(workingHours==WorkingHoursStatus.CLOSED || marketOrder.getDone())
+        if(workingHours==WorkingHoursStatus.CLOSED || (marketOrder.getDone() != null && marketOrder.getDone()))
             return;
 
         final ListingBaseDto listingBaseDto = marketService.getStock(marketOrder.getStockId());
