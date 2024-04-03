@@ -128,8 +128,6 @@ public class BankAccountServiceImplTest {
 
         when(bankAccountService.getCustomerRepository().findById(createRequest.getCustomerId())).thenReturn(Optional.of(customer));
 
-        when(bankAccountService.getPaymentRepository().findBySenderAccountNumber(anyString())).thenReturn(List.of(payment1));
-
         BankAccount bankAccount = bankAccountService.createBankAccount(createRequest);
 
         // Assertions
@@ -138,9 +136,9 @@ public class BankAccountServiceImplTest {
         assertEquals(bankAccount.getAvailableBalance(), createRequest.getAccount().getAvailableBalance());
         assertEquals(bankAccount.getCurrency().getCurrencyCode(), createRequest.getAccount().getCurrencyCode());
         assertEquals(bankAccount.getAccountName(),createRequest.getAccount().getAccountName());
-        assertEquals(1, bankAccount.getPayments().size());
+        assertEquals(0, bankAccount.getPayments().size());
         assertFalse(bankAccount.getAccountStatus());
-        assertFalse(bankAccount.getPayments().isEmpty());
+        assertTrue(bankAccount.getPayments().isEmpty());
         assertNull(bankAccount.getCompany());
     }
 

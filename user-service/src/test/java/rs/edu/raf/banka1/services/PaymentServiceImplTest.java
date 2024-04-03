@@ -99,10 +99,12 @@ class PaymentServiceImplTest {
 
         BankAccount senderAccount = new BankAccount();
         senderAccount.setAvailableBalance(1000.0);
+        senderAccount.setBalance(1000.0);
         senderAccount.setCurrency(currency);
 
         BankAccount recipientAccount = new BankAccount();
         recipientAccount.setAvailableBalance(0.0);
+        recipientAccount.setBalance(0.0);
         recipientAccount.setCurrency(currency);
 
         Long paymentId = 1L;
@@ -120,7 +122,11 @@ class PaymentServiceImplTest {
 
         assertEquals(TransactionStatus.COMPLETE, payment.getStatus());
         assertEquals(898.0, senderAccount.getAvailableBalance()); //  commission
+        assertEquals(898.0, senderAccount.getBalance()); //  commission
+
         assertEquals(100.0, recipientAccount.getAvailableBalance());
+        assertEquals(100.0, recipientAccount.getBalance());
+
         verify(bankAccountRepository, times(2)).save(any(BankAccount.class));
         verify(paymentRepository).save(payment);
     }
