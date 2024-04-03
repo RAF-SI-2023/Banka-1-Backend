@@ -10,6 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreatePaymentRequest {
+    private String singleUseCode;
     private String senderAccountNumber;
     private String recipientName;
     private String recipientAccountNumber;

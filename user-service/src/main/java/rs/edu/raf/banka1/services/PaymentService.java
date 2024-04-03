@@ -11,4 +11,7 @@ public interface PaymentService {
     List<PaymentDto> getAllPaymentsForAccountNumber(String accountNumber);
 
     PaymentDto getPaymentById(Long id);
+    boolean sendSingleUseCode(Long customerId);
+
+    boolean validatePayment(CreatePaymentRequest request);
 }

@@ -71,4 +71,6 @@ public class Customer extends User {
             orphanRemoval = true
     )
     private List<PaymentRecipient> recipients;
+
+    private String singleUseCode;
 }

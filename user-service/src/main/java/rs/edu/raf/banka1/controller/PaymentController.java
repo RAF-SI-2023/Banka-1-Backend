@@ -12,8 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.dtos.PaymentDto;
 import rs.edu.raf.banka1.requests.CreatePaymentRequest;
-import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.PaymentService;
+import rs.edu.raf.banka1.services.UserService;
 
 import java.util.List;
 
@@ -22,10 +22,12 @@ import java.util.List;
 @RequestMapping("/payment")
 public class PaymentController {
     private final PaymentService paymentService;
+    private final UserService userService;
 
     @Autowired
-    public PaymentController(PaymentService paymentService) {
+    public PaymentController(PaymentService paymentService, UserService userService) {
         this.paymentService = paymentService;
+        this.userService = userService;
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -34,11 +36,16 @@ public class PaymentController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Boolean.class))}),
-            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "400", description = "Bad request"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Boolean> createPayment(@RequestBody CreatePaymentRequest request) {
-        return ResponseEntity.ok(paymentService.createPayment(request));
+    public ResponseEntity<Void> createPayment(@RequestBody CreatePaymentRequest request) {
+        if (!paymentService.validatePayment(request)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        paymentService.createPayment(request);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "/getAll/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -68,6 +75,20 @@ public class PaymentController {
     public ResponseEntity<PaymentDto> getById(@PathVariable(name = "id") Long id) {
         PaymentDto resp = paymentService.getPaymentById(id);
         return new ResponseEntity<>(resp, resp != null ? HttpStatus.OK : HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping(value = "/sendCode", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Request single use token for customer in jwt", description = "Request single use token for customer in jwt")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> sendCode() {
+        Long customerId = userService.findByJwt().getUserId();
+        boolean sent = paymentService.sendSingleUseCode(customerId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 
