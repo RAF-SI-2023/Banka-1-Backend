@@ -19,12 +19,12 @@ public class Card {
     private String cardName;
     private Long creationDate;
     private Long expirationDate;
+
     private String accountNumber;
+
     @Column(length = 3)
     private String cvv;
     private Integer cardLimit;
     private Boolean isActivated;
-
-
 
 }

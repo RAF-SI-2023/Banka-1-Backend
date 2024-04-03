@@ -84,8 +84,12 @@ public class CustomerServiceImplTest {
 
         AccountData accountData = new AccountData();
         accountData.setAccountType(AccountType.CURRENT);
-        accountData.setCurrencyName("RSD");
+        accountData.setCurrencyCode("RSD");
         accountData.setMaintenanceCost(123.0);
+        accountData.setBalance(1000.0);
+        accountData.setAvailableBalance(1000.0);
+        accountData.setSubtypeOfAccount("Personal");
+        accountData.setAccountName("Probni");
 
         CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest();
         createCustomerRequest.setCustomer(customerData);
@@ -113,7 +117,7 @@ public class CustomerServiceImplTest {
 
             BankAccount bankAccount = new BankAccount();
             bankAccount.setAccountNumber("3921893");
-            when(bankAccountService.generateBankAccount(any())).thenReturn(bankAccount);
+            when(bankAccountService.createBankAccount(any())).thenReturn(bankAccount);
 
             sut.createNewCustomer(createCustomerRequest);
 

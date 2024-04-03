@@ -10,6 +10,7 @@ public class BankAccountDto {
 //    it will be assigned based on from what table it was taken
     private String accountType;
     private String accountNumber;
+    private String accountName;
     private String accountStatus;
     private String currency;
     private Double balance;

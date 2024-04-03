@@ -1,9 +1,11 @@
 package rs.edu.raf.banka1.bootstrap;
 
 import lombok.AllArgsConstructor;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import org.tinylog.Logger;
 import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingFuture;
 import rs.edu.raf.banka1.model.ListingHistory;
@@ -26,6 +28,7 @@ import static rs.edu.raf.banka1.utils.Constants.*;
 @AllArgsConstructor
 public class BootstrapData implements CommandLineRunner {
 
+
     private final CurrencyService currencyService;
 
     @Autowired
@@ -44,8 +47,8 @@ public class BootstrapData implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        Logger.info("Loading Data...");
 
-        System.out.println("Loading Data...");
         ExecutorService executorService = Executors.newFixedThreadPool(10);
 
         executorService.submit(() -> {
@@ -53,13 +56,13 @@ public class BootstrapData implements CommandLineRunner {
             List<ListingHistory> futureHistories = futuresService.fetchNFutureHistories(listingFutures, maxFutureHistories);
             futuresService.addAllFutures(listingFutures);
             listingStockService.addAllListingsToHistory(futureHistories);
-            System.out.println("Futures data loaded!");
+            Logger.info("Futures data loaded!");
         });
 
         executorService.submit(() -> {
             List<CurrencyDto> currencyList = loadCurrencies();
             currencyService.addCurrencies(currencyList);
-            System.out.println("Currency Data Loaded!");
+            Logger.info("Currency Data Loaded!");
         });
 
         // Since JSON symbols are available in repo, and the API key needs to be replaced or paid,
@@ -67,7 +70,7 @@ public class BootstrapData implements CommandLineRunner {
         // listingStockService.generateJSONSymbols();
 
         exchangeService.seedDatabase();
-        System.out.println("Exchange data loaded!");
+        Logger.info("Exchange data loaded!");
         // STOCK
         // Populate stock and stock history
         executorService.submit(() -> {
@@ -76,7 +79,7 @@ public class BootstrapData implements CommandLineRunner {
             listingStockService.addAllListingStocks(listingStocks);
             List<ListingHistory> listingHistories = listingStockService.fetchNListingsHistory(maxStockListingsHistory);
             listingStockService.addAllListingsToHistory(listingHistories);
-            System.out.println("Stock Data Loaded!");
+            Logger.info("Stock Data Loaded!");
         });
         ////////////////////////////////////////////////////////////////
         // FOREX
@@ -98,16 +101,16 @@ public class BootstrapData implements CommandLineRunner {
             // Warning: agreement was to add just histories for 10 forexes
             List<ListingHistory> histories = forexService.getAllForexHistories(updated);
             listingStockService.addAllListingsToHistory(histories);
-            System.out.println("Forex Data Loaded!");
+            Logger.info("Forex Data Loaded!");
         });
         ////////////////////////////////////////////////////////////////
 
         executorService.submit(() -> {
             optionsService.fetchOptions();
-            System.out.println("Options Data Loaded!");
+            Logger.info("Options Data Loaded!");
         });
 
-        System.out.println("All Data loaded!");
+        Logger.info("All Data loaded!");
     }
 
     public List<CurrencyDto> loadCurrencies() {
