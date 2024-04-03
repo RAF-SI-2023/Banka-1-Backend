@@ -53,6 +53,7 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentRepository.save(payment).getId();
     }
 
+
     @Override
     public void processPayment(Long paymentId) {
         Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
@@ -91,6 +92,7 @@ public class PaymentServiceImpl implements PaymentService {
                 bankAccount.getPayments().stream()
                 .map(paymentMapper::paymentToPaymentDto)
                 .collect(Collectors.toList())).orElseGet(ArrayList::new);
+
     }
 
     @Override
@@ -128,6 +130,5 @@ public class PaymentServiceImpl implements PaymentService {
         }
         return valid;
     }
-
 
 }
