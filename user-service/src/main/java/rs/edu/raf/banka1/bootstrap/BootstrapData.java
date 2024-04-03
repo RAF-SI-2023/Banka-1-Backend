@@ -94,6 +94,8 @@ public class BootstrapData implements CommandLineRunner {
         client.setActive(true);
         client.setPosition("employee");
         client.setLastName("ClientPrezime");
+        client.setOrderlimit(100.0);
+        client.setLimitNow(56.0);
         userRepository.save(user1);
         userRepository.save(client);
 

@@ -371,7 +371,21 @@ public class OrderServiceImpl implements OrderService {
         userRepository.saveAll(users);
     }
 
-    //    private void processOrder(
+    @Override
+    public void resetLimitForUser(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("Cannot find user with id: " + userId));
+        user.setLimitNow(0.0);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void setLimitOrderForUser(Long userId, Double newOrderLimit) {
+        User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("Cannot find user with id: " + userId));
+        user.setOrderlimit(newOrderLimit);
+        userRepository.save(user);
+    }
+
+//    private void processOrder(
 //        final Long orderId,
 //        final WorkingHoursStatus workingHours
 //    ){

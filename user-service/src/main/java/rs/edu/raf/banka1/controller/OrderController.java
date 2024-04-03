@@ -167,4 +167,43 @@ public class OrderController {
         orderService.createStopLimitOrder(request);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping(value = "/resetLimit/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Reset current limit for user", description = "Supervisor resets current limit for user")
+    @PreAuthorize("hasAuthority('manageOrderRequests')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = DecideOrderResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid status provided"),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to reset limits for users"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> resetCurrentLimitForUser(
+            @PathVariable(name = "userId") Long userId
+    ) {
+        orderService.resetLimitForUser(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping(value = "/setLimit/{userId}/{orderLimit}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Set order limit for user", description = "Supervisor sets order limit for user")
+    @PreAuthorize("hasAuthority('manageOrderRequests')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = DecideOrderResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid status provided"),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to set limits for users"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> setOrderLimitForUser(
+        @PathVariable(name = "userId") Long userId,
+        @PathVariable(name = "orderLimit") Double orderLimit
+    ) {
+        orderService.setLimitOrderForUser(userId, orderLimit);
+        return ResponseEntity.ok().build();
+    }
 }

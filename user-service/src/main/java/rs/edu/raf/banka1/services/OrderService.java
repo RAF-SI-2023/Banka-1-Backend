@@ -22,4 +22,8 @@ public interface OrderService {
     boolean checkOrderOwner(Long id);
 
     void resetUsersLimits();
+
+    void resetLimitForUser(Long userId);
+
+    void setLimitOrderForUser(Long userId, Double newOrderLimit);
 }
