@@ -69,6 +69,7 @@ public class PaymentServiceImpl implements PaymentService {
                 recipientAccountOpt.isEmpty()
                 || payment.getStatus() != TransactionStatus.PROCESSING
                 || payment.getAmount() + commission > senderAccount.getAvailableBalance()
+                || payment.getAmount() + commission > senderAccount.getBalance()
                 || !recipientAccountOpt.get().getCurrency().getId().equals(senderAccount.getCurrency().getId())
         ) {
             payment.setStatus(TransactionStatus.DENIED);
@@ -77,7 +78,10 @@ public class PaymentServiceImpl implements PaymentService {
         }
         BankAccount recipientAccount = recipientAccountOpt.get();
         recipientAccount.setAvailableBalance(recipientAccount.getAvailableBalance() + payment.getAmount());
+        recipientAccount.setBalance(recipientAccount.getBalance() + payment.getAmount());
+
         senderAccount.setAvailableBalance(senderAccount.getAvailableBalance() - payment.getAmount() - commission);
+        senderAccount.setBalance(senderAccount.getBalance() - payment.getAmount() - commission);
         payment.setStatus(TransactionStatus.COMPLETE);
 
         bankAccountRepository.save(recipientAccount);

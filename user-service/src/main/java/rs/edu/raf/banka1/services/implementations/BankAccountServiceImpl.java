@@ -106,8 +106,7 @@ public class BankAccountServiceImpl implements BankAccountService {
 
         bankAccount.setAccountStatus(false);
 
-        List<Payment> payments = paymentRepository.findBySenderAccountNumber(bankAccount.getAccountNumber());
-        bankAccount.setPayments(payments);
+        bankAccount.setPayments(new ArrayList<>());
 
         saveBankAccount(bankAccount);
 
