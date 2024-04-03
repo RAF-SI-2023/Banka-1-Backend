@@ -61,8 +61,7 @@ public class OrderServiceImpl implements OrderService {
             marketOrder.setStatus(OrderStatus.PROCESSING);
         }
         marketOrder = orderRepository.save(marketOrder);
-        startOrder(marketOrder.getId());
-        return true;
+        return startOrder(marketOrder.getId());
     }
 
     private Double calculatePrice(final Double price, final Long contractSize) {
@@ -75,15 +74,21 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void startOrder(final Long orderId) {
-        MarketOrder marketOrder = orderRepository.getReferenceById(orderId);
+    public boolean startOrder(final Long orderId) {
+        Optional<MarketOrder> optMarketOrder = orderRepository.findById(orderId);
+        if (optMarketOrder.isEmpty()) return false;
+        MarketOrder marketOrder = optMarketOrder.get();
         if(marketOrder.getStatus() != OrderStatus.APPROVED){
             executorService.schedule(() -> startOrder(orderId), 3, TimeUnit.MINUTES);
+            return true;
         }
         WorkingHoursStatus workingHours = marketService.getWorkingHours(marketOrder.getStockId());
 
-        if(workingHours==WorkingHoursStatus.CLOSED || marketOrder.getStatus().equals(OrderStatus.DONE)) {
-            return;
+        if(workingHours==WorkingHoursStatus.CLOSED) {
+            return false;
+        }
+        if (marketOrder.getStatus().equals(OrderStatus.DONE)) {
+            return true;
         }
         final ListingBaseDto listingBaseDto = marketService.getStock(marketOrder.getStockId());
 
@@ -103,12 +108,13 @@ public class OrderServiceImpl implements OrderService {
         final Long remainingQuantity = marketOrder.getContractSize() - marketOrder.getProcessedNumber();
 
         if(remainingQuantity == 0){
-            return;
+            return false;
         }
 
         long timeInterval = random.nextLong(24*60/(volume/remainingQuantity));
         timeInterval = workingHours.equals(WorkingHoursStatus.AFTER_HOURS) ? timeInterval + 30*60 : timeInterval;
         executorService.schedule(() -> startOrder(orderId), timeInterval, TimeUnit.MINUTES);
+        return true;
     }
 
     @Override
@@ -146,19 +152,27 @@ public class OrderServiceImpl implements OrderService {
             marketOrder.setStatus(OrderStatus.PROCESSING);
         }
         marketOrder = orderRepository.save(marketOrder);
-        startLimitOrder(marketOrder.getId());
+        if (!startLimitOrder(marketOrder.getId())) {
+            return false;
+        }
         return true;
     }
 
     @Override
-    public void startLimitOrder(Long orderId) {
-        MarketOrder marketOrder = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Cannot find limit order with id: " + orderId));
+    public boolean startLimitOrder(Long orderId) {
+        Optional<MarketOrder> optMarketOrder = orderRepository.findById(orderId);
+        if (optMarketOrder.isEmpty()) return false;
+        MarketOrder marketOrder = optMarketOrder.get();
+//        MarketOrder marketOrder = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Cannot find limit order with id: " + orderId));
         if(marketOrder.getStatus() != OrderStatus.APPROVED){
             executorService.schedule(() -> startLimitOrder(orderId), 3, TimeUnit.MINUTES);
         }
         WorkingHoursStatus workingHours = marketService.getWorkingHours(marketOrder.getStockId());
-        if(workingHours==WorkingHoursStatus.CLOSED || marketOrder.getStatus().equals(OrderStatus.DONE)) {
-            return;
+        if(workingHours==WorkingHoursStatus.CLOSED) {
+            return false;
+        }
+        if (marketOrder.getStatus().equals(OrderStatus.DONE)) {
+            return true;
         }
 
         final ListingBaseDto listingBaseDto = marketService.getStock(marketOrder.getStockId());
@@ -202,12 +216,13 @@ public class OrderServiceImpl implements OrderService {
         Long remainingQuantity = marketOrder.getContractSize() - marketOrder.getProcessedNumber();
 
         if(remainingQuantity == 0){
-            return;
+            return false;
         }
 
         long timeInterval = random.nextLong(24*60/(volume/remainingQuantity));
         timeInterval = workingHours.equals(WorkingHoursStatus.AFTER_HOURS) ? timeInterval + 30*60 : timeInterval;
         executorService.schedule(() -> startLimitOrder(orderId), timeInterval, TimeUnit.MINUTES);
+        return true;
     }
 
     @Override
@@ -216,21 +231,26 @@ public class OrderServiceImpl implements OrderService {
         marketOrder = orderRepository.save(marketOrder);
         Long stockId = marketOrder.getStockId();
         Long marketOrderId = marketOrder.getId();
-
         stopOrderExecutor = Executors.newScheduledThreadPool(1);
-        stopOrderExecutor.scheduleWithFixedDelay(() -> {
-            boolean conditionMet = checkStockPriceForStopOrder(marketOrderId, stockId);
-            if (conditionMet) {
-                // popraviti ovu startOrder Funkciju da radi
-                startOrder(marketOrderId);
-                stopOrderExecutor.shutdown(); // Stop further executions
-            }
-        }, 0, 30, TimeUnit.SECONDS);
+        stopOrderExecutor.schedule(() -> checkConditionForStopOrderExecutor(marketOrderId, stockId), 0, TimeUnit.MINUTES);
         return true;
     }
+
+    private void checkConditionForStopOrderExecutor(Long marketOrderId, Long stockId) {
+        boolean conditionMet = checkStockPriceForStopOrder(marketOrderId, stockId);
+        if (conditionMet) {
+            executorService.schedule(() -> startOrder(marketOrderId), 0, TimeUnit.MINUTES);
+        } else {
+            stopOrderExecutor.schedule(() -> checkConditionForStopOrderExecutor(marketOrderId, stockId), 3, TimeUnit.MINUTES);
+        }
+    }
+
     @Override
     public Boolean checkStockPriceForStopOrder(Long marketOrderId, Long stockId) {
-        MarketOrder marketOrder = orderRepository.findById(marketOrderId).orElseThrow(()-> new RuntimeException("Order not found"));
+        Optional<MarketOrder> optMarketOrder = orderRepository.findById(marketOrderId);
+        if (optMarketOrder.isEmpty()) return false;
+        MarketOrder marketOrder = optMarketOrder.get();
+//        MarketOrder marketOrder = orderRepository.findById(marketOrderId).orElseThrow(()-> new RuntimeException("Order not found"));
         ListingBaseDto listingBase = marketService.getStock(stockId);
 
         Double ask = listingBase.getHigh();

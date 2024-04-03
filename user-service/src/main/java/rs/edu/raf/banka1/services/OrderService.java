@@ -5,9 +5,9 @@ import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 
 public interface OrderService {
     boolean createOrder(final CreateOrderRequest request);
-    void startOrder(final Long orderId);
+    boolean startOrder(final Long orderId);
 
-    void startLimitOrder(Long orderId);
+    boolean startLimitOrder(Long orderId);
     boolean createLimitOrder(CreateOrderRequest limitOrderRequest);
 
     boolean createStopOrder(CreateOrderRequest stopOrderRequest);
