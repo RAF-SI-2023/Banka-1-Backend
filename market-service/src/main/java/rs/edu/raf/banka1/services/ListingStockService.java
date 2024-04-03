@@ -32,6 +32,7 @@ public interface ListingStockService {
 
     Optional<ListingStock> findByTicker(String ticker);
     Optional<ListingStock> findById(Long id);
+    String getWorkingTimeById(Long id);
 
     List<ListingHistory> getListingHistoriesByTimestamp(String ticker, Integer from, Integer to);
 

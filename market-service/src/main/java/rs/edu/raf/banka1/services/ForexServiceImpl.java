@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.tinylog.Logger;
 import rs.edu.raf.banka1.mapper.ForexMapper;
 import rs.edu.raf.banka1.mapper.ListingHistoryMapper;
 import rs.edu.raf.banka1.model.ListingForex;
@@ -81,7 +82,7 @@ public class ForexServiceImpl implements ForexService {
             return listingForexList;
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Error while initializing forex returning empty list ");
+            Logger.error("Error while initializing forex returning empty list ");
             return new ArrayList<>();
         }
      }
@@ -116,7 +117,6 @@ public class ForexServiceImpl implements ForexService {
             return listingForexList;
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println();
             return new ArrayList<>();
         }
     }
@@ -146,10 +146,10 @@ public class ForexServiceImpl implements ForexService {
             return updatedForex;
         } catch (Exception e) {
 //            e.printStackTrace();
-            System.out.println("Response: " + response);
+            Logger.info("Response: " + response);
 //            this currency pair is not supported by the API (or maybe we are sending too much requests)
-            System.out.println("BaseCurrency: " + listingForex.getBaseCurrency() + ", QuoteCurrency: "
-                    + listingForex.getQuoteCurrency() + " are not available on the alphavantae API");
+            Logger.info("BaseCurrency: " + listingForex.getBaseCurrency() + ", QuoteCurrency: "
+                    + listingForex.getQuoteCurrency() + " are not available on the alphavantage API");
             return null;
         }
     }
