@@ -140,8 +140,13 @@ public class OrderServiceImpl implements OrderService {
                 marketOrder.getLimitValue(),
                 listingBaseDto.getPrice()));
         marketOrder.setFee(calculateFee(request.getLimitValue(), marketOrder.getPrice()));
-        // dok ne implementiramo approvovanje ordera
-        marketOrder.setStatus(OrderStatus.APPROVED);
+        if (!orderRequiresApprove()) {
+            marketOrder.setStatus(OrderStatus.APPROVED);
+//            marketOrder.setDone(true);
+        } else {
+            marketOrder.setStatus(OrderStatus.PROCESSING);
+//            marketOrder.setDone(false);
+        }
         marketOrder.setDone(false);
         marketOrder = orderRepository.save(marketOrder);
         startLimitOrder(marketOrder.getId());
@@ -154,7 +159,7 @@ public class OrderServiceImpl implements OrderService {
             executorService.schedule(() -> startLimitOrder(orderId), 3, TimeUnit.MINUTES);
         }
         WorkingHoursStatus workingHours = marketService.getWorkingHours(marketOrder.getStockId());
-        if(workingHours==WorkingHoursStatus.CLOSED || marketOrder.getDone())
+        if(workingHours==WorkingHoursStatus.CLOSED /*|| marketOrder.getDone()*/)
             return;
 
         final ListingBaseDto listingBaseDto = marketService.getStock(marketOrder.getStockId());
@@ -251,7 +256,13 @@ public class OrderServiceImpl implements OrderService {
                             ask));
                 }
                 marketOrder.setFee(calculateFee(marketOrder.getLimitValue(), marketOrder.getPrice()));
-                marketOrder.setStatus(OrderStatus.APPROVED);
+                if (!orderRequiresApprove()) {
+                    marketOrder.setStatus(OrderStatus.APPROVED);
+//                    marketOrder.setDone(true);
+                } else {
+                    marketOrder.setStatus(OrderStatus.PROCESSING);
+//                    marketOrder.setDone(false);
+                }
                 marketOrder.setDone(false);
                 orderRepository.save(marketOrder);
                 return true;
@@ -268,7 +279,13 @@ public class OrderServiceImpl implements OrderService {
                             bid));
                 }
                 marketOrder.setFee(calculateFee(marketOrder.getLimitValue(), marketOrder.getPrice()));
-                marketOrder.setStatus(OrderStatus.APPROVED);
+                if (!orderRequiresApprove()) {
+                    marketOrder.setStatus(OrderStatus.APPROVED);
+//                    marketOrder.setDone(true);
+                } else {
+                    marketOrder.setStatus(OrderStatus.PROCESSING);
+//                    marketOrder.setDone(false);
+                }
                 marketOrder.setDone(false);
                 orderRepository.save(marketOrder);
                 return true;
