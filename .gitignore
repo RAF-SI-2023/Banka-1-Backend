@@ -2,3 +2,5 @@
 
 docker-compose.yaml
 init.sql
+
+market-service/src/main/resources/logs

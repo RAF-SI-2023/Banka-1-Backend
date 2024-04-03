@@ -121,48 +121,51 @@ public class OrderController {
     @Operation(summary = "Create limit order request", description = "Create limit order request")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = {@Content(mediaType = "application/json")}),
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))}),
             @ApiResponse(responseCode = "403", description = "You aren't authorized to create limit order request"),
             @ApiResponse(responseCode = "404", description = "Bad Request"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Void> createLimitOrderRequest(
+    public ResponseEntity<Boolean> createLimitOrderRequest(
             @RequestBody CreateOrderRequest request
     ) {
-        orderService.createLimitOrder(request);
-        return ResponseEntity.ok().build();
+        boolean ok = orderService.createLimitOrder(request);
+        return new ResponseEntity<>(ok, ok ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping(value = "/stop", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create stop order request", description = "Create stop order request")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = {@Content(mediaType = "application/json")}),
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))}),
             @ApiResponse(responseCode = "403", description = "You aren't authorized to create limit order request"),
             @ApiResponse(responseCode = "404", description = "Bad Request"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Void> createStopOrderRequest(
+    public ResponseEntity<Boolean> createStopOrderRequest(
             @RequestBody CreateOrderRequest request
     ) {
-        orderService.createStopOrder(request);
-        return ResponseEntity.ok().build();
+        boolean ok = orderService.createStopOrder(request);
+        return new ResponseEntity<>(ok, ok ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping(value = "/stoplimit", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create stop-limit order request", description = "Create stop-limit order request")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = {@Content(mediaType = "application/json")}),
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))}),
             @ApiResponse(responseCode = "403", description = "You aren't authorized to create limit order request"),
             @ApiResponse(responseCode = "404", description = "Bad Request"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Void> createStopLimitOrderRequest(
+    public ResponseEntity<Boolean> createStopLimitOrderRequest(
             @RequestBody CreateOrderRequest request
     ) {
-        orderService.createStopLimitOrder(request);
-        return ResponseEntity.ok().build();
+        boolean ok = orderService.createStopLimitOrder(request);
+        return new ResponseEntity<>(ok, ok ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
     }
 
     @PutMapping(value = "/resetLimit/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -177,11 +180,17 @@ public class OrderController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Void> resetCurrentLimitForUser(
+    public ResponseEntity<DecideOrderResponse> resetCurrentLimitForUser(
             @PathVariable(name = "userId") Long userId
     ) {
-        orderService.resetLimitForUser(userId);
-        return ResponseEntity.ok().build();
+        boolean ok = orderService.resetLimitForUser(userId);
+
+        if (!ok) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new DecideOrderResponse(false, "Failed to reset limit."));
+        }
+
+        return ResponseEntity.ok().body(new DecideOrderResponse(true, "Limit reset successfully."));
     }
 
     @PutMapping(value = "/setLimit/{userId}/{orderLimit}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -196,11 +205,17 @@ public class OrderController {
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Void> setOrderLimitForUser(
+    public ResponseEntity<DecideOrderResponse> setOrderLimitForUser(
         @PathVariable(name = "userId") Long userId,
         @PathVariable(name = "orderLimit") Double orderLimit
     ) {
-        orderService.setLimitOrderForUser(userId, orderLimit);
-        return ResponseEntity.ok().build();
+        boolean ok = orderService.setLimitOrderForUser(userId, orderLimit);
+
+        if (!ok) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new DecideOrderResponse(false, "Failed to set limit."));
+        }
+
+        return ResponseEntity.ok().body(new DecideOrderResponse(true, "Limit set successfully."));
     }
 }

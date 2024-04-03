@@ -130,7 +130,7 @@ public class OrderServiceImpl implements OrderService {
         }
     }
     @Override
-    public void createLimitOrder(CreateOrderRequest request) {
+    public boolean createLimitOrder(CreateOrderRequest request) {
         MarketOrder marketOrder = orderMapper.requestToMarketOrder(request);
         ListingBaseDto listingBaseDto = marketService.getStock(request.getStockId());
 
@@ -147,6 +147,7 @@ public class OrderServiceImpl implements OrderService {
         }
         marketOrder = orderRepository.save(marketOrder);
         startLimitOrder(marketOrder.getId());
+        return true;
     }
 
     @Override
@@ -210,7 +211,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void createStopOrder(CreateOrderRequest stopOrderRequest) {
+    public boolean createStopOrder(CreateOrderRequest stopOrderRequest) {
         MarketOrder marketOrder = orderMapper.requestToMarketOrder(stopOrderRequest);
         marketOrder = orderRepository.save(marketOrder);
         Long stockId = marketOrder.getStockId();
@@ -225,6 +226,7 @@ public class OrderServiceImpl implements OrderService {
                 stopOrderExecutor.shutdown(); // Stop further executions
             }
         }, 0, 30, TimeUnit.SECONDS);
+        return true;
     }
     @Override
     public Boolean checkStockPriceForStopOrder(Long marketOrderId, Long stockId) {
@@ -287,7 +289,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void createStopLimitOrder(CreateOrderRequest stopLimitOrderRequest) {
+    public boolean createStopLimitOrder(CreateOrderRequest stopLimitOrderRequest) {
         MarketOrder marketOrder = orderMapper.requestToMarketOrder(stopLimitOrderRequest);
         marketOrder = orderRepository.save(marketOrder);
         Long stockId = marketOrder.getStockId();
@@ -301,6 +303,7 @@ public class OrderServiceImpl implements OrderService {
                 stopOrderExecutor.shutdown(); // Stop further executions
             }
         }, 0, 30, TimeUnit.SECONDS);
+        return true;
     }
 
     private User getLoggedUser() {
@@ -380,16 +383,24 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void resetLimitForUser(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("Cannot find user with id: " + userId));
+    public boolean resetLimitForUser(Long userId) {
+        Optional<User> optUser = userRepository.findById(userId);
+        if (optUser.isEmpty()) return false;
+        User user = optUser.get();
+//        User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("Cannot find user with id: " + userId));
         user.setLimitNow(0.0);
         userRepository.save(user);
+        return true;
     }
 
     @Override
-    public void setLimitOrderForUser(Long userId, Double newOrderLimit) {
-        User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("Cannot find user with id: " + userId));
+    public boolean setLimitOrderForUser(Long userId, Double newOrderLimit) {
+//        User user = userRepository.findById(userId).orElseThrow(()-> new RuntimeException("Cannot find user with id: " + userId));
+        Optional<User> optUser = userRepository.findById(userId);
+        if (optUser.isEmpty()) return false;
+        User user = optUser.get();
         user.setOrderlimit(newOrderLimit);
         userRepository.save(user);
+        return true;
     }
 }

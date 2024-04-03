@@ -8,12 +8,12 @@ public interface OrderService {
     void startOrder(final Long orderId);
 
     void startLimitOrder(Long orderId);
-    void createLimitOrder(CreateOrderRequest limitOrderRequest);
+    boolean createLimitOrder(CreateOrderRequest limitOrderRequest);
 
-    void createStopOrder(CreateOrderRequest stopOrderRequest);
+    boolean createStopOrder(CreateOrderRequest stopOrderRequest);
     Boolean checkStockPriceForStopOrder(Long marketOrderId, Long stockId);
 
-    void createStopLimitOrder(CreateOrderRequest stopLimitOrderRequest);
+    boolean createStopLimitOrder(CreateOrderRequest stopLimitOrderRequest);
 
     boolean changeStatus(Long id, OrderStatus orderStatus);
 
@@ -23,7 +23,7 @@ public interface OrderService {
 
     void resetUsersLimits();
 
-    void resetLimitForUser(Long userId);
+    boolean resetLimitForUser(Long userId);
 
-    void setLimitOrderForUser(Long userId, Double newOrderLimit);
+    boolean setLimitOrderForUser(Long userId, Double newOrderLimit);
 }
