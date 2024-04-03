@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.threads;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.tinylog.Logger;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.exceptions.APIException;
 import rs.edu.raf.banka1.repositories.StockRepository;
@@ -40,7 +41,7 @@ public class FetchingThread implements Runnable  {
     }
 
     public void valuesForConstantUpdating() {
-      //  System.out.println("[CHRON] USAO SAM OVDE " + this.updateListingApiUrl);
+        //  System.out.println("[CHRON] USAO SAM OVDE " + this.updateListingApiUrl);
         try {
             for (ListingStock curr : this.listingStocks) {
                 String response = requests.sendRequest(this.updateListingApiUrl +
@@ -80,9 +81,9 @@ public class FetchingThread implements Runnable  {
                 this.stockRepository.updateFreshValuesStock(high, low, price, volume, change, curr.getListingId(), (int) (System.currentTimeMillis() / 1000L));
             }
         } catch (APIException apiException) {
-            System.out.println("[ListingStockServiceImpl] Error occured when calling api " + apiException.getMessage());
+            Logger.error("Error occured when calling api " + apiException.getMessage());
         } catch (Exception e) {
-            System.out.println("[ListingStockServiceImpl] Error occured when calling valuesForConstantUpdating " + e.getMessage() + " Cause: " + e.getCause());
+            Logger.error("Error occured when calling valuesForConstantUpdating " + e.getMessage() + " Cause: " + e.getCause());
         }
     }
 

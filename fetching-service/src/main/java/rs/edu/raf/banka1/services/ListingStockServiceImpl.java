@@ -5,30 +5,39 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import org.tinylog.Logger;
 import rs.edu.raf.banka1.mapper.StockMapper;
 import rs.edu.raf.banka1.model.ListingHistory;
+
 import rs.edu.raf.banka1.model.ListingStock;
+
+import rs.edu.raf.banka1.model.entities.Country;
 import rs.edu.raf.banka1.model.entities.Exchange;
+import rs.edu.raf.banka1.model.entities.Holiday;
 import rs.edu.raf.banka1.model.exceptions.APIException;
-import rs.edu.raf.banka1.repositories.ExchangeRepository;
-import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
-import rs.edu.raf.banka1.repositories.StockRepository;
+import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.threads.FetchingThread;
 import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.Requests;
 
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
+
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Setter
+@Getter
 @Service
 public class ListingStockServiceImpl implements ListingStockService {
     private final ObjectMapper objectMapper;
@@ -41,6 +50,10 @@ public class ListingStockServiceImpl implements ListingStockService {
     private ListingHistoryRepository listingHistoryRepository;
     @Autowired
     private ExchangeRepository exchangeRepository;
+    @Autowired
+    private CountryRepository countryRepository;
+    @Autowired
+    private HolidayRepository holidayRepository;
 
     private Requests requests;
     @Value("${listingAPItoken}")
@@ -93,10 +106,10 @@ public class ListingStockServiceImpl implements ListingStockService {
                 e.printStackTrace();
             }
         } catch (APIException apiException) {
-            System.out.println(apiException.getMessage());
+            Logger.error("Error occured when calling api: " + apiException.getMessage());
         } catch (Exception e) {
             //e.printStackTrace();
-            System.err.println("[generateJSONSymbols] Exception occured:" + e.getMessage());
+            Logger.error("Exception occured: " + e.getMessage());
         }
 
     }
@@ -158,9 +171,9 @@ public class ListingStockServiceImpl implements ListingStockService {
             }
 
         } catch (APIException apiException) {
-            System.out.println(apiException.getMessage());
+            Logger.error("Error occured when calling api: " + apiException.getMessage());
         } catch (Exception e) {
-            System.out.println(symbol + " not found on alphavantage");
+            Logger.error(symbol + " not found on alphavantage");
         }
         return null;
     }
@@ -194,7 +207,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     @Override
     public List<ListingHistory> fetchNListingsHistory(int n) {
         try{
-             List<ListingStock> listingStocks = fetchNStocks(n);
+            List<ListingStock> listingStocks = fetchNStocks(n);
             List<ListingHistory> listingHistories = new ArrayList<>();
             for (ListingStock stock : listingStocks) {
                 List<ListingHistory> singleStockHistory = fetchSingleListingHistory(stock.getTicker());
@@ -394,4 +407,5 @@ public class ListingStockServiceImpl implements ListingStockService {
 
         return listingHistories;
     }
+
 }

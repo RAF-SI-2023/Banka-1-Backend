@@ -1,19 +1,23 @@
 package rs.edu.raf.banka1.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.tinylog.Logger;
 import rs.edu.raf.banka1.exceptions.OptionsException;
 import rs.edu.raf.banka1.mapper.OptionsMapper;
 import rs.edu.raf.banka1.model.OptionsModel;
 import rs.edu.raf.banka1.model.dtos.OptionsDto;
 import rs.edu.raf.banka1.model.enums.OptionType;
 import rs.edu.raf.banka1.repositories.OptionsRepository;
+
 import rs.edu.raf.banka1.threads.OptionsThread;
+
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.io.File;
@@ -21,7 +25,11 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Iterator;
+import java.util.Collections;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -51,7 +59,7 @@ public class OptionsServiceImpl implements OptionsService{
         if (cookie == null || crumb == null) {
             // If not cached, obtain them
             if (!getCookieAndCrumb()) {
-                System.out.println("Failed to obtain cookie and crumb values");
+                Logger.error("Failed to obtain cookie and crumb values");
                 return new ArrayList<>();
             }
         }
@@ -155,10 +163,10 @@ public class OptionsServiceImpl implements OptionsService{
     @Override
     public List<OptionsDto> getOptionsByTicker(String ticker) {
         List<OptionsDto> options = this.optionsRepository.findByTicker(ticker).map(optionsModels ->
-            optionsModels.stream()
-                .map(optionsMapper::optionsModelToOptionsDto)
-                .collect(Collectors.toList()))
-            .orElse(Collections.emptyList());
+                        optionsModels.stream()
+                                .map(optionsMapper::optionsModelToOptionsDto)
+                                .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
         if(options.isEmpty()) {
             if(crumb != null) {
                 options = fetchOptionsForTicker(ticker, optionsUrl + ticker + "?crumb=" + crumb);
@@ -230,7 +238,7 @@ public class OptionsServiceImpl implements OptionsService{
                 throw new OptionsException("Initial HTTP request did not return a 404||500 response");
             }
         } catch (Exception e) {
-            System.out.println("Problem with getting cookie: " + e.getMessage());
+            Logger.error("Problem with getting cookie: " + e.getMessage());
 //            throw new OptionsException("Problem with getting cookie: " + e.getMessage());
         }
         return false;
