@@ -16,6 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import rs.edu.raf.banka1.mapper.PaymentMapper;
 import rs.edu.raf.banka1.dtos.PaymentDto;
 import rs.edu.raf.banka1.model.*;
@@ -34,6 +37,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class PaymentServiceImplTest {
 
     @Mock
@@ -50,11 +54,6 @@ class PaymentServiceImplTest {
     private JwtUtil jwtUtil;
     @InjectMocks
     private PaymentServiceImpl paymentService;
-
-    @BeforeEach
-    private void setUp(){
-
-    }
 
     @Test
     public void createNewPaymentTestSuccessful(){
