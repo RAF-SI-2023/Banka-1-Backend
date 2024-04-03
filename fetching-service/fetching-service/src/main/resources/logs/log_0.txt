@@ -1,6 +1,0 @@
-2024-04-03 20:00:17     ForexServiceImpl.getUpdatedForex()     INFO: Response: 
-2024-04-03 20:00:17     ForexServiceImpl.getUpdatedForex()     INFO: BaseCurrency: null, QuoteCurrency: null are not available on the alphavantage API
-2024-04-03 20:00:17     ForexServiceImpl.getUpdatedForex()     INFO: Response: 
-2024-04-03 20:00:17     ForexServiceImpl.getUpdatedForex()     INFO: BaseCurrency: null, QuoteCurrency: null are not available on the alphavantage API
-2024-04-03 20:00:19     OptionsServiceImpl.getCookieAndCrumb()     ERROR: Problem with getting cookie: Failed to retrieve crumb value. Status code: 429
-2024-04-03 20:00:19     OptionsServiceImpl.fetchOptions()     ERROR: Failed to obtain cookie and crumb values
