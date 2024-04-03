@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import rs.edu.raf.banka1.utils.JwtUtil;
 @RestController
 @CrossOrigin
 @RequestMapping("/orders")
+@SecurityRequirement(name = "basicScheme")
 public class OrderController {
 
     private final OrderService orderService;
@@ -84,31 +86,14 @@ public class OrderController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<CancelOrderResponse> cancelOrderRequestStatus(
-            @PathVariable(name = "orderId") final Long id,
-            @RequestBody final StatusRequest request
+            @PathVariable(name = "orderId") final Long id
     ) {
-        // Parsing request into OrderStatus
-        OrderStatus status;
-        try {
-            status = OrderStatus.valueOf(request.getStatus());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new CancelOrderResponse(false, "Invalid status provided."));
-        }
-
         if (!orderService.checkOrderOwner(id)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new CancelOrderResponse(false, "Logged user is not owner of this order."));
         }
 
-        boolean ok = false;
-
-        // CANCELLED, execute cancel logic
-        if (status.equals(OrderStatus.CANCELLED)) {
-            ok = orderService.changeStatus(id, status);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new CancelOrderResponse(false, "Invalid status provided."));
-        }
+        boolean ok = orderService.changeStatus(id, OrderStatus.CANCELLED);
 
         if (!ok) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

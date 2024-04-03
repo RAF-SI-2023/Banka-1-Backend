@@ -14,6 +14,7 @@ import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.OrderService;
 import rs.edu.raf.banka1.utils.Constants;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.Executors;
@@ -32,10 +33,10 @@ public class OrderServiceImpl implements OrderService {
     private final Random random = new Random();
 
     public OrderServiceImpl(
-            OrderMapper orderMapper,
-            OrderRepository orderRepository,
-            MarketService marketService,
-            UserRepository userRepository
+            final OrderMapper orderMapper,
+            final OrderRepository orderRepository,
+            final MarketService marketService,
+            final UserRepository userRepository
     ) {
         this.orderMapper = orderMapper;
         this.orderRepository = orderRepository;
@@ -81,7 +82,7 @@ public class OrderServiceImpl implements OrderService {
 
 //        if(workingHours==WorkingHoursStatus.CLOSED || marketOrder.getStatus().equals(OrderStatus.DONE))
 //            return;
-        if(workingHours==WorkingHoursStatus.CLOSED || marketOrder.getDone())
+        if(workingHours==WorkingHoursStatus.CLOSED || (marketOrder.getDone() != null && marketOrder.getDone()))
             return;
 
         final ListingBaseDto listingBaseDto = marketService.getStock(marketOrder.getStockId());
@@ -353,6 +354,12 @@ public class OrderServiceImpl implements OrderService {
         Optional<MarketOrder> optOrder = this.orderRepository.findById(id);
         if (optOrder.isEmpty()) return false;
         MarketOrder order = optOrder.get();
+
+        // Order must be in PROCESSING state to be DENIED / APPROVED
+        if (order.getStatus() != null && !order.getStatus().equals(OrderStatus.PROCESSING)) return false;
+        // Order processed before
+        if (order.getDone() != null && order.getDone()) return false;
+
         order.setStatus(orderStatus);
         order.setApprovedBy(this.getLoggedUser());
         order.setLastModifiedDate(System.currentTimeMillis() / 1000);
@@ -373,7 +380,7 @@ public class OrderServiceImpl implements OrderService {
         Optional<User> optOrderOwner = this.userRepository.findById(order.getOwnerId());
         if (optOrderOwner.isEmpty()) return false;
         // Check if logged user and order owner are the same person
-        return loggedUser.getUserId().equals(optOrderOwner.get().getUserId());
+        return Objects.equals(loggedUser.getUserId(), optOrderOwner.get().getUserId());
     }
 
 //    private void processOrder(

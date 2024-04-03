@@ -116,7 +116,7 @@ public class UserServiceImpl implements UserService {
     private boolean userHasValidPosition(CreateUserRequest createUserRequest) {
         return (createUserRequest.getPosition().equalsIgnoreCase(Constants.AGENT) ||
                 createUserRequest.getPosition().equalsIgnoreCase(Constants.SUPERVIZOR) ||
-                createUserRequest.getPosition().equalsIgnoreCase(Constants.EMPLOYEE));
+                createUserRequest.getPosition().equalsIgnoreCase(Constants.ADMIN));
     }
 
     @Override

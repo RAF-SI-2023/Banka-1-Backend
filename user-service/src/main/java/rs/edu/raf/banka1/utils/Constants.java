@@ -6,5 +6,5 @@ public class Constants {
     public static final Long JWT_EXPIRATION_LENGTH = 1000L * 60 * 60 * 10;
     public static final String AGENT = "agent";
     public static final String SUPERVIZOR = "supervizor";
-    public static final String EMPLOYEE = "employee";
+    public static final String ADMIN = "admin";
 }
