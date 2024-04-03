@@ -1,0 +1,1 @@
+2024-04-03 20:00:28     FetchingThread.valuesForConstantUpdating()     ERROR: Error occured when calling api Api call failed
