@@ -14,6 +14,9 @@ import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.OrderService;
 import rs.edu.raf.banka1.utils.Constants;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -357,7 +360,18 @@ public class OrderServiceImpl implements OrderService {
         return Objects.equals(loggedUser.getUserId(), optOrderOwner.get().getUserId());
     }
 
-//    private void processOrder(
+    @Override
+    public void resetUsersLimits() {
+        if(LocalDate.now().getDayOfWeek().equals(DayOfWeek.SATURDAY) ||
+            LocalDate.now().getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+            return;
+        }
+        List<User> users = userRepository.findAll();
+        users.forEach(user->user.setLimitNow(0.0));
+        userRepository.saveAll(users);
+    }
+
+    //    private void processOrder(
 //        final Long orderId,
 //        final WorkingHoursStatus workingHours
 //    ){

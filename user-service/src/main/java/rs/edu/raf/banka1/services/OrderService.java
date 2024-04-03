@@ -20,4 +20,6 @@ public interface OrderService {
     boolean decideOrder(Long id, OrderStatus orderStatus);
 
     boolean checkOrderOwner(Long id);
+
+    void resetUsersLimits();
 }

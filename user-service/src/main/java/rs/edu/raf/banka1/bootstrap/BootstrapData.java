@@ -10,12 +10,18 @@ import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
+import rs.edu.raf.banka1.services.OrderService;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.HashSet;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class BootstrapData implements CommandLineRunner {
@@ -31,6 +37,9 @@ public class BootstrapData implements CommandLineRunner {
 
     private final OrderRepository orderRepository;
 
+    private OrderService orderService;
+    private final ScheduledExecutorService resetLimitExecutor = Executors.newScheduledThreadPool(1);
+
     private final CardRepository cardRepository;
 
     @Autowired
@@ -45,7 +54,8 @@ public class BootstrapData implements CommandLineRunner {
         final LoanRequestRepository loanRequestRepository,
         final LoanRepository loanRepository,
         final CardRepository cardRepository,
-        final OrderRepository orderRepository
+        final OrderRepository orderRepository,
+        OrderService orderService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -58,6 +68,7 @@ public class BootstrapData implements CommandLineRunner {
         this.loanRepository = loanRepository;
         this.cardRepository = cardRepository;
         this.orderRepository = orderRepository;
+        this.orderService = orderService;
     }
 
     @Override
@@ -124,6 +135,11 @@ public class BootstrapData implements CommandLineRunner {
 
         seedLoan();
         seedLoanRequest();
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime midnight = now.toLocalDate().atStartOfDay().plusDays(1);
+        Duration duration = Duration.between(now, midnight);
+        resetLimitExecutor.scheduleAtFixedRate(() -> orderService.resetUsersLimits(), duration.toMillis(), 24, TimeUnit.HOURS);
 
         createTestOrders();
 
