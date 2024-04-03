@@ -80,7 +80,6 @@ public class BootstrapData implements CommandLineRunner {
         client.setPosition("employee");
         client.setLastName("ClientPrezime");
         userRepository.save(user1);
-        userRepository.save(client);
 
         Company company = new Company();
         company.setCompanyName("Sony");
@@ -100,6 +99,13 @@ public class BootstrapData implements CommandLineRunner {
         customer.setActive(true);
         customerRepository.save(customer);
 
+        //ovo samo za test moze da se obrise
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("1234");
+        bankAccount.setAvailableBalance(10000.0);
+        bankAccount.setCustomer(customer);
+        bankAccountService.saveBankAccount(bankAccount);
+        // dovde
 
         BankAccountRequest bankAccountRequest = new BankAccountRequest();
         bankAccountRequest.setAccountType(AccountType.FOREIGN_CURRENCY);

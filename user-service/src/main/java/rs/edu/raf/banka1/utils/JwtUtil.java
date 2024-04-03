@@ -60,6 +60,14 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS512, secretKey).compact();
     }
 
+    public String generateSingleUseCode(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + Constants.SINGLE_USE_CODE_EXPIRATION_LENGTH))
+                .signWith(SignatureAlgorithm.HS512, secretKey).compact();
+    }
+
     public boolean validateToken(String token) {
         return !isTokenExpired(token);
     }

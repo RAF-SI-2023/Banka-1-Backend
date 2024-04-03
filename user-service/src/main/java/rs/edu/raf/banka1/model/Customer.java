@@ -65,4 +65,12 @@ public class Customer extends User {
     )
     private List<BankAccount> accountIds;
 
+    @OneToMany(
+            mappedBy = "customer",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<PaymentRecipient> recipients;
+
+    private String singleUseCode;
 }

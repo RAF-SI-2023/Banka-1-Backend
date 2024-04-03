@@ -1,9 +1,6 @@
 package rs.edu.raf.banka1.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,18 +10,29 @@ import lombok.Setter;
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long paymentId;
-    //broj naloga
-    private String senderAccountNumber;
-    private Double amount;
+    private Long id;
+
+//    private String senderAccountOwnerName;
+//    private String senderAccountNumber;
+
+    @ManyToOne
+    @JoinColumn(name = "sender_bankaccount_id", referencedColumnName = "id")
+    private BankAccount senderBankAccount;
+
+    private String recipientName;
     private String recipientAccountNumber;
-    private String recipient;
-    //primalac -> ime i prezime i adresa
-    private Integer paymentCode;
-    //sifra placanja
+    private Double amount;
+    private String paymentCode;
+    private String model;
     private String referenceNumber;
-    //poziv na broj
-    private String purposeOfPayment;
-    private Long paymentDate;
+    private TransactionStatus status;
+    private Double commissionFee;
+    private Long dateOfPayment;
+    private String channel;
+    private String paymentPurpose;
+
+    public static Double calculateCommission(Double amount) {
+        return 0.02 * amount;
+    }
 
 }
