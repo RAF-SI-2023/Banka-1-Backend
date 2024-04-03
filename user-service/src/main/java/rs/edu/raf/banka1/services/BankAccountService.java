@@ -1,11 +1,7 @@
 package rs.edu.raf.banka1.services;
 
 import rs.edu.raf.banka1.model.BankAccount;
-import rs.edu.raf.banka1.model.Card;
-import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
-import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
-
 
 import java.util.List;
 

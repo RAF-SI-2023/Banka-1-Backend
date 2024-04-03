@@ -10,9 +10,7 @@ import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.BankAccountMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
-import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
-import rs.edu.raf.banka1.requests.GenerateBankAccountRequest;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CardService;
@@ -35,10 +33,15 @@ public class BankAccountServiceImpl implements BankAccountService {
     private CompanyRepository companyRepository;
     @Autowired
     private BankAccountRepository bankAccountRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
+
     @Autowired
     private CardService cardService;
     @Autowired
     private CurrencyRepository currencyRepository;
+
     @Autowired
     private BankAccountMapper bankAccountMapper;
     @Autowired
@@ -102,6 +105,8 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccount.setCurrency(currency);
 
         bankAccount.setAccountStatus(false);
+
+        bankAccount.setPayments(new ArrayList<>());
 
         saveBankAccount(bankAccount);
 

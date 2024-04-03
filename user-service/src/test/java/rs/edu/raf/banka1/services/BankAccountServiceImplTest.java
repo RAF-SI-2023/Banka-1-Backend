@@ -3,17 +3,12 @@ package rs.edu.raf.banka1.services;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rs.edu.raf.banka1.model.BankAccount;
-import rs.edu.raf.banka1.model.Company;
-import rs.edu.raf.banka1.model.Currency;
-import rs.edu.raf.banka1.model.Customer;
-import rs.edu.raf.banka1.model.AccountType;
-import rs.edu.raf.banka1.repositories.BankAccountRepository;
-import rs.edu.raf.banka1.repositories.CompanyRepository;
-import rs.edu.raf.banka1.repositories.CurrencyRepository;
-import rs.edu.raf.banka1.repositories.CustomerRepository;
+import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.services.implementations.BankAccountServiceImpl;
@@ -27,23 +22,20 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class BankAccountServiceImplTest {
 
-    @Spy
+    @Mock
+    private CustomerRepository customerRepository;
+    @Mock
+    private CompanyRepository companyRepository;
+    @Mock
+    private BankAccountRepository bankAccountRepository;
+    @Mock
+    private PaymentRepository paymentRepository;
+    @Mock
+    private CurrencyRepository currencyRepository;
+    @Mock
+    private CardService cardService;
+    @InjectMocks
     private BankAccountServiceImpl bankAccountService;
-
-    @BeforeEach
-    void setUp() {
-        CustomerRepository customerRepository = mock(CustomerRepository.class);
-        CompanyRepository companyRepository = mock(CompanyRepository.class);
-        BankAccountRepository bankAccountRepository = mock(BankAccountRepository.class);
-        CurrencyRepository currencyRepository = mock(CurrencyRepository.class);
-        CardService cardService = mock(CardService.class);
-        bankAccountService.setCustomerRepository(customerRepository);
-        bankAccountService.setCompanyRepository(companyRepository);
-        bankAccountService.setBankAccountRepository(bankAccountRepository);
-        bankAccountService.setCardService(cardService);
-        bankAccountService.setCurrencyRepository(currencyRepository);
-    }
-
     @Test
     public void createBankAccountTestNoCompanyInDatabase(){
         CreateBankAccountRequest createRequest = new CreateBankAccountRequest();
@@ -123,6 +115,15 @@ public class BankAccountServiceImplTest {
         Currency currency = new Currency();
         currency.setCurrencyCode(curr);
 
+        BankAccount senderBankAccount = new BankAccount();
+        senderBankAccount.setAccountNumber("123456789");
+
+        Payment payment1 = new Payment();
+        payment1.setAmount(100.0);
+        payment1.setSenderBankAccount(senderBankAccount);
+        payment1.setRecipientAccountNumber("987654321");
+
+
         when(bankAccountService.getCurrencyRepository().findCurrencyByCurrencyCode(curr)).thenReturn(Optional.of(currency));
 
         when(bankAccountService.getCustomerRepository().findById(createRequest.getCustomerId())).thenReturn(Optional.of(customer));
@@ -133,9 +134,11 @@ public class BankAccountServiceImplTest {
         assertEquals(bankAccount.getCustomer(), customer);
         assertEquals(bankAccount.getBalance(), createRequest.getAccount().getBalance());
         assertEquals(bankAccount.getAvailableBalance(), createRequest.getAccount().getAvailableBalance());
-        //assertEquals(bankAccount.getCreatedByAgentId(), createRequest.getCreatedByAgentId());
         assertEquals(bankAccount.getCurrency().getCurrencyCode(), createRequest.getAccount().getCurrencyCode());
         assertEquals(bankAccount.getAccountName(),createRequest.getAccount().getAccountName());
+        assertEquals(0, bankAccount.getPayments().size());
+        assertFalse(bankAccount.getAccountStatus());
+        assertTrue(bankAccount.getPayments().isEmpty());
         assertNull(bankAccount.getCompany());
     }
 

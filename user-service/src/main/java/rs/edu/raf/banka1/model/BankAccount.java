@@ -40,6 +40,9 @@ public class BankAccount {
 
     private Boolean accountStatus;
 
+    @OneToMany(mappedBy = "senderBankAccount")
+    private List<Payment> payments;
+
 //    Only for current_account and foreign_currency_account
     private String subtypeOfAccount;
     private Double maintenanceCost;
