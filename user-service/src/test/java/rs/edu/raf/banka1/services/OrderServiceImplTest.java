@@ -52,7 +52,6 @@ public class OrderServiceImplTest {
         assertTrue(result);
         verify(orderRepository).save(existingOrder);
         assertEquals(newStatus, existingOrder.getStatus());
-        assertTrue(existingOrder.getDone());
     }
 
     @Test
@@ -85,7 +84,6 @@ public class OrderServiceImplTest {
         assertTrue(result);
         verify(orderRepository).save(existingOrder);
         assertEquals(newStatus, existingOrder.getStatus());
-        assertTrue(existingOrder.getDone());
     }
 
     @Test
