@@ -11,7 +11,7 @@ public class OrderMapper {
     public MarketOrder requestToMarketOrder(CreateOrderRequest request) {
         MarketOrder marketOrder = new MarketOrder();
         marketOrder.setStockId(request.getStockId());
-        marketOrder.setOwnerId(request.getUserId());
+        marketOrder.setOwnerId(request.getOwnerId());
         marketOrder.setOrderType(request.getOrderType());
         marketOrder.setStatus(OrderStatus.PROCESSING);
         marketOrder.setContractSize(request.getContractSize());

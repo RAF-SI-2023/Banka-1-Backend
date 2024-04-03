@@ -34,12 +34,9 @@ public class BootstrapData implements CommandLineRunner {
     private final CurrencyRepository currencyRepository;
     private final LoanRequestRepository loanRequestRepository;
     private final LoanRepository loanRepository;
-
     private final OrderRepository orderRepository;
-
-    private OrderService orderService;
+    private final OrderService orderService;
     private final ScheduledExecutorService resetLimitExecutor = Executors.newScheduledThreadPool(1);
-
     private final CardRepository cardRepository;
 
     @Autowired
@@ -55,7 +52,7 @@ public class BootstrapData implements CommandLineRunner {
         final LoanRepository loanRepository,
         final CardRepository cardRepository,
         final OrderRepository orderRepository,
-        OrderService orderService
+        final OrderService orderService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -76,7 +73,7 @@ public class BootstrapData implements CommandLineRunner {
         Logger.info("Loading Data...");
 
         seedPermissions();
-        seedCurencies();
+        seedCurrencies();
 
         User user1 = new User();
         user1.setEmail("admin");
@@ -116,7 +113,6 @@ public class BootstrapData implements CommandLineRunner {
         customer.setPosition("customer");
         customer.setActive(true);
         customerRepository.save(customer);
-
 
         BankAccountRequest bankAccountRequest = new BankAccountRequest();
         bankAccountRequest.setAccountType(AccountType.FOREIGN_CURRENCY);
@@ -194,7 +190,7 @@ public class BootstrapData implements CommandLineRunner {
 
     }
 
-    private void seedCurencies() {
+    private void seedCurrencies() {
         //loading currencies
         Set<Currency> currencies = Currency.getAvailableCurrencies();
         for(Currency currency : currencies) {

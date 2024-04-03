@@ -17,7 +17,6 @@ import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.responses.CancelOrderResponse;
 import rs.edu.raf.banka1.responses.DecideOrderResponse;
 import rs.edu.raf.banka1.services.OrderService;
-import rs.edu.raf.banka1.utils.JwtUtil;
 
 @RestController
 @CrossOrigin
@@ -26,11 +25,9 @@ import rs.edu.raf.banka1.utils.JwtUtil;
 public class OrderController {
 
     private final OrderService orderService;
-    private final JwtUtil jwtUtil;
 
-    public OrderController(OrderService orderService, JwtUtil jwtUtil) {
+    public OrderController(OrderService orderService) {
         this.orderService = orderService;
-        this.jwtUtil = jwtUtil;
     }
 
     @PutMapping(value = "/decideOrder/{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)

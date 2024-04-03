@@ -9,7 +9,7 @@ import rs.edu.raf.banka1.model.OrderType;
 public class CreateOrderRequest {
     private OrderType orderType;
     private Long stockId;
-    private Long userId;
+    private Long ownerId;
     private Long contractSize;
     private Double limitValue;
     private Double stopValue;

@@ -103,7 +103,11 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(marketOrder);
 
         final Long volume = Long.valueOf(listingBaseDto.getVolume());
-        Long remainingQuantity = marketOrder.getContractSize() - marketOrder.getProcessedNumber();
+        final Long remainingQuantity = marketOrder.getContractSize() - marketOrder.getProcessedNumber();
+
+        if(remainingQuantity == 0){
+            return;
+        }
 
         long timeInterval = random.nextLong(24*60/(volume/remainingQuantity));
         timeInterval = workingHours.equals(WorkingHoursStatus.AFTER_HOURS) ? timeInterval + 30*60 : timeInterval;
@@ -401,41 +405,4 @@ public class OrderServiceImpl implements OrderService {
         user.setOrderlimit(newOrderLimit);
         userRepository.save(user);
     }
-
-//    private void processOrder(
-//        final Long orderId,
-//        final WorkingHoursStatus workingHours
-//    ){
-//        if(workingHours==WorkingHoursStatus.CLOSED)
-//            return;
-//        MarketOrder marketOrder = orderRepository.getReferenceById(orderId);
-//
-//        if(marketOrder.getAllOrNone()){
-//            marketOrder.setProcessedNumber(marketOrder.getContractSize());
-//            marketOrder.setStatus(OrderStatus.DONE);
-//            orderRepository.save(marketOrder);
-//            return;
-//        }
-//
-//        final ListingBaseDto listingBaseDto = marketService.getStock(marketOrder.getStockId());
-//
-//
-//        Random random = new Random();
-//        Long processedNumber = random.nextLong(marketOrder.getContractSize() - marketOrder.getProcessedNumber()) + 1;
-//        marketOrder.setProcessedNumber(marketOrder.getProcessedNumber() + processedNumber);
-//        if(marketOrder.getContractSize().equals(marketOrder.getProcessedNumber())) {
-//            marketOrder.setStatus(OrderStatus.DONE);
-//            orderRepository.save(marketOrder);
-//            return;
-//        }
-//        orderRepository.save(marketOrder);
-//
-//        final Long volume = Long.valueOf(listingBaseDto.getVolume());
-//        Long remainingQuantity = marketOrder.getContractSize() - marketOrder.getProcessedNumber();
-//
-//        long timeInterval = random.nextLong(24*60/(volume/remainingQuantity));
-//        timeInterval = workingHours.equals(WorkingHoursStatus.AFTER_HOURS) ? timeInterval + 30*60 : timeInterval;
-//
-//        executorService.schedule(() -> processOrder(orderId, workingHours), timeInterval, TimeUnit.SECONDS);
-//    }
 }
