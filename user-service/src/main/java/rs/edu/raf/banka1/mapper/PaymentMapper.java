@@ -58,7 +58,7 @@ public class PaymentMapper {
         payment.setModel(request.getModel());
         payment.setReferenceNumber(request.getReferenceNumber());
         payment.setStatus(TransactionStatus.PROCESSING);
-        payment.setCommissionFee(request.getAmount() * 0.02);
+        payment.setCommissionFee(Payment.calculateCommission(request.getAmount()));
         payment.setDateOfPayment(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toEpochSecond());
         payment.setChannel("web");
         payment.setPaymentPurpose(request.getPaymentPurpose());

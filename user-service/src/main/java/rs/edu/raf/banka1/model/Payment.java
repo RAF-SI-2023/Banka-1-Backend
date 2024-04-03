@@ -31,4 +31,8 @@ public class Payment {
     private String channel;
     private String paymentPurpose;
 
+    public static Double calculateCommission(Double amount) {
+        return 0.02 * amount;
+    }
+
 }

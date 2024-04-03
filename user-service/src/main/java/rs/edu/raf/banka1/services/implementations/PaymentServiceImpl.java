@@ -7,6 +7,7 @@ import rs.edu.raf.banka1.mapper.PaymentMapper;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.model.Payment;
+import rs.edu.raf.banka1.model.TransactionStatus;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.repositories.PaymentRepository;
@@ -46,11 +47,41 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public Boolean createPayment(CreatePaymentRequest request) {
+    public Long createPayment(CreatePaymentRequest request) {
         Payment payment = paymentMapper.createPaymentRequestToPayment(request);
-        if (payment == null) return false;
+        if (payment == null) return -1L;
+        return paymentRepository.save(payment).getId();
+    }
+
+    @Override
+    public void processPayment(Long paymentId) {
+        Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
+        if (paymentOpt.isEmpty()) {
+            return;
+        }
+        Payment payment = paymentOpt.get();
+        BankAccount senderAccount = payment.getSenderBankAccount();
+        Optional<BankAccount> recipientAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(payment.getRecipientAccountNumber());
+        double commission = Payment.calculateCommission(payment.getAmount());
+        //TODO: da li availableBalance ili balance??
+        if (
+                recipientAccountOpt.isEmpty()
+                || payment.getStatus() != TransactionStatus.PROCESSING
+                || payment.getAmount() + commission > senderAccount.getAvailableBalance()
+                || !recipientAccountOpt.get().getCurrency().getId().equals(senderAccount.getCurrency().getId())
+        ) {
+            payment.setStatus(TransactionStatus.DENIED);
+            paymentRepository.save(payment);
+            return;
+        }
+        BankAccount recipientAccount = recipientAccountOpt.get();
+        recipientAccount.setAvailableBalance(recipientAccount.getAvailableBalance() + payment.getAmount());
+        senderAccount.setAvailableBalance(senderAccount.getAvailableBalance() - payment.getAmount() - commission);
+        payment.setStatus(TransactionStatus.COMPLETE);
+
+        bankAccountRepository.save(recipientAccount);
+        bankAccountRepository.save(senderAccount);
         paymentRepository.save(payment);
-        return true;
     }
 
     @Override
@@ -77,7 +108,7 @@ public class PaymentServiceImpl implements PaymentService {
         customer.setSingleUseCode(singleUseCode);
         customerRepository.save(customer);
         return emailService.sendEmail(customer.getEmail(), "RAF Banka - Single use token",
-                "Your single use code:" + singleUseCode);
+                "Your single use code:\n" + singleUseCode);
     }
 
     @Override

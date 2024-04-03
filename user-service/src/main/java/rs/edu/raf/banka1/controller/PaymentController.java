@@ -44,7 +44,10 @@ public class PaymentController {
         if (!paymentService.validatePayment(request)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        paymentService.createPayment(request);
+        Long paymentId = paymentService.createPayment(request);
+        if (paymentId > -1) {
+            paymentService.processPayment(paymentId);
+        }
         return ResponseEntity.ok().build();
     }
 

@@ -6,7 +6,8 @@ import rs.edu.raf.banka1.requests.CreatePaymentRequest;
 import java.util.List;
 
 public interface PaymentService {
-    Boolean createPayment(CreatePaymentRequest request);
+    Long createPayment(CreatePaymentRequest request);
+    void processPayment(Long paymentId);
 
     List<PaymentDto> getAllPaymentsForAccountNumber(String accountNumber);
 
