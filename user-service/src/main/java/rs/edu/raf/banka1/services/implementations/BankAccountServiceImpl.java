@@ -33,6 +33,10 @@ public class BankAccountServiceImpl implements BankAccountService {
     private CompanyRepository companyRepository;
     @Autowired
     private BankAccountRepository bankAccountRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
+
     @Autowired
     private CardService cardService;
     @Autowired
@@ -102,7 +106,8 @@ public class BankAccountServiceImpl implements BankAccountService {
 
         bankAccount.setAccountStatus(false);
 
-        bankAccount.setPayments(new ArrayList<>());
+        List<Payment> payments = paymentRepository.findBySenderAccountNumber(bankAccount.getAccountNumber());
+        bankAccount.setPayments(payments);
 
         saveBankAccount(bankAccount);
 
