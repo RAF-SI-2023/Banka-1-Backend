@@ -9,6 +9,5 @@ public class CreateBankAccountRequest {
 
     private BankAccountRequest account;
     private Long customerId;
-
     private Long companyId;
 }

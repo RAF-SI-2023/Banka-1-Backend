@@ -37,6 +37,7 @@ public class BankAccountServiceImpl implements BankAccountService {
     private CardService cardService;
     @Autowired
     private CurrencyRepository currencyRepository;
+
     @Autowired
     private BankAccountMapper bankAccountMapper;
     @Autowired
@@ -100,6 +101,8 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccount.setCurrency(currency);
 
         bankAccount.setAccountStatus(false);
+
+        bankAccount.setPayments(new ArrayList<>());
 
         saveBankAccount(bankAccount);
 

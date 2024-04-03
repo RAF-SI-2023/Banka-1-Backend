@@ -31,19 +31,19 @@ public class BankAccountMapper {
         return bankAccountDto;
     }
 
-    public BankAccount generateBankAccount(GenerateBankAccountRequest generateBankAccountRequest) {
-        BankAccount currentAccount = new BankAccount();
-        currentAccount.setBalance(0.0);
-        currentAccount.setAvailableBalance(0.0);
-        currentAccount.setCustomer(generateBankAccountRequest.getCustomer());
-        currentAccount.setAccountType(generateBankAccountRequest.getAccountData().getAccountType());
-        currentAccount.setCreatedByAgentId(generateBankAccountRequest.getEmployeeId());
-        currentAccount.setCreationDate(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toEpochSecond());
-        currentAccount.setExpirationDate(LocalDate.now().plusYears(BankAccountServiceImpl.years_to_expire).atStartOfDay(ZoneOffset.UTC).toEpochSecond());
-        currentAccount.setCurrency(generateBankAccountRequest.getCurrency());
-        currentAccount.setMaintenanceCost(generateBankAccountRequest.getMaintananceFee());
-        currentAccount.setPayments(new ArrayList<>());
-        return currentAccount;
-    }
+//    public BankAccount generateBankAccount(GenerateBankAccountRequest generateBankAccountRequest) {
+//        BankAccount currentAccount = new BankAccount();
+//        currentAccount.setBalance(0.0);
+//        currentAccount.setAvailableBalance(0.0);
+//        currentAccount.setCustomer(generateBankAccountRequest.getCustomer());
+//        currentAccount.setAccountType(generateBankAccountRequest.getAccountData().getAccountType());
+//        currentAccount.setCreatedByAgentId(generateBankAccountRequest.getEmployeeId());
+//        currentAccount.setCreationDate(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toEpochSecond());
+//        currentAccount.setExpirationDate(LocalDate.now().plusYears(BankAccountServiceImpl.years_to_expire).atStartOfDay(ZoneOffset.UTC).toEpochSecond());
+//        currentAccount.setCurrency(generateBankAccountRequest.getCurrency());
+//        currentAccount.setMaintenanceCost(generateBankAccountRequest.getMaintananceFee());
+//        currentAccount.setPayments(new ArrayList<>());
+//        return currentAccount;
+//    }
 
 }
