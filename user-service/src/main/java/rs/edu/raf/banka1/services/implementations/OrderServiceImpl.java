@@ -216,7 +216,9 @@ public class OrderServiceImpl implements OrderService {
 
         long timeInterval = random.nextLong(24*60/(volume/remainingQuantity));
         timeInterval = workingHours.equals(WorkingHoursStatus.AFTER_HOURS) ? timeInterval + 30*60 : timeInterval;
-        executorService.schedule(() -> startLimitOrder(orderId), timeInterval, TimeUnit.MINUTES);
+
+        // TODO problem! Ovo se poziva samo dva puta i posle toga nista! ? proveri !!!
+        executorService.schedule(() -> startLimitOrder(orderId), timeInterval, TimeUnit.SECONDS);
     }
 
     @Override
@@ -260,23 +262,60 @@ public class OrderServiceImpl implements OrderService {
 
         if(marketOrder.getOrderType().equals(OrderType.BUY)) {
             if(ask > marketOrder.getStopValue()) {
-                marketOrder.setPrice(calculatePrice(ask, marketOrder.getContractSize()));
+                if(marketOrder.getLimitValue() == null) {
+                    marketOrder.setPrice(calculatePrice(ask, marketOrder.getContractSize()));
+                } else {
+                    marketOrder.setPrice(calculatePriceForLimitOrder(
+                            marketOrder.getOrderType(),
+                            marketOrder.getContractSize(),
+                            marketOrder.getLimitValue(),
+                            ask));
+                }
                 marketOrder.setFee(calculateFee(marketOrder.getLimitValue(), marketOrder.getPrice()));
                 marketOrder.setStatus(OrderStatus.APPROVED);
+                marketOrder.setDone(false);
                 orderRepository.save(marketOrder);
                 return true;
             }
         } else { // SELL
             if(bid < marketOrder.getStopValue()) {
-                marketOrder.setPrice(calculatePrice(bid, marketOrder.getContractSize()));
+                if(marketOrder.getLimitValue() == null) {
+                    marketOrder.setPrice(calculatePrice(bid, marketOrder.getContractSize()));
+                } else {
+                    marketOrder.setPrice(calculatePriceForLimitOrder(
+                            marketOrder.getOrderType(),
+                            marketOrder.getContractSize(),
+                            marketOrder.getLimitValue(),
+                            bid));
+                }
                 marketOrder.setFee(calculateFee(marketOrder.getLimitValue(), marketOrder.getPrice()));
                 marketOrder.setStatus(OrderStatus.APPROVED);
+                marketOrder.setDone(false);
                 orderRepository.save(marketOrder);
                 return true;
             }
         }
         return false;
     }
+
+    @Override
+    public void createStopLimitOrder(CreateOrderRequest stopLimitOrderRequest) {
+        MarketOrder marketOrder = orderMapper.requestToMarketOrder(stopLimitOrderRequest);
+        marketOrder = orderRepository.save(marketOrder);
+        Long stockId = marketOrder.getStockId();
+        Long marketOrderId = marketOrder.getId();
+
+        stopOrderExecutor = Executors.newScheduledThreadPool(1);
+        stopOrderExecutor.scheduleWithFixedDelay(() -> {
+            System.out.println("STOP-LIMIT ORDER EXECUTOR");
+            boolean conditionMet = checkStockPriceForStopOrder(marketOrderId, stockId);
+            if (conditionMet) {
+                startLimitOrder(marketOrderId);
+                stopOrderExecutor.shutdown(); // Stop further executions
+            }
+        }, 0, 30, TimeUnit.SECONDS);
+    }
+
     private User getLoggedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // Check if the user is authenticated

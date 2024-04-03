@@ -12,6 +12,8 @@ public interface OrderService {
 
     void createStopOrder(CreateOrderRequest stopOrderRequest);
 
+    void createStopLimitOrder(CreateOrderRequest stopLimitOrderRequest);
+
     boolean changeStatus(Long id, OrderStatus orderStatus);
 
     boolean decideOrder(Long id, OrderStatus orderStatus);
