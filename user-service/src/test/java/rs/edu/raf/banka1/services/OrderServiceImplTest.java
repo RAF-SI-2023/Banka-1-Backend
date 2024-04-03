@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rs.edu.raf.banka1.dtos.ListingBaseDto;
+import rs.edu.raf.banka1.dtos.ListingStockDto;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.OrderRepository;
@@ -118,14 +118,15 @@ public class OrderServiceImplTest {
         marketOrder.setStopValue(null);
         marketOrder.setAllOrNone(true);
         marketOrder.setId(1L);
-        ListingBaseDto listingBaseDto = new ListingBaseDto();
-        listingBaseDto.setPrice(99.99);
-        listingBaseDto.setHigh(101.01);
-        listingBaseDto.setLow(98.98);
-        listingBaseDto.setVolume(100);
+
+        ListingStockDto listingStockDto = new ListingStockDto();
+        listingStockDto.setPrice(99.99);
+        listingStockDto.setHigh(101.01);
+        listingStockDto.setLow(98.98);
+        listingStockDto.setVolume(100);
 
         when(orderMapper.requestToMarketOrder(request)).thenReturn(marketOrder);
-        when(marketService.getStock(request.getStockId())).thenReturn(listingBaseDto);
+        when(marketService.getStock(request.getStockId())).thenReturn(listingStockDto);
         when(marketService.getWorkingHours(anyLong())).thenReturn(WorkingHoursStatus.OPENED);
         when(orderRepository.save(marketOrder)).thenReturn(marketOrder);
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(marketOrder));
@@ -152,14 +153,14 @@ public class OrderServiceImplTest {
         marketOrder.setAllOrNone(true);
         marketOrder.setId(1L);
 
-        ListingBaseDto listingBaseDto = new ListingBaseDto();
-        listingBaseDto.setPrice(99.99);
-        listingBaseDto.setHigh(115.01); // kljucno za test, nikad nece biti < od stopValue
-        listingBaseDto.setLow(98.98);
-        listingBaseDto.setVolume(100);
+        ListingStockDto listingStockDto = new ListingStockDto();
+        listingStockDto.setPrice(99.99);
+        listingStockDto.setHigh(115.01); // kljucno za test, nikad nece biti < od stopValue
+        listingStockDto.setLow(98.98);
+        listingStockDto.setVolume(100);
 
         when(orderRepository.findById(marketOrderId)).thenReturn(Optional.of(marketOrder));
-        when(marketService.getStock(stockId)).thenReturn(listingBaseDto);
+        when(marketService.getStock(stockId)).thenReturn(listingStockDto);
 
         Boolean conditionMet = orderService.checkStockPriceForStopOrder(marketOrderId, stockId);
 
@@ -184,14 +185,14 @@ public class OrderServiceImplTest {
         marketOrder.setAllOrNone(true);
         marketOrder.setId(1L);
 
-        ListingBaseDto listingBaseDto = new ListingBaseDto();
-        listingBaseDto.setPrice(99.99);
-        listingBaseDto.setHigh(80.0); // kljucno za test, nikad nece biti > od stopValue
-        listingBaseDto.setLow(98.98);
-        listingBaseDto.setVolume(100);
+        ListingStockDto listingStockDto = new ListingStockDto();
+        listingStockDto.setPrice(99.99);
+        listingStockDto.setHigh(80.0); // kljucno za test, nikad nece biti > od stopValue
+        listingStockDto.setLow(98.98);
+        listingStockDto.setVolume(100);
 
         when(orderRepository.findById(marketOrderId)).thenReturn(Optional.of(marketOrder));
-        when(marketService.getStock(stockId)).thenReturn(listingBaseDto);
+        when(marketService.getStock(stockId)).thenReturn(listingStockDto);
 
         Boolean conditionMet = orderService.checkStockPriceForStopOrder(marketOrderId, stockId);
 

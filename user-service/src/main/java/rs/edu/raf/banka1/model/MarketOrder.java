@@ -23,7 +23,6 @@ public class MarketOrder {
     private Double price;
     private Boolean allOrNone;
     private Long lastModifiedDate;
-    private Boolean done;
     @ManyToOne
     @JoinColumn(name = "approved_by_id")
     private User approvedBy;
