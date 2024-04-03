@@ -24,13 +24,14 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class OrderServiceImpl implements OrderService {
-    private final OrderMapper orderMapper;
+    private OrderMapper orderMapper;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final MarketService marketService;
     private static final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private static ScheduledExecutorService stopOrderExecutor = Executors.newScheduledThreadPool(1);
-    private final Random random = new Random();
+    private Random random = new Random();
+    private Double PERCENT = 0.1;
 
     public OrderServiceImpl(
             final OrderMapper orderMapper,
@@ -80,8 +81,6 @@ public class OrderServiceImpl implements OrderService {
         }
         WorkingHoursStatus workingHours = marketService.getWorkingHours(marketOrder.getStockId());
 
-//        if(workingHours==WorkingHoursStatus.CLOSED || marketOrder.getStatus().equals(OrderStatus.DONE))
-//            return;
         if(workingHours==WorkingHoursStatus.CLOSED || (marketOrder.getDone() != null && marketOrder.getDone()))
             return;
 
@@ -96,7 +95,6 @@ public class OrderServiceImpl implements OrderService {
         }
 
         if(marketOrder.getContractSize().equals(marketOrder.getProcessedNumber())) {
-//            marketOrder.setStatus(OrderStatus.DONE);
             marketOrder.setDone(true);
         }
         orderRepository.save(marketOrder);
@@ -132,12 +130,6 @@ public class OrderServiceImpl implements OrderService {
     public void createLimitOrder(CreateOrderRequest request) {
         MarketOrder marketOrder = orderMapper.requestToMarketOrder(request);
         ListingBaseDto listingBaseDto = marketService.getStock(request.getStockId());
-//    /** Ovo je provera - za test jer getStock vraca null trenutno !!! **/
-//        ListingBaseDto listingBaseDto = new ListingBaseDto();
-//        listingBaseDto.setPrice(99.99);
-//        listingBaseDto.setHigh(101.01);
-//        listingBaseDto.setLow(98.98);
-//        listingBaseDto.setVolume(10);
 
         marketOrder.setPrice(calculatePriceForLimitOrder(
                 marketOrder.getOrderType(),
@@ -154,27 +146,18 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void startLimitOrder(Long orderId) {
-        System.out.println("Start Limit Order: ");
         MarketOrder marketOrder = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Cannot find limit order with id: " + orderId));
         if(marketOrder.getStatus() != OrderStatus.APPROVED){
             executorService.schedule(() -> startLimitOrder(orderId), 3, TimeUnit.MINUTES);
         }
         WorkingHoursStatus workingHours = marketService.getWorkingHours(marketOrder.getStockId());
-//        WorkingHoursStatus workingHours = WorkingHoursStatus.OPENED;
         if(workingHours==WorkingHoursStatus.CLOSED || marketOrder.getDone())
             return;
 
         final ListingBaseDto listingBaseDto = marketService.getStock(marketOrder.getStockId());
-//    /** Ovo je provera - za test jer getStock vraca null trenutno !!! **/
-//        ListingBaseDto listingBaseDto = new ListingBaseDto();
-//        listingBaseDto.setPrice(99.99);
-//        listingBaseDto.setHigh(101.01);
-//        listingBaseDto.setLow(98.98);
-//        listingBaseDto.setVolume(10);
-
 
         Double stockPrice = listingBaseDto.getPrice();
-        Double change = random.nextDouble(stockPrice*0.1);
+        Double change = random.nextDouble(stockPrice*PERCENT);
         boolean plus = random.nextBoolean();
         stockPrice = plus ? (stockPrice + change) : (stockPrice - change);
 
@@ -217,9 +200,7 @@ public class OrderServiceImpl implements OrderService {
 
         long timeInterval = random.nextLong(24*60/(volume/remainingQuantity));
         timeInterval = workingHours.equals(WorkingHoursStatus.AFTER_HOURS) ? timeInterval + 30*60 : timeInterval;
-
-        // TODO problem! Ovo se poziva samo dva puta i posle toga nista! ? proveri !!!
-        executorService.schedule(() -> startLimitOrder(orderId), timeInterval, TimeUnit.SECONDS);
+        executorService.schedule(() -> startLimitOrder(orderId), timeInterval, TimeUnit.MINUTES);
     }
 
     @Override
@@ -231,7 +212,6 @@ public class OrderServiceImpl implements OrderService {
 
         stopOrderExecutor = Executors.newScheduledThreadPool(1);
         stopOrderExecutor.scheduleWithFixedDelay(() -> {
-            System.out.println("STOP ORDER EXECUTOR");
             boolean conditionMet = checkStockPriceForStopOrder(marketOrderId, stockId);
             if (conditionMet) {
                 // popraviti ovu startOrder Funkciju da radi
@@ -239,24 +219,19 @@ public class OrderServiceImpl implements OrderService {
                 stopOrderExecutor.shutdown(); // Stop further executions
             }
         }, 0, 30, TimeUnit.SECONDS);
-
     }
-
-    private Boolean checkStockPriceForStopOrder(Long marketOrderId, Long stockId) {
+    @Override
+    public Boolean checkStockPriceForStopOrder(Long marketOrderId, Long stockId) {
         MarketOrder marketOrder = orderRepository.findById(marketOrderId).orElseThrow(()-> new RuntimeException("Order not found"));
-        ListingBaseDto listingBase = new ListingBaseDto();
-        listingBase.setPrice(99.99);
-        listingBase.setHigh(99.99);
-        listingBase.setLow(98.98);
-        listingBase.setVolume(10);
+        ListingBaseDto listingBase = marketService.getStock(stockId);
 
         Double ask = listingBase.getHigh();
         Double bid = listingBase.getLow();
 
-        Double changeAsk = random.nextDouble(ask*0.1);
+        Double changeAsk = random.nextDouble(ask*PERCENT);
         boolean plusAsk = random.nextBoolean();
         ask = plusAsk ? (ask + changeAsk) : (ask - changeAsk);
-        Double changeBid = random.nextDouble(bid*0.1);
+        Double changeBid = random.nextDouble(bid*PERCENT);
         boolean plusBid = random.nextBoolean();
         bid = plusBid ? (bid + changeBid) : (bid - changeBid);
 
@@ -308,7 +283,6 @@ public class OrderServiceImpl implements OrderService {
 
         stopOrderExecutor = Executors.newScheduledThreadPool(1);
         stopOrderExecutor.scheduleWithFixedDelay(() -> {
-            System.out.println("STOP-LIMIT ORDER EXECUTOR");
             boolean conditionMet = checkStockPriceForStopOrder(marketOrderId, stockId);
             if (conditionMet) {
                 startLimitOrder(marketOrderId);

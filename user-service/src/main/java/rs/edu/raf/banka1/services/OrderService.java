@@ -11,6 +11,7 @@ public interface OrderService {
     void createLimitOrder(CreateOrderRequest limitOrderRequest);
 
     void createStopOrder(CreateOrderRequest stopOrderRequest);
+    Boolean checkStockPriceForStopOrder(Long marketOrderId, Long stockId);
 
     void createStopLimitOrder(CreateOrderRequest stopLimitOrderRequest);
 

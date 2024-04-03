@@ -5,23 +5,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
+import rs.edu.raf.banka1.dtos.ListingBaseDto;
 import rs.edu.raf.banka1.mapper.OrderMapper;
-import rs.edu.raf.banka1.model.MarketOrder;
-import rs.edu.raf.banka1.model.OrderStatus;
-import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.OrderRepository;
 import rs.edu.raf.banka1.repositories.UserRepository;
+import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.services.implementations.OrderServiceImpl;
-import rs.edu.raf.banka1.utils.Constants;
-
-import javax.swing.text.html.Option;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -110,5 +100,101 @@ public class OrderServiceImplTest {
         // Then
         assertFalse(result);
         verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    public void testCreateAndStartLimitOrder() {
+        CreateOrderRequest request = new CreateOrderRequest();
+        request.setStockId(1L);
+
+        MarketOrder marketOrder = new MarketOrder();
+        marketOrder.setStockId(1L);
+        marketOrder.setOwnerId(1L);
+        marketOrder.setOrderType(OrderType.BUY);
+        marketOrder.setStatus(OrderStatus.PROCESSING);
+        marketOrder.setContractSize(40L);
+        marketOrder.setProcessedNumber(0L);
+        marketOrder.setLimitValue(100.0);
+        marketOrder.setStopValue(null);
+        marketOrder.setAllOrNone(true);
+        marketOrder.setId(1L);
+        ListingBaseDto listingBaseDto = new ListingBaseDto();
+        listingBaseDto.setPrice(99.99);
+        listingBaseDto.setHigh(101.01);
+        listingBaseDto.setLow(98.98);
+        listingBaseDto.setVolume(100);
+
+        when(orderMapper.requestToMarketOrder(request)).thenReturn(marketOrder);
+        when(marketService.getStock(request.getStockId())).thenReturn(listingBaseDto);
+        when(marketService.getWorkingHours(anyLong())).thenReturn(WorkingHoursStatus.OPENED);
+        when(orderRepository.save(marketOrder)).thenReturn(marketOrder);
+        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(marketOrder));
+
+        orderService.createLimitOrder(request);
+
+        verify(orderRepository, times(2)).save(any());
+    }
+
+    @Test
+    public void testCheckStockPriceForStopOrderConditionMet() {
+        Long marketOrderId = 1L;
+        Long stockId = 1L;
+
+        MarketOrder marketOrder = new MarketOrder();
+        marketOrder.setStockId(1L);
+        marketOrder.setOwnerId(1L);
+        marketOrder.setOrderType(OrderType.BUY);
+        marketOrder.setStatus(OrderStatus.PROCESSING);
+        marketOrder.setContractSize(40L);
+        marketOrder.setProcessedNumber(0L);
+        marketOrder.setLimitValue(null);
+        marketOrder.setStopValue(100.0);
+        marketOrder.setAllOrNone(true);
+        marketOrder.setId(1L);
+
+        ListingBaseDto listingBaseDto = new ListingBaseDto();
+        listingBaseDto.setPrice(99.99);
+        listingBaseDto.setHigh(115.01); // kljucno za test, nikad nece biti < od stopValue
+        listingBaseDto.setLow(98.98);
+        listingBaseDto.setVolume(100);
+
+        when(orderRepository.findById(marketOrderId)).thenReturn(Optional.of(marketOrder));
+        when(marketService.getStock(stockId)).thenReturn(listingBaseDto);
+
+        Boolean conditionMet = orderService.checkStockPriceForStopOrder(marketOrderId, stockId);
+
+        assertTrue(conditionMet);
+        verify(orderRepository, times(1)).save(any());
+    }
+
+    @Test
+    public void testCheckStockPriceForStopOrderConditionNotMet() {
+        Long marketOrderId = 1L;
+        Long stockId = 1L;
+
+        MarketOrder marketOrder = new MarketOrder();
+        marketOrder.setStockId(1L);
+        marketOrder.setOwnerId(1L);
+        marketOrder.setOrderType(OrderType.BUY);
+        marketOrder.setStatus(OrderStatus.PROCESSING);
+        marketOrder.setContractSize(40L);
+        marketOrder.setProcessedNumber(0L);
+        marketOrder.setLimitValue(null);
+        marketOrder.setStopValue(100.0);
+        marketOrder.setAllOrNone(true);
+        marketOrder.setId(1L);
+
+        ListingBaseDto listingBaseDto = new ListingBaseDto();
+        listingBaseDto.setPrice(99.99);
+        listingBaseDto.setHigh(80.0); // kljucno za test, nikad nece biti > od stopValue
+        listingBaseDto.setLow(98.98);
+        listingBaseDto.setVolume(100);
+
+        when(orderRepository.findById(marketOrderId)).thenReturn(Optional.of(marketOrder));
+        when(marketService.getStock(stockId)).thenReturn(listingBaseDto);
+
+        Boolean conditionMet = orderService.checkStockPriceForStopOrder(marketOrderId, stockId);
+
+        assertFalse(conditionMet);
     }
 }
