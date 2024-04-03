@@ -119,6 +119,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
         Customer customer = bankAccountOpt.get().getCustomer();
         boolean valid = customer.getSingleUseCode() != null
+                && request.getSingleUseCode() != null
                 && !jwtUtil.isTokenExpired(request.getSingleUseCode())
                 && customer.getSingleUseCode().equals(request.getSingleUseCode());
         if (valid) {
