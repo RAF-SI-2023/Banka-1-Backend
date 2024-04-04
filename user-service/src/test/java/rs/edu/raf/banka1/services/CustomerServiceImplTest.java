@@ -86,9 +86,9 @@ public class CustomerServiceImplTest {
         accountData.setAccountType(AccountType.CURRENT);
         accountData.setCurrencyCode("RSD");
         accountData.setMaintenanceCost(123.0);
-        accountData.setBalance(1000.0);
-        accountData.setAvailableBalance(1000.0);
-        accountData.setSubtypeOfAccount("Personal");
+//        accountData.setBalance(1000.0);
+//        accountData.setAvailableBalance(1000.0);
+//        accountData.setSubtypeOfAccount("Personal");
         accountData.setAccountName("Probni");
 
         CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest();
