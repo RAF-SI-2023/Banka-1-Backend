@@ -79,7 +79,7 @@ public class RecipientsController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json")}),
             @ApiResponse(responseCode = "403", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Not found"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Void> removeRecipient(@PathVariable Long id) {
