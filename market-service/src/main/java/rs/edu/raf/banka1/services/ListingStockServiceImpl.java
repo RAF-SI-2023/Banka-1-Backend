@@ -5,21 +5,24 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import org.tinylog.Logger;
 import rs.edu.raf.banka1.mapper.StockMapper;
 import rs.edu.raf.banka1.model.ListingHistory;
 
 import rs.edu.raf.banka1.model.ListingStock;
 
+import rs.edu.raf.banka1.model.entities.Country;
 import rs.edu.raf.banka1.model.entities.Exchange;
+import rs.edu.raf.banka1.model.entities.Holiday;
 import rs.edu.raf.banka1.model.exceptions.APIException;
-import rs.edu.raf.banka1.repositories.ExchangeRepository;
-import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
-import rs.edu.raf.banka1.repositories.StockRepository;
+import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.threads.FetchingThread;
 import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.Requests;
@@ -29,15 +32,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.time.*;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Iterator;
-import java.util.Optional;
 
+@Setter
+@Getter
 @Service
 public class ListingStockServiceImpl implements ListingStockService {
     private final ObjectMapper objectMapper;
@@ -50,6 +50,10 @@ public class ListingStockServiceImpl implements ListingStockService {
     private ListingHistoryRepository listingHistoryRepository;
     @Autowired
     private ExchangeRepository exchangeRepository;
+    @Autowired
+    private CountryRepository countryRepository;
+    @Autowired
+    private HolidayRepository holidayRepository;
 
     private Requests requests;
     @Value("${listingAPItoken}")
@@ -102,10 +106,10 @@ public class ListingStockServiceImpl implements ListingStockService {
                 e.printStackTrace();
             }
         } catch (APIException apiException) {
-            System.out.println(apiException.getMessage());
+            Logger.error("Error occured when calling api: " + apiException.getMessage());
         } catch (Exception e) {
             //e.printStackTrace();
-            System.err.println("[generateJSONSymbols] Exception occured:" + e.getMessage());
+            Logger.error("Exception occured: " + e.getMessage());
         }
 
     }
@@ -167,9 +171,9 @@ public class ListingStockServiceImpl implements ListingStockService {
             }
 
         } catch (APIException apiException) {
-            System.out.println(apiException.getMessage());
+            Logger.error("Error occured when calling api: " + apiException.getMessage());
         } catch (Exception e) {
-            System.out.println(symbol + " not found on alphavantage");
+            Logger.error(symbol + " not found on alphavantage");
         }
         return null;
     }
@@ -374,6 +378,53 @@ public class ListingStockServiceImpl implements ListingStockService {
     }
 
     @Override
+    public String getWorkingTimeById(Long id) {
+        Optional<ListingStock> optionalListingStock = stockRepository.findById(id);
+        if (!optionalListingStock.isPresent())
+            return "Stock not found";
+        ListingStock listingStock = optionalListingStock.get();
+
+        Exchange exchange = listingStock.getExchange();
+
+        Optional<Country> optionalCountry = countryRepository.findById(exchange.getCountry().getId());
+        if (!optionalCountry.isPresent())
+            return "Country not found";
+        Country country = optionalCountry.get();
+
+        int timezoneOffsetInSeconds = country.getTimezoneOffset();
+        int hoursOffset = timezoneOffsetInSeconds / 3600;
+        ZoneOffset zoneOffset = ZoneOffset.ofHours(hoursOffset);
+        ZoneId exchangeZoneId = ZoneId.ofOffset("UTC", zoneOffset);
+
+        Date openTimeDate = country.getOpenTime();
+        Date closeTimeDate = country.getCloseTime();
+
+        LocalTime openingLocalTime = Instant.ofEpochMilli(openTimeDate.getTime()).atZone(exchangeZoneId).toLocalTime();
+        LocalTime closingLocalTime = Instant.ofEpochMilli(closeTimeDate.getTime()).atZone(exchangeZoneId).toLocalTime();
+        LocalDate today = LocalDate.now(exchangeZoneId);
+
+        LocalDateTime openingTime = LocalDateTime.of(today, openingLocalTime);
+        LocalDateTime closingTime = LocalDateTime.of(today, closingLocalTime);
+        LocalDateTime now = LocalDateTime.now(exchangeZoneId);
+
+        Optional<List<Holiday>> optionalHoliday = holidayRepository.findByCountryId(country.getId());
+        for (Holiday holiday : optionalHoliday.get()) {
+            LocalDate localDate = Instant.ofEpochMilli(holiday.getDate().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+            if(localDate.equals(now.toLocalDate())){
+                return "CLOSED";
+            }
+        }
+
+        if (now.isBefore(openingTime) || now.isAfter(closingTime)) {
+            if (now.isAfter(closingTime) && now.isBefore(closingTime.plusHours(4))) {
+                return "AFTER_HOURS";
+            }
+            return "CLOSED";
+        }
+        return "OPENED";
+    }
+
+    @Override
     public List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to) {
         List<ListingHistory> listingHistories = new ArrayList<>();
 //        find stock in database
@@ -403,4 +454,5 @@ public class ListingStockServiceImpl implements ListingStockService {
 
         return listingHistories;
     }
+
 }

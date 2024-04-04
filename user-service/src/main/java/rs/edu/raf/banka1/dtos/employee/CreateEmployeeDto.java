@@ -9,6 +9,9 @@ public class CreateEmployeeDto {
     private String position;
     private String phoneNumber;
     private Boolean active;
+    private Double limitNow;
+    private Double orderlimit;
+    private Boolean requireApproval;
 
     public String getEmail() {
         return email;
@@ -64,5 +67,29 @@ public class CreateEmployeeDto {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public Double getLimitNow() {
+        return limitNow;
+    }
+
+    public void setLimitNow(Double limitNow) {
+        this.limitNow = limitNow;
+    }
+
+    public Double getOrderlimit() {
+        return orderlimit;
+    }
+
+    public void setOrderlimit(Double orderlimit) {
+        this.orderlimit = orderlimit;
+    }
+
+    public Boolean getRequireApproval() {
+        return requireApproval;
+    }
+
+    public void setRequireApproval(Boolean requireApproval) {
+        this.requireApproval = requireApproval;
     }
 }

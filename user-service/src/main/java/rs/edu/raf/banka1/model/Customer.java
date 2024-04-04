@@ -73,4 +73,13 @@ public class Customer extends User {
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     private Set<Permission> permissions = new HashSet<>();
+
+    @OneToMany(
+            mappedBy = "customer",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<PaymentRecipient> recipients;
+
+    private String singleUseCode;
 }

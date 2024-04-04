@@ -29,6 +29,16 @@ public class Employee extends User {
     @Column
     private String position;
 
+    // Agent fields
+    @Column
+    private Double limitNow;
+
+    @Column
+    private Double orderlimit;
+
+    @Column
+    private Boolean requireApproval;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_permissions",

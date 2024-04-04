@@ -80,7 +80,6 @@ public class CustomerMapper {
     public CustomerResponse customerToCustomerResponse(Customer customer) {
         CustomerResponse customerResponse = new CustomerResponse();
         customerResponse.setUserId(customer.getUserId());
-        customerResponse.setUserId(customer.getUserId());
         customerResponse.setFirstName(customer.getFirstName());
         customerResponse.setLastName(customer.getLastName());
         customerResponse.setEmail(customer.getEmail());

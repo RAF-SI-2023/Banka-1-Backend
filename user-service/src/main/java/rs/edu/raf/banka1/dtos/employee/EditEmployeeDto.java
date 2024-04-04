@@ -11,6 +11,9 @@ public class EditEmployeeDto {
     private String position;
     private String phoneNumber;
     private Boolean isActive;
+    private Double limitNow;
+    private Double orderlimit;
+    private Boolean requireApproval;
     private List<String> permissions;
 
     public String getEmail() {
@@ -75,5 +78,37 @@ public class EditEmployeeDto {
 
     public void setPermissions(List<String> permissions) {
         this.permissions = permissions;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
+    }
+
+    public Double getLimitNow() {
+        return limitNow;
+    }
+
+    public void setLimitNow(Double limitNow) {
+        this.limitNow = limitNow;
+    }
+
+    public Double getOrderlimit() {
+        return orderlimit;
+    }
+
+    public void setOrderlimit(Double orderlimit) {
+        this.orderlimit = orderlimit;
+    }
+
+    public Boolean getRequireApproval() {
+        return requireApproval;
+    }
+
+    public void setRequireApproval(Boolean requireApproval) {
+        this.requireApproval = requireApproval;
     }
 }

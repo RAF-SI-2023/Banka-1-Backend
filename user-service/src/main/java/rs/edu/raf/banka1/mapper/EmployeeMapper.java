@@ -9,9 +9,13 @@ import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -31,12 +35,16 @@ public class EmployeeMapper {
 
     public EmployeeDto employeeToEmployeeDto(Employee employee) {
         EmployeeDto employeeDto = new EmployeeDto();
+        employeeDto.setUserId(employee.getUserId());
         employeeDto.setEmail(employee.getEmail());
         employeeDto.setFirstName(employee.getFirstName());
         employeeDto.setLastName(employee.getLastName());
         employeeDto.setJmbg(employee.getJmbg());
         employeeDto.setPhoneNumber(employee.getPhoneNumber());
         employeeDto.setPosition(employee.getPosition());
+        employeeDto.setOrderlimit(employee.getOrderlimit());
+        employeeDto.setLimitNow(employee.getLimitNow());
+        employeeDto.setRequireApproval(employee.getRequireApproval());
 
         List<PermissionDto> permissionDtoList = new ArrayList<>();
 
@@ -58,23 +66,75 @@ public class EmployeeMapper {
         employee.setPhoneNumber(createEmployeeDto.getPhoneNumber());
         employee.setActive(false);
         employee.setPassword(UUID.randomUUID().toString());
+        employee.setRequireApproval(createEmployeeDto.getRequireApproval());
+        employee.setLimitNow(createEmployeeDto.getLimitNow());
+        employee.setOrderlimit(createEmployeeDto.getOrderlimit());
+        employee.setPosition(createEmployeeDto.getPosition().toLowerCase(Locale.ROOT));
+
+        Set<Permission> permissionSet = new HashSet<>();
+
+        for(String permission : Constants.userPermissions.get(employee.getPosition())){
+            Permission perm = permissionRepository.findByName(permission).orElse(null);
+
+            if(perm == null){
+                continue;
+            }
+
+            permissionSet.add(perm);
+        }
+
+        employee.setPermissions(permissionSet);
 
         return employee;
     }
 
-    public Employee editEmployeeDtoToEmployee(EditEmployeeDto employeeDto) {
-        Employee employee = new Employee();
-        employee.setEmail(employeeDto.getEmail());
-        employee.setPassword(employeeDto.getPassword());
-        employee.setFirstName(employeeDto.getFirstName());
-        employee.setLastName(employeeDto.getLastName());
-        employee.setPosition(employeeDto.getPosition());
-        employee.setPhoneNumber(employeeDto.getPhoneNumber());
-        employee.setActive(employeeDto.getIsActive());
-        employee.setPermissions(employeeDto.getPermissions()
-                .stream()
-                .map(permission -> permissionRepository.findByName(permission).orElseThrow())
-                .collect(Collectors.toSet()));
+    public Employee editEmployeeDtoToEmployee(Employee employee, EditEmployeeDto employeeDto) {
+        if (employeeDto.getEmail() != null && (employee.getEmail() == null || employee.getEmail().isEmpty())) {
+            employee.setEmail(employeeDto.getEmail());
+        }
+
+        if (employeeDto.getPassword() != null && (employee.getPassword() == null || employee.getPassword().isEmpty())) {
+            employee.setPassword(employeeDto.getPassword());
+        }
+
+        if (employeeDto.getFirstName() != null && (employee.getFirstName() == null || employee.getFirstName().isEmpty())) {
+            employee.setFirstName(employeeDto.getFirstName());
+        }
+
+        if (employeeDto.getLastName() != null && (employee.getLastName() == null || employee.getLastName().isEmpty())) {
+            employee.setLastName(employeeDto.getLastName());
+        }
+
+        if (employeeDto.getPosition() != null && (employee.getPosition() == null || employee.getPosition().isEmpty())) {
+            employee.setPosition(employeeDto.getPosition());
+        }
+
+        if (employeeDto.getPhoneNumber() != null && (employee.getPhoneNumber() == null || employee.getPhoneNumber().isEmpty())) {
+            employee.setPhoneNumber(employeeDto.getPhoneNumber());
+        }
+
+        if (employeeDto.getIsActive() != null) {
+            employee.setActive(employeeDto.getIsActive());
+        }
+
+        if (employeeDto.getLimitNow() != null) {
+            employee.setLimitNow(employeeDto.getLimitNow());
+        }
+
+        if (employeeDto.getRequireApproval() != null) {
+            employee.setRequireApproval(employeeDto.getRequireApproval());
+        }
+
+        if (employeeDto.getOrderlimit() != null){
+            employee.setOrderlimit(employeeDto.getOrderlimit());
+        }
+
+        if (employeeDto.getPermissions() != null && !employeeDto.getPermissions().isEmpty()) {
+            employee.setPermissions(employeeDto.getPermissions()
+                    .stream()
+                    .map(permission -> permissionRepository.findByName(permission).orElseThrow())
+                    .collect(Collectors.toSet()));
+        }
 
         return employee;
     }
@@ -88,24 +148,14 @@ public class EmployeeMapper {
         editEmployeeDto.setPhoneNumber(employee.getPhoneNumber());
         editEmployeeDto.setIsActive(employee.getActive());
         editEmployeeDto.setPosition(employee.getPosition());
+        editEmployeeDto.setOrderlimit(employee.getOrderlimit());
+        editEmployeeDto.setLimitNow(employee.getLimitNow());
+        editEmployeeDto.setRequireApproval(employee.getRequireApproval());
         editEmployeeDto.setPermissions(employee.getPermissions()
                 .stream()
                 .map(Permission::getName)
                 .collect(Collectors.toList()));
 
         return editEmployeeDto;
-    }
-
-    public CreateEmployeeDto employeeToCreateEmployeeDto(Employee employee) {
-        CreateEmployeeDto createEmployeeDto = new CreateEmployeeDto();
-        createEmployeeDto.setFirstName(employee.getFirstName());
-        createEmployeeDto.setLastName(employee.getLastName());
-        createEmployeeDto.setEmail(employee.getEmail());
-        createEmployeeDto.setPhoneNumber(employee.getPhoneNumber());
-        createEmployeeDto.setActive(employee.getActive());
-        createEmployeeDto.setPosition(employee.getPosition());
-        createEmployeeDto.setJmbg(employee.getJmbg());
-
-        return createEmployeeDto;
     }
 }

@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.dtos.employee;
 
 
+import jakarta.persistence.Column;
 import rs.edu.raf.banka1.dtos.PermissionDto;
 
 import java.util.List;
@@ -17,6 +18,9 @@ public class EmployeeDto {
     private String position;
     private String phoneNumber;
     private Boolean active;
+    private Double limitNow;
+    private Double orderlimit;
+    private Boolean requireApproval;
     private List<PermissionDto> permissions;
 
     public Long getUserId() {
@@ -105,5 +109,29 @@ public class EmployeeDto {
 
     public void setPermissions(List<PermissionDto> permissions) {
         this.permissions = permissions;
+    }
+
+    public Double getLimitNow() {
+        return limitNow;
+    }
+
+    public void setLimitNow(Double limitNow) {
+        this.limitNow = limitNow;
+    }
+
+    public Double getOrderlimit() {
+        return orderlimit;
+    }
+
+    public void setOrderlimit(Double orderlimit) {
+        this.orderlimit = orderlimit;
+    }
+
+    public Boolean getRequireApproval() {
+        return requireApproval;
+    }
+
+    public void setRequireApproval(Boolean requireApproval) {
+        this.requireApproval = requireApproval;
     }
 }

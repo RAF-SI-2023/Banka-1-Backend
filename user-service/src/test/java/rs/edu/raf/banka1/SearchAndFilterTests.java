@@ -1,6 +1,5 @@
 package rs.edu.raf.banka1;
 
-import io.cucumber.java.an.E;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,7 +15,7 @@ import rs.edu.raf.banka1.repositories.PermissionRepository;
 //import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.EmployeeService;
-import rs.edu.raf.banka1.services.EmployeeServiceImpl;
+import rs.edu.raf.banka1.services.implementations.EmployeeServiceImpl;
 //import rs.edu.raf.banka1.services.UserService;
 //import rs.edu.raf.banka1.services.UserServiceImpl;
 import rs.edu.raf.banka1.utils.JwtUtil;

@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.tinylog.Logger;
 import rs.edu.raf.banka1.exceptions.OptionsException;
 import rs.edu.raf.banka1.mapper.OptionsMapper;
 import rs.edu.raf.banka1.model.OptionsModel;
@@ -58,7 +59,7 @@ public class OptionsServiceImpl implements OptionsService{
         if (cookie == null || crumb == null) {
             // If not cached, obtain them
             if (!getCookieAndCrumb()) {
-                System.out.println("Failed to obtain cookie and crumb values");
+                Logger.error("Failed to obtain cookie and crumb values");
                 return new ArrayList<>();
             }
         }
@@ -237,7 +238,7 @@ public class OptionsServiceImpl implements OptionsService{
                 throw new OptionsException("Initial HTTP request did not return a 404||500 response");
             }
         } catch (Exception e) {
-            System.out.println("Problem with getting cookie: " + e.getMessage());
+            Logger.error("Problem with getting cookie: " + e.getMessage());
 //            throw new OptionsException("Problem with getting cookie: " + e.getMessage());
         }
         return false;

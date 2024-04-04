@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -15,7 +18,7 @@ public class BankAccount {
     private AccountType accountType;
 
     private String accountNumber;
-
+    private String accountName;
 
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "userId")
@@ -37,7 +40,13 @@ public class BankAccount {
 
     private Boolean accountStatus;
 
+    @OneToMany(mappedBy = "senderBankAccount")
+    private List<Payment> payments;
+
 //    Only for current_account and foreign_currency_account
     private String subtypeOfAccount;
     private Double maintenanceCost;
+
+    @OneToMany(cascade = CascadeType.ALL,mappedBy = "accountNumber")
+    private List<Card> cards = new ArrayList<>();
 }

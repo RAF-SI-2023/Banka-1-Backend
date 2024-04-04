@@ -21,8 +21,10 @@ import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.repositories.EmployeeRepository;
 import rs.edu.raf.banka1.requests.LoginRequest;
 import rs.edu.raf.banka1.responses.LoginResponse;
-import rs.edu.raf.banka1.services.AuthenticationService;
 import java.util.Optional;
+import rs.edu.raf.banka1.responses.UserResponse;
+import rs.edu.raf.banka1.services.implementations.AuthenticationService;
+import rs.edu.raf.banka1.services.UserService;
 
 @RestController
 @RequestMapping("/auth")

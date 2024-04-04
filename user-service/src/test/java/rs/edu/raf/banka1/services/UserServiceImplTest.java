@@ -20,6 +20,9 @@ import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.repositories.EmployeeRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
+import rs.edu.raf.banka1.services.implementations.EmailServiceImpl;
+import rs.edu.raf.banka1.services.implementations.EmployeeServiceImpl;
+
 import rs.edu.raf.banka1.utils.JwtUtil;
 
 import java.util.Set;
@@ -212,7 +215,7 @@ public class UserServiceImplTest {
                 .thenReturn(Optional.of(mockPermission));
         when(userMapper.createEmployeeDtoToEmployee(any()))
                 .thenReturn(mockUser);
-        when(userMapper.editEmployeeDtoToEmployee(any()))
+        when(userMapper.editEmployeeDtoToEmployee(any(), any()))
                 .thenReturn(mockUser);
 
         CreateEmployeeDto createUserRequest = new CreateEmployeeDto();
