@@ -5,11 +5,15 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.tinylog.Logger;
+import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
+import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
+import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
+import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.utils.Constants;
 
@@ -32,8 +36,9 @@ public class BootstrapData implements CommandLineRunner {
     private final CurrencyRepository currencyRepository;
     private final LoanRequestRepository loanRequestRepository;
     private final LoanRepository loanRepository;
-
     private final CardRepository cardRepository;
+    private final CapitalRepository capitalRepository;
+    private final CapitalService capitalService;
 
     private final MarketService marketService;
 
@@ -49,7 +54,9 @@ public class BootstrapData implements CommandLineRunner {
         final LoanRequestRepository loanRequestRepository,
         final LoanRepository loanRepository,
         final CardRepository cardRepository,
-        final MarketService marketService
+        final MarketService marketService,
+        final CapitalService capitalService,
+        final CapitalRepository capitalRepository
     ) {
         this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -62,6 +69,8 @@ public class BootstrapData implements CommandLineRunner {
         this.loanRepository = loanRepository;
         this.cardRepository = cardRepository;
         this.marketService = marketService;
+        this.capitalService = capitalService;
+        this.capitalRepository = capitalRepository;
     }
 
     @Override
@@ -150,12 +159,7 @@ public class BootstrapData implements CommandLineRunner {
         seedLoan();
         seedLoanRequest();
 
-        Logger.info("Data loaded!");
-        System.out.println("--------------------------------------------------");
-        System.out.println(marketService.getAllStocks().size());
-        System.out.println(marketService.getAllFutures().size());
-        System.out.println(marketService.getAllForex().size());
-        System.out.println("--------------------------------------------------");
+        seedBankCapital();
 
     }
 
@@ -223,6 +227,69 @@ public class BootstrapData implements CommandLineRunner {
             currencyRepository.save(myCurrency);
 
         }
+    }
+
+    private void seedBankCapital(){
+        Company bank = createBankCompany();
+        companyRepository.save(bank);
+
+        List<rs.edu.raf.banka1.model.Currency> allCurrencies = currencyRepository.findAll();
+
+
+        // Make entry for each currency
+        for(rs.edu.raf.banka1.model.Currency currency : allCurrencies) {
+            BankAccount bankAccount = createBankAccountByCurrency(currency.getCurrencyCode(), bank);
+            Capital capital = capitalService.createCapitalForBankAccount(bankAccount, currency, bankAccount.getBalance(), 0.0);
+            capitalRepository.save(capital);
+        }
+
+        // Make entry for stocks, futures and forex
+        List<ListingStockDto> stocks = marketService.getAllStocks();
+        for(ListingStockDto stock : stocks) {
+            Capital capital = capitalService.createCapitalForListing(ListingType.STOCK, stock.getListingId(), 100.0, 0.0);
+            capitalRepository.save(capital);
+        }
+
+        List<ListingFutureDto> futures = marketService.getAllFutures();
+        for(ListingFutureDto future : futures) {
+            Capital capital = capitalService.createCapitalForListing(ListingType.FUTURE, future.getListingId(), 100.0, 0.0);
+            capitalRepository.save(capital);
+        }
+
+        List<ListingForexDto> forexes = marketService.getAllForex();
+        for(ListingForexDto forex : forexes) {
+            Capital capital = capitalService.createCapitalForListing(ListingType.FOREX, forex.getListingId(), 100.0, 0.0);
+            capitalRepository.save(capital);
+        }
+    }
+
+    private BankAccount createBankAccountByCurrency(String currency, Company company){
+        return bankAccountService.createBankAccount(
+                new CreateBankAccountRequest(
+                        new BankAccountRequest(
+                                AccountType.BUSINESS,
+                                "Bank's account",
+                                1000000.0,
+                                1000000.0,
+                                currency,
+                                null,
+                                0.0
+                                ),
+                        null,
+                        company.getId()
+                ));
+    }
+
+    private Company createBankCompany(){
+        Company bank = new Company();
+        bank.setCompanyName("JP Morgan Chase Bank");
+        bank.setTelephoneNumber("069 678 7889");
+        bank.setFaxNumber("555-123-4567");
+        bank.setPib("123-45-6789");
+        bank.setIdNumber("987654321");
+        bank.setJobId("1777838");
+        bank.setRegistrationNumber("7737");
+        return bank;
     }
 
     private static final Random random = new Random();
