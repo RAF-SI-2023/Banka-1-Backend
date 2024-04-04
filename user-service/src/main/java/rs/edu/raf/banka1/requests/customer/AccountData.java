@@ -18,5 +18,5 @@ public class AccountData {
 //    private Double balance;
 //    private Double availableBalance;
 //    private String subtypeOfAccount;
-//    private String accountName;
+    private String accountName;
 }

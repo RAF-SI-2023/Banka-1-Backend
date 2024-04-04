@@ -102,7 +102,7 @@ public class CustomerServiceImpl implements CustomerService {
             createBankAccountRequest.getAccount().setBalance(0.0);
             createBankAccountRequest.getAccount().setAvailableBalance(0.0);
             createBankAccountRequest.getAccount().setSubtypeOfAccount("");
-            createBankAccountRequest.getAccount().setAccountName("");
+            createBankAccountRequest.getAccount().setAccountName(createCustomerRequest.getAccount().getAccountName());
 
             BankAccount bankAccount = bankAccountService.createBankAccount(createBankAccountRequest);
 
