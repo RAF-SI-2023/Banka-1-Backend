@@ -12,19 +12,15 @@ import rs.edu.raf.banka1.mapper.BankAccountMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
-import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CardService;
 import rs.edu.raf.banka1.services.EmployeeService;
-import rs.edu.raf.banka1.services.UserService;
-import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.utils.RandomUtil;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 
 @Getter

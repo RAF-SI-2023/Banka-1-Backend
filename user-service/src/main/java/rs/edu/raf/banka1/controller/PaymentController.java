@@ -14,7 +14,6 @@ import rs.edu.raf.banka1.dtos.PaymentDto;
 import rs.edu.raf.banka1.requests.CreatePaymentRequest;
 import rs.edu.raf.banka1.services.CustomerService;
 import rs.edu.raf.banka1.services.PaymentService;
-import rs.edu.raf.banka1.services.UserService;
 
 import java.util.List;
 
