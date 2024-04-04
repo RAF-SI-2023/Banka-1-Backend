@@ -16,8 +16,6 @@ import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.EmployeeService;
 import rs.edu.raf.banka1.services.implementations.EmployeeServiceImpl;
-//import rs.edu.raf.banka1.services.UserService;
-//import rs.edu.raf.banka1.services.UserServiceImpl;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
 import java.util.Arrays;
@@ -31,10 +29,7 @@ import static org.mockito.Mockito.when;
 
 
 public class SearchAndFilterTests {
-//    private UserService userService;
-//    private UserRepository userRepository;
     private EmployeeRepository employeeRepository;
-//    private UserMapper userMapper;
     private EmployeeMapper employeeMapper;
     private EmployeeService employeeService;
     private EmailService emailService;
@@ -57,9 +52,6 @@ public class SearchAndFilterTests {
         passwordEncoder = mock(PasswordEncoder.class);
         employeeMapper = new EmployeeMapper(new PermissionMapper(), passwordEncoder, permissionRepository);
 
-
-//        userService = new UserServiceImpl(userRepository, userMapper, emailService, permissionRepository, jwtUtil,
-//                permissionMapper, passwordEncoder);
 
 //        EmployeeServiceImpl(EmployeeMapper employeeMapper,
 //                PermissionMapper permissionMapper,
