@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.requests.ActivateAccountRequest;
 import rs.edu.raf.banka1.requests.InitialActivationRequest;
 import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
@@ -63,6 +64,25 @@ public class CustomerController {
     })
     public ResponseEntity<List<CustomerResponse>> readAllCustomers() {
         return new ResponseEntity<>(this.customerService.findAll(), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getCustomer", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get customer by jwt", description = "Returns customer by jwt")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = EmployeeDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Customer not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<CustomerResponse> readCustomerByJWT() {
+        CustomerResponse customerResponse = this.customerService.findByJwt();
+
+        if (customerResponse == null) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<CustomerResponse>(customerResponse, HttpStatus.OK);
     }
 
     @PutMapping()
