@@ -32,10 +32,10 @@ public class UserMapper {
         userResponse.setEmail(user.getEmail());
         userResponse.setPhoneNumber(user.getPhoneNumber());
         userResponse.setJmbg(user.getJmbg());
-        userResponse.setPosition(user.getPosition());
+//        userResponse.setPosition(user.getPosition());
         userResponse.setActive(user.getActive());
-        userResponse.setPermissions(user.getPermissions().stream().map(permissionMapper::permissionToPermissionDto).
-                collect(Collectors.toList()));
+//        userResponse.setPermissions(user.getPermissions().stream().map(permissionMapper::permissionToPermissionDto).
+//                collect(Collectors.toList()));
         return userResponse;
     }
 
@@ -46,7 +46,7 @@ public class UserMapper {
         user.setEmail(createUserRequest.getEmail());
         user.setJmbg(createUserRequest.getJmbg());
         user.setPhoneNumber(createUserRequest.getPhoneNumber());
-        user.setPosition(createUserRequest.getPosition());
+//        user.setPosition(createUserRequest.getPosition());
         if(createUserRequest.getActive() == null) {
             createUserRequest.setActive(false);
         }
@@ -67,22 +67,22 @@ public class UserMapper {
         if (editUserRequest.getLastName() != null) {
             user.setLastName(editUserRequest.getLastName());
         }
-        if (editUserRequest.getPosition() != null) {
-            user.setPosition(editUserRequest.getPosition());
-        }
+//        if (editUserRequest.getPosition() != null) {
+//            user.setPosition(editUserRequest.getPosition());
+//        }
         if (editUserRequest.getPhoneNumber() != null) {
             user.setPhoneNumber(editUserRequest.getPhoneNumber());
         }
         if (editUserRequest.getIsActive() != null) {
             user.setActive(editUserRequest.getIsActive());
         }
-        if (editUserRequest.getPermissions() != null) {
-            user.setPermissions(editUserRequest.getPermissions()
-                    .stream()
-                    .map(permissionString -> permissionRepository.findByName(permissionString).orElseThrow())
-                    .collect(Collectors.toSet())
-            );
-        }
+//        if (editUserRequest.getPermissions() != null) {
+//            user.setPermissions(editUserRequest.getPermissions()
+//                    .stream()
+//                    .map(permissionString -> permissionRepository.findByName(permissionString).orElseThrow())
+//                    .collect(Collectors.toSet())
+//            );
+//        }
         return user;
     }
 
@@ -92,9 +92,9 @@ public class UserMapper {
         editUserRequest.setLastName(user.getLastName());
         editUserRequest.setEmail(user.getEmail());
         editUserRequest.setPhoneNumber(user.getPhoneNumber());
-        editUserRequest.setPosition(user.getPosition());
+//        editUserRequest.setPosition(user.getPosition());
         editUserRequest.setIsActive(user.getActive());
-        editUserRequest.setPermissions(user.getPermissions().stream().map(permission -> permission.getName()).collect(Collectors.toList()));
+//        editUserRequest.setPermissions(user.getPermissions().stream().map(permission -> permission.getName()).collect(Collectors.toList()));
         editUserRequest.setPassword(user.getPassword());
         return editUserRequest;
     }

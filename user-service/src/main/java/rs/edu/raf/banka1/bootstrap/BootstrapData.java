@@ -10,16 +10,19 @@ import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.HashSet;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class BootstrapData implements CommandLineRunner {
-    private final UserRepository userRepository;
+//    private final UserRepository userRepository;
+    private final EmployeeRepository employeeRepository;
     private final PermissionRepository permissionRepository;
     private final PasswordEncoder passwordEncoder;
     private final BankAccountService bankAccountService;
@@ -33,7 +36,7 @@ public class BootstrapData implements CommandLineRunner {
 
     @Autowired
     public BootstrapData(
-        final UserRepository userRepository,
+        final EmployeeRepository userRepository,
         final PasswordEncoder passwordEncoder,
         final PermissionRepository permissionRepository,
         final CurrencyRepository currencyRepository,
@@ -44,7 +47,7 @@ public class BootstrapData implements CommandLineRunner {
         final LoanRepository loanRepository,
         final CardRepository cardRepository
     ) {
-        this.userRepository = userRepository;
+        this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
         this.customerRepository = customerRepository;
@@ -63,23 +66,25 @@ public class BootstrapData implements CommandLineRunner {
         seedPermissions();
         seedCurencies();
 
-        User user1 = new User();
+        Employee user1 = new Employee();
         user1.setEmail("admin");
         user1.setPassword(passwordEncoder.encode("user1"));
         user1.setFirstName("User1");
         user1.setLastName("User1Prezime");
-        user1.setPosition("admin");
+        user1.setPosition(Constants.ADMIN);
         user1.setActive(true);
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
+        employeeRepository.save(user1);
 
-        User client = new User();
+        Employee client = new Employee();
         client.setEmail("client@gmail.com");
         client.setPassword(passwordEncoder.encode("client"));
         client.setFirstName("Client");
         client.setActive(true);
-        client.setPosition("employee");
+        client.setPosition(Constants.SUPERVIZOR);
+        client.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
         client.setLastName("ClientPrezime");
-        userRepository.save(user1);
+        employeeRepository.save(client);
 
         Company company = new Company();
         company.setCompanyName("Sony");
@@ -95,15 +100,26 @@ public class BootstrapData implements CommandLineRunner {
         customer.setFirstName("Customer1");
         customer.setEmail("customer@gmail.com");
         customer.setPassword(passwordEncoder.encode("customer"));
-        customer.setPosition("customer");
+//        customer.setPosition("customer");
         customer.setActive(true);
         customerRepository.save(customer);
 
         //ovo samo za test moze da se obrise
         BankAccount bankAccount = new BankAccount();
-        bankAccount.setAccountNumber("1234");
+        bankAccount.setAccountStatus(true);
+        bankAccount.setAccountType(AccountType.BUSINESS);
         bankAccount.setAvailableBalance(10000.0);
+        bankAccount.setBalance(10000.0);
+        bankAccount.setMaintenanceCost(240.0);
+        bankAccount.setCompany(company);
+        bankAccount.setCreatedByAgentId(52L);
+        bankAccount.setCreationDate(new Date().getTime());
+        bankAccount.setCurrency(this.currencyRepository.getReferenceById(1L));
         bankAccount.setCustomer(customer);
+        bankAccount.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+        bankAccount.setAccountName("124141j2kraslL");
+        bankAccount.setAccountNumber("1234");
+        bankAccount.setSubtypeOfAccount("LICNI");
         bankAccountService.saveBankAccount(bankAccount);
         // dovde
 
@@ -142,12 +158,26 @@ public class BootstrapData implements CommandLineRunner {
         loanRepository.save(loan);
     }
 
+    private List<Permission> getPermissionsForSupervisor(){
+        try{
+            List<Permission> resultList = new ArrayList<>();
+            for(String s : Constants.userPermissions.get(Constants.SUPERVIZOR)){
+                Optional<Permission> p = permissionRepository.findByName(s);
+                if(p.isPresent()) {
+                    resultList.add(p.get());
+                }
+            }
+
+            return resultList;
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
+    }
 
     private void seedPermissions() {
-        for(String s : Arrays.asList(
-            "addUser", "modifyUser", "deleteUser", "readUser",
-            "manageLoans", "manageLoanRequests", "modifyCustomer")
-        ) {
+        for(String s : Constants.allPermissions) {
             if(permissionRepository.findByName(s).isPresent()) {
                 continue;
             }

@@ -36,7 +36,7 @@ public class CustomerMapper {
         customer.setPhoneNumber(createCustomerRequest.getPhoneNumber());
         customer.setAddress(createCustomerRequest.getAddress());
         customer.setActive(false);
-        customer.setPosition("customer");
+//        customer.setPosition("customer");
         customer.setPassword(UUID.randomUUID().toString());
         customer.setJmbg(createCustomerRequest.getJmbg());
         return customer;
@@ -58,9 +58,9 @@ public class CustomerMapper {
         if (editCustomerRequest.getAddress() != null) {
             customer.setAddress(editCustomerRequest.getAddress());
         }
-        if (editCustomerRequest.getPosition() != null) {
-            customer.setPosition(editCustomerRequest.getPosition());
-        }
+//        if (editCustomerRequest.getPosition() != null) {
+//            customer.setPosition(editCustomerRequest.getPosition());
+//        }
         if (editCustomerRequest.getPhoneNumber() != null) {
             customer.setPhoneNumber(editCustomerRequest.getPhoneNumber());
         }
@@ -80,12 +80,11 @@ public class CustomerMapper {
     public CustomerResponse customerToCustomerResponse(Customer customer) {
         CustomerResponse customerResponse = new CustomerResponse();
         customerResponse.setUserId(customer.getUserId());
-        customerResponse.setUserId(customer.getUserId());
         customerResponse.setFirstName(customer.getFirstName());
         customerResponse.setLastName(customer.getLastName());
         customerResponse.setEmail(customer.getEmail());
         customerResponse.setJmbg(customer.getJmbg());
-        customerResponse.setPosition(customer.getPosition());
+//        customerResponse.setPosition(customer.getPosition());
         customerResponse.setPhoneNumber(customer.getPhoneNumber());
         customerResponse.setActive(customer.getActive());
         customerResponse.setPermissions(customer.getPermissions()

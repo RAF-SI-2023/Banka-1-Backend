@@ -74,7 +74,7 @@ public class CustomerServiceImplTest {
         CustomerData customerData = new CustomerData();
         customerData.setFirstName("Test");
         customerData.setLastName("Test");
-        customerData.setPosition("Test");
+//        customerData.setPosition("Test");
         customerData.setDateOfBirth(123456789L);
         customerData.setGender("Test");
         customerData.setEmail("test@gmail.com");

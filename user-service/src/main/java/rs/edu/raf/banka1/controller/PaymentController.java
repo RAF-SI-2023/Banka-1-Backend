@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.dtos.PaymentDto;
 import rs.edu.raf.banka1.requests.CreatePaymentRequest;
+import rs.edu.raf.banka1.services.CustomerService;
 import rs.edu.raf.banka1.services.PaymentService;
 import rs.edu.raf.banka1.services.UserService;
 
@@ -22,12 +23,12 @@ import java.util.List;
 @RequestMapping("/payment")
 public class PaymentController {
     private final PaymentService paymentService;
-    private final UserService userService;
+    private final CustomerService customerService;
 
     @Autowired
-    public PaymentController(PaymentService paymentService, UserService userService) {
+    public PaymentController(PaymentService paymentService, CustomerService customerService) {
         this.paymentService = paymentService;
-        this.userService = userService;
+        this.customerService = customerService;
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -89,7 +90,7 @@ public class PaymentController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Void> sendCode() {
-        Long customerId = userService.findByJwt().getUserId();
+        Long customerId = customerService.findByJwt().getUserId();
         boolean sent = paymentService.sendSingleUseCode(customerId);
         return new ResponseEntity<>(HttpStatus.OK);
     }

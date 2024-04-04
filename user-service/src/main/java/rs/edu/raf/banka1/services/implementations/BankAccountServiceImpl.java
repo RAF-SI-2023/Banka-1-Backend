@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.mapper.BankAccountMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
@@ -14,7 +15,10 @@ import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CardService;
+import rs.edu.raf.banka1.services.EmployeeService;
 import rs.edu.raf.banka1.services.UserService;
+import rs.edu.raf.banka1.services.EmailService;
+import rs.edu.raf.banka1.utils.RandomUtil;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -44,8 +48,9 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     @Autowired
     private BankAccountMapper bankAccountMapper;
+
     @Autowired
-    UserService userService;
+    EmployeeService userService;
 
     public static final int years_to_expire = 5;
 
@@ -150,9 +155,8 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     private String generateBankAccountNumber(){
         Long start = 1312420L;
-        Random random = new Random();
         while(true) {
-            Long mid = 100_000_000L + random.nextLong(900_000_000L);
+            Long mid = 100_000_000L + RandomUtil.returnNextLong(900_000_000L);
             Long generated = Long.parseLong(start.toString() + mid.toString()) * 100;
             generated = generated + (98 - generated % 97);
             String accountNumber = generated.toString();
@@ -183,7 +187,7 @@ public class BankAccountServiceImpl implements BankAccountService {
             // Assuming your UserDetails implementation has the email field
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String email = userDetails.getUsername();
-            UserResponse employee = userService.findByEmail(email);
+            EmployeeDto employee = userService.findByEmail(email);
             if (employee == null) {
                 return null;
             }

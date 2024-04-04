@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.dtos.PaymentDto;
 import rs.edu.raf.banka1.requests.CreatePaymentRecipientRequest;
 import rs.edu.raf.banka1.dtos.PaymentRecipientDto;
+import rs.edu.raf.banka1.services.CustomerService;
 import rs.edu.raf.banka1.services.RecipientsService;
 import rs.edu.raf.banka1.services.UserService;
 
@@ -22,12 +23,12 @@ import java.util.List;
 @RequestMapping("/recipients")
 public class RecipientsController {
     private final RecipientsService recipientsService;
-    private final UserService userService;
+    private final CustomerService customerService;
 
     @Autowired
-    public RecipientsController(RecipientsService recipientsService, UserService userService) {
+    public RecipientsController(RecipientsService recipientsService, CustomerService customerService) {
         this.recipientsService = recipientsService;
-        this.userService = userService;
+        this.customerService = customerService;
     }
 
     @PostMapping(value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -39,7 +40,7 @@ public class RecipientsController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Void> createPaymentRecipient(@RequestBody CreatePaymentRecipientRequest request) {
-        Long customerId = userService.findByJwt().getUserId();
+        Long customerId = customerService.findByJwt().getUserId();
         recipientsService.createRecipient(customerId, request);
         return ResponseEntity.ok().build();
     }
@@ -69,7 +70,7 @@ public class RecipientsController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<List<PaymentRecipientDto>> getAllRecipientsForCustomer() {
-        Long customerId = userService.findByJwt().getUserId();
+        Long customerId = customerService.findByJwt().getUserId();
         return ResponseEntity.ok(recipientsService.getAllRecipientsForCustomer(customerId));
     }
 }

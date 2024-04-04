@@ -16,12 +16,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
 //import rs.edu.raf.banka1.mapper.ForeignCurrencyAccountMapper;
+import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
+import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
+import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.mapper.EmployeeMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.mapper.UserMapper;
+import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.User;
 //import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
+import rs.edu.raf.banka1.repositories.EmployeeRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
-import rs.edu.raf.banka1.repositories.UserRepository;
+//import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.*;
 import rs.edu.raf.banka1.responses.*;
 import rs.edu.raf.banka1.services.EmailService;
@@ -39,7 +45,7 @@ import static org.mockito.Mockito.verify;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerSteps {
 
-    private final PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder = null;
 
     @Autowired
     private EmailService emailService;
@@ -52,25 +58,25 @@ public class UserControllerSteps {
     private String jwt = "";
 
     private UserResponse lastReadUserResponse;
-    private List<UserResponse> lastReadAllUsersResponse;
+    private List<EmployeeDto> lastReadAllUsersResponse;
     private CreateUserResponse lastCreateUserResponse;
 //    private CreateForeignCurrencyAccountResponse lastCreateForeignCurrencyAccountResponse;
 //    private List<ForeignCurrencyAccountResponse> lastReadAllForeignCurrencyAccountsResponse;
     private EditUserResponse lastEditUserResponse;
     private ActivateAccountResponse lastActivateAccountResponse;
     private User activatedUser;
-    private EditUserRequest editUserRequest = new EditUserRequest();
-    private CreateUserRequest createUserRequest = new CreateUserRequest();
+    private EditEmployeeDto editUserRequest = new EditEmployeeDto();
+    private CreateEmployeeDto createUserRequest = new CreateEmployeeDto();
     private Long userToRemove;
     private String email;
-    private UserMapper userMapper = new UserMapper(new PermissionMapper());
     private ResponseEntity<?> lastResponse;
 
-    private UserRepository userRepository;
+    private EmployeeRepository userRepository;
 //    private ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
 //    private ForeignCurrencyAccountRequest foreignCurrencyAccountRequest = new ForeignCurrencyAccountRequest();
     private PermissionRepository permissionRepository;
-    private List<UserResponse> userResponses = new ArrayList<>();
+    private EmployeeMapper userMapper = new EmployeeMapper(new PermissionMapper(), passwordEncoder, permissionRepository);
+    private List<EmployeeDto> userResponses = new ArrayList<>();
     //private final String url = "http://localhost:";
     private final String url = "http://" + SpringIntegrationTest.enviroment.getServiceHost("user-service", 8080) + ":";
     //private final String url = "http://" + "host.docker.internal" + ":";
@@ -133,23 +139,23 @@ public class UserControllerSteps {
         loginRequest.setPassword(password);
 
         HttpEntity<LoginRequest> entity = new HttpEntity<>(loginRequest);
-        ResponseEntity<LoginResponse> responseEntity = new RestTemplate().postForEntity(url + port + "/auth/login", entity, LoginResponse.class);
+        ResponseEntity<LoginResponse> responseEntity = new RestTemplate().postForEntity(url + port + "/auth/login/employee", entity, LoginResponse.class);
         jwt = responseEntity.getBody().getJwt();
     }
 
     @Given("I have a user with id {int}")
     public void iHaveAUserWithId(int id) {
-        User user = new User();
+        Employee user = new Employee();
         user.setUserId((long) id);
         user.setEmail("teeeest@gmail.com");
         user.setPassword("testpassword");
         user.setActivationToken(null);
         user.setJmbg("testjmbg");
         user.setActive(true);
-        user.setPermissions(new HashSet<>());
+//        user.setPermissions(new HashSet<>());
         user.setFirstName("nebitno");
         user.setLastName("nebitno");
-        user.setPosition("nebitno");
+//        user.setPosition("nebitno");
         userRepository.save(user);
     }
 
@@ -160,30 +166,30 @@ public class UserControllerSteps {
 
     @Given("user with email {string} exists")
     public void userWithEmailExists(String email) {
-        User user = new User();
+        Employee user = new Employee();
         user.setEmail(email);
         user.setPassword("testpassword");
         user.setActivationToken(null);
         user.setJmbg("testjmbg");
         user.setActive(true);
-        user.setPermissions(new HashSet<>());
+//        user.setPermissions(new HashSet<>());
         user.setFirstName("nebitno");
         user.setLastName("nebitno");
-        user.setPosition("nebitno");
+//        user.setPosition("nebitno");
         userRepository.save(user);
 
-        editUserRequest = userMapper.userToEditUserRequest(user);
+        editUserRequest = userMapper.employeeToEditEmployeeDto(user);
     }
 
     @Given("user i want to delete exists")
     public void userWithIdExists() {
-        User user = new User();
+        Employee user = new Employee();
         user.setEmail("testemail123@gmail.com");
         user.setPassword("testpassword");
         user.setActivationToken(null);
         user.setJmbg("testjmbg12345");
         user.setActive(true);
-        user.setPermissions(new HashSet<>());
+//        user.setPermissions(new HashSet<>());
         user = userRepository.save(user);
         userToRemove = user.getUserId();
     }
@@ -193,7 +199,7 @@ public class UserControllerSteps {
         userToRemove = Long.parseLong(id);
     }
 
-    public UserControllerSteps(UserRepository userRepository,
+    public UserControllerSteps(EmployeeRepository userRepository,
                                PermissionRepository permissionRepository,
                                PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -203,7 +209,7 @@ public class UserControllerSteps {
 
     @Given("i have email {string}")
     public void iHaveEmail(String email123) {
-        createUserRequest.mysetEmail(email123);
+        createUserRequest.setEmail(email123);
     }
 
     @Given("i have firstName {string}")
@@ -237,7 +243,7 @@ public class UserControllerSteps {
     @Given("I am a user that wants to set password to {string}")
     public void iAmAUserThatWantsToSetPasswordTo(String password) {
         this.password = password;
-        User user = new User();
+        Employee user = new Employee();
         user.setActivationToken("testtoken");
         user.setEmail("testemail");
         user.setPassword("password");
@@ -350,18 +356,18 @@ public class UserControllerSteps {
         userResponses.clear();
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            if (path.equals("/user/getAll")) {
-                lastReadAllUsersResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<UserResponse>>() {
+            if (path.equals("/employee/getAll")) {
+                lastReadAllUsersResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<EmployeeDto>>() {
                 });
-                userRepository.findAll().forEach(user -> userResponses.add(userMapper.userToUserResponse(user)));
+                userRepository.findAll().forEach(user -> userResponses.add(userMapper.employeeToEmployeeDto(user)));
             }
-            else if (path.startsWith("/user/get/")) {
+            else if (path.startsWith("/employee/get/")) {
                     lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), UserResponse.class);
                 String[] split = path.split("/");
                 email = split[split.length - 1];
             }
-            else if (path.equals("/user/search")) {
-                lastReadAllUsersResponse = objectMapper.readValue(getFiltered(url + port + path), new TypeReference<List<UserResponse>>() {
+            else if (path.equals("/employee/search")) {
+                lastReadAllUsersResponse = objectMapper.readValue(getFiltered(url + port + path), new TypeReference<List<EmployeeDto>>() {
                 });
                 userRepository.findAll().forEach(user -> {
                     if (user.getActive() == null || !user.getActive()) return;
@@ -370,12 +376,15 @@ public class UserControllerSteps {
                         return;
                     if (searchFilter.getLastName() != null && !user.getLastName().equalsIgnoreCase(searchFilter.getLastName()))
                         return;
-                    if (searchFilter.getPosition() != null && !user.getPosition().equalsIgnoreCase(searchFilter.getPosition()))
+                    if (searchFilter.getPosition() != null
+//                            &&
+//                            !user.getPosition().equalsIgnoreCase(searchFilter.getPosition())
+                    )
                         return;
-                    userResponses.add(userMapper.userToUserResponse(user));
+                    userResponses.add(userMapper.employeeToEmployeeDto(user));
                 });
             }
-            else if (path.equals("/user/permissions/userId/100") || path.equals("/user/permissions/email/admin@admin.com")) {
+            else if (path.equals("/employee/permissions/userId/100") || path.equals("/employee/permissions/email/admin@admin.com")) {
                 getBody(url + port + path);
             }
             else if (path.equals("/balance/foreign_currency/100")) {
@@ -385,7 +394,7 @@ public class UserControllerSteps {
 //                lastReadAllForeignCurrencyAccountsResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<ForeignCurrencyAccountResponse>>() {
 //                });
 //            }
-            else if (path.startsWith("/user/")) {
+            else if (path.startsWith("/employee/")) {
                 lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), UserResponse.class);
                 String[] split = path.split("/");
                 lastid = Long.parseLong(split[split.length - 1]);
@@ -401,7 +410,7 @@ public class UserControllerSteps {
    public void userCallsPostOn(String path) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            if (path.equals("/user/createUser")) {
+            if (path.equals("/employee/createUser")) {
                 String tmp = post(url + port + path, createUserRequest);
                 lastCreateUserResponse = objectMapper.readValue(tmp, CreateUserResponse.class);
             }
@@ -417,7 +426,7 @@ public class UserControllerSteps {
 
     @When("i send DELETE request to remove the user")
     public void iSendDELETERequestTo() {
-        delete(url + port + "/user/remove/" + userToRemove);
+        delete(url + port + "/employee/remove/" + userToRemove);
     }
 
    @When("I go to {string}")
@@ -493,11 +502,11 @@ public class UserControllerSteps {
     @Then("Response body is the correct user JSON")
     public void responseBodyIsTheCorrectUserJSON() {
         if(email!=null) {
-            UserResponse userResponse = userMapper.userToUserResponse(userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found")));
+            EmployeeDto userResponse = userMapper.employeeToEmployeeDto(userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found")));
             assertThat(lastReadUserResponse).isEqualTo(userResponse);
         }
         else {
-            UserResponse userResponse = userMapper.userToUserResponse(userRepository.findById(lastid).get());
+            EmployeeDto userResponse = userMapper.employeeToEmployeeDto(userRepository.findById(lastid).get());
             assertThat(lastReadUserResponse).isEqualTo(userResponse);
         }
     }

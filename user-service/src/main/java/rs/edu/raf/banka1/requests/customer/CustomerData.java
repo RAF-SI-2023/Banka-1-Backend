@@ -12,7 +12,6 @@ import lombok.Setter;
 public class CustomerData {
     private String firstName;
     private String lastName;
-    private String position; // for frontend purposes
     private Long dateOfBirth;
     private String gender;
     private String email;

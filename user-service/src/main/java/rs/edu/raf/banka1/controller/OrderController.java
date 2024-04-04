@@ -52,10 +52,10 @@ public class OrderController {
         @PathVariable(name = "orderId") final Long id,
         @RequestBody final StatusRequest request
     ) {
-        orderService.changeStatus(
-            id,
-            OrderStatus.valueOf(request.getStatus())
-        );
+//        orderService.changeStatus(
+//            id,
+//            OrderStatus.valueOf(request.getStatus())
+//        );
         return ResponseEntity.ok().build();
     }
 
@@ -71,7 +71,7 @@ public class OrderController {
     public ResponseEntity<Void> createLoanRequest(
         @RequestBody final CreateOrderRequest request
     ) {
-        orderService.createOrder(request);
+//        orderService.createOrder(request);
         return ResponseEntity.ok().build();
     }
 

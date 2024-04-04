@@ -16,9 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import rs.edu.raf.banka1.model.Customer;
+import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
+import rs.edu.raf.banka1.repositories.EmployeeRepository;
 import rs.edu.raf.banka1.requests.LoginRequest;
 import rs.edu.raf.banka1.responses.LoginResponse;
+import java.util.Optional;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.implementations.AuthenticationService;
 import rs.edu.raf.banka1.services.UserService;
@@ -26,21 +29,24 @@ import rs.edu.raf.banka1.services.UserService;
 @RestController
 @RequestMapping("/auth")
 public class AuthenticationController {
+
     private final AuthenticationService authenticationService;
     private final AuthenticationManager authenticationManager;
-    private final UserService userService;
+    private final EmployeeRepository employeeRepository;
     private final CustomerRepository customerRepository;
 
-    public AuthenticationController(AuthenticationService authenticationService, AuthenticationManager authenticationManager,
-                                    UserService userService, CustomerRepository customerRepository) {
+    public AuthenticationController(AuthenticationService authenticationService,
+                                    AuthenticationManager authenticationManager,
+                                    EmployeeRepository employeeRepository,
+                                    CustomerRepository customerRepository) {
         this.authenticationService = authenticationService;
         this.authenticationManager = authenticationManager;
-        this.userService = userService;
+        this.employeeRepository = employeeRepository;
         this.customerRepository = customerRepository;
     }
 
-    @PostMapping("/login")
-    @Operation(summary = "User login", description = "Authenticate user and return JWT token")
+    @PostMapping("/login/employee")
+    @Operation(summary = "User login", description = "Authenticate employee and return JWT token")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful login",
                     content = {@Content(mediaType = "application/json",
@@ -49,22 +55,45 @@ public class AuthenticationController {
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest) {
+    public ResponseEntity<?> employeeLogin(@RequestBody @Valid LoginRequest loginRequest) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
-            UserResponse user = this.userService.findByEmail(loginRequest.getEmail());
-            if (user == null) {
-                Customer customer = customerRepository.findCustomerByEmail(loginRequest.getEmail()).orElse(null);
-                if(customer == null) {
+            Optional<Employee> optionalEmployee = this.employeeRepository.findByEmail(loginRequest.getEmail());
+
+            if (optionalEmployee.isEmpty()) {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-                }
-                LoginResponse loginResponse = this.authenticationService.generateLoginResponse(loginRequest);
-                return ResponseEntity.ok(loginResponse);
             }
 
-            // Generate login response
-            LoginResponse loginResponse = this.authenticationService.generateLoginResponse(loginRequest, user);
+            LoginResponse loginResponse = this.authenticationService.generateLoginResponse(loginRequest, optionalEmployee.get());
+
+            return ResponseEntity.ok(loginResponse);
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/login/customer")
+    @Operation(summary = "User login", description = "Authenticate customer and return JWT token")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful login",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponse.class))}),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<?> customerLogin(@RequestBody @Valid LoginRequest loginRequest) {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+
+            Optional<Customer> optionalCustomer = this.customerRepository.findCustomerByEmail(loginRequest.getEmail());
+
+            if (optionalCustomer.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+
+            LoginResponse loginResponse = this.authenticationService.generateLoginResponse(loginRequest, optionalCustomer.get());
 
             return ResponseEntity.ok(loginResponse);
         } catch (AuthenticationException e) {

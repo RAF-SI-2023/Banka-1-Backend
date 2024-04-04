@@ -174,6 +174,5 @@ public class BankAccountServiceImplTest {
 
         verify(bankAccountService.getBankAccountRepository(), times(1)).save(bankAccount);
         verify(bankAccountService.getCardService(), times(numberOfCards)).saveCard(any());
-
     }
 }
