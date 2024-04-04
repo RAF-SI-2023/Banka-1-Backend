@@ -71,7 +71,7 @@ public class OrderController {
     public ResponseEntity<Void> createLoanRequest(
         @RequestBody final CreateOrderRequest request
     ) {
-//        orderService.createOrder(request);
+        orderService.createOrder(request);
         return ResponseEntity.ok().build();
     }
 

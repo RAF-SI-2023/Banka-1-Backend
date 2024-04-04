@@ -9,7 +9,13 @@ import rs.edu.raf.banka1.services.MarketService;
 public class MarketServiceImpl implements MarketService {
     @Override
     public ListingBaseDto getStock(final Long stockId) {
-        return null;
+        //Mock
+        ListingBaseDto listingStockDto = new ListingBaseDto();
+        listingStockDto.setPrice(99.99);
+        listingStockDto.setHigh(100.00);
+        listingStockDto.setLow(98.98);
+        listingStockDto.setVolume(100);
+        return listingStockDto;
     }
 
     @Override
