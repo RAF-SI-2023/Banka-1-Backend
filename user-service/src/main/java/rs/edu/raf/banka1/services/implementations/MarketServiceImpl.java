@@ -123,7 +123,7 @@ public class MarketServiceImpl implements MarketService {
                 System.out.println("Bad request: getStockByIdFromMarket for " + listType);
             }
         }catch (Exception e){
-            System.out.println("Error: getStockByIdFromMarket");
+            System.out.println("Error: getAllListingsFromMarket for " + listType + " " + e.getMessage());
         }
         return new ArrayList<>();
     }
