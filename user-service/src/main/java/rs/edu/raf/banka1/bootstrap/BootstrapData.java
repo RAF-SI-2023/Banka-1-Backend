@@ -10,6 +10,7 @@ import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
+import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.time.Instant;
@@ -34,6 +35,8 @@ public class BootstrapData implements CommandLineRunner {
 
     private final CardRepository cardRepository;
 
+    private final MarketService marketService;
+
     @Autowired
     public BootstrapData(
         final EmployeeRepository userRepository,
@@ -45,7 +48,8 @@ public class BootstrapData implements CommandLineRunner {
         final CustomerRepository customerRepository,
         final LoanRequestRepository loanRequestRepository,
         final LoanRepository loanRepository,
-        final CardRepository cardRepository
+        final CardRepository cardRepository,
+        final MarketService marketService
     ) {
         this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -57,11 +61,14 @@ public class BootstrapData implements CommandLineRunner {
         this.loanRequestRepository = loanRequestRepository;
         this.loanRepository = loanRepository;
         this.cardRepository = cardRepository;
+        this.marketService = marketService;
     }
 
     @Override
     public void run(String... args) throws Exception {
         Logger.info("Loading Data...");
+
+
 
         seedPermissions();
         seedCurencies();
@@ -144,6 +151,11 @@ public class BootstrapData implements CommandLineRunner {
         seedLoanRequest();
 
         Logger.info("Data loaded!");
+        System.out.println("--------------------------------------------------");
+        System.out.println(marketService.getAllStocks().size());
+        System.out.println(marketService.getAllFutures().size());
+        System.out.println(marketService.getAllForex().size());
+        System.out.println("--------------------------------------------------");
 
     }
 

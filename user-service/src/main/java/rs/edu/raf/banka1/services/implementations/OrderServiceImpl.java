@@ -1,16 +1,10 @@
 package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.stereotype.Service;
-import rs.edu.raf.banka1.dtos.ListingBaseDto;
 import rs.edu.raf.banka1.mapper.OrderMapper;
-import rs.edu.raf.banka1.model.MarketOrder;
-import rs.edu.raf.banka1.model.OrderStatus;
-import rs.edu.raf.banka1.model.WorkingHoursStatus;
 import rs.edu.raf.banka1.repositories.OrderRepository;
-import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.OrderService;
-import rs.edu.raf.banka1.utils.RandomUtil;
 
 import java.util.Random;
 import java.util.concurrent.Executors;
