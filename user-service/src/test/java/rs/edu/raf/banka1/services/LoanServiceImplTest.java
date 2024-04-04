@@ -5,36 +5,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import rs.edu.raf.banka1.dtos.LoanDto;
 import rs.edu.raf.banka1.dtos.LoanFullDto;
 import rs.edu.raf.banka1.generators.LoanGenerators;
-import rs.edu.raf.banka1.mapper.CustomerMapper;
 import rs.edu.raf.banka1.mapper.LoanMapper;
-import rs.edu.raf.banka1.mapper.PermissionMapper;
-import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.*;
-import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.repositories.LoanRepository;
-import rs.edu.raf.banka1.requests.InitialActivationRequest;
-import rs.edu.raf.banka1.requests.customer.AccountData;
-import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
-import rs.edu.raf.banka1.requests.customer.CustomerData;
-import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
+import rs.edu.raf.banka1.services.implementations.LoanServiceImpl;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 

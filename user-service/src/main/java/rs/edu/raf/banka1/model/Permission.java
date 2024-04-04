@@ -31,6 +31,12 @@ public class Permission {
     @Column
     private String description;
 
+//    @ManyToMany(mappedBy = "permissions")
+//    private Set<User> users = new HashSet<>();
+
     @ManyToMany(mappedBy = "permissions")
-    private Set<User> users = new HashSet<>();
+    private Set<Employee> employees = new HashSet<>();
+
+    @ManyToMany(mappedBy = "permissions")
+    private Set<Customer> customers = new HashSet<>();
 }

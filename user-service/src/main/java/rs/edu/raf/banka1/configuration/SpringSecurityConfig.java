@@ -6,20 +6,22 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import rs.edu.raf.banka1.configuration.authproviders.CustomAuthProvider;
 import rs.edu.raf.banka1.filters.JwtFilter;
-import rs.edu.raf.banka1.services.UserService;
+import rs.edu.raf.banka1.services.CustomerService;
+import rs.edu.raf.banka1.services.EmployeeService;
 
 import java.util.Arrays;
 
@@ -32,11 +34,12 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 @EnableMethodSecurity
 public class SpringSecurityConfig {
 
-    private final UserService userService;
+    private final EmployeeService employeeService;
+    private final CustomerService customerService;
     private final JwtFilter jwtFilter;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManagerBuilder auth) throws Exception {
         http
                 .authorizeHttpRequests((authz) ->
                                 authz
@@ -75,22 +78,40 @@ public class SpringSecurityConfig {
     }
 
     @Autowired
-    public SpringSecurityConfig(UserService userService, JwtFilter jwtFilter) {
-        this.userService = userService;
+    public SpringSecurityConfig(EmployeeService employeeService,
+                                CustomerService customerService,
+                                JwtFilter jwtFilter) {
+        this.employeeService = employeeService;
+        this.customerService = customerService;
         this.jwtFilter = jwtFilter;
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        return this.userService;
+    public UserDetailsService employeeDetailsService() {
+        return this.employeeService;
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsService);
-        authenticationProvider.setPasswordEncoder(passwordEncoder);
+    public UserDetailsService customerDetailsService() {
+        return this.customerService;
+    }
 
-        return new ProviderManager(authenticationProvider);
+//    @Bean
+//    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+//        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+//        authenticationProvider.setUserDetailsService(userDetailsService);
+//        authenticationProvider.setPasswordEncoder(passwordEncoder);
+//
+//        return new ProviderManager(authenticationProvider);
+//    }
+
+    @Bean
+    public AuthenticationProvider customAuthenticationProvider() {
+        return new CustomAuthProvider(employeeDetailsService(), customerDetailsService());
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager() throws Exception {
+        return new ProviderManager(Arrays.asList(customAuthenticationProvider()));
     }
 }
