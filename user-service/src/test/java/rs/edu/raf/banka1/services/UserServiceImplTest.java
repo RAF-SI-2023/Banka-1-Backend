@@ -23,6 +23,7 @@ import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.services.implementations.EmailServiceImpl;
 import rs.edu.raf.banka1.services.implementations.EmployeeServiceImpl;
 
+import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
 import java.util.Set;
@@ -139,7 +140,7 @@ public class UserServiceImplTest {
         createUserRequest.setFirstName("asdf");
         createUserRequest.setLastName("asdf");
         createUserRequest.setJmbg("1234");
-        createUserRequest.setPosition("asdf");
+        createUserRequest.setPosition(Constants.ADMIN);
         createUserRequest.setPhoneNumber("1234");
         createUserRequest.setActive(true);
         userService.createEmployee(createUserRequest);
@@ -223,7 +224,7 @@ public class UserServiceImplTest {
         createUserRequest.setFirstName("asdf");
         createUserRequest.setLastName("asdf");
         createUserRequest.setJmbg("1234");
-        createUserRequest.setPosition("asdf");
+        createUserRequest.setPosition(Constants.ADMIN);
         createUserRequest.setPhoneNumber("1234");
         createUserRequest.setActive(true);
         userService.createEmployee(createUserRequest);
@@ -233,7 +234,7 @@ public class UserServiceImplTest {
         editUserRequest.setFirstName("asdf");
         editUserRequest.setLastName("asdf");
 //        editUserRequest.setJmbg("1234");
-        editUserRequest.setPosition("asdf");
+        editUserRequest.setPosition(Constants.ADMIN);
         editUserRequest.setPhoneNumber("1234");
         editUserRequest.setIsActive(false);
         String perm = "can_manage_users";
