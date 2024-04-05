@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.dtos.BankAccountDto;
+import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.dtos.CardDto;
 import rs.edu.raf.banka1.mapper.*;
 import rs.edu.raf.banka1.model.*;
@@ -128,5 +129,60 @@ public class BankAccountController {
         if(bankAccount!=null)
             return ResponseEntity.ok(true);
         return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+    }
+
+    @GetMapping(value = "/balance/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Double> estimateBalanceForBankAccount(@PathVariable(name = "accountNumber") String accountNumber) {
+        return new ResponseEntity<>(bankAccountService.estimateBalanceForAccount(accountNumber), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/listing/stock/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {CapitalDto.class}))}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<CapitalDto>> getCapitalForStock(@PathVariable(name = "accountNumber") String accountNumber) {
+        return new ResponseEntity<>(bankAccountService.getCapitalForListing(accountNumber, ListingType.STOCK), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/balance/future/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {CapitalDto.class}))}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<CapitalDto>> getCapitalForFuture(@PathVariable(name = "accountNumber") String accountNumber) {
+        return new ResponseEntity<>(bankAccountService.getCapitalForListing(accountNumber, ListingType.FUTURE), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/listing/forex/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {CapitalDto.class}))}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<CapitalDto>> getCapitalForForex(@PathVariable(name = "accountNumber") String accountNumber) {
+        return new ResponseEntity<>(bankAccountService.getCapitalForListing(accountNumber, ListingType.FOREX), HttpStatus.OK);
     }
 }
