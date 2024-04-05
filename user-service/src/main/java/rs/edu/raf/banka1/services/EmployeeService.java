@@ -34,4 +34,6 @@ public interface EmployeeService extends UserDetailsService {
 
     Boolean sendResetPasswordEmail(String email);
     NewPasswordResponse setNewPassword(String token, String password);
+    void resetLimitForEmployee(Long employeeId);
+    void resetUsersLimits();
 }

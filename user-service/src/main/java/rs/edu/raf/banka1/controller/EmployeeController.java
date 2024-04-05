@@ -254,5 +254,21 @@ public class EmployeeController {
         return new ResponseEntity<>(this.employeeService.findPermissions(email), HttpStatus.OK);
     }
 
-
+    @PutMapping(value = "/resetLimit/{employeeId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Reset current limit for user", description = "Supervisor resets current limit for user")
+    @PreAuthorize("hasAuthority('manageOrderRequests')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "400", description = "Invalid status provided"),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to reset limits for users"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> resetCurrentLimitForEmployee(
+            @PathVariable(name = "employeeId") Long employeeId
+    ) {
+        employeeService.resetLimitForEmployee(employeeId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
