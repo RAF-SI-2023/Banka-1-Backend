@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.tinylog.Logger;
+import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
 
 import java.util.NoSuchElementException;
 
@@ -21,5 +22,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleNoSuchElementException(NoSuchElementException e) {
         Logger.info("Error: Attempted to access a non-existent value in Optional");
         return new ResponseEntity<>("Attempted to access a non-existent value in Optional", HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(OrderNotFoundByIdException.class)
+    public ResponseEntity<String> handleOrderNotFoundByIdException(OrderNotFoundByIdException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 }

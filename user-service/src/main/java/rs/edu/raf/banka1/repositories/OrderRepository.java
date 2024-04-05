@@ -26,10 +26,4 @@ public interface OrderRepository extends JpaRepository<MarketOrder, Long> {
     @Query("UPDATE MarketOrder mo SET mo.processedNumber = :processedNum WHERE mo.id = :orderId")
     void changeProcessedNumber(final Long orderId, final Long processedNum);
 
-
-
-    List<MarketOrder> findByIsTradingTrue();
-
-
-
 }

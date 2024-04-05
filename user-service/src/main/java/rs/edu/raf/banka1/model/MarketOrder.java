@@ -27,6 +27,5 @@ public class MarketOrder {
     private Double fee;
     private Double price;
     private Boolean allOrNone;
-    private Boolean isTrading; // Polje za simulaciju
 
 }
