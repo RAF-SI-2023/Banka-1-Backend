@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.mapper.BankAccountMapper;
 import rs.edu.raf.banka1.model.*;
@@ -174,6 +175,16 @@ public class BankAccountServiceImpl implements BankAccountService {
     public void activateBankAccount(BankAccount bankAccount) {
         bankAccount.setAccountStatus(true);
         bankAccountRepository.save(bankAccount);
+    }
+
+    @Override
+    public Double estimateBalanceForAccount(String accountNumber) {
+        return 0.0;
+    }
+
+    @Override
+    public List<CapitalDto> getCapitalForListing(String accountNumber, ListingType listingType) {
+        return new ArrayList<>();
     }
 
     private Long getEmployeeId() {
