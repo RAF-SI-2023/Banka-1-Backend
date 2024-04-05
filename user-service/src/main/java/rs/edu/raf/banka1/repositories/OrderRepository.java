@@ -13,8 +13,8 @@ public interface OrderRepository extends JpaRepository<MarketOrder, Long> {
 
     @Transactional
     @Modifying
-    @Query("UPDATE MarketOrder mo SET mo.status = :orderStatus WHERE mo.id = :orderId")
-    void changeStatus(final Long orderId, final OrderStatus orderStatus);
+    @Query("UPDATE MarketOrder mo SET mo.status = :orderStatus, mo.processedNumber = :processedNum WHERE mo.id = :orderId")
+    void changeStatus(final Long orderId, final OrderStatus orderStatus, final Long processedNum);
 
     List<MarketOrder> findByIsTradingTrue();
 
