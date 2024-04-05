@@ -20,7 +20,7 @@ public class Transaction {
     @ManyToOne()
     private MarketOrder marketOrder;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne()
     private Employee employee;
 
     // make some kind of description builder function, so that descriptions are consistent
