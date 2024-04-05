@@ -11,4 +11,6 @@ public interface RecipientsService {
     boolean editRecipient(PaymentRecipientDto request);
 
     List<PaymentRecipientDto> getAllRecipientsForCustomer(Long customerId);
+
+    boolean removeRecipient(Long id);
 }

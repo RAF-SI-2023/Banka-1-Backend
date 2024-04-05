@@ -54,4 +54,14 @@ public class RecipientsServiceImpl implements RecipientsService {
                 .map(recipientMapper::recipientToRecipientDto)
                 .collect(Collectors.toList())).orElseGet(ArrayList::new);
     }
+
+    @Override
+    public boolean removeRecipient(Long id) {
+        Optional<PaymentRecipient> recipient = paymentRecipientRepository.findById(id);
+        if (recipient.isEmpty()) {
+            return false;
+        }
+        paymentRecipientRepository.delete(recipient.get());
+        return true;
+    }
 }
