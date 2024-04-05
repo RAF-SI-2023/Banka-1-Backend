@@ -134,7 +134,7 @@ public class MarketController {
             return new ResponseEntity<>(listingStockService.getAllStocks().stream().map(stockMapper::stockDto), HttpStatus.OK);
         }
         else if(listingType.equalsIgnoreCase("futures")) {
-            return new ResponseEntity<>(this.futuresService.getAllFutures(), HttpStatus.OK);
+            return new ResponseEntity<>(this.futuresService.getAllFutures().stream().map(futureMapper::toDto), HttpStatus.OK);
         }
         else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
