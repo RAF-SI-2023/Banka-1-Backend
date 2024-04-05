@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import rs.edu.raf.banka1.model.MarketOrder;
 import rs.edu.raf.banka1.model.OrderStatus;
 
+import java.time.Instant;
 import java.util.List;
 
 public interface OrderRepository extends JpaRepository<MarketOrder, Long> {
@@ -25,5 +26,13 @@ public interface OrderRepository extends JpaRepository<MarketOrder, Long> {
     @Modifying
     @Query("UPDATE MarketOrder mo SET mo.processedNumber = :processedNum WHERE mo.id = :orderId")
     void changeProcessedNumber(final Long orderId, final Long processedNum);
+
+    List<MarketOrder> findByStatusAndUpdatedAtLessThanEqual(OrderStatus status, Instant updatedAt);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE MarketOrder m SET m.updatedAt = ?1 WHERE m.id = ?2")
+    void updateUpdatedAtById(Instant updatedAt, Long id);
+
 
 }

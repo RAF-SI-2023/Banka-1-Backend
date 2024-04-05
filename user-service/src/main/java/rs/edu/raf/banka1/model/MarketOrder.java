@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.Instant;
 
 @Entity
 @Getter
@@ -26,7 +29,12 @@ public class MarketOrder {
     private Double fee;
     private Double price;
     private Boolean allOrNone;
-    private Long lastModifiedDate;
+
+    @UpdateTimestamp
+    private Instant updatedAt;
+
+    @Version
+    private Integer version;
 
     @ManyToOne()
     private Employee approvedBy;

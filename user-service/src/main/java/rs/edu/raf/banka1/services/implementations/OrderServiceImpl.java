@@ -16,7 +16,9 @@ import rs.edu.raf.banka1.services.OrderService;
 import rs.edu.raf.banka1.stocksimulation.StockSimulationJob;
 import rs.edu.raf.banka1.stocksimulation.StockSimulationTrigger;
 
+import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Executors;
@@ -32,7 +34,9 @@ public class OrderServiceImpl implements OrderService {
     private final Random random = new Random();
     private final TaskScheduler taskScheduler;
 
-    private Map<Long, ScheduledFuture<?>> scheduledFutureMap = new HashMap<>();
+    //Map for storing ScheduledFuture instances for every order - used for task cancellation (kills finished simulation threads).
+    //Used only for orders simulated by this one server instance.
+    private final Map<Long, ScheduledFuture<?>> scheduledFutureMap;
 
     public OrderServiceImpl(
         final OrderMapper orderMapper,
@@ -44,6 +48,8 @@ public class OrderServiceImpl implements OrderService {
         this.orderRepository = orderRepository;
         this.marketService = marketService;
         this.taskScheduler = taskScheduler;
+
+        scheduledFutureMap = new HashMap<>();
     }
 
     @Override
@@ -56,20 +62,7 @@ public class OrderServiceImpl implements OrderService {
         marketOrder.setStatus(OrderStatus.APPROVED);
         orderRepository.save(marketOrder);
 
-        //Start simulation
-        ScheduledFuture<?> future = taskScheduler.schedule(
-                new StockSimulationJob(
-                        this,
-                        marketOrder.getId()
-                ),
-                new StockSimulationTrigger(
-                        this,
-                        marketService,
-                        marketOrder.getId(),
-                        WorkingHoursStatus.OPENED
-                )
-        );
-        this.scheduledFutureMap.put(marketOrder.getId(), future);
+        startOrderSimulation(marketOrder.getId());
     }
 
     @Override
@@ -79,13 +72,37 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void finishOrder(Long orderId) {
-        this.orderRepository.changeStatus(orderId, OrderStatus.DONE);
+        this.orderRepository.finishOrder(orderId, OrderStatus.DONE);
         this.scheduledFutureMap.get(orderId).cancel(false);
     }
 
     @Override
     public void setProcessedNumber(Long orderId, Long processedNumber) {
         this.orderRepository.changeProcessedNumber(orderId, processedNumber);
+    }
+
+    @Override
+    public List<MarketOrder> getInactiveOrders(Instant timeThreshold) {
+        return orderRepository.findByStatusAndUpdatedAtLessThanEqual(OrderStatus.APPROVED, timeThreshold);
+    }
+
+    @Override
+    public void startOrderSimulation(Long orderId) {
+        orderRepository.updateUpdatedAtById(Instant.now(), orderId); // Update updatedAt to ensure multiple instances don't run the same simulation
+        //Start simulation
+        ScheduledFuture<?> future = taskScheduler.schedule(
+                new StockSimulationJob(
+                        this,
+                        orderId
+                ),
+                new StockSimulationTrigger(
+                        this,
+                        marketService,
+                        orderId,
+                        WorkingHoursStatus.OPENED
+                )
+        );
+        this.scheduledFutureMap.put(orderId, future);
     }
 
     private Double calculatePrice(final Double price, final Long contractSize) {
