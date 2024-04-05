@@ -3,7 +3,7 @@ package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
-import rs.edu.raf.banka1.dtos.ListingBaseDto;
+import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
 import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.MarketOrder;
@@ -43,7 +43,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void createOrder(final CreateOrderRequest request) {
         final MarketOrder marketOrder = orderMapper.requestToMarketOrder(request);
-        final ListingBaseDto listingBaseDto = marketService.getStock(request.getStockId());
+        final ListingBaseDto listingBaseDto = marketService.getStockById(request.getStockId());
         marketOrder.setPrice(calculatePrice(listingBaseDto.getPrice(), request.getContractSize()));
         marketOrder.setFee(calculateFee(request.getLimitValue(), marketOrder.getPrice()));
         // dok ne implementiramo approvovanje ordera

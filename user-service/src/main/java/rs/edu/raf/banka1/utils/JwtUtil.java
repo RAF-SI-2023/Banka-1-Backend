@@ -72,5 +72,7 @@ public class JwtUtil {
         return !isTokenExpired(token);
     }
 
-
+    public String getAdminToken() {
+        return generateToken(Constants.ADMIN, Constants.allPermissions);
+    }
 }
