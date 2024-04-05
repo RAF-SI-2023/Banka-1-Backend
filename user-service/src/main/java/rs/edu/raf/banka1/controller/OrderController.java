@@ -9,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.configuration.authproviders.CurrentAuth;
+import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.requests.StatusRequest;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.services.OrderService;
@@ -60,9 +62,10 @@ public class OrderController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Void> createLoanRequest(
-        @RequestBody final CreateOrderRequest request
-    ) {
-        orderService.createOrder(request);
+        @RequestBody final CreateOrderRequest request,
+        @CurrentAuth Employee currentAuth
+        ) {
+        orderService.createOrder(request, currentAuth);
         return ResponseEntity.ok().build();
     }
 

@@ -14,15 +14,19 @@ import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CapitalService;
+import rs.edu.raf.banka1.services.EmployeeService;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.utils.Constants;
 
+import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
+import java.time.LocalDateTime;
 import java.util.Currency;
 import java.util.HashSet;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class BootstrapData implements CommandLineRunner {
@@ -42,6 +46,10 @@ public class BootstrapData implements CommandLineRunner {
 
     private final MarketService marketService;
 
+    private final EmployeeService employeeService;
+
+    private final ScheduledExecutorService resetLimitExecutor = Executors.newScheduledThreadPool(1);
+
     @Autowired
     public BootstrapData(
         final EmployeeRepository userRepository,
@@ -56,8 +64,9 @@ public class BootstrapData implements CommandLineRunner {
         final CardRepository cardRepository,
         final MarketService marketService,
         final CapitalService capitalService,
-        final CapitalRepository capitalRepository
-    ) {
+        final CapitalRepository capitalRepository,
+        final EmployeeService employeeService
+        ) {
         this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
@@ -71,6 +80,7 @@ public class BootstrapData implements CommandLineRunner {
         this.marketService = marketService;
         this.capitalService = capitalService;
         this.capitalRepository = capitalRepository;
+        this.employeeService = employeeService;
     }
 
     @Override
@@ -158,6 +168,12 @@ public class BootstrapData implements CommandLineRunner {
 
         seedLoan();
         seedLoanRequest();
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime midnight = now.toLocalDate().atStartOfDay().plusDays(1);
+        Duration initialDelay = Duration.between(now, midnight);
+        resetLimitExecutor.scheduleAtFixedRate(employeeService::resetEmployeeLimits, initialDelay.toMillis(), 24, TimeUnit.HOURS);
+
 
         seedBankCapital();
 

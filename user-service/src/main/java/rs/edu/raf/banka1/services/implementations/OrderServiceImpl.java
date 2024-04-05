@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
 import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
 import rs.edu.raf.banka1.mapper.OrderMapper;
+import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.MarketOrder;
 import rs.edu.raf.banka1.model.OrderStatus;
 import rs.edu.raf.banka1.model.WorkingHoursStatus;
@@ -53,7 +54,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void createOrder(final CreateOrderRequest request) {
+    public void createOrder(final CreateOrderRequest request, final Employee currentAuth) {
         final MarketOrder marketOrder = orderMapper.requestToMarketOrder(request);
         final ListingBaseDto listingBaseDto = marketService.getStockById(request.getStockId());
         marketOrder.setPrice(calculatePrice(listingBaseDto.getPrice(), request.getContractSize()));

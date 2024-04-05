@@ -12,6 +12,7 @@ import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.exceptions.EmployeeNotFoundException;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.model.Employee;
@@ -27,6 +28,8 @@ import rs.edu.raf.banka1.services.EmployeeService;
 import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -224,6 +227,31 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.employeeRepository.save(employee);
 
         return new NewPasswordResponse(employee.getUserId());
+    }
+
+    @Override
+    public void resetLimitForEmployee(Long employeeId) {
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EmployeeNotFoundException(employeeId));
+        employee.setLimitNow(0.0);
+        employeeRepository.save(employee);
+    }
+
+    @Override
+    public void resetEmployeeLimits() {
+        if(LocalDate.now().getDayOfWeek().equals(DayOfWeek.SATURDAY) ||
+                LocalDate.now().getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+            return;
+        }
+        List<Employee> users = employeeRepository.findAll();
+        users.forEach(user->user.setLimitNow(0.0));
+        employeeRepository.saveAll(users);
+    }
+
+    @Override
+    public void setLimitOrderForEmployee(Long employeeId, Double orderLimit) {
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(()-> new EmployeeNotFoundException(employeeId));
+        employee.setOrderlimit(orderLimit);
+        employeeRepository.save(employee);
     }
 
     @Override
