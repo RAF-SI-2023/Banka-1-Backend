@@ -8,6 +8,7 @@ import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.OrderRepository;
+import rs.edu.raf.banka1.repositories.TransactionRepository;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.OrderService;
@@ -25,6 +26,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
     private final MarketService marketService;
+    private final TransactionRepository transactionRepository;
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private final Random random = new Random();
     private final TaskScheduler taskScheduler;
@@ -38,11 +40,13 @@ public class OrderServiceImpl implements OrderService {
         final OrderMapper orderMapper,
         final OrderRepository orderRepository,
         final MarketService marketService,
+        final TransactionRepository transactionRepository,
         final TaskScheduler taskScheduler
     ) {
         this.orderMapper = orderMapper;
         this.orderRepository = orderRepository;
         this.marketService = marketService;
+        this.transactionRepository = transactionRepository;
         this.taskScheduler = taskScheduler;
 
         scheduledFutureMap = new HashMap<>();
@@ -75,6 +79,7 @@ public class OrderServiceImpl implements OrderService {
             new StockSimulationJob(
                 this,
                 marketService,
+                transactionRepository,
                 orderId
             ),
             new StockSimulationTrigger(
