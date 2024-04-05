@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.mapper;
 
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.dtos.OrderDto;
+import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.MarketOrder;
 import rs.edu.raf.banka1.model.OrderStatus;
 import rs.edu.raf.banka1.repositories.EmployeeRepository;
@@ -19,7 +20,6 @@ public class OrderMapper {
     public MarketOrder requestToMarketOrder(CreateOrderRequest request) {
         MarketOrder marketOrder = new MarketOrder();
         marketOrder.setStockId(request.getStockId());
-
         // whoever makes controller for this, should first find in repository Employee with given id
 //        marketOrder.set(request.getUserId());
         marketOrder.setOrderType(request.getOrderType());
@@ -46,7 +46,7 @@ public class OrderMapper {
         orderDto.setFee(marketOrder.getFee());
         orderDto.setPrice(marketOrder.getPrice());
         orderDto.setAllOrNone(marketOrder.getAllOrNone());
-        orderDto.setLastModifiedDate(marketOrder.getLastModifiedDate());
+        orderDto.setUpdatedAt(marketOrder.getUpdatedAt().getEpochSecond());
         orderDto.setApprovedBy(employeeMapper.employeeToEmployeeDto(marketOrder.getApprovedBy()));
         return orderDto;
     }

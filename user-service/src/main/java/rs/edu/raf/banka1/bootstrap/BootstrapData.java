@@ -100,6 +100,7 @@ public class BootstrapData implements CommandLineRunner {
         user1.setPosition(Constants.ADMIN);
         user1.setActive(true);
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
+        user1.setRequireApproval(false);
         employeeRepository.save(user1);
 
         Employee client = new Employee();
@@ -108,6 +109,7 @@ public class BootstrapData implements CommandLineRunner {
         client.setFirstName("Client");
         client.setActive(true);
         client.setPosition(Constants.SUPERVIZOR);
+        client.setRequireApproval(false);
         client.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
         client.setLastName("ClientPrezime");
         employeeRepository.save(client);

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.dtos.market_service.*;
 import org.springframework.web.client.HttpClientErrorException;
+import rs.edu.raf.banka1.model.WorkingHoursStatus;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
@@ -53,6 +54,38 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public ListingForexDto getForexById(Long forexId) {
+        return null;
+    }
+
+    @Override
+    public WorkingHoursStatus getWorkingHoursForStock(Long stockId) {
+        try {
+            // Create header with JWT token
+            HttpEntity<?> httpEntity = createHeader();
+
+            ResponseEntity<String> response = marketServiceRestTemplate.exchange(
+                "market/exchange/stock/" + stockId + "/time",
+                HttpMethod.GET,
+                httpEntity,
+                String.class
+            );
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return WorkingHoursStatus.valueOf(response.getBody());
+            } else {
+                // Log the unsuccessful response status code
+                System.out.println("Unsuccessful response status code: " + response.getStatusCode());
+                return null;
+            }
+        }catch(HttpClientErrorException e){
+            if(e.getStatusCode().equals(HttpStatus.NOT_FOUND)){
+                System.out.println("Stock not found: getStockByIdFromMarket");
+            }
+            if(e.getStatusCode().equals(HttpStatus.BAD_REQUEST)){
+                System.out.println("Bad request: getStockByIdFromMarket");
+            }
+        }catch (Exception e){
+            System.out.println("Error: getStockByIdFromMarket");
+        }
         return null;
     }
 

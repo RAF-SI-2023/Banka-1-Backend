@@ -17,7 +17,6 @@ public class StockSimulationTrigger implements Trigger {
     private final OrderService orderService;
     private final MarketService marketService;
     private final Long orderId;
-    private final WorkingHoursStatus workingHours;
     private final Random random = new Random();
 
     @Override
@@ -30,7 +29,7 @@ public class StockSimulationTrigger implements Trigger {
         long remainingQuantity = marketOrder.getContractSize() - marketOrder.getProcessedNumber();
         long timeInterval = (long)random.nextDouble((24 * 60) / ( volume / remainingQuantity ) * 1000);
 
-        timeInterval = workingHours.equals(WorkingHoursStatus.AFTER_HOURS) ? timeInterval + 30*60 * 1000 : timeInterval;
+        timeInterval = marketService.getWorkingHoursForStock(listingBaseDto.getListingId()).equals(WorkingHoursStatus.AFTER_HOURS) ? timeInterval + 30*60 * 1000 : timeInterval;
         return Instant.now().plusMillis(timeInterval);
     }
 }

@@ -23,6 +23,6 @@ public class OrderDto {
     private Double fee;
     private Double price;
     private Boolean allOrNone;
-    private Long lastModifiedDate;
+    private Long updatedAt;
     private EmployeeDto approvedBy;
 }
