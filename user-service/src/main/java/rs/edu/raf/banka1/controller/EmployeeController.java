@@ -271,4 +271,23 @@ public class EmployeeController {
         employeeService.resetLimitForEmployee(employeeId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PutMapping(value = "/setLimit/{employeeId}/{orderLimit}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Set order limit for user", description = "Supervisor sets order limit for user")
+    @PreAuthorize("hasAuthority('manageOrderRequests')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "400", description = "Invalid status provided"),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to set limits for users"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> setOrderLimitForUser(
+            @PathVariable(name = "employeeId") Long employeeId,
+            @PathVariable(name = "orderLimit") Double orderLimit
+    ) {
+        employeeService.setLimitOrderForEmployee(employeeId, orderLimit);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

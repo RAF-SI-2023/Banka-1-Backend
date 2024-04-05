@@ -237,7 +237,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public void resetUsersLimits() {
+    public void resetEmployeeLimits() {
         if(LocalDate.now().getDayOfWeek().equals(DayOfWeek.SATURDAY) ||
                 LocalDate.now().getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
             return;
@@ -245,6 +245,13 @@ public class EmployeeServiceImpl implements EmployeeService {
         List<Employee> users = employeeRepository.findAll();
         users.forEach(user->user.setLimitNow(0.0));
         employeeRepository.saveAll(users);
+    }
+
+    @Override
+    public void setLimitOrderForEmployee(Long employeeId, Double orderLimit) {
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(()-> new EmployeeNotFoundException(employeeId));
+        employee.setOrderlimit(orderLimit);
+        employeeRepository.save(employee);
     }
 
     @Override

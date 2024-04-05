@@ -5,13 +5,10 @@ import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
-import rs.edu.raf.banka1.requests.CreateUserRequest;
-import rs.edu.raf.banka1.requests.EditUserRequest;
 import rs.edu.raf.banka1.requests.ModifyPermissionsRequest;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
 import rs.edu.raf.banka1.responses.NewPasswordResponse;
-import rs.edu.raf.banka1.responses.UserResponse;
 
 import java.util.List;
 
@@ -35,5 +32,6 @@ public interface EmployeeService extends UserDetailsService {
     Boolean sendResetPasswordEmail(String email);
     NewPasswordResponse setNewPassword(String token, String password);
     void resetLimitForEmployee(Long employeeId);
-    void resetUsersLimits();
+    void resetEmployeeLimits();
+    void setLimitOrderForEmployee(Long employeeId, Double orderLimit);
 }

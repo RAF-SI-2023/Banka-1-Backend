@@ -172,7 +172,7 @@ public class BootstrapData implements CommandLineRunner {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime midnight = now.toLocalDate().atStartOfDay().plusDays(1);
         Duration initialDelay = Duration.between(now, midnight);
-        resetLimitExecutor.scheduleAtFixedRate(employeeService::resetUsersLimits, initialDelay.toMillis(), 24, TimeUnit.HOURS);
+        resetLimitExecutor.scheduleAtFixedRate(employeeService::resetEmployeeLimits, initialDelay.toMillis(), 24, TimeUnit.HOURS);
 
 
         seedBankCapital();
