@@ -1,9 +1,6 @@
 package rs.edu.raf.banka1.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -17,7 +14,9 @@ public class MarketOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long stockId;
-    private Long agentId;
+
+    @ManyToOne()
+    private Employee owner;
     private OrderType orderType;
     private OrderStatus status;
     private Long contractSize;
@@ -27,5 +26,8 @@ public class MarketOrder {
     private Double fee;
     private Double price;
     private Boolean allOrNone;
+    private Long lastModifiedDate;
 
+    @ManyToOne()
+    private Employee approvedBy;
 }

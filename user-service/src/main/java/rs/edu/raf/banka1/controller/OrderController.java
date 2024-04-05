@@ -9,20 +9,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import rs.edu.raf.banka1.dtos.LoanDto;
-import rs.edu.raf.banka1.dtos.LoanFullDto;
-import rs.edu.raf.banka1.dtos.LoanRequestDto;
-import rs.edu.raf.banka1.model.LoanRequestStatus;
-import rs.edu.raf.banka1.model.OrderStatus;
-import rs.edu.raf.banka1.requests.CreateLoanRequest;
-import rs.edu.raf.banka1.requests.CreateUserRequest;
 import rs.edu.raf.banka1.requests.StatusRequest;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
-import rs.edu.raf.banka1.services.LoanService;
 import rs.edu.raf.banka1.services.OrderService;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
-import java.util.List;
 
 @RestController
 @CrossOrigin
