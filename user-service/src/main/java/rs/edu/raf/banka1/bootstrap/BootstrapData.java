@@ -282,7 +282,7 @@ public class BootstrapData implements CommandLineRunner {
 
     private Company createBankCompany(){
         Company bank = new Company();
-        bank.setCompanyName("JP Morgan Chase Bank");
+        bank.setCompanyName("Banka1");
         bank.setTelephoneNumber("069 678 7889");
         bank.setFaxNumber("555-123-4567");
         bank.setPib("123-45-6789");

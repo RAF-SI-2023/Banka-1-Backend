@@ -12,12 +12,12 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne()
     private BankAccount bankAccount;
 
     private Long dateTime;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne()
     private MarketOrder marketOrder;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -26,7 +26,7 @@ public class Transaction {
     // make some kind of description builder function, so that descriptions are consistent
     private String description;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne()
     private Currency currency;
 
     // decreases amount of money on bank account
