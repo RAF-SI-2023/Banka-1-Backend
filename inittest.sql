@@ -34,11 +34,11 @@ SET time_zone = "+00:00";
 -- INSERT INTO A VALUES B;
 
 CREATE TABLE `bank_account` (
-                                `account_maintenance` double DEFAULT NULL,
                                 `account_status` bit(1) DEFAULT NULL,
                                 `account_type` tinyint(4) DEFAULT NULL,
                                 `available_balance` double DEFAULT NULL,
                                 `balance` double DEFAULT NULL,
+                                `maintenance_cost` double DEFAULT NULL,
                                 `company_id` bigint(20) DEFAULT NULL,
                                 `created_by_agent_id` bigint(20) DEFAULT NULL,
                                 `creation_date` bigint(20) DEFAULT NULL,
@@ -46,8 +46,28 @@ CREATE TABLE `bank_account` (
                                 `customer_id` bigint(20) DEFAULT NULL,
                                 `expiration_date` bigint(20) DEFAULT NULL,
                                 `id` bigint(20) NOT NULL,
+                                `account_name` varchar(255) DEFAULT NULL,
                                 `account_number` varchar(255) DEFAULT NULL,
                                 `subtype_of_account` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `business_account`
+--
+
+CREATE TABLE `business_account` (
+                                    `available_balance` double DEFAULT NULL,
+                                    `balance` double DEFAULT NULL,
+                                    `created_by_agent_id` bigint(20) DEFAULT NULL,
+                                    `creation_date` bigint(20) DEFAULT NULL,
+                                    `expiration_date` bigint(20) DEFAULT NULL,
+                                    `id` bigint(20) NOT NULL,
+                                    `owner_id` bigint(20) DEFAULT NULL,
+                                    `account_number` varchar(255) DEFAULT NULL,
+                                    `account_status` varchar(255) DEFAULT NULL,
+                                    `currency` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -105,6 +125,106 @@ CREATE TABLE `currency` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `current_account`
+--
+
+CREATE TABLE `current_account` (
+                                   `account_maintenance` double DEFAULT NULL,
+                                   `available_balance` double DEFAULT NULL,
+                                   `balance` double DEFAULT NULL,
+                                   `created_by_agent_id` bigint(20) DEFAULT NULL,
+                                   `creation_date` bigint(20) DEFAULT NULL,
+                                   `expiration_date` bigint(20) DEFAULT NULL,
+                                   `id` bigint(20) NOT NULL,
+                                   `owner_id` bigint(20) DEFAULT NULL,
+                                   `account_number` varchar(255) DEFAULT NULL,
+                                   `account_status` varchar(255) DEFAULT NULL,
+                                   `currency` varchar(255) DEFAULT NULL,
+                                   `subtype_of_account` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer`
+--
+
+CREATE TABLE `customer` (
+                            `active` bit(1) NOT NULL,
+                            `date_of_birth` bigint(20) DEFAULT NULL,
+                            `user_id` bigint(20) NOT NULL,
+                            `activation_token` varchar(255) DEFAULT NULL,
+                            `address` varchar(255) DEFAULT NULL,
+                            `email` varchar(255) DEFAULT NULL,
+                            `first_name` varchar(255) DEFAULT NULL,
+                            `gender` varchar(255) DEFAULT NULL,
+                            `jmbg` varchar(255) DEFAULT NULL,
+                            `last_name` varchar(255) DEFAULT NULL,
+                            `password` varchar(255) DEFAULT NULL,
+                            `phone_number` varchar(255) DEFAULT NULL,
+                            `reset_password_token` varchar(255) DEFAULT NULL,
+                            `single_use_code` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `employee`
+--
+
+CREATE TABLE `employee` (
+                            `active` bit(1) NOT NULL,
+                            `limit_now` double DEFAULT NULL,
+                            `orderlimit` double DEFAULT NULL,
+                            `require_approval` bit(1) DEFAULT NULL,
+                            `user_id` bigint(20) NOT NULL,
+                            `activation_token` varchar(255) DEFAULT NULL,
+                            `email` varchar(255) DEFAULT NULL,
+                            `first_name` varchar(255) DEFAULT NULL,
+                            `jmbg` varchar(255) DEFAULT NULL,
+                            `last_name` varchar(255) DEFAULT NULL,
+                            `password` varchar(255) DEFAULT NULL,
+                            `phone_number` varchar(255) DEFAULT NULL,
+                            `position` varchar(255) DEFAULT NULL,
+                            `reset_password_token` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `foreign_currency_accounts`
+--
+
+CREATE TABLE `foreign_currency_accounts` (
+                                             `account_maintenance` double DEFAULT NULL,
+                                             `available_balance` double DEFAULT NULL,
+                                             `balance` double DEFAULT NULL,
+                                             `creation_date` int(11) DEFAULT NULL,
+                                             `default_currency` bit(1) DEFAULT NULL,
+                                             `expiration_date` int(11) DEFAULT NULL,
+                                             `created_by_agent_id` bigint(20) DEFAULT NULL,
+                                             `id` bigint(20) NOT NULL,
+                                             `owner_id` bigint(20) DEFAULT NULL,
+                                             `account_number` varchar(255) DEFAULT NULL,
+                                             `account_status` varchar(255) DEFAULT NULL,
+                                             `currency` varchar(255) DEFAULT NULL,
+                                             `subtype_of_account` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hibernate_sequences`
+--
+
+CREATE TABLE `hibernate_sequences` (
+                                       `next_val` bigint(20) DEFAULT NULL,
+                                       `sequence_name` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `loan`
 --
 
@@ -150,6 +270,63 @@ CREATE TABLE `loan_request` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `market_order`
+--
+
+CREATE TABLE `market_order` (
+                                `all_or_none` bit(1) DEFAULT NULL,
+                                `fee` double DEFAULT NULL,
+                                `limit_value` double DEFAULT NULL,
+                                `order_type` tinyint(4) DEFAULT NULL,
+                                `price` double DEFAULT NULL,
+                                `status` tinyint(4) DEFAULT NULL,
+                                `stop_value` double DEFAULT NULL,
+                                `agent_id` bigint(20) DEFAULT NULL,
+                                `contract_size` bigint(20) DEFAULT NULL,
+                                `id` bigint(20) NOT NULL,
+                                `processed_number` bigint(20) DEFAULT NULL,
+                                `stock_id` bigint(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `payment`
+--
+
+CREATE TABLE `payment` (
+                           `amount` double DEFAULT NULL,
+                           `commission_fee` double DEFAULT NULL,
+                           `status` tinyint(4) DEFAULT NULL,
+                           `date_of_payment` bigint(20) DEFAULT NULL,
+                           `id` bigint(20) NOT NULL,
+                           `sender_bankaccount_id` bigint(20) DEFAULT NULL,
+                           `channel` varchar(255) DEFAULT NULL,
+                           `model` varchar(255) DEFAULT NULL,
+                           `payment_code` varchar(255) DEFAULT NULL,
+                           `payment_purpose` varchar(255) DEFAULT NULL,
+                           `recipient_account_number` varchar(255) DEFAULT NULL,
+                           `recipient_name` varchar(255) DEFAULT NULL,
+                           `reference_number` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `payment_recipient`
+--
+
+CREATE TABLE `payment_recipient` (
+                                     `customer_id` bigint(20) DEFAULT NULL,
+                                     `id` bigint(20) NOT NULL,
+                                     `first_name` varchar(255) DEFAULT NULL,
+                                     `last_name` varchar(255) DEFAULT NULL,
+                                     `recipient_account_number` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `permission`
 --
 
@@ -162,36 +339,40 @@ CREATE TABLE `permission` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user`
+-- Table structure for table `transfer`
 --
 
-CREATE TABLE `user` (
-                        `active` bit(1) DEFAULT NULL,
-                        `date_of_birth` bigint(20) DEFAULT NULL,
-                        `user_id` bigint(20) NOT NULL,
-                        `dtype` varchar(31) NOT NULL,
-                        `activation_token` varchar(255) DEFAULT NULL,
-                        `address` varchar(255) DEFAULT NULL,
-                        `email` varchar(255) DEFAULT NULL,
-                        `first_name` varchar(255) DEFAULT NULL,
-                        `gender` varchar(255) DEFAULT NULL,
-                        `jmbg` varchar(255) DEFAULT NULL,
-                        `last_name` varchar(255) DEFAULT NULL,
-                        `password` varchar(255) DEFAULT NULL,
-                        `phone_number` varchar(255) DEFAULT NULL,
-                        `position` varchar(255) DEFAULT NULL,
-                        `reset_password_token` varchar(255) DEFAULT NULL
+CREATE TABLE `transfer` (
+                            `amount` double DEFAULT NULL,
+                            `commision` double DEFAULT NULL,
+                            `converted_amount` double DEFAULT NULL,
+                            `exchange` double DEFAULT NULL,
+                            `transfer_date` bigint(20) DEFAULT NULL,
+                            `transfer_id` bigint(20) NOT NULL,
+                            `recipient_account_number` varchar(255) DEFAULT NULL,
+                            `sender_account_number` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_permissions`
+-- Table structure for table `user_permissions_customer`
 --
 
-CREATE TABLE `user_permissions` (
-                                    `permission_id` bigint(20) NOT NULL,
-                                    `user_id` bigint(20) NOT NULL
+CREATE TABLE `user_permissions_customer` (
+                                             `permission_id` bigint(20) NOT NULL,
+                                             `user_id` bigint(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_permissions_employee`
+--
+
+CREATE TABLE `user_permissions_employee` (
+                                             `permission_id` bigint(20) NOT NULL,
+                                             `user_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -205,7 +386,13 @@ ALTER TABLE `bank_account`
     ADD PRIMARY KEY (`id`),
   ADD KEY `FKgm6p0ej8mhbakybacuneanald` (`company_id`),
   ADD KEY `FKb0rqy46m451rdbnhil6kkvlve` (`currency_id`),
-  ADD KEY `FKcd2iwv9rd0bxjvfkyhh90xnd0` (`customer_id`);
+  ADD KEY `FKj818ht4ban0c4uw4bmsbf3jme` (`customer_id`);
+
+--
+-- Indexes for table `business_account`
+--
+ALTER TABLE `business_account`
+    ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `card`
@@ -227,6 +414,40 @@ ALTER TABLE `currency`
     ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `current_account`
+--
+ALTER TABLE `current_account`
+    ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `customer`
+--
+ALTER TABLE `customer`
+    ADD PRIMARY KEY (`user_id`),
+  ADD UNIQUE KEY `UK_dwk6cx0afu8bs9o4t536v1j5v` (`email`),
+  ADD UNIQUE KEY `UK_74noy3hdjlok2p75kut6hc7q9` (`jmbg`);
+
+--
+-- Indexes for table `employee`
+--
+ALTER TABLE `employee`
+    ADD PRIMARY KEY (`user_id`),
+  ADD UNIQUE KEY `UK_fopic1oh5oln2khj8eat6ino0` (`email`),
+  ADD UNIQUE KEY `UK_cd34h7mb4lrr65book7qaa8sj` (`jmbg`);
+
+--
+-- Indexes for table `foreign_currency_accounts`
+--
+ALTER TABLE `foreign_currency_accounts`
+    ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `hibernate_sequences`
+--
+ALTER TABLE `hibernate_sequences`
+    ADD PRIMARY KEY (`sequence_name`);
+
+--
 -- Indexes for table `loan`
 --
 ALTER TABLE `loan`
@@ -239,25 +460,50 @@ ALTER TABLE `loan_request`
     ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `market_order`
+--
+ALTER TABLE `market_order`
+    ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `payment`
+--
+ALTER TABLE `payment`
+    ADD PRIMARY KEY (`id`),
+  ADD KEY `FKjk674co7a4x2ie6wl4bpjjtp9` (`sender_bankaccount_id`);
+
+--
+-- Indexes for table `payment_recipient`
+--
+ALTER TABLE `payment_recipient`
+    ADD PRIMARY KEY (`id`),
+  ADD KEY `FK50onfwsjlj9k1n40pjdg4l20a` (`customer_id`);
+
+--
 -- Indexes for table `permission`
 --
 ALTER TABLE `permission`
     ADD PRIMARY KEY (`permission_id`);
 
 --
--- Indexes for table `user`
+-- Indexes for table `transfer`
 --
-ALTER TABLE `user`
-    ADD PRIMARY KEY (`user_id`),
-  ADD UNIQUE KEY `UK_ob8kqyqqgmefl0aco34akdtpe` (`email`),
-  ADD UNIQUE KEY `UK_foa7nm38hlyhwqgbw0ujd3tt4` (`jmbg`);
+ALTER TABLE `transfer`
+    ADD PRIMARY KEY (`transfer_id`);
 
 --
--- Indexes for table `user_permissions`
+-- Indexes for table `user_permissions_customer`
 --
-ALTER TABLE `user_permissions`
+ALTER TABLE `user_permissions_customer`
     ADD PRIMARY KEY (`permission_id`,`user_id`),
-  ADD KEY `FK79uqaq5t8qjak65ldagkoo7yr` (`user_id`);
+  ADD KEY `FK6xxlag2b3hjgv0qxrword9560` (`user_id`);
+
+--
+-- Indexes for table `user_permissions_employee`
+--
+ALTER TABLE `user_permissions_employee`
+    ADD PRIMARY KEY (`permission_id`,`user_id`),
+  ADD KEY `FKjv5retfeiq32vnojwuqqqt9ol` (`user_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -267,6 +513,12 @@ ALTER TABLE `user_permissions`
 -- AUTO_INCREMENT for table `bank_account`
 --
 ALTER TABLE `bank_account`
+    MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `business_account`
+--
+ALTER TABLE `business_account`
     MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
@@ -288,6 +540,18 @@ ALTER TABLE `currency`
     MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `current_account`
+--
+ALTER TABLE `current_account`
+    MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `foreign_currency_accounts`
+--
+ALTER TABLE `foreign_currency_accounts`
+    MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `loan`
 --
 ALTER TABLE `loan`
@@ -300,16 +564,34 @@ ALTER TABLE `loan_request`
     MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `market_order`
+--
+ALTER TABLE `market_order`
+    MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `payment`
+--
+ALTER TABLE `payment`
+    MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `payment_recipient`
+--
+ALTER TABLE `payment_recipient`
+    MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `permission`
 --
 ALTER TABLE `permission`
     MODIFY `permission_id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `user`
+-- AUTO_INCREMENT for table `transfer`
 --
-ALTER TABLE `user`
-    MODIFY `user_id` bigint(20) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `transfer`
+    MODIFY `transfer_id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -320,15 +602,34 @@ ALTER TABLE `user`
 --
 ALTER TABLE `bank_account`
     ADD CONSTRAINT `FKb0rqy46m451rdbnhil6kkvlve` FOREIGN KEY (`currency_id`) REFERENCES `currency` (`id`),
-  ADD CONSTRAINT `FKcd2iwv9rd0bxjvfkyhh90xnd0` FOREIGN KEY (`customer_id`) REFERENCES `user` (`user_id`),
-  ADD CONSTRAINT `FKgm6p0ej8mhbakybacuneanald` FOREIGN KEY (`company_id`) REFERENCES `company` (`id`);
+  ADD CONSTRAINT `FKgm6p0ej8mhbakybacuneanald` FOREIGN KEY (`company_id`) REFERENCES `company` (`id`),
+  ADD CONSTRAINT `FKj818ht4ban0c4uw4bmsbf3jme` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`user_id`);
 
 --
--- Constraints for table `user_permissions`
+-- Constraints for table `payment`
 --
-ALTER TABLE `user_permissions`
-    ADD CONSTRAINT `FK79uqaq5t8qjak65ldagkoo7yr` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`),
-  ADD CONSTRAINT `FKmyy1imx646s9c8usrmsfu9f51` FOREIGN KEY (`permission_id`) REFERENCES `permission` (`permission_id`);
+ALTER TABLE `payment`
+    ADD CONSTRAINT `FKjk674co7a4x2ie6wl4bpjjtp9` FOREIGN KEY (`sender_bankaccount_id`) REFERENCES `bank_account` (`id`);
+
+--
+-- Constraints for table `payment_recipient`
+--
+ALTER TABLE `payment_recipient`
+    ADD CONSTRAINT `FK50onfwsjlj9k1n40pjdg4l20a` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`user_id`);
+
+--
+-- Constraints for table `user_permissions_customer`
+--
+ALTER TABLE `user_permissions_customer`
+    ADD CONSTRAINT `FK6xxlag2b3hjgv0qxrword9560` FOREIGN KEY (`user_id`) REFERENCES `customer` (`user_id`),
+  ADD CONSTRAINT `FK7ocumjmox0nk1eo2vsu771c07` FOREIGN KEY (`permission_id`) REFERENCES `permission` (`permission_id`);
+
+--
+-- Constraints for table `user_permissions_employee`
+--
+ALTER TABLE `user_permissions_employee`
+    ADD CONSTRAINT `FKjv5retfeiq32vnojwuqqqt9ol` FOREIGN KEY (`user_id`) REFERENCES `employee` (`user_id`),
+  ADD CONSTRAINT `FKrp0i2e3sql1jemh151ahjqwvb` FOREIGN KEY (`permission_id`) REFERENCES `permission` (`permission_id`);
 
 
 INSERT INTO `permission` (`permission_id`, `description`, `name`) VALUES
@@ -346,26 +647,60 @@ INSERT INTO `permission` (`permission_id`, `description`, `name`) VALUES
 INSERT INTO `permission` (`permission_id`, `description`, `name`) VALUES
     (6, 'deleteUser', 'deleteUser');
 
-INSERT INTO `user` (`user_id`, `active`, `email`, `first_name`, `jmbg`, `last_name`, `password`, `phone_number`, `position`, `dtype`) VALUES
-    (100, b'1', 'admin@admin.com', 'admin', 'admin', 'admin', '$2a$10$PBWT9wzA7OPpZPr5lVNxj.SLlHhrBrUzHH/wOG6sqfOp3wbYk8Kze', '1234567890', 'admin', 'User');
+INSERT INTO `permission` (`permission_id`, `description`, `name`) VALUES
+    (7, 'manageLoans', 'manageLoans');
 
-INSERT INTO `user` (`user_id`, `active`, `email`, `first_name`, `jmbg`, `last_name`, `password`, `phone_number`, `position`, `dtype`) VALUES
-    (101, b'1', 'user@test.com', 'petar', '412325124', 'petrovic', '$2a$10$PBWT9wzA7OPpZPr5lVNxj.SLlHhrBrUzHH/wOG6sqfOp3wbYk8Kze', '1111111111', 'user', 'User');
+INSERT INTO `permission` (`permission_id`, `description`, `name`) VALUES
+    (8, 'manageLoanRequests', 'manageLoanRequests');
 
-INSERT INTO `user_permissions` (`user_id`, `permission_id`) VALUES
+INSERT INTO `permission` (`permission_id`, `description`, `name`) VALUES
+    (9, 'modifyCustomer', 'modifyCustomer');
+
+INSERT INTO `permission` (`permission_id`, `description`, `name`) VALUES
+    (10, 'manageOrderRequests', 'manageOrderRequests');
+
+
+INSERT INTO `employee` (`user_id`, `active`, `email`, `first_name`, `jmbg`, `last_name`, `password`, `phone_number`, `position`) VALUES
+    (100, b'1', 'admin@admin.com', 'admin', 'admin', 'admin', '$2a$10$PBWT9wzA7OPpZPr5lVNxj.SLlHhrBrUzHH/wOG6sqfOp3wbYk8Kze', '1234567890', 'admin');
+
+-- INSERT INTO `customer` (`user_id`, `active`, `email`, `first_name`, `jmbg`, `last_name`, `password`, `phone_number`) VALUES
+--     (101, b'1', 'user@test.com', 'petar', '412325124', 'petrovic', '$2a$10$PBWT9wzA7OPpZPr5lVNxj.SLlHhrBrUzHH/wOG6sqfOp3wbYk8Kze', '1111111111');
+
+INSERT INTO `user_permissions_employee` (`user_id`, `permission_id`) VALUES
     (100, 2);
 
-INSERT INTO `user_permissions` (`user_id`, `permission_id`) VALUES
+INSERT INTO `user_permissions_employee` (`user_id`, `permission_id`) VALUES
     (100, 3);
 
-INSERT INTO `user_permissions` (`user_id`, `permission_id`) VALUES
+INSERT INTO `user_permissions_employee` (`user_id`, `permission_id`) VALUES
     (100, 4);
 
-INSERT INTO `user_permissions` (`user_id`, `permission_id`) VALUES
+INSERT INTO `user_permissions_employee` (`user_id`, `permission_id`) VALUES
     (100, 5);
 
-INSERT INTO `user_permissions` (`user_id`, `permission_id`) VALUES
+INSERT INTO `user_permissions_employee` (`user_id`, `permission_id`) VALUES
     (100, 6);
+
+INSERT INTO `user_permissions_employee` (`user_id`, `permission_id`) VALUES
+    (100, 7);
+
+INSERT INTO `user_permissions_employee` (`user_id`, `permission_id`) VALUES
+    (100, 8);
+
+INSERT INTO `user_permissions_employee` (`user_id`, `permission_id`) VALUES
+    (100, 9);
+
+INSERT INTO `user_permissions_employee` (`user_id`, `permission_id`) VALUES
+    (100, 10);
+
+INSERT INTO `company` (`id`, `company_name`, `fax_number`, `id_number`, `job_id`, `pib`, `registration_number`, `telephone_number`) VALUES
+    (1, 'test', 'test', 'test', 'test', 'test', 'test', 'test');
+
+INSERT INTO `currency` (`active`, `id`, `country`, `currency_code`, `currency_desc`, `currency_name`, `currency_symbol`) VALUES
+    (b'1', 10000, 'TEST', 'TST', 'TEST', 'TEST', 'TST');
+
+INSERT INTO `bank_account` (account_status, account_type, available_balance, balance, maintenance_cost, company_id, created_by_agent_id, creation_date, currency_id, customer_id, expiration_date, id, account_name, account_number, subtype_of_account)
+VALUES (b'1', 1, 1000.0, 1200.0, 100.0, NULL, 100, 1710959528, 10000, 101, 2710959528, 100, 'test', '123456789', 'subtest');
 
 -- INSERT INTO `foreign_currency_accounts` (`id`, `account_maintenance`, `account_number`, `account_status`, `available_balance`, `balance`, `created_by_agent_id`, `creation_date`, `currency`, `default_currency`, `expiration_date`, `owner_id`, `subtype_of_account`, `type_of_account`) VALUES
 --  (100, 100.0, '123456789', 'active', 1000.0, 1200.0, 100, 1710959528, 'CD1', 'CD1', 2710959528, 102, 'subtest', 'test');

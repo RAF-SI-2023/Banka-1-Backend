@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.bootstrap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.tinylog.Logger;
@@ -20,6 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@Profile("!test")
 public class BootstrapData implements CommandLineRunner {
 //    private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;

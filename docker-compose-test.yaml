@@ -31,6 +31,8 @@ services:
         JAR_FILE: user-service/target/*.jar
         CACHEBUST: ${CI_COMMIT_SHA}  # Use a unique value to bust the cache
     image: user-service
+    environment:
+      - "SPRING_PROFILES_ACTIVE=test"
     #container_name: user-service-container
     restart: always
     ports:

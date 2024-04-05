@@ -4,5 +4,5 @@ Feature: users with permission want to edit users
     And user with email "petarpetrovic@gmail.com" exists
     When i select user with email "petarpetrovic@gmail.com" to change
     And i change first name to "John"
-    And i send PUT request to "/user"
+    And i send PUT request to "/customer"
     Then user with email "petarpetrovic@gmail.com" has his first name changed to "John"

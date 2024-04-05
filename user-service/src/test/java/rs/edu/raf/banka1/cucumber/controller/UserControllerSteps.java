@@ -16,23 +16,33 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
 //import rs.edu.raf.banka1.mapper.ForeignCurrencyAccountMapper;
+import rs.edu.raf.banka1.dtos.customer.CustomerDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
-import rs.edu.raf.banka1.mapper.EmployeeMapper;
-import rs.edu.raf.banka1.mapper.PermissionMapper;
-import rs.edu.raf.banka1.mapper.UserMapper;
+import rs.edu.raf.banka1.mapper.*;
+import rs.edu.raf.banka1.model.AccountType;
+import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.User;
 //import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
+import rs.edu.raf.banka1.repositories.BankAccountRepository;
+import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.repositories.EmployeeRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 //import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.*;
+import rs.edu.raf.banka1.requests.customer.AccountData;
+import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
+import rs.edu.raf.banka1.requests.customer.CustomerData;
 import rs.edu.raf.banka1.responses.*;
 import rs.edu.raf.banka1.services.EmailService;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -57,15 +67,16 @@ public class UserControllerSteps {
 
     private String jwt = "";
 
-    private UserResponse lastReadUserResponse;
+    private EmployeeDto lastReadUserResponse;
     private List<EmployeeDto> lastReadAllUsersResponse;
+    private List<CustomerResponse> lastReadAllCustomersResponse;
     private CreateUserResponse lastCreateUserResponse;
 //    private CreateForeignCurrencyAccountResponse lastCreateForeignCurrencyAccountResponse;
 //    private List<ForeignCurrencyAccountResponse> lastReadAllForeignCurrencyAccountsResponse;
     private EditUserResponse lastEditUserResponse;
     private ActivateAccountResponse lastActivateAccountResponse;
     private User activatedUser;
-    private EditEmployeeDto editUserRequest = new EditEmployeeDto();
+    private CustomerResponse editUserRequest = new CustomerResponse();
     private CreateEmployeeDto createUserRequest = new CreateEmployeeDto();
     private Long userToRemove;
     private String email;
@@ -75,14 +86,21 @@ public class UserControllerSteps {
 //    private ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
 //    private ForeignCurrencyAccountRequest foreignCurrencyAccountRequest = new ForeignCurrencyAccountRequest();
     private PermissionRepository permissionRepository;
+    private CustomerRepository customerRepository;
+    private BankAccountRepository bankAccountRepository;
     private EmployeeMapper userMapper = new EmployeeMapper(new PermissionMapper(), passwordEncoder, permissionRepository);
+    private CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper());
     private List<EmployeeDto> userResponses = new ArrayList<>();
+    private List<CustomerResponse> customerResponses = new ArrayList<>();
     //private final String url = "http://localhost:";
     private final String url = "http://" + SpringIntegrationTest.enviroment.getServiceHost("user-service", 8080) + ":";
     //private final String url = "http://" + "host.docker.internal" + ":";
     private Long lastid;
     private String password;
-
+    private String token;
+    private AccountData accountData = new AccountData();
+    private CustomerData customerData = new CustomerData();
+    private String bankAccountNumber;
 
     @Data
     class SearchFilter {
@@ -166,7 +184,7 @@ public class UserControllerSteps {
 
     @Given("user with email {string} exists")
     public void userWithEmailExists(String email) {
-        Employee user = new Employee();
+        Customer user = new Customer();
         user.setEmail(email);
         user.setPassword("testpassword");
         user.setActivationToken(null);
@@ -175,10 +193,11 @@ public class UserControllerSteps {
 //        user.setPermissions(new HashSet<>());
         user.setFirstName("nebitno");
         user.setLastName("nebitno");
+        user.setAccountIds(new ArrayList<>());
 //        user.setPosition("nebitno");
-        userRepository.save(user);
+        customerRepository.save(user);
 
-        editUserRequest = userMapper.employeeToEditEmployeeDto(user);
+        editUserRequest = customerMapper.customerToCustomerResponse(user);
     }
 
     @Given("user i want to delete exists")
@@ -201,10 +220,14 @@ public class UserControllerSteps {
 
     public UserControllerSteps(EmployeeRepository userRepository,
                                PermissionRepository permissionRepository,
-                               PasswordEncoder passwordEncoder) {
+                               PasswordEncoder passwordEncoder,
+                               CustomerRepository customerRepository,
+                               BankAccountRepository bankAccountRepository) {
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
         this.passwordEncoder = passwordEncoder;
+        this.customerRepository = customerRepository;
+        this.bankAccountRepository = bankAccountRepository;
     }
 
     @Given("i have email {string}")
@@ -243,12 +266,13 @@ public class UserControllerSteps {
     @Given("I am a user that wants to set password to {string}")
     public void iAmAUserThatWantsToSetPasswordTo(String password) {
         this.password = password;
-        Employee user = new Employee();
+        Customer user = new Customer();
         user.setActivationToken("testtoken");
         user.setEmail("testemail");
         user.setPassword("password");
         user.setActive(true);
-        userRepository.save(user);
+        user.setAccountIds(new ArrayList<>());
+        customerRepository.save(user);
     }
 
 //    private String getBody(String path){
@@ -361,8 +385,13 @@ public class UserControllerSteps {
                 });
                 userRepository.findAll().forEach(user -> userResponses.add(userMapper.employeeToEmployeeDto(user)));
             }
+            else if (path.equals("/customer/getAll")) {
+                lastReadAllCustomersResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<CustomerResponse>>() {
+                });
+                customerRepository.findAll().forEach(user -> customerResponses.add(customerMapper.customerToCustomerResponse(user)));
+            }
             else if (path.startsWith("/employee/get/")) {
-                    lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), UserResponse.class);
+                    lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), EmployeeDto.class);
                 String[] split = path.split("/");
                 email = split[split.length - 1];
             }
@@ -384,7 +413,7 @@ public class UserControllerSteps {
                     userResponses.add(userMapper.employeeToEmployeeDto(user));
                 });
             }
-            else if (path.equals("/employee/permissions/userId/100") || path.equals("/employee/permissions/email/admin@admin.com")) {
+            else if (path.equals("/employee/permissions/employeeId/100") || path.equals("/employee/permissions/email/admin@admin.com")) {
                 getBody(url + port + path);
             }
             else if (path.equals("/balance/foreign_currency/100")) {
@@ -395,7 +424,7 @@ public class UserControllerSteps {
 //                });
 //            }
             else if (path.startsWith("/employee/")) {
-                lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), UserResponse.class);
+                lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), EmployeeDto.class);
                 String[] split = path.split("/");
                 lastid = Long.parseLong(split[split.length - 1]);
             }
@@ -414,6 +443,26 @@ public class UserControllerSteps {
                 String tmp = post(url + port + path, createUserRequest);
                 lastCreateUserResponse = objectMapper.readValue(tmp, CreateUserResponse.class);
             }
+            else if(path.equals("/customer/createNewCustomer")){
+                CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest();
+                createCustomerRequest.setCustomer(customerData);
+                createCustomerRequest.setAccount(accountData);
+                post(url + port + path, createCustomerRequest);
+            }
+            else if(path.equals("/customer/initialActivation")){
+                InitialActivationRequest initialActivationRequest = new InitialActivationRequest();
+                initialActivationRequest.setEmail(customerData.getEmail());
+                initialActivationRequest.setPhoneNumber(customerData.getPhoneNumber());
+                initialActivationRequest.setAccountNumber(bankAccountNumber);
+                post(url + port + path, initialActivationRequest);
+            }
+            else if(path.equals("/customer/activate/{token}")){
+                path = path.replace("{token}", token);
+                ActivateAccountRequest activateAccountRequest = new ActivateAccountRequest();
+                activateAccountRequest.setPassword(password);
+                post(url + port + path, activateAccountRequest);
+            }
+
 //            else if (path.equals("/balance/foreign_currency/create")) {
 //                lastCreateForeignCurrencyAccountResponse = objectMapper.readValue(post(url + port + path, foreignCurrencyAccountRequest), CreateForeignCurrencyAccountResponse.class);
 //            }
@@ -496,7 +545,7 @@ public class UserControllerSteps {
 
     @Then("Response body is the correct JSON list of users")
     public void theResponseBodyShouldBeAListOfUsers() {
-        assertThat(lastReadAllUsersResponse).hasSameElementsAs(userResponses);
+        assertThat(lastReadAllCustomersResponse).hasSameElementsAs(customerResponses);
     }
 
     @Then("Response body is the correct user JSON")
@@ -516,10 +565,15 @@ public class UserControllerSteps {
         activatedUser = userRepository.findById(lastActivateAccountResponse.getUserId()).get();
         assertThat(passwordEncoder.matches(password, activatedUser.getPassword())).isTrue();
     }
+    @Then("customer should have his password set to {string}")
+    public void customerShouldHaveHisPasswordSetTo(String arg0) {
+        assertThat(passwordEncoder.matches(arg0, customerRepository.findCustomerByEmail(customerData.getEmail()).get().getPassword())).isTrue();
+    }
+
 
     @Then("user with email {string} has his first name changed to {string}")
     public void userWithEmailHasHisFirstNameChangedTo(String email, String firstName) {
-        User user = userRepository.findByEmail(email).get();
+        Customer user = customerRepository.findCustomerByEmail(email).get();
         assertThat(user.getFirstName()).isEqualTo(firstName);
     }
 
@@ -532,6 +586,102 @@ public class UserControllerSteps {
     public void iShouldGetResponseWithStatus(int status) {
         assertThat(lastResponse.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.valueOf(status));
     }
+
+    @Given("customer has first name {string}")
+    public void customerHasFirstName(String arg0) {
+        customerData.setFirstName(arg0);
+    }
+
+    @Given("customer has last name {string}")
+    public void customerHasLastName(String arg0) {
+        customerData.setLastName(arg0);
+    }
+
+    @Given("customer has date of birth of {string}")
+    public void customerHasDateOfBirthOf(String arg0) throws ParseException {
+        DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+        Date date = df.parse(arg0);
+        customerData.setDateOfBirth((long)date.getTime());
+    }
+
+    @Given("customer has address {string}")
+    public void customerHasAddress(String arg0) {
+        customerData.setAddress(arg0);
+    }
+
+    @Given("customer has phone number {string}")
+    public void customerHasPhoneNumber(String arg0) {
+        customerData.setPhoneNumber(arg0);
+    }
+
+    @Given("customer has email {string}")
+    public void customerHasEmail(String arg0) {
+        customerData.setEmail(arg0);
+    }
+
+    @Given("customer has jmbg {string}")
+    public void customerHasJmbg(String arg0) {
+        customerData.setJmbg(arg0);
+    }
+
+    @Given("customer is male")
+    public void customerIsMale() {
+        customerData.setGender("M");
+    }
+
+    @Given("accountType is {string}")
+    public void accounttypeIs(String arg0) {
+        accountData.setAccountType(AccountType.valueOf(arg0));
+    }
+
+    @Given("account currency is {string}")
+    public void accountCurrencyIs(String arg0) {
+        accountData.setCurrencyCode(arg0);
+    }
+
+    @Given("maintenance cost is {string}")
+    public void maintenanceCostIs(String arg0) {
+        accountData.setMaintenanceCost(Double.parseDouble(arg0));
+    }
+
+    @Then("response should be true")
+    public void responseShouldBeTrue() {
+        assertThat(lastResponse.getBody()).isEqualTo("true");
+    }
+
+    @Given("customer got his bank account from email")
+    public void customerGotHisBankAccountFromEmail() {
+        Customer customer = customerRepository.findCustomerByEmail(customerData.getEmail()).get();
+        bankAccountNumber = bankAccountRepository.findByCustomer(customer).getFirst().getAccountNumber();
+    }
+
+    @Given("customer got his token from email")
+    public void customerGotHisTokenFromEmail() {
+        token = customerRepository.findCustomerByEmail(customerData.getEmail()).get().getActivationToken();
+    }
+
+    @Given("customer wants to set his password to {string}")
+    public void customerWantsToSetHisPasswordTo(String arg0) {
+        password = arg0;
+    }
+
+    private ObjectMapper objectMapper = new ObjectMapper();
+    @Then("i should get all customers")
+    public void iShouldGetAllCustomers() {
+        try{
+            CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper());
+            List<CustomerResponse> customerResponses = objectMapper.readValue(lastResponse.getBody().toString(), new TypeReference<List<CustomerResponse>>() {
+            });
+            List<Customer> customers = customerRepository.findAll();
+            List<CustomerResponse> customerResponses1 = new ArrayList<>();
+            customers.forEach(customer -> customerResponses1.add(customerMapper.customerToCustomerResponse(customer)));
+            assertThat(customerResponses).hasSameElementsAs(customerResponses1);
+        } catch (Exception e){
+            e.printStackTrace();
+            fail("Failed to parse response body");
+        }
+    }
+
 
 //    @Then("new foreign account should be created")
 //    public void newForeignAccountShouldBeCreated() {

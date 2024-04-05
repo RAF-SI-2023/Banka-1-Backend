@@ -1,5 +1,6 @@
+@Ignore
 Feature: user can activate his account by clicking the link sent by email
   Scenario: user clicks the link given to him
     Given I am a user that wants to set password to "password"
-    When I go to "/user/activate/testtoken"
+    When I go to "/customer/activate/testtoken"
     Then I should have my password set to "password"

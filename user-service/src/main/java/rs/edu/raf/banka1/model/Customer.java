@@ -62,13 +62,14 @@ public class Customer extends User {
     @OneToMany(
             mappedBy = "customer",
             cascade = CascadeType.ALL,
-            orphanRemoval = true
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
     )
     private List<BankAccount> accountIds;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_permissions",
+            name = "user_permissions_customer",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
