@@ -12,7 +12,9 @@ public class MarketOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long stockId;
-    private Long ownerId;
+
+    @ManyToOne()
+    private Employee owner;
     private OrderType orderType;
     private OrderStatus status;
     private Long contractSize;
@@ -24,6 +26,6 @@ public class MarketOrder {
     private Boolean allOrNone;
     private Long lastModifiedDate;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne()
     private Employee approvedBy;
 }
