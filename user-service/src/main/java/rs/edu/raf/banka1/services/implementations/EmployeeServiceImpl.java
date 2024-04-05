@@ -12,6 +12,7 @@ import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.exceptions.EmployeeNotFoundException;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.model.Employee;
@@ -224,6 +225,13 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.employeeRepository.save(employee);
 
         return new NewPasswordResponse(employee.getUserId());
+    }
+
+    @Override
+    public void resetLimitForEmployee(Long employeeId) {
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EmployeeNotFoundException(employeeId));
+        employee.setLimitNow(0.0);
+        employeeRepository.save(employee);
     }
 
     @Override
