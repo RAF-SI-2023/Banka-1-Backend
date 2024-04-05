@@ -8,6 +8,7 @@ import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.MarketOrder;
 import rs.edu.raf.banka1.model.OrderStatus;
+import rs.edu.raf.banka1.model.WorkingHoursStatus;
 import rs.edu.raf.banka1.repositories.OrderRepository;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.services.MarketService;
@@ -15,9 +16,12 @@ import rs.edu.raf.banka1.services.OrderService;
 import rs.edu.raf.banka1.stocksimulation.StockSimulationJob;
 import rs.edu.raf.banka1.stocksimulation.StockSimulationTrigger;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -27,6 +31,8 @@ public class OrderServiceImpl implements OrderService {
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private final Random random = new Random();
     private final TaskScheduler taskScheduler;
+
+    private Map<Long, ScheduledFuture<?>> scheduledFutureMap = new HashMap<>();
 
     public OrderServiceImpl(
         final OrderMapper orderMapper,
@@ -51,7 +57,19 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(marketOrder);
 
         //Start simulation
-        taskScheduler.schedule(new StockSimulationJob(marketOrder.getId()), new StockSimulationTrigger());
+        ScheduledFuture<?> future = taskScheduler.schedule(
+                new StockSimulationJob(
+                        this,
+                        marketOrder.getId()
+                ),
+                new StockSimulationTrigger(
+                        this,
+                        marketService,
+                        marketOrder.getId(),
+                        WorkingHoursStatus.OPENED
+                )
+        );
+        this.scheduledFutureMap.put(marketOrder.getId(), future);
     }
 
     @Override
@@ -62,13 +80,13 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void finishOrder(Long orderId) {
         this.orderRepository.changeStatus(orderId, OrderStatus.DONE);
+        this.scheduledFutureMap.get(orderId).cancel(false);
     }
 
     @Override
     public void setProcessedNumber(Long orderId, Long processedNumber) {
         this.orderRepository.changeProcessedNumber(orderId, processedNumber);
     }
-
 
     private Double calculatePrice(final Double price, final Long contractSize) {
         return price * contractSize;
