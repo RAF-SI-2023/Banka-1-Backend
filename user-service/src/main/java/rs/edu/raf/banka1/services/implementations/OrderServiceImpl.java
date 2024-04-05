@@ -13,13 +13,9 @@ import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.OrderService;
 import rs.edu.raf.banka1.stocksimulation.StockSimulationJob;
 import rs.edu.raf.banka1.stocksimulation.StockSimulationTrigger;
-import rs.edu.raf.banka1.utils.Constants;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -32,6 +28,7 @@ public class OrderServiceImpl implements OrderService {
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private final Random random = new Random();
     private final TaskScheduler taskScheduler;
+    private final Double PERCENT = 0.1;
 
     //Map for storing ScheduledFuture instances for every order - used for task cancellation (kills finished simulation threads).
     //Used only for orders simulated by this one server instance.
@@ -65,6 +62,8 @@ public class OrderServiceImpl implements OrderService {
         }
         orderRepository.save(order);
 
+        // ako je marketorder onda odmah startorderSimulation a ako je stop
+
         startOrderSimulation(order.getId());
     }
 
@@ -85,6 +84,78 @@ public class OrderServiceImpl implements OrderService {
             )
         );
         this.scheduledFutureMap.put(orderId, future);
+    }
+
+    public Boolean checkStockPriceForStopOrder(Long marketOrderId, Long stockId) {
+        Optional<MarketOrder> optMarketOrder = orderRepository.findById(marketOrderId);
+        if (optMarketOrder.isEmpty()) return false;
+        MarketOrder marketOrder = optMarketOrder.get();
+        ListingBaseDto listingBase = marketService.getStockById(stockId);
+
+        Double ask = listingBase.getHigh();
+        Double bid = listingBase.getLow();
+
+        Double changeAsk = random.nextDouble(ask * PERCENT);
+        boolean plusAsk = random.nextBoolean();
+        ask = plusAsk ? (ask + changeAsk) : (ask - changeAsk);
+        Double changeBid = random.nextDouble(bid * PERCENT);
+        boolean plusBid = random.nextBoolean();
+        bid = plusBid ? (bid + changeBid) : (bid - changeBid);
+
+
+        if(marketOrder.getOrderType().equals(OrderType.BUY) && ask > marketOrder.getStopValue()) {
+
+            if(marketOrder.getLimitValue() == null) {
+                marketOrder.setPrice(calculatePrice(ask, marketOrder.getContractSize()));
+            } else {
+                marketOrder.setPrice(calculatePriceForLimitOrder(
+                    marketOrder.getOrderType(),
+                    marketOrder.getContractSize(),
+                    marketOrder.getLimitValue(),
+                    ask));
+            }
+            marketOrder.setFee(calculateFee(marketOrder.getLimitValue(), marketOrder.getPrice()));
+            if (!orderRequiresApprove(marketOrder.getOwner())) {
+                marketOrder.setStatus(OrderStatus.APPROVED);
+            } else {
+                marketOrder.setStatus(OrderStatus.PROCESSING);
+            }
+            orderRepository.save(marketOrder);
+            return true;
+
+        } else if (bid < marketOrder.getStopValue()){ // SELL
+            if(marketOrder.getLimitValue() == null) {
+                marketOrder.setPrice(calculatePrice(bid, marketOrder.getContractSize()));
+            } else {
+                marketOrder.setPrice(calculatePriceForLimitOrder(
+                    marketOrder.getOrderType(),
+                    marketOrder.getContractSize(),
+                    marketOrder.getLimitValue(),
+                    bid));
+            }
+            marketOrder.setFee(calculateFee(marketOrder.getLimitValue(), marketOrder.getPrice()));
+            if (!orderRequiresApprove(marketOrder.getOwner())) {
+                marketOrder.setStatus(OrderStatus.APPROVED);
+            } else {
+                marketOrder.setStatus(OrderStatus.PROCESSING);
+            }
+            orderRepository.save(marketOrder);
+            return true;
+
+        }
+        return false;
+    }
+
+    private Double calculatePriceForLimitOrder(OrderType orderType, Long contractSize, Double limitValue, Double stockPrice) {
+        if(orderType.equals(OrderType.BUY)) {
+            return contractSize * Math.min(stockPrice, limitValue); // high(ask) umesto stockPrice
+        } else {
+            return contractSize * Math.max(stockPrice, limitValue); // low(bid) umesto stockPrice
+        }
+    }
+
+    private Double calculatePrice(final Double price, final Long contractSize) {
+        return price * contractSize;
     }
 
     @Override
