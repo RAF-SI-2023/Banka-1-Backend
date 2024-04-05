@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.configuration.authproviders;
 
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,11 +21,18 @@ public class CurrentAuthAspect {
         this.employeeService = employeeService;
     }
 
-    @Before("@annotation(CurrentAuth) && args(.., @CurrentAuth currentAuth)")
-    public void injectCurrentAuth(JoinPoint joinPoint, Employee currentAuth) {
+    @Before("execution(* *(.., @CurrentAuth (*), ..))")
+    public void injectCurrentAuth(JoinPoint joinPoint) throws Throwable {
+        Object[] args = joinPoint.getArgs();
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails userDetails) {
-            currentAuth = employeeService.findByEmail(userDetails.getUsername()).orElseThrow(ForbiddenException::new);
+            for (int i = 0; i < args.length; i++) {
+                if (args[i] instanceof Employee) {
+                    args[i] = employeeService.findByEmail(userDetails.getUsername()).orElseThrow(ForbiddenException::new);
+                    break;
+                }
+            }
         }
+        ((ProceedingJoinPoint) joinPoint).proceed(args);
     }
 }
