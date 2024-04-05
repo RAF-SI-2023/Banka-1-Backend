@@ -28,6 +28,8 @@ import rs.edu.raf.banka1.services.EmployeeService;
 import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -232,6 +234,17 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EmployeeNotFoundException(employeeId));
         employee.setLimitNow(0.0);
         employeeRepository.save(employee);
+    }
+
+    @Override
+    public void resetUsersLimits() {
+        if(LocalDate.now().getDayOfWeek().equals(DayOfWeek.SATURDAY) ||
+                LocalDate.now().getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+            return;
+        }
+        List<Employee> users = employeeRepository.findAll();
+        users.forEach(user->user.setLimitNow(0.0));
+        employeeRepository.saveAll(users);
     }
 
     @Override
