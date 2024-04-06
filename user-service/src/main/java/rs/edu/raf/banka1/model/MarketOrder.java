@@ -16,7 +16,8 @@ public class MarketOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long stockId;
+    private Long listingId;
+    private ListingType listingType;
 
     @ManyToOne()
     private Employee owner;
