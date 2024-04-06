@@ -144,7 +144,7 @@ public class BankAccountController {
         return new ResponseEntity<>(bankAccountService.estimateBalanceForAccount(accountNumber), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/listing/stock/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/stock/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -158,7 +158,7 @@ public class BankAccountController {
         return new ResponseEntity<>(bankAccountService.getCapitalForListing(accountNumber, ListingType.STOCK), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/balance/future/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/future/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -172,7 +172,7 @@ public class BankAccountController {
         return new ResponseEntity<>(bankAccountService.getCapitalForListing(accountNumber, ListingType.FUTURE), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/listing/forex/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/forex/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",

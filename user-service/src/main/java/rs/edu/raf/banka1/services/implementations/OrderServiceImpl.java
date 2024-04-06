@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.OrderDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
 import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
 import rs.edu.raf.banka1.mapper.OrderMapper;
@@ -20,6 +21,7 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -89,6 +91,16 @@ public class OrderServiceImpl implements OrderService {
             )
         );
         this.scheduledFutureMap.put(orderId, future);
+    }
+
+    @Override
+    public List<OrderDto> getAllOrdersForEmployee(Employee currentAuth) {
+        return orderRepository.getAllByOwner(currentAuth).stream().map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OrderDto> getAllOrders() {
+        return orderRepository.findAll().stream().map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
     }
 
     public Boolean checkStockPriceForStopOrder(Long marketOrderId, Long stockId) {

@@ -34,7 +34,7 @@ public class OrderMapper {
 
     public OrderDto marketOrderToOrderDto(MarketOrder marketOrder) {
         OrderDto orderDto = new OrderDto();
-        orderDto.setId(marketOrder.getId());
+//        orderDto.setId(marketOrder.getId());
         orderDto.setStockId(marketOrder.getStockId());
         orderDto.setOwner(employeeMapper.employeeToEmployeeDto(marketOrder.getOwner()));
         orderDto.setOrderType(marketOrder.getOrderType());

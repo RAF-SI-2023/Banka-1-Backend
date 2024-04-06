@@ -6,9 +6,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import rs.edu.raf.banka1.model.MarketOrder;
 import rs.edu.raf.banka1.model.OrderStatus;
+import rs.edu.raf.banka1.model.User;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<MarketOrder, Long> {
 
@@ -34,5 +36,5 @@ public interface OrderRepository extends JpaRepository<MarketOrder, Long> {
     @Query("UPDATE MarketOrder m SET m.updatedAt = ?1 WHERE m.id = ?2")
     void updateUpdatedAtById(Instant updatedAt, Long id);
 
-
+    List<MarketOrder> getAllByOwner(User owner);
 }

@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services;
 
+import rs.edu.raf.banka1.dtos.OrderDto;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.MarketOrder;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
@@ -14,5 +15,6 @@ public interface OrderService {
     void setProcessedNumber(Long orderId, Long processedNumber);
     List<MarketOrder> getInactiveOrders(Instant timeThreshold);
     void startOrderSimulation(Long orderId);
-
+    List<OrderDto> getAllOrdersForEmployee(Employee currentAuth);
+    List<OrderDto> getAllOrders();
 }
