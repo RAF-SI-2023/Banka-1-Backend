@@ -23,7 +23,7 @@ public class StockSimulationTrigger implements Trigger {
     public Instant nextExecution(TriggerContext triggerContext) {
         MarketOrder marketOrder = orderService.getOrderById(orderId);
 
-        final ListingBaseDto listingBaseDto = marketService.getStockById(marketOrder.getStockId());
+        final ListingBaseDto listingBaseDto = marketService.getStockById(marketOrder.getListingId());
         final double volume = listingBaseDto.getVolume();
 
         long remainingQuantity = marketOrder.getContractSize() - marketOrder.getProcessedNumber();

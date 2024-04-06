@@ -8,6 +8,8 @@ import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
 import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.repositories.BankAccountRepository;
+import rs.edu.raf.banka1.repositories.CapitalRepository;
 import rs.edu.raf.banka1.repositories.OrderRepository;
 import rs.edu.raf.banka1.repositories.TransactionRepository;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
@@ -29,6 +31,8 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final MarketService marketService;
     private final TransactionRepository transactionRepository;
+    private final BankAccountRepository bankAccountRepository;
+    private final CapitalRepository capitalRepository;
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private final Random random = new Random();
     private final TaskScheduler taskScheduler;
@@ -42,13 +46,15 @@ public class OrderServiceImpl implements OrderService {
         final OrderMapper orderMapper,
         final OrderRepository orderRepository,
         final MarketService marketService,
-        final TransactionRepository transactionRepository,
+        final TransactionRepository transactionRepository, BankAccountRepository bankAccountRepository, CapitalRepository capitalRepository,
         final TaskScheduler taskScheduler
     ) {
         this.orderMapper = orderMapper;
         this.orderRepository = orderRepository;
         this.marketService = marketService;
         this.transactionRepository = transactionRepository;
+        this.bankAccountRepository = bankAccountRepository;
+        this.capitalRepository = capitalRepository;
         this.taskScheduler = taskScheduler;
 
         scheduledFutureMap = new HashMap<>();
@@ -57,8 +63,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void createOrder(final CreateOrderRequest request, final Employee currentAuth) {
         final MarketOrder order = orderMapper.requestToMarketOrder(request);
-        final ListingBaseDto listingBaseDto = marketService.getStockById(order.getStockId());
-        order.setPrice(calculatePrice(order,listingBaseDto));
+        // todo forex future
+        final ListingBaseDto listingBaseDto = marketService.getStockById(order.getListingId());
+        order.setPrice(calculatePrice(order,listingBaseDto,order.getContractSize()));
         order.setFee(calculateFee(request.getLimitValue(), order.getPrice()));
         order.setOwner(currentAuth);
         if (!orderRequiresApprove(currentAuth)) {
@@ -68,7 +75,12 @@ public class OrderServiceImpl implements OrderService {
         }
         orderRepository.save(order);
 
-        // ako je marketorder onda odmah startorderSimulation a ako je stop
+//        if(order.getLimitValue() == null && order.getStopValue() == null)
+//            startOrderSimulation(order.getId());
+        // ako je marketorder onda odmah startorderSimulation a ako je stop\
+
+
+        //
 
         startOrderSimulation(order.getId());
     }
@@ -82,6 +94,8 @@ public class OrderServiceImpl implements OrderService {
                 this,
                 marketService,
                 transactionRepository,
+                capitalRepository,
+                bankAccountRepository,
                 orderId
             ),
             new StockSimulationTrigger(
@@ -196,16 +210,24 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findByStatusAndUpdatedAtLessThanEqual(OrderStatus.APPROVED, timeThreshold);
     }
 
-    private Double calculatePrice(
+    @Override
+    public Double calculatePrice(
         final MarketOrder order,
-        final ListingBaseDto listingBaseDto
+        final ListingBaseDto listingBaseDto,
+        final long proccessNum
     ) {
         if(order.getOrderType().equals(OrderType.BUY)) {
-            return order.getContractSize() * (order.getLimitValue() != null ?
-                Math.min(listingBaseDto.getHigh(), order.getLimitValue()) : listingBaseDto.getPrice());
+            // ako je market order processednumber* price
+            // ako je limit order processednumber *
+            return proccessNum * (order.getLimitValue() != null ?
+                Math.min(listingBaseDto.getHigh(), order.getLimitValue()) :
+                order.getStopValue() !=null ? listingBaseDto.getHigh() :
+                listingBaseDto.getPrice());
         } else {
-            return order.getContractSize() * (order.getLimitValue() != null ?
-                Math.max(listingBaseDto.getLow(), order.getLimitValue()) : listingBaseDto.getPrice());
+            return proccessNum * (order.getLimitValue() != null ?
+                Math.max(listingBaseDto.getLow(), order.getLimitValue()) :
+                order.getStopValue() !=null ? listingBaseDto.getHigh() :
+                listingBaseDto.getPrice());
         }
     }
 

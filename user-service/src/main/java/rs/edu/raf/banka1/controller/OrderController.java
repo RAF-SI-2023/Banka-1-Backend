@@ -65,9 +65,9 @@ public class OrderController {
         @ApiResponse(responseCode = "404", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Void> createLoanRequest(
+    public ResponseEntity<Void> createOrder(
         @RequestBody final CreateOrderRequest request,
-        @CurrentAuth Employee currentAuth
+        @CurrentAuth final Employee currentAuth
         ) {
         orderService.createOrder(request, currentAuth);
         return ResponseEntity.ok().build();

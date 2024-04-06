@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.model.ListingType;
 import rs.edu.raf.banka1.model.OrderStatus;
 import rs.edu.raf.banka1.model.OrderType;
 
@@ -11,7 +12,9 @@ import rs.edu.raf.banka1.model.OrderType;
 @Setter
 @ToString
 public class OrderDto {
-    private Long stockId;
+    private Long id;
+    private Long listingId;
+    private ListingType listingType;
     private EmployeeDto owner;
     private OrderType orderType;
     private OrderStatus status;
