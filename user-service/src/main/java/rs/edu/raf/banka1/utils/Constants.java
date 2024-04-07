@@ -27,4 +27,7 @@ public class Constants {
         put(SUPERVIZOR, allPermissions);
         put(ADMIN, allPermissions);
     }};
+
+    // subject to change on production
+    public static final String marketServiceUrl = "http://localhost:8081";
 }

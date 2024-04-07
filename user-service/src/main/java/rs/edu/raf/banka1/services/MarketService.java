@@ -1,9 +1,16 @@
 package rs.edu.raf.banka1.services;
 
-import rs.edu.raf.banka1.dtos.ListingBaseDto;
+import rs.edu.raf.banka1.dtos.market_service.*;
 import rs.edu.raf.banka1.model.WorkingHoursStatus;
 
+import java.util.List;
+
 public interface MarketService {
-    ListingBaseDto getStock(final Long stockId);
-    WorkingHoursStatus getWorkingHours(final Long stockId);
+    List<ListingStockDto> getAllStocks();
+    List<ListingFutureDto> getAllFutures();
+    List<ListingForexDto> getAllForex();
+
+    ListingStockDto getStockById(Long stockId);
+    ListingFutureDto getFutureById(Long futureId);
+    ListingForexDto getForexById(Long forexId);
 }

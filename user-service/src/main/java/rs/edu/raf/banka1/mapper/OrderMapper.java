@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.mapper;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.model.MarketOrder;
 import rs.edu.raf.banka1.model.OrderStatus;
+import rs.edu.raf.banka1.repositories.EmployeeRepository;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 
 @Component
@@ -11,7 +12,9 @@ public class OrderMapper {
     public MarketOrder requestToMarketOrder(CreateOrderRequest request) {
         MarketOrder marketOrder = new MarketOrder();
         marketOrder.setStockId(request.getStockId());
-        marketOrder.setAgentId(request.getUserId());
+
+        // whoever makes controller for this, should first find in repository Employee with given id
+//        marketOrder.set(request.getUserId());
         marketOrder.setOrderType(request.getOrderType());
         marketOrder.setStatus(OrderStatus.PROCESSING);
         marketOrder.setContractSize(request.getContractSize());
