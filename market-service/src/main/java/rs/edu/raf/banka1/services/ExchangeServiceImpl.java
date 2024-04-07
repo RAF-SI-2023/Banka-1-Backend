@@ -184,7 +184,7 @@ public class ExchangeServiceImpl implements ExchangeService {
 
             Resource resource = new ClassPathResource("classpath:country_timezone_offsets.json");
 
-            countryTimezones = mapper.readValue(resource.getFile(), CountryTimezoneDto[].class);
+            countryTimezones = mapper.readValue(resource.getInputStream(), CountryTimezoneDto[].class);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -197,7 +197,7 @@ public class ExchangeServiceImpl implements ExchangeService {
         try {
             ObjectMapper mapper = new ObjectMapper();
             Resource resource = new ClassPathResource("classpath:working_hours_and_holidays_for_exchanges.json");
-            resultMap = mapper.readValue(resource.getFile(), HashMap.class);
+            resultMap = mapper.readValue(resource.getInputStream(), HashMap.class);
 
             for (Map.Entry<String, BusinessHoursDto> entry : resultMap.entrySet()) {
                 resultMap.put(entry.getKey(), mapper.convertValue(entry.getValue(), BusinessHoursDto.class));
