@@ -135,7 +135,7 @@ public class BootstrapData implements CommandLineRunner {
                 resource = new ClassPathResource(currencyFilePath);
             }
             else {
-                resource = new ClassPathResource("classpath:" + currencyFilePath.substring(currencyFilePath.lastIndexOf("/")));
+                resource = new ClassPathResource("classpath:" + currencyFilePath.substring(currencyFilePath.lastIndexOf("/") + 1));
             }
 
             InputStream in = resource.getInputStream();

@@ -94,7 +94,7 @@ public class ExchangeServiceImpl implements ExchangeService {
                 reader = new CSVReader(new FileReader(Constants.micCsvFilePath));
             } else {
                 String classpath = "classpath:" + Constants.micCsvFilePath
-                        .substring(Constants.micCsvFilePath.lastIndexOf("/"));
+                        .substring(Constants.micCsvFilePath.lastIndexOf("/") + 1);
                 resource = new ClassPathResource(classpath);
                 InputStream in = resource.getInputStream();
                 reader = new CSVReader(new InputStreamReader(in));
@@ -203,7 +203,7 @@ public class ExchangeServiceImpl implements ExchangeService {
                 countryTimezones = mapper.readValue(new File(countryTimezoneOffsetsFilePath), CountryTimezoneDto[].class);
             } else {
                 String classpath = "classpath:" + countryTimezoneOffsetsFilePath
-                        .substring(countryTimezoneOffsetsFilePath.lastIndexOf("/"));
+                        .substring(countryTimezoneOffsetsFilePath.lastIndexOf("/") + 1);
 
                 resource = new ClassPathResource(classpath);
                 countryTimezones = mapper.readValue(resource.getInputStream(), CountryTimezoneDto[].class);
@@ -225,7 +225,7 @@ public class ExchangeServiceImpl implements ExchangeService {
                 resultMap = mapper.readValue(new File(businessHoursFilePath), HashMap.class);
             } else {
                 String classpath = "classpath:" + businessHoursFilePath
-                        .substring(businessHoursFilePath.lastIndexOf("/"));
+                        .substring(businessHoursFilePath.lastIndexOf("/") + 1);
                 resource = new ClassPathResource(classpath);
                 resultMap = mapper.readValue(resource.getInputStream(), HashMap.class);
             }
