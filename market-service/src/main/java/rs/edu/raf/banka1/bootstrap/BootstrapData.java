@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.tinylog.Logger;
 import rs.edu.raf.banka1.model.ListingForex;
@@ -18,6 +19,8 @@ import rs.edu.raf.banka1.utils.Constants;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -119,7 +122,16 @@ public class BootstrapData implements CommandLineRunner {
         String line = "";
         String csvSplitBy = ",";
 
-        try (BufferedReader br = new BufferedReader(new FileReader(Constants.currencyFilePath))) {
+//        try (BufferedReader br = new BufferedReader(new FileReader(Constants.currencyFilePath))) {
+        try {
+            Resource resource = new ClassPathResource(currencyFilePath);
+            InputStream in = resource.getInputStream();
+            InputStreamReader inputStreamReader = new InputStreamReader(in);
+
+            BufferedReader br = new BufferedReader(inputStreamReader);
+
+            System.out.println("OKEJ");
+
             br.readLine();
 
             while ((line = br.readLine()) != null) {
