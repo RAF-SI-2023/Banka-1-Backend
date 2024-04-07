@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.bootstrap;
 import lombok.AllArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -48,6 +49,8 @@ public class BootstrapData implements CommandLineRunner {
 
     @Autowired
     private final ExchangeService exchangeService;
+
+    private static final Boolean environment = Boolean.parseBoolean(System.getProperty("dev.environment", "true"));
 
     @Override
     public void run(String... args) throws Exception {
@@ -126,7 +129,15 @@ public class BootstrapData implements CommandLineRunner {
         BufferedReader br = null;
 
         try {
-            Resource resource = new ClassPathResource("classpath:physical_currency_list.csv");
+            Resource resource = null;
+
+            if(environment){
+                resource = new ClassPathResource(currencyFilePath);
+            }
+            else {
+                resource = new ClassPathResource("classpath:" + currencyFilePath.substring(currencyFilePath.lastIndexOf("/")));
+            }
+
             InputStream in = resource.getInputStream();
             InputStreamReader inputStreamReader = new InputStreamReader(in);
 
