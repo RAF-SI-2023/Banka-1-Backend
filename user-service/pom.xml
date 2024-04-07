@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -45,6 +45,12 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-retry</artifactId>
+			<version>1.7.1</version>
 		</dependency>
 
 		<dependency>
@@ -191,10 +197,10 @@
 			<artifactId>jaxb-api</artifactId>
 			<version>2.3.1</version>
 		</dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-context-support -->
 		<dependency>
@@ -217,14 +223,14 @@
 			<artifactId>springfox-swagger-ui</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-        <dependency>
-            <groupId>org.tinylog</groupId>
-            <artifactId>tinylog-api</artifactId>
-            <version>2.7.0</version>
-            <scope>compile</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.tinylog</groupId>
+			<artifactId>tinylog-api</artifactId>
+			<version>2.7.0</version>
+			<scope>compile</scope>
+		</dependency>
 
-    </dependencies>
+	</dependencies>
 
 	<build>
 		<finalName>${finalName}</finalName>
