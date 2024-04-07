@@ -124,7 +124,7 @@ public class BootstrapData implements CommandLineRunner {
 
 //        try (BufferedReader br = new BufferedReader(new FileReader(Constants.currencyFilePath))) {
         try {
-            Resource resource = new ClassPathResource(currencyFilePath);
+            Resource resource = new ClassPathResource("classpath:physical_currency_list.csv");
             InputStream in = resource.getInputStream();
             InputStreamReader inputStreamReader = new InputStreamReader(in);
 
