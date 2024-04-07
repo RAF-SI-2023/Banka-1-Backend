@@ -19,8 +19,8 @@ WORKDIR $HOME
 # Ovaj deo kopira mikroservis u image kako bi Maven mogao da builduje taj mikroservis.
 ADD . $HOME
 
-COPY src/main/resources $HOME
-COPY src/test/resources $HOME
+COPY src/main/resources ./src/main/resources
+COPY src/test/resources ./src/main/resources
 
 # Ovaj deo builduje .jar fajl.
 # - "--mount=type=cache,target=/root/.m2" sluzi da kesira maven dependencies
