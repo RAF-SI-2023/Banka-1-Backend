@@ -4,7 +4,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
+import org.aspectj.apache.bcel.util.ClassPath;
+import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.ExchangeMapper;
 import rs.edu.raf.banka1.model.dtos.BusinessHoursDto;
@@ -21,6 +25,8 @@ import rs.edu.raf.banka1.utils.Constants;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -71,7 +77,14 @@ public class ExchangeServiceImpl implements ExchangeService {
     }
 
     private void parseCsv(Map<String, BusinessHoursDto> countryIsoToBusinessHoursMap, Map<String, Country> countryIsoToCountryMap) {
-        try (CSVReader reader = new CSVReader(new FileReader(Constants.micCsvFilePath))) {
+        CSVReader reader = null;
+
+//        try (CSVReader reader = new CSVReader(new FileReader(Constants.micCsvFilePath))) {
+        try {
+            Resource resource = new ClassPathResource("classpath:ISO10383_MIC.csv");
+            InputStream in = resource.getInputStream();
+            reader = new CSVReader(new InputStreamReader(in));
+
             // e.g. 17:00:00
             SimpleDateFormat hoursDateFormat = new SimpleDateFormat("HH:mm:ss");
             // e.g. 2024-01-01
@@ -118,6 +131,14 @@ public class ExchangeServiceImpl implements ExchangeService {
             saveAllHolidays(countryIsoToCountryMap, countryIsoToAllHolidayDatesMap);
         } catch (IOException | CsvValidationException | ParseException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                Logger.error("[-] Error occured when trying to read file in exchange service impl " + e.getMessage());
+            }
         }
     }
 
@@ -160,7 +181,10 @@ public class ExchangeServiceImpl implements ExchangeService {
         try {
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            countryTimezones = mapper.readValue(new File(Constants.countryTimezoneOffsetsFilePath), CountryTimezoneDto[].class);
+
+            Resource resource = new ClassPathResource("classpath:country_timezone_offsets.json");
+
+            countryTimezones = mapper.readValue(resource.getFile(), CountryTimezoneDto[].class);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -172,7 +196,8 @@ public class ExchangeServiceImpl implements ExchangeService {
         Map<String, BusinessHoursDto> resultMap = null;
         try {
             ObjectMapper mapper = new ObjectMapper();
-            resultMap = mapper.readValue(new File(Constants.businessHoursFilePath), HashMap.class);
+            Resource resource = new ClassPathResource("classpath:working_hours_and_holidays_for_exchanges.json");
+            resultMap = mapper.readValue(resource.getFile(), HashMap.class);
 
             for (Map.Entry<String, BusinessHoursDto> entry : resultMap.entrySet()) {
                 resultMap.put(entry.getKey(), mapper.convertValue(entry.getValue(), BusinessHoursDto.class));

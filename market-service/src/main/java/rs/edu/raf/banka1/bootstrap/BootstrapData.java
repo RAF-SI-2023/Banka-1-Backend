@@ -123,12 +123,14 @@ public class BootstrapData implements CommandLineRunner {
         String csvSplitBy = ",";
 
 //        try (BufferedReader br = new BufferedReader(new FileReader(Constants.currencyFilePath))) {
+        BufferedReader br = null;
+
         try {
             Resource resource = new ClassPathResource("classpath:physical_currency_list.csv");
             InputStream in = resource.getInputStream();
             InputStreamReader inputStreamReader = new InputStreamReader(in);
 
-            BufferedReader br = new BufferedReader(inputStreamReader);
+            br = new BufferedReader(inputStreamReader);
 
             System.out.println("OKEJ");
 
@@ -144,6 +146,14 @@ public class BootstrapData implements CommandLineRunner {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if(br != null) {
+                    br.close();
+                }
+            } catch (IOException e) {
+                Logger.error("[-] Error occured when trying to close buffered reader " + e.getMessage());
+            }
         }
 
         return currencyList;
