@@ -48,7 +48,7 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.getTransactionsForEmployee(userId));
     }
 
-    @GetMapping(value = "/account/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get transactions for accountNumber", description = "Get transactions for accountNumber")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
