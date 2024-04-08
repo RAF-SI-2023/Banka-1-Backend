@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.TransferDto;
+import rs.edu.raf.banka1.mapper.TransferMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.CurrencyRepository;
@@ -20,9 +22,11 @@ import java.net.http.HttpResponse;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TransferServiceImpl implements TransferService {
@@ -31,6 +35,7 @@ public class TransferServiceImpl implements TransferService {
     private final BankAccountRepository bankAccountRepository;
     private final CurrencyRepository currencyRepository;
     private final ObjectMapper objectMapper;
+    private final TransferMapper transferMapper;
     HttpClient httpClient = HttpClient.newHttpClient();
 
     @Value("${exchangeRateAPIToken}")
@@ -39,7 +44,8 @@ public class TransferServiceImpl implements TransferService {
     @Value("${exchangeRateApiUrl}")
     private String exchangeRateApiUrl;
 
-    public TransferServiceImpl(TransferRepository transferRepository, BankAccountRepository bankAccountRepository, CurrencyRepository currencyRepository) {
+    public TransferServiceImpl(TransferRepository transferRepository, BankAccountRepository bankAccountRepository, CurrencyRepository currencyRepository, TransferMapper transferMapper) {
+        this.transferMapper = transferMapper;
         objectMapper = new ObjectMapper();
         this.currencyRepository = currencyRepository;
         this.transferRepository = transferRepository;
@@ -248,6 +254,21 @@ public class TransferServiceImpl implements TransferService {
 
         transferRepository.save(transfer);
         bankAccountRepository.saveAll(List.of(fromBank, toBank, senderAccount, recipientAccount));
+    }
+
+    @Override
+    public TransferDto getTransferById(Long id) {
+        Optional<Transfer> paymentOpt = transferRepository.findById(id);
+        return paymentOpt.map(transferMapper::transferToTransferDto).orElse(null);
+    }
+
+    @Override
+    public List<TransferDto> getAllTransfersForAccountNumber(String accountNumber) {
+        Optional<BankAccount> bankAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(accountNumber);
+        return bankAccountOpt.map(bankAccount ->
+                bankAccount.getTransfers().stream()
+                        .map(transferMapper::transferToTransferDto)
+                        .collect(Collectors.toList())).orElseGet(ArrayList::new);
     }
 
 }

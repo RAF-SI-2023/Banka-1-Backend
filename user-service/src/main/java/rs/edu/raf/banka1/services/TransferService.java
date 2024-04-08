@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services;
 
+import rs.edu.raf.banka1.dtos.TransferDto;
 import rs.edu.raf.banka1.model.Transfer;
 import rs.edu.raf.banka1.requests.CreateTransferRequest;
 
@@ -14,4 +15,8 @@ public interface TransferService {
     Long createTransfer(CreateTransferRequest createTransferRequest);
 
     void processTransfer(Long id);
+
+    TransferDto getTransferById(Long id);
+
+    List<TransferDto> getAllTransfersForAccountNumber(String accountNumber);
 }
