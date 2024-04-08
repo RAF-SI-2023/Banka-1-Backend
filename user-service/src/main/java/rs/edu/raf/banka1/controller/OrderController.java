@@ -73,7 +73,7 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all orders for current Employee", description = "Get all orders for current Employee")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -89,7 +89,7 @@ public class OrderController {
         return new ResponseEntity<>(orderService.getAllOrdersForEmployee(currentAuth), HttpStatus.OK);
     }
 
-    @PutMapping(value = "/supervisor/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/supervisor/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get orders for all employees", description = "Supervisor gets orders for all employees")
     @PreAuthorize("hasAuthority('manageOrderRequests')")
     @ApiResponses({

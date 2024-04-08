@@ -9,7 +9,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
 import rs.edu.raf.banka1.mapper.BankAccountMapper;
+import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
@@ -22,6 +24,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Getter
@@ -36,6 +39,9 @@ public class BankAccountServiceImpl implements BankAccountService {
     private BankAccountRepository bankAccountRepository;
 
     @Autowired
+    private CapitalRepository capitalRepository;
+
+    @Autowired
     private PaymentRepository paymentRepository;
 
     @Autowired
@@ -45,6 +51,9 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     @Autowired
     private BankAccountMapper bankAccountMapper;
+
+    @Autowired
+    private CapitalMapper capitalMapper;
 
     @Autowired
     EmployeeService userService;
@@ -184,7 +193,8 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     @Override
     public List<CapitalDto> getCapitalForListing(String accountNumber, ListingType listingType) {
-        return new ArrayList<>();
+        BankAccount bankAccount = this.bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
+        return this.capitalRepository.getCapitalsByBankAccountAndListingType(bankAccount, listingType).stream().map(capitalMapper::capitalToCapitalDto).collect(Collectors.toList());
     }
 
     private Long getEmployeeId() {

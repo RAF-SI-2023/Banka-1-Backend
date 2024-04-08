@@ -20,6 +20,7 @@ import rs.edu.raf.banka1.utils.Constants;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Currency;
 import java.util.HashSet;
@@ -48,6 +49,8 @@ public class BootstrapData implements CommandLineRunner {
 
     private final EmployeeService employeeService;
 
+    private final OrderRepository orderRepository;
+
     private final ScheduledExecutorService resetLimitExecutor = Executors.newScheduledThreadPool(1);
 
     @Autowired
@@ -65,8 +68,8 @@ public class BootstrapData implements CommandLineRunner {
         final MarketService marketService,
         final CapitalService capitalService,
         final CapitalRepository capitalRepository,
-        final EmployeeService employeeService
-        ) {
+        final EmployeeService employeeService,
+        final OrderRepository orderRepository) {
         this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
@@ -81,6 +84,7 @@ public class BootstrapData implements CommandLineRunner {
         this.capitalService = capitalService;
         this.capitalRepository = capitalRepository;
         this.employeeService = employeeService;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -170,6 +174,30 @@ public class BootstrapData implements CommandLineRunner {
 
         seedLoan();
         seedLoanRequest();
+
+        MarketOrder marketOrder = new MarketOrder();
+        marketOrder.setStatus(OrderStatus.PROCESSING);
+        marketOrder.setUpdatedAt(Instant.now());
+        marketOrder.setOwner(user1);
+        marketOrder.setApprovedBy(user1);
+        marketOrder.setPrice(123.0);
+        this.orderRepository.save(marketOrder);
+
+        MarketOrder marketOrder1 = new MarketOrder();
+        marketOrder1.setStatus(OrderStatus.PROCESSING);
+        marketOrder1.setUpdatedAt(Instant.now());
+        marketOrder1.setPrice(456.0);
+        marketOrder1.setOwner(client);
+        marketOrder1.setApprovedBy(user1);
+        this.orderRepository.save(marketOrder1);
+
+        MarketOrder marketOrder2 = new MarketOrder();
+        marketOrder2.setStatus(OrderStatus.PROCESSING);
+        marketOrder2.setUpdatedAt(Instant.now());
+        marketOrder2.setPrice(789.0);
+        marketOrder2.setOwner(client);
+        marketOrder2.setApprovedBy(user1);
+        this.orderRepository.save(marketOrder2);
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime midnight = now.toLocalDate().atStartOfDay().plusDays(1);

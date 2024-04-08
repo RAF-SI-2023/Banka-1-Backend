@@ -12,7 +12,6 @@ import rs.edu.raf.banka1.model.OrderType;
 @Setter
 @ToString
 public class OrderDto {
-    private Long id;
     private Long listingId;
     private ListingType listingType;
     private EmployeeDto owner;
