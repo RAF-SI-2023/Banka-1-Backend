@@ -27,7 +27,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final CapitalService capitalService;
     private final BankAccountService bankAccountService;
 
-    public TransactionServiceImpl(TransactionMapper transactionMapper, TransactionRepository transactionRepository, BankAccountService bankAccountService, CapitalService capitalService, OrderService orderService) {
+    public TransactionServiceImpl(TransactionMapper transactionMapper, TransactionRepository transactionRepository, BankAccountService bankAccountService, CapitalService capitalService) {
         this.transactionMapper = transactionMapper;
         this.transactionRepository = transactionRepository;
         this.bankAccountService = bankAccountService;
