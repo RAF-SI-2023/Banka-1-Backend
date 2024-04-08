@@ -1,7 +1,9 @@
 package rs.edu.raf.banka1.cucumber.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -11,11 +13,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
 //import rs.edu.raf.banka1.mapper.ForeignCurrencyAccountMapper;
+import rs.edu.raf.banka1.dtos.PaymentDto;
 import rs.edu.raf.banka1.dtos.customer.CustomerDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
@@ -101,6 +107,8 @@ public class UserControllerSteps {
     private AccountData accountData = new AccountData();
     private CustomerData customerData = new CustomerData();
     private String bankAccountNumber;
+    private CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest();
+
 
     @Data
     class SearchFilter {
@@ -275,6 +283,65 @@ public class UserControllerSteps {
         customerRepository.save(user);
     }
 
+    @Given("customer is logged in with email {string} and password {string}")
+    public void customerIsLoggedInWithEmailAndPassword(String email, String password) {
+        this.email = email;
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail(email);
+        loginRequest.setPassword(password);
+
+        HttpEntity<LoginRequest> entity = new HttpEntity<>(loginRequest);
+        ResponseEntity<LoginResponse> responseEntity = new RestTemplate().postForEntity(url + port + "/auth/login/customer", entity, LoginResponse.class);
+        jwt = responseEntity.getBody().getJwt();
+    }
+
+    @Given("customer got his OTP code")
+    public void customerGotHisOTPCode() {
+        Customer customer = customerRepository.findCustomerByEmail("user@test.com").orElse(null);
+
+        createPaymentRequest.setSingleUseCode(customer.getSingleUseCode());
+    }
+
+    @Given("sender account number is {string}")
+    public void senderAccountNumberIs(String arg0) {
+        createPaymentRequest.setSenderAccountNumber(arg0);
+    }
+
+    @Given("receiver name is {string}")
+    public void receiverNameIs(String arg0) {
+        createPaymentRequest.setRecipientName(arg0);
+    }
+
+    @Given("receiver account number is {string}")
+    public void receiverAccountNumberIs(String arg0) {
+        createPaymentRequest.setRecipientAccountNumber(arg0);
+    }
+
+    @Given("amount is {string}")
+    public void amountIs(String arg0) {
+        createPaymentRequest.setAmount(Double.parseDouble(arg0));
+    }
+
+    @Given("paymentCode is {string}")
+    public void paymentcodeIs(String arg0) {
+        createPaymentRequest.setPaymentCode(arg0);
+    }
+
+    @Given("model is {string}")
+    public void modelIs(String arg0) {
+        createPaymentRequest.setModel(arg0);
+    }
+
+    @Given("referenceNumber is {string}")
+    public void referencenumberIs(String arg0) {
+        createPaymentRequest.setReferenceNumber(arg0);
+    }
+
+    @Given("paymentPurpose is {string}")
+    public void paymentpurposeIs(String arg0) {
+        createPaymentRequest.setPaymentPurpose(arg0);
+    }
+
 //    private String getBody(String path){
 //        java.net.http.HttpRequest httpRequest = java.net.http.HttpRequest.newBuilder()
 //                .uri(URI.create(path))
@@ -303,6 +370,19 @@ public class UserControllerSteps {
         HttpEntity<Object> request = new HttpEntity<>(headers);
 
         ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.GET, request, String.class);
+        lastResponse = response;
+        return response.getBody();
+    }
+
+    private String postNoBody(String path){
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
+        HttpEntity<Object> request = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.POST, request, String.class);
         lastResponse = response;
         return response.getBody();
     }
@@ -428,6 +508,9 @@ public class UserControllerSteps {
                 String[] split = path.split("/");
                 lastid = Long.parseLong(split[split.length - 1]);
             }
+            else if(path.equals("/payment/getAll/1234567890")){
+                getBody(url + port + path);
+            }
         }
         catch (Exception e){
             e.printStackTrace();
@@ -461,6 +544,12 @@ public class UserControllerSteps {
                 ActivateAccountRequest activateAccountRequest = new ActivateAccountRequest();
                 activateAccountRequest.setPassword(password);
                 post(url + port + path, activateAccountRequest);
+            }
+            else if(path.equals("/payment/sendCode")){
+                postNoBody(url + port + path);
+            }
+            else if(path.equals("/payment")){
+                post(url + port + path, createPaymentRequest);
             }
 
 //            else if (path.equals("/balance/foreign_currency/create")) {
@@ -680,6 +769,30 @@ public class UserControllerSteps {
             e.printStackTrace();
             fail("Failed to parse response body");
         }
+    }
+
+    @Then("i should have my OTP code set")
+    public void iShouldHaveMyOTPCodeSet() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication == null)
+            return;
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        CustomerResponse response = this.customerRepository.findCustomerByEmail(email)
+                .map(this.customerMapper::customerToCustomerResponse)
+                .orElse(null);
+        customerRepository.findCustomerByEmail(email).ifPresent(user -> {
+            assertThat(user.getSingleUseCode()).isNotNull();
+        });
+    }
+
+
+    @Then("response should contain payment with receiver account number {string}")
+    public void responseShouldContainPaymentWithReceiverAccountNumber(String arg0) throws JsonProcessingException {
+        List<PaymentDto> payments =  objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<PaymentDto>>() {
+        });
+        assertThat(payments).anyMatch(payment -> payment.getRecipientAccountNumber().equals(arg0));
     }
 
 
