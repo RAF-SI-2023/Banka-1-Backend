@@ -8,12 +8,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.LimitDto;
+import rs.edu.raf.banka1.dtos.NewLimitDto;
 import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.exceptions.EmployeeNotFoundException;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
+import rs.edu.raf.banka1.mapper.LimitMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.Permission;
@@ -40,6 +43,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private String frontPort;
     private EmployeeMapper employeeMapper;
     private PermissionMapper permissionMapper;
+    private LimitMapper limitMapper;
     private EmployeeRepository employeeRepository;
     private PermissionRepository permissionRepository;
     private EmailService emailService;
@@ -52,7 +56,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                                PermissionRepository permissionRepository,
                                EmailService emailService,
                                JwtUtil jwtUtil,
-                               PasswordEncoder passwordEncoder){
+                               PasswordEncoder passwordEncoder,
+                               LimitMapper limitMapper){
         this.employeeMapper = employeeMapper;
         this.permissionMapper = permissionMapper;
         this.employeeRepository = employeeRepository;
@@ -60,6 +65,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.emailService = emailService;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
+        this.limitMapper = limitMapper;
     }
 
     @Override
@@ -248,10 +254,18 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public void setLimitOrderForEmployee(Long employeeId, Double orderLimit) {
+    public LimitDto setLimitForEmployee(NewLimitDto newLimitDto) {
+        Long employeeId = newLimitDto.getUserId();
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(()-> new EmployeeNotFoundException(employeeId));
-        employee.setOrderlimit(orderLimit);
-        employeeRepository.save(employee);
+        employee.setOrderlimit(newLimitDto.getLimit());
+        employee.setRequireApproval(newLimitDto.getApprovalRequired());
+        Employee saved = employeeRepository.save(employee);
+        return limitMapper.toLimitDto(employee);
+    }
+
+    @Override
+    public List<LimitDto> getAllLimits(Employee currentAuth) {
+        return this.employeeRepository.findAll().stream().map(limitMapper::toLimitDto).collect(Collectors.toList());
     }
 
     @Override

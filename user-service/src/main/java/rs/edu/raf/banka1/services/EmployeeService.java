@@ -1,10 +1,13 @@
 package rs.edu.raf.banka1.services;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
+import rs.edu.raf.banka1.dtos.LimitDto;
+import rs.edu.raf.banka1.dtos.NewLimitDto;
 import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.requests.ModifyPermissionsRequest;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
@@ -33,5 +36,6 @@ public interface EmployeeService extends UserDetailsService {
     NewPasswordResponse setNewPassword(String token, String password);
     void resetLimitForEmployee(Long employeeId);
     void resetEmployeeLimits();
-    void setLimitOrderForEmployee(Long employeeId, Double orderLimit);
+    LimitDto setLimitForEmployee(NewLimitDto newLimitDto);
+    List<LimitDto> getAllLimits(Employee currentAuth);
 }

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
+import rs.edu.raf.banka1.mapper.LimitMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 //import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.Employee;
@@ -35,6 +36,7 @@ public class SearchAndFilterTests {
     private EmailService emailService;
     private PermissionRepository permissionRepository;
     private PermissionMapper permissionMapper;
+    private LimitMapper limitMapper;
     private PasswordEncoder passwordEncoder;
     private JwtUtil jwtUtil;
 
@@ -51,6 +53,7 @@ public class SearchAndFilterTests {
         permissionRepository = mock(PermissionRepository.class);
         passwordEncoder = mock(PasswordEncoder.class);
         employeeMapper = new EmployeeMapper(new PermissionMapper(), passwordEncoder, permissionRepository);
+        limitMapper = new LimitMapper();
 
 
 //        EmployeeServiceImpl(EmployeeMapper employeeMapper,
@@ -62,7 +65,7 @@ public class SearchAndFilterTests {
 //                PasswordEncoder passwordEncoder)
 
         employeeService = new EmployeeServiceImpl(employeeMapper, permissionMapper, employeeRepository,
-                permissionRepository, emailService, jwtUtil, passwordEncoder);
+                permissionRepository, emailService, jwtUtil, passwordEncoder, limitMapper);
 
         this.admin = new Employee();
         admin.setActive(true);

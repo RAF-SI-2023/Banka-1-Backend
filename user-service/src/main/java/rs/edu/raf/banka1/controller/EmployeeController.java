@@ -13,10 +13,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.configuration.authproviders.CurrentAuth;
+import rs.edu.raf.banka1.dtos.LimitDto;
+import rs.edu.raf.banka1.dtos.NewLimitDto;
 import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.requests.*;
 import rs.edu.raf.banka1.responses.*;
 import rs.edu.raf.banka1.services.EmployeeService;
@@ -254,15 +258,15 @@ public class EmployeeController {
         return new ResponseEntity<>(this.employeeService.findPermissions(email), HttpStatus.OK);
     }
 
-    @PutMapping(value = "/resetLimit/{employeeId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Reset current limit for user", description = "Supervisor resets current limit for user")
+    @PutMapping(value = "/limits/reset/{employeeId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Reset current limit for employee", description = "Supervisor resets current limit for employee")
     @PreAuthorize("hasAuthority('manageOrderRequests')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json")}),
             @ApiResponse(responseCode = "400", description = "Invalid status provided"),
-            @ApiResponse(responseCode = "403", description = "You aren't authorized to reset limits for users"),
-            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to reset limits for employees"),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Void> resetCurrentLimitForEmployee(
@@ -272,22 +276,33 @@ public class EmployeeController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping(value = "/setLimit/{employeeId}/{orderLimit}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Set order limit for user", description = "Supervisor sets order limit for user")
+    @PutMapping(value = "/limits/newLimit", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Set order limit for employee", description = "Supervisor sets order limit for employee")
     @PreAuthorize("hasAuthority('manageOrderRequests')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json")}),
             @ApiResponse(responseCode = "400", description = "Invalid status provided"),
-            @ApiResponse(responseCode = "403", description = "You aren't authorized to set limits for users"),
-            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to set limits for employees"),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Void> setOrderLimitForUser(
-            @PathVariable(name = "employeeId") Long employeeId,
-            @PathVariable(name = "orderLimit") Double orderLimit
-    ) {
-        employeeService.setLimitOrderForEmployee(employeeId, orderLimit);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<LimitDto> setOrderLimitForUser(@RequestBody NewLimitDto newLimitDto) {
+        return new ResponseEntity<>(employeeService.setLimitForEmployee(newLimitDto), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/limits/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all limits for all employees", description = "Only supervisor gets all limits for all employees.")
+    @PreAuthorize("hasAuthority('manageOrderRequests')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {PermissionDto.class}))}),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<LimitDto>> getAllLimits(@CurrentAuth Employee currentAuth) {
+        return new ResponseEntity<>(this.employeeService.getAllLimits(currentAuth), HttpStatus.OK);
     }
 }

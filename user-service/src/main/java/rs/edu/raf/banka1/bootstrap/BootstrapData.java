@@ -112,6 +112,8 @@ public class BootstrapData implements CommandLineRunner {
         client.setPassword(passwordEncoder.encode("client"));
         client.setFirstName("Client");
         client.setActive(true);
+        client.setOrderlimit(1000.0);
+        client.setLimitNow(0.0);
         client.setPosition(Constants.SUPERVIZOR);
         client.setRequireApproval(false);
         client.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
