@@ -11,15 +11,14 @@ public class OrderMapper {
 
     private final EmployeeMapper employeeMapper;
 
-    public OrderMapper(EmployeeMapper employeeMapper) {
+    public OrderMapper(final EmployeeMapper employeeMapper) {
         this.employeeMapper = employeeMapper;
     }
 
     public MarketOrder requestToMarketOrder(CreateOrderRequest request) {
         MarketOrder marketOrder = new MarketOrder();
-        marketOrder.setListingId(request.getStockId());
-        // whoever makes controller for this, should first find in repository Employee with given id
-//        marketOrder.set(request.getUserId());
+        marketOrder.setListingId(request.getListingId());
+        marketOrder.setListingType(request.getListingType());
         marketOrder.setOrderType(request.getOrderType());
         marketOrder.setStatus(OrderStatus.PROCESSING);
         marketOrder.setContractSize(request.getContractSize());
@@ -34,6 +33,7 @@ public class OrderMapper {
         OrderDto orderDto = new OrderDto();
 //        orderDto.setId(marketOrder.getId());
         orderDto.setListingId(marketOrder.getListingId());
+        marketOrder.setListingType(marketOrder.getListingType());
         orderDto.setOwner(employeeMapper.employeeToEmployeeDto(marketOrder.getOwner()));
         orderDto.setOrderType(marketOrder.getOrderType());
         orderDto.setStatus(marketOrder.getStatus());
