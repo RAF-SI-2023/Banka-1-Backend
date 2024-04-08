@@ -22,7 +22,7 @@ public class Constants {
     public static final int maxStockListingsHistory = 10;
     public static final int maxFutures = 10;
     public static final int maxFutureHistories = 20;
-    public static String optionsFilePath = getAbsoluteFilePath(
+    public static final String optionsFilePath = getAbsoluteFilePath(
             "options.json");
     //    public static final List<String> sectors = List.of("Technology");
     public static List<String> tickersForTestingOptions = List.of("AAPL", "ORCL", "MSFT", "VXX");
@@ -41,7 +41,7 @@ public class Constants {
             "ATMQF",
             "FLUXF");
 
-    public static String currencyFilePath = getAbsoluteFilePath(
+    public static final String currencyFilePath = getAbsoluteFilePath(
             "physical_currency_list.csv");
 
 
