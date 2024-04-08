@@ -50,8 +50,6 @@ public class BootstrapData implements CommandLineRunner {
     @Autowired
     private final ExchangeService exchangeService;
 
-    private static final Boolean environment = Boolean.parseBoolean(System.getProperty("dev.environment", "true"));
-
     @Override
     public void run(String... args) throws Exception {
         Logger.info("Loading Data...");
