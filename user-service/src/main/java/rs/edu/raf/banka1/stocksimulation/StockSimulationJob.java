@@ -53,7 +53,6 @@ public class StockSimulationJob implements Runnable {
         );
 
         createTransaction(order,listingBaseDto, processedNumber, DEFAULT_CURRENCY);
-//        transaction.setBankAccount(order.); TODO bank account trebalo bi employee da radi u banci i prebaciti u neki servis
 
         if(order.getContractSize() == order.getProcessedNumber() + processedNumber) {
             orderService.finishOrder(orderId);
