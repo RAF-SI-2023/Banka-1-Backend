@@ -15,6 +15,7 @@ import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.exceptions.EmployeeNotFoundException;
+import rs.edu.raf.banka1.exceptions.ForbiddenException;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
 import rs.edu.raf.banka1.mapper.LimitMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
@@ -257,6 +258,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     public LimitDto setLimitForEmployee(NewLimitDto newLimitDto) {
         Long employeeId = newLimitDto.getUserId();
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(()-> new EmployeeNotFoundException(employeeId));
+        if(!employee.getPosition().equalsIgnoreCase(Constants.AGENT)) {
+            throw new ForbiddenException("Employee with id: " + employeeId + " is not in agent position. Changing the limit is prohibited.");
+        }
         employee.setOrderlimit(newLimitDto.getLimit());
         employee.setRequireApproval(newLimitDto.getApprovalRequired());
         Employee saved = employeeRepository.save(employee);

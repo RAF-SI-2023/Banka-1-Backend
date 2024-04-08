@@ -36,6 +36,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(BankAccountNotFoundException.class)
+    public ResponseEntity<String> handleBankAccountNotFoundException(BankAccountNotFoundException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(CapitalNotFoundByCodeException.class)
     public ResponseEntity<String> handleCapitalNotFoundByCodeException(CapitalNotFoundByCodeException e) {
         Logger.info("Error: " + e.getMessage());
