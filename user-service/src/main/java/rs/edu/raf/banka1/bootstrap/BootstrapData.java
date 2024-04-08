@@ -79,87 +79,87 @@ public class BootstrapData implements CommandLineRunner {
 
 
 
-        seedPermissions();
+//        seedPermissions();
         seedCurencies();
 
-        Employee user1 = new Employee();
-        user1.setEmail("admin");
-        user1.setPassword(passwordEncoder.encode("user1"));
-        user1.setFirstName("User1");
-        user1.setLastName("User1Prezime");
-        user1.setPosition(Constants.ADMIN);
-        user1.setActive(true);
-        user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
-        employeeRepository.save(user1);
+//        Employee user1 = new Employee();
+//        user1.setEmail("admin");
+//        user1.setPassword(passwordEncoder.encode("user1"));
+//        user1.setFirstName("User1");
+//        user1.setLastName("User1Prezime");
+//        user1.setPosition(Constants.ADMIN);
+//        user1.setActive(true);
+//        user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
+//        employeeRepository.save(user1);
+//
+//        Employee client = new Employee();
+//        client.setEmail("client@gmail.com");
+//        client.setPassword(passwordEncoder.encode("client"));
+//        client.setFirstName("Client");
+//        client.setActive(true);
+//        client.setPosition(Constants.SUPERVIZOR);
+//        client.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
+//        client.setLastName("ClientPrezime");
+//        employeeRepository.save(client);
+//
+//        Company company = new Company();
+//        company.setCompanyName("Sony");
+//        company.setTelephoneNumber("123456789");
+//        company.setFaxNumber("987654321");
+//        company.setPib("123456789");
+//        company.setIdNumber("987654321");
+//        company.setJobId("123456789");
+//        company.setRegistrationNumber("987654321");
+//        companyRepository.save(company);
+//
+//        Customer customer = new Customer();
+//        customer.setFirstName("Customer1");
+//        customer.setEmail("customer@gmail.com");
+//        customer.setPassword(passwordEncoder.encode("customer"));
+////        customer.setPosition("customer");
+//        customer.setActive(true);
+//        customerRepository.save(customer);
+//
+//        //ovo samo za test moze da se obrise
+//        BankAccount bankAccount = new BankAccount();
+//        bankAccount.setAccountStatus(true);
+//        bankAccount.setAccountType(AccountType.BUSINESS);
+//        bankAccount.setAvailableBalance(10000.0);
+//        bankAccount.setBalance(10000.0);
+//        bankAccount.setMaintenanceCost(240.0);
+//        bankAccount.setCompany(company);
+//        bankAccount.setCreatedByAgentId(52L);
+//        bankAccount.setCreationDate(new Date().getTime());
+//        bankAccount.setCurrency(this.currencyRepository.getReferenceById(1L));
+//        bankAccount.setCustomer(customer);
+//        bankAccount.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+//        bankAccount.setAccountName("124141j2kraslL");
+//        bankAccount.setAccountNumber("1234");
+//        bankAccount.setSubtypeOfAccount("LICNI");
+//        bankAccountService.saveBankAccount(bankAccount);
+//        // dovde
+//
+//        BankAccountRequest bankAccountRequest = new BankAccountRequest();
+//        bankAccountRequest.setAccountType(AccountType.FOREIGN_CURRENCY);
+//        bankAccountRequest.setBalance(1000.0);
+//        bankAccountRequest.setAvailableBalance(900.0);
+//        bankAccountRequest.setCurrencyCode("USD");
+//        bankAccountRequest.setSubtypeOfAccount("LICNI");
+//        bankAccountRequest.setMaintenanceCost(10.0);
+//
+//        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
+//        createBankAccountRequest.setCustomerId(customer.getUserId());
+//        createBankAccountRequest.setAccount(bankAccountRequest);
+//        //BITNO!
+//        // createBankAccount unutar sebe pozove saveBankAccount koji unutar sebe pozove createCard
+//        // na ovaj nacin se dodaju 2 kartice za svaki bankAcc
+//        bankAccountService.createBankAccount(createBankAccountRequest);
 
-        Employee client = new Employee();
-        client.setEmail("client@gmail.com");
-        client.setPassword(passwordEncoder.encode("client"));
-        client.setFirstName("Client");
-        client.setActive(true);
-        client.setPosition(Constants.SUPERVIZOR);
-        client.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
-        client.setLastName("ClientPrezime");
-        employeeRepository.save(client);
-
-        Company company = new Company();
-        company.setCompanyName("Sony");
-        company.setTelephoneNumber("123456789");
-        company.setFaxNumber("987654321");
-        company.setPib("123456789");
-        company.setIdNumber("987654321");
-        company.setJobId("123456789");
-        company.setRegistrationNumber("987654321");
-        companyRepository.save(company);
-
-        Customer customer = new Customer();
-        customer.setFirstName("Customer1");
-        customer.setEmail("customer@gmail.com");
-        customer.setPassword(passwordEncoder.encode("customer"));
-//        customer.setPosition("customer");
-        customer.setActive(true);
-        customerRepository.save(customer);
-
-        //ovo samo za test moze da se obrise
-        BankAccount bankAccount = new BankAccount();
-        bankAccount.setAccountStatus(true);
-        bankAccount.setAccountType(AccountType.BUSINESS);
-        bankAccount.setAvailableBalance(10000.0);
-        bankAccount.setBalance(10000.0);
-        bankAccount.setMaintenanceCost(240.0);
-        bankAccount.setCompany(company);
-        bankAccount.setCreatedByAgentId(52L);
-        bankAccount.setCreationDate(new Date().getTime());
-        bankAccount.setCurrency(this.currencyRepository.getReferenceById(1L));
-        bankAccount.setCustomer(customer);
-        bankAccount.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
-        bankAccount.setAccountName("124141j2kraslL");
-        bankAccount.setAccountNumber("1234");
-        bankAccount.setSubtypeOfAccount("LICNI");
-        bankAccountService.saveBankAccount(bankAccount);
-        // dovde
-
-        BankAccountRequest bankAccountRequest = new BankAccountRequest();
-        bankAccountRequest.setAccountType(AccountType.FOREIGN_CURRENCY);
-        bankAccountRequest.setBalance(1000.0);
-        bankAccountRequest.setAvailableBalance(900.0);
-        bankAccountRequest.setCurrencyCode("USD");
-        bankAccountRequest.setSubtypeOfAccount("LICNI");
-        bankAccountRequest.setMaintenanceCost(10.0);
-
-        CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
-        createBankAccountRequest.setCustomerId(customer.getUserId());
-        createBankAccountRequest.setAccount(bankAccountRequest);
-        //BITNO!
-        // createBankAccount unutar sebe pozove saveBankAccount koji unutar sebe pozove createCard
-        // na ovaj nacin se dodaju 2 kartice za svaki bankAcc
-        bankAccountService.createBankAccount(createBankAccountRequest);
-
-
-        seedLoan();
-        seedLoanRequest();
-
-        seedBankCapital();
+//
+//        seedLoan();
+//        seedLoanRequest();
+//
+//        seedBankCapital();
 
     }
 

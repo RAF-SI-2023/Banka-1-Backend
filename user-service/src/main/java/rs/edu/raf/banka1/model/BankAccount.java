@@ -42,6 +42,8 @@ public class BankAccount {
 
     @OneToMany(mappedBy = "senderBankAccount")
     private List<Payment> payments;
+    @OneToMany(mappedBy = "senderBankAccount")
+    private List<Transfer> transfers;
 
 //    Only for current_account and foreign_currency_account
     private String subtypeOfAccount;
