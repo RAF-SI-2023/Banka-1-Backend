@@ -15,6 +15,7 @@ import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.MarketService;
+import rs.edu.raf.banka1.services.TransferService;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.time.Instant;
@@ -41,6 +42,7 @@ public class BootstrapData implements CommandLineRunner {
     private final CapitalService capitalService;
 
     private final MarketService marketService;
+    private final TransferService transferService;
 
     @Autowired
     public BootstrapData(
@@ -56,7 +58,8 @@ public class BootstrapData implements CommandLineRunner {
         final CardRepository cardRepository,
         final MarketService marketService,
         final CapitalService capitalService,
-        final CapitalRepository capitalRepository
+        final CapitalRepository capitalRepository,
+        final TransferService transferService
     ) {
         this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -71,13 +74,12 @@ public class BootstrapData implements CommandLineRunner {
         this.marketService = marketService;
         this.capitalService = capitalService;
         this.capitalRepository = capitalRepository;
+        this.transferService = transferService;
     }
 
     @Override
     public void run(String... args) throws Exception {
         Logger.info("Loading Data...");
-
-
 
         seedPermissions();
         seedCurencies();
@@ -160,7 +162,7 @@ public class BootstrapData implements CommandLineRunner {
         seedLoanRequest();
 
         seedBankCapital();
-
+        transferService.seedExchangeRates();
     }
 
     private void seedLoanRequest() {
