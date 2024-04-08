@@ -22,15 +22,13 @@ import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
 //import rs.edu.raf.banka1.mapper.ForeignCurrencyAccountMapper;
 import rs.edu.raf.banka1.dtos.PaymentDto;
+import rs.edu.raf.banka1.dtos.PaymentRecipientDto;
 import rs.edu.raf.banka1.dtos.customer.CustomerDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.mapper.*;
-import rs.edu.raf.banka1.model.AccountType;
-import rs.edu.raf.banka1.model.Customer;
-import rs.edu.raf.banka1.model.Employee;
-import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.model.*;
 //import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
 import rs.edu.raf.banka1.repositories.*;
 //import rs.edu.raf.banka1.repositories.UserRepository;
@@ -92,6 +90,7 @@ public class UserControllerSteps {
     private PaymentRepository paymentRepository;
     private CustomerRepository customerRepository;
     private BankAccountRepository bankAccountRepository;
+    private PaymentRecipientRepository paymentRecipientRepository;
     private EmployeeMapper userMapper = new EmployeeMapper(new PermissionMapper(), passwordEncoder, permissionRepository);
     private CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper());
     private List<EmployeeDto> userResponses = new ArrayList<>();
@@ -107,6 +106,8 @@ public class UserControllerSteps {
     private String bankAccountNumber;
     private CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest();
     private Long paymentId;
+    private CreatePaymentRecipientRequest createPaymentRecipientRequest = new CreatePaymentRecipientRequest();
+    private PaymentRecipientDto paymentRecipientDto = new PaymentRecipientDto();
 
 
     @Data
@@ -230,13 +231,15 @@ public class UserControllerSteps {
                                PasswordEncoder passwordEncoder,
                                CustomerRepository customerRepository,
                                BankAccountRepository bankAccountRepository,
-                               PaymentRepository paymentRepository) {
+                               PaymentRepository paymentRepository,
+                               PaymentRecipientRepository paymentRecipientRepository) {
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
         this.passwordEncoder = passwordEncoder;
         this.customerRepository = customerRepository;
         this.bankAccountRepository = bankAccountRepository;
         this.paymentRepository = paymentRepository;
+        this.paymentRecipientRepository = paymentRecipientRepository;
     }
 
     @Given("i have email {string}")
@@ -346,6 +349,42 @@ public class UserControllerSteps {
     @Given("employee is aware of payment id")
     public void employeeIsAwareOfPaymentId() {
         paymentId = paymentRepository.findAll().get(0).getId();
+    }
+
+    @Given("recipient first name is {string}")
+    public void recipientFirstNameIs(String arg0) {
+        createPaymentRecipientRequest.setFirstName(arg0);
+    }
+
+    @Given("recipient last name is {string}")
+    public void recipientLastNameIs(String arg0) {
+        createPaymentRecipientRequest.setLastName(arg0);
+    }
+
+    @Given("recipient bank account number is {string}")
+    public void recipientBankAccountNumberIs(String arg0) {
+        createPaymentRecipientRequest.setBankAccountNumber(arg0);
+    }
+
+    @Given("customer wants to change recipient first name to {string}")
+    public void customerWantsToChangeRecipientFirstNameTo(String arg0) {
+        post(url + port + "/recipients/add", createPaymentRecipientRequest);
+
+        paymentRecipientDto.setFirstName(arg0);
+        paymentRecipientDto.setLastName(createPaymentRecipientRequest.getLastName());
+        paymentRecipientDto.setBankAccountNumber(createPaymentRecipientRequest.getBankAccountNumber());
+
+        PaymentRecipient paymentRecipient = paymentRecipientRepository.findAll().stream().filter(
+                recipient -> recipient.getFirstName().equals(createPaymentRecipientRequest.getFirstName()) &&
+                        recipient.getLastName().equals(createPaymentRecipientRequest.getLastName()) &&
+                        recipient.getRecipientAccountNumber().equals(createPaymentRecipientRequest.getBankAccountNumber())
+        ).findFirst().orElse(null);
+
+        if(paymentRecipient == null){
+            fail("Recipient not found");
+        }
+
+        paymentRecipientDto.setId(paymentRecipient.getId());
     }
 
 //    private String getBody(String path){
@@ -520,6 +559,9 @@ public class UserControllerSteps {
             else if(path.equals("/payment/get")){
                 getBody(url + port + path + "/" + paymentId);
             }
+            else if(path.equals("/recipients/getAll")){
+                getBody(url + port + path);
+            }
         }
         catch (Exception e){
             e.printStackTrace();
@@ -559,6 +601,9 @@ public class UserControllerSteps {
             }
             else if(path.equals("/payment")){
                 post(url + port + path, createPaymentRequest);
+            }
+            else if(path.equals("/recipients/add")){
+                post(url + port + path, createPaymentRecipientRequest);
             }
 
 //            else if (path.equals("/balance/foreign_currency/create")) {
@@ -602,13 +647,25 @@ public class UserControllerSteps {
 
     @When("i send PUT request to {string}")
     public void whenISendPUTRequestTo(String path) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
+        if(path.equals( "/customer")) {
             put(url + port + path, editUserRequest);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("Failed to parse response body");
         }
+        else if(path.equals("/recipients/edit")){
+            put(url + port + path, paymentRecipientDto);
+        }
+    }
+
+    @When("i send DELETE request to remove recipient")
+    public void iSendDELETERequestToRemoveRecipient() {
+        PaymentRecipient paymentRecipient = paymentRecipientRepository.findAll().stream().filter(
+                recipient -> recipient.getFirstName().equals("mika")
+        ).findFirst().orElse(null);
+
+        if(paymentRecipient == null){
+            fail("Recipient not found");
+        }
+
+        delete(url + port + "/recipients/remove/" + paymentRecipient.getId());
     }
 
     @Then("i should get my id as a response")
@@ -802,6 +859,31 @@ public class UserControllerSteps {
         List<PaymentDto> payments =  objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<PaymentDto>>() {
         });
         assertThat(payments).anyMatch(payment -> payment.getRecipientAccountNumber().equals(arg0));
+    }
+
+    @Then("i should NOT have recipient mika mikic {string} in response")
+    public void iShouldNOTHaveRecipientMikaMikicInResponse(String arg0) throws JsonProcessingException {
+
+        List<PaymentRecipientDto> answer = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<PaymentRecipientDto>>() {
+        });
+
+        for(PaymentRecipientDto recipient : answer){
+            if(recipient.getFirstName().equals("mika") &&
+                    recipient.getLastName().equals("mikic") &&
+                    recipient.getBankAccountNumber().equals(arg0)){
+                fail("Recipient found");
+            }
+        }
+    }
+
+    @Then("recipient first name should be {string}")
+    public void recipientFirstNameShouldBe(String arg0) {
+        PaymentRecipient paymentRecipient = paymentRecipientRepository.findById(paymentRecipientDto.getId()).orElse(null);
+        if(paymentRecipient == null){
+            fail("Recipient not found");
+        }
+
+        assertThat(paymentRecipient.getFirstName()).isEqualTo(arg0);
     }
 
 
