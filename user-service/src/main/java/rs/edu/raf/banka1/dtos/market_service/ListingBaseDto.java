@@ -8,7 +8,7 @@ import rs.edu.raf.banka1.model.ListingType;
 @Setter
 public class ListingBaseDto {
     private Long listingId;
-    private ListingType listingType;
+    private String listingType;
     private String ticker;
     private String name;
     private String exchangeName;
@@ -18,5 +18,4 @@ public class ListingBaseDto {
     private Double low;
     private Double priceChange;
     private Integer volume;
-
 }

@@ -91,7 +91,7 @@ public class StockSimulationJob implements Runnable {
     //todo treba da se radi sa currency i da se doda u listingdto exchangedto koji ce da ima i currency u sebi
     private void createTransaction(MarketOrder order, ListingBaseDto listingBaseDto, Long processedNum, String currencyCode){
         Capital bankAccountCapital = capitalService.getCapitalByCurrencyCode(currencyCode);
-        Capital securityCapital = capitalService.getCapitalByListingIdAndType(listingBaseDto.getListingId(), listingBaseDto.getListingType());
+        Capital securityCapital = capitalService.getCapitalByListingIdAndType(listingBaseDto.getListingId(), ListingType.valueOf(listingBaseDto.getListingType()));
 
         Double price = orderService.calculatePrice(order,listingBaseDto,processedNum);
         price = convertPrice(price,null,null);

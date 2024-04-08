@@ -64,13 +64,24 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void createOrder(final CreateOrderRequest request, final Employee currentAuth) {
         final MarketOrder order = orderMapper.requestToMarketOrder(request);
-        final ListingBaseDto listingBaseDto = marketService.getStockById(order.getListingId());
+        ListingBaseDto listingBaseDto;
+
+        if(order.getListingType().equals(ListingType.STOCK)) {
+            listingBaseDto = marketService.getStockById(order.getListingId());
+        } else if(order.getListingType().equals(ListingType.FOREX)) {
+            listingBaseDto = marketService.getForexById(order.getListingId());
+        } else {
+            listingBaseDto = marketService.getFutureById(order.getListingId());
+        }
+
+        if(listingBaseDto == null) return;
+
         order.setPrice(calculatePrice(order,listingBaseDto,order.getContractSize()));
         order.setFee(calculateFee(request.getLimitValue(), order.getPrice()));
         order.setOwner(currentAuth);
 
         if(!currentAuth.getPosition().equalsIgnoreCase(Constants.SUPERVIZOR)) {
-            if(currentAuth.getOrderlimit() < currentAuth.getLimitNow()+order.getPrice()) {
+            if(currentAuth.getOrderlimit() < currentAuth.getLimitNow() + order.getPrice()) {
                 order.setStatus(OrderStatus.DENIED);
             }
         }
