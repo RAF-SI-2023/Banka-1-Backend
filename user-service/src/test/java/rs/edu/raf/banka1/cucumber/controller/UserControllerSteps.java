@@ -32,10 +32,7 @@ import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.User;
 //import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
-import rs.edu.raf.banka1.repositories.BankAccountRepository;
-import rs.edu.raf.banka1.repositories.CustomerRepository;
-import rs.edu.raf.banka1.repositories.EmployeeRepository;
-import rs.edu.raf.banka1.repositories.PermissionRepository;
+import rs.edu.raf.banka1.repositories.*;
 //import rs.edu.raf.banka1.repositories.UserRepository;
 import rs.edu.raf.banka1.requests.*;
 import rs.edu.raf.banka1.requests.customer.AccountData;
@@ -92,6 +89,7 @@ public class UserControllerSteps {
 //    private ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
 //    private ForeignCurrencyAccountRequest foreignCurrencyAccountRequest = new ForeignCurrencyAccountRequest();
     private PermissionRepository permissionRepository;
+    private PaymentRepository paymentRepository;
     private CustomerRepository customerRepository;
     private BankAccountRepository bankAccountRepository;
     private EmployeeMapper userMapper = new EmployeeMapper(new PermissionMapper(), passwordEncoder, permissionRepository);
@@ -108,6 +106,7 @@ public class UserControllerSteps {
     private CustomerData customerData = new CustomerData();
     private String bankAccountNumber;
     private CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest();
+    private Long paymentId;
 
 
     @Data
@@ -230,12 +229,14 @@ public class UserControllerSteps {
                                PermissionRepository permissionRepository,
                                PasswordEncoder passwordEncoder,
                                CustomerRepository customerRepository,
-                               BankAccountRepository bankAccountRepository) {
+                               BankAccountRepository bankAccountRepository,
+                               PaymentRepository paymentRepository) {
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
         this.passwordEncoder = passwordEncoder;
         this.customerRepository = customerRepository;
         this.bankAccountRepository = bankAccountRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     @Given("i have email {string}")
@@ -340,6 +341,11 @@ public class UserControllerSteps {
     @Given("paymentPurpose is {string}")
     public void paymentpurposeIs(String arg0) {
         createPaymentRequest.setPaymentPurpose(arg0);
+    }
+
+    @Given("employee is aware of payment id")
+    public void employeeIsAwareOfPaymentId() {
+        paymentId = paymentRepository.findAll().get(0).getId();
     }
 
 //    private String getBody(String path){
@@ -510,6 +516,9 @@ public class UserControllerSteps {
             }
             else if(path.equals("/payment/getAll/1234567890")){
                 getBody(url + port + path);
+            }
+            else if(path.equals("/payment/get")){
+                getBody(url + port + path + "/" + paymentId);
             }
         }
         catch (Exception e){

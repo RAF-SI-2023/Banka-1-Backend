@@ -25,3 +25,10 @@ Feature: users can create payments and grab info about them later
       Then i should get response with status 200
       And response should contain payment with receiver account number "0987654321"
 
+  Scenario: employee gets payment using payment id
+    Given i am logged in with email "admin@admin.com" and password "admin"
+    And employee is aware of payment id
+    #id is added automatically
+    When User calls get on "/payment/get"
+    Then i should get response with status 200
+
