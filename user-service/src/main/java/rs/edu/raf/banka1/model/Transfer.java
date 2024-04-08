@@ -16,7 +16,9 @@ public class Transfer {
     @JoinColumn(name = "sender_bankaccount_id", referencedColumnName = "id")
     private BankAccount senderBankAccount;
 
-//    private String senderAccountNumber;
+//    private String senderAccountNumber; ?  u payment je isto bilo ovo al ima samo citav acc
+    //ne znam je l treba i ime da se izvuce rekla bih da da jer u create tranfer stoji ime
+
     private String recipientName;
     private String recipientAccountNumber;
     private Double amount;

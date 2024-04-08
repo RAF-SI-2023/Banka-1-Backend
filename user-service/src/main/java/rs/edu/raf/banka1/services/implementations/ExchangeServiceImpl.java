@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import rs.edu.raf.banka1.model.ExchangeRate;
-import rs.edu.raf.banka1.model.Transfer;
+import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.ExchangeRateRepository;
 import rs.edu.raf.banka1.repositories.TransferRepository;
 import rs.edu.raf.banka1.requests.CreateTransferRequest;
@@ -16,8 +16,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ExchangeServiceImpl implements ExchangeService {
@@ -25,6 +28,8 @@ public class ExchangeServiceImpl implements ExchangeService {
     private final ExchangeRateRepository exchangeRateRepository;
 
     private final TransferRepository transferRepository;
+
+    private final BankAccountRepository bankAccountRepository;
     private final ObjectMapper objectMapper;
 
     @Value("${exchangeRateAPIToken}")
@@ -33,10 +38,11 @@ public class ExchangeServiceImpl implements ExchangeService {
     @Value("${exchangeRateApiUrl}")
     private String exchangeRateApiUrl;
 
-    public ExchangeServiceImpl(ExchangeRateRepository exchangeRateRepository,TransferRepository transferRepository) {
+    public ExchangeServiceImpl(ExchangeRateRepository exchangeRateRepository,TransferRepository transferRepository,BankAccountRepository bankAccountRepository) {
         objectMapper = new ObjectMapper();
         this.exchangeRateRepository = exchangeRateRepository;
         this.transferRepository = transferRepository;
+        this.bankAccountRepository = bankAccountRepository;
     }
 
     public List<ExchangeRate> fetchExchangeRates(String fromCurrencyCode){
@@ -118,7 +124,25 @@ public class ExchangeServiceImpl implements ExchangeService {
     }
 
     @Override
-    public Transfer createTransfer(CreateTransferRequest createTransferRequest) {
+    public Transfer createTransfer(CreateTransferRequest request) {
+        Optional<BankAccount> senderAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(request.getSenderAccountNumber());
+        if (senderAccountOpt.isEmpty()) return null;
+        BankAccount senderAccount = senderAccountOpt.get();
+
+        Transfer transfer = new Transfer();
+        transfer.setSenderBankAccount(senderAccount);
+      //sender name
+        transfer.setRecipientName(request.getRecipientName());
+        transfer.setRecipientAccountNumber(request.getRecipientAccountNumber());
+        transfer.setAmount(request.getAmount());
+
+        transfer.setPaymentCode(request.getPaymentCode());
+        transfer.setModel(request.getModel());
+        transfer.setReferenceNumber(request.getReferenceNumber());
+
+        transfer.setStatus(TransactionStatus.PROCESSING);
+//        payment.setCommissionFee(Payment.calculateCommission(request.getAmount()));
+//        payment.setDateOfPayment(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toEpochSecond());
        return null;
     }
 
