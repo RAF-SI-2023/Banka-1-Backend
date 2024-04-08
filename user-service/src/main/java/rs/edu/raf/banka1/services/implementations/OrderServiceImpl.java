@@ -17,6 +17,7 @@ import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.OrderService;
 import rs.edu.raf.banka1.stocksimulation.StockSimulationJob;
 import rs.edu.raf.banka1.stocksimulation.StockSimulationTrigger;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.time.Instant;
 import java.util.*;
@@ -68,6 +69,13 @@ public class OrderServiceImpl implements OrderService {
         order.setPrice(calculatePrice(order,listingBaseDto,order.getContractSize()));
         order.setFee(calculateFee(request.getLimitValue(), order.getPrice()));
         order.setOwner(currentAuth);
+
+        if(!currentAuth.getPosition().equalsIgnoreCase(Constants.SUPERVIZOR)) {
+            if(currentAuth.getOrderlimit() < currentAuth.getLimitNow()+order.getPrice()) {
+                order.setStatus(OrderStatus.DENIED);
+            }
+        }
+
         if (!orderRequiresApprove(currentAuth)) {
             order.setStatus(OrderStatus.APPROVED);
         } else {
