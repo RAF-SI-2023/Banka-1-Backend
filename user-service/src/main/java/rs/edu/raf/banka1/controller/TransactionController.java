@@ -65,8 +65,8 @@ public class TransactionController {
     }
 
 
-    @PostMapping(value = "/sell", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Create sell transaction", description = "Create sell transaction")
+    @PostMapping(value = "/pay", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Create sell transaction", description = "Create pay transaction")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
             content = {@Content(mediaType = "application/json",
@@ -81,8 +81,8 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.createSellTransaction(request));
     }
 
-    @PostMapping(value = "/buy", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Create buy transaction", description = "Create buy transaction")
+    @PostMapping(value = "/payOff", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Create pay off transaction", description = "Create pay off transaction")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
             content = {@Content(mediaType = "application/json",
