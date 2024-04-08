@@ -10,11 +10,7 @@ import rs.edu.raf.banka1.model.Currency;
 @Getter
 @Setter
 public class CreateTransactionRequest {
-
     private String accountNumber;
-
     private Currency currency;
-
     private Double value;
-
 }
