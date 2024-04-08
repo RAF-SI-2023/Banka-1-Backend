@@ -31,6 +31,7 @@ public class TransferServiceImpl implements TransferService {
     private final BankAccountRepository bankAccountRepository;
     private final CurrencyRepository currencyRepository;
     private final ObjectMapper objectMapper;
+    HttpClient httpClient = HttpClient.newHttpClient();
 
     @Value("${exchangeRateAPIToken}")
     private String exchangeRateAPIToken;
@@ -66,7 +67,7 @@ public class TransferServiceImpl implements TransferService {
     }
 
     private void seedExchangeRatesToRsd(List<String> supportedCurrencies) {
-        try (HttpClient httpClient = HttpClient.newHttpClient()) {
+        try {
             for (String currencyCode : supportedCurrencies) {
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(exchangeRateApiUrl + exchangeRateAPIToken + "/latest/" + currencyCode))
@@ -99,7 +100,7 @@ public class TransferServiceImpl implements TransferService {
 
     private void seedExchangeRatesFromRsd(List<String> supportedCurrencies) {
         HttpResponse<String> response;
-        try (HttpClient httpClient = HttpClient.newHttpClient()) {
+        try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(exchangeRateApiUrl + exchangeRateAPIToken + "/latest/RSD"))
                     .GET()
