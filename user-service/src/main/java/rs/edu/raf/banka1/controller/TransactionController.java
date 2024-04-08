@@ -20,7 +20,7 @@ import java.util.List;
 
 @Controller
 @CrossOrigin
-@RequestMapping("/transaction")
+@RequestMapping("/transactions")
 public class TransactionController {
 
     private final TransactionService transactionService;
