@@ -56,3 +56,19 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+
+  fetching-service:
+    build:
+      context: fetching-service/
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: market-service/target/*.jar
+        CACHEBUST: ${CI_COMMIT_SHA}  # Use a unique value to bust the cache
+    image: fetching-service
+    #container_name: market-service-container
+    restart: always
+    ports:
+      - "8082:8082"  # Adjust the port as needed
+    depends_on:
+      mysql:
+        condition: service_healthy
