@@ -48,10 +48,6 @@ public class ExchangeServiceImpl implements ExchangeService {
     private final ExchangeRepository exchangeRepository;
     private final ExchangeMapper exchangeMapper;
 
-
-    @Value("${dev.environment}")
-    private Boolean environment;
-
     @Autowired
     public ExchangeServiceImpl(
             CountryRepository countryRepository,
