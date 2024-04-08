@@ -13,8 +13,7 @@ import rs.edu.raf.banka1.repositories.CapitalRepository;
 import rs.edu.raf.banka1.repositories.OrderRepository;
 import rs.edu.raf.banka1.repositories.TransactionRepository;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
-import rs.edu.raf.banka1.services.MarketService;
-import rs.edu.raf.banka1.services.OrderService;
+import rs.edu.raf.banka1.services.*;
 import rs.edu.raf.banka1.stocksimulation.StockSimulationJob;
 import rs.edu.raf.banka1.stocksimulation.StockSimulationTrigger;
 import rs.edu.raf.banka1.utils.Constants;
@@ -31,9 +30,10 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
     private final MarketService marketService;
-    private final TransactionRepository transactionRepository;
-    private final BankAccountRepository bankAccountRepository;
-    private final CapitalRepository capitalRepository;
+
+    private final TransactionService transactionService;
+    private final CapitalService capitalService;
+
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private final Random random = new Random();
     private final TaskScheduler taskScheduler;
@@ -47,16 +47,16 @@ public class OrderServiceImpl implements OrderService {
         final OrderMapper orderMapper,
         final OrderRepository orderRepository,
         final MarketService marketService,
-        final TransactionRepository transactionRepository, BankAccountRepository bankAccountRepository, CapitalRepository capitalRepository,
-        final TaskScheduler taskScheduler
+        final TaskScheduler taskScheduler,
+        final TransactionService transactionService,
+        final CapitalService capitalService
     ) {
         this.orderMapper = orderMapper;
         this.orderRepository = orderRepository;
         this.marketService = marketService;
-        this.transactionRepository = transactionRepository;
-        this.bankAccountRepository = bankAccountRepository;
-        this.capitalRepository = capitalRepository;
         this.taskScheduler = taskScheduler;
+        this.transactionService = transactionService;
+        this.capitalService = capitalService;
 
         scheduledFutureMap = new HashMap<>();
     }
@@ -64,13 +64,24 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void createOrder(final CreateOrderRequest request, final Employee currentAuth) {
         final MarketOrder order = orderMapper.requestToMarketOrder(request);
-        final ListingBaseDto listingBaseDto = marketService.getStockById(order.getListingId());
+        ListingBaseDto listingBaseDto;
+
+        if(order.getListingType().equals(ListingType.STOCK)) {
+            listingBaseDto = marketService.getStockById(order.getListingId());
+        } else if(order.getListingType().equals(ListingType.FOREX)) {
+            listingBaseDto = marketService.getForexById(order.getListingId());
+        } else {
+            listingBaseDto = marketService.getFutureById(order.getListingId());
+        }
+
+        if(listingBaseDto == null) return;
+
         order.setPrice(calculatePrice(order,listingBaseDto,order.getContractSize()));
         order.setFee(calculateFee(request.getLimitValue(), order.getPrice()));
         order.setOwner(currentAuth);
 
         if(!currentAuth.getPosition().equalsIgnoreCase(Constants.SUPERVIZOR)) {
-            if(currentAuth.getOrderlimit() < currentAuth.getLimitNow()+order.getPrice()) {
+            if(currentAuth.getOrderlimit() < currentAuth.getLimitNow() + order.getPrice()) {
                 order.setStatus(OrderStatus.DENIED);
             }
         }
@@ -82,12 +93,10 @@ public class OrderServiceImpl implements OrderService {
         }
         orderRepository.save(order);
 
-//        if(order.getLimitValue() == null && order.getStopValue() == null)
-//            startOrderSimulation(order.getId());
-        // ako je marketorder onda odmah startorderSimulation a ako je stop\
-
-
-        //
+        //Will automatically throw an exception if there is insufficient capital to create order
+        if(order.getStatus().equals(OrderStatus.APPROVED)) {
+            reserveStockCapital(order);
+        }
 
         startOrderSimulation(order.getId());
     }
@@ -100,9 +109,8 @@ public class OrderServiceImpl implements OrderService {
             new StockSimulationJob(
                 this,
                 marketService,
-                transactionRepository,
-                capitalRepository,
-                bankAccountRepository,
+                transactionService,
+                capitalService,
                 orderId
             ),
             new StockSimulationTrigger(
@@ -122,6 +130,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderDto> getAllOrders() {
         return orderRepository.findAll().stream().map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public void cancelOrder(Long orderId) {
+        orderRepository.cancelOrder(OrderStatus.CANCELLED, orderId);
     }
 
     public Boolean checkStockPriceForStopOrder(Long marketOrderId, Long stockId) {
@@ -244,6 +257,22 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private boolean orderRequiresApprove(final Employee currentAuth) {
-        return currentAuth.getRequireApproval() || currentAuth.getLimitNow() >= currentAuth.getOrderlimit();
+        System.out.println(currentAuth);
+        return currentAuth.getRequireApproval() || (currentAuth.getOrderlimit() != null && currentAuth.getLimitNow() != null && currentAuth.getLimitNow() >= currentAuth.getOrderlimit());
+    }
+
+    private void reserveStockCapital(MarketOrder order) {
+        if(!order.getListingType().equals(ListingType.STOCK))
+            return;
+
+        Capital bankAccountCapital = capitalService.getCapitalByCurrencyCode("RSD");
+        Capital securityCapital = capitalService.getCapitalByListingIdAndType(order.getListingId(), order.getListingType());
+
+        if(order.getOrderType().equals(OrderType.BUY)) {
+            capitalService.reserveBalance(bankAccountCapital.getCurrency().getCurrencyCode(), order.getPrice());
+        } else {
+            capitalService.reserveBalance(securityCapital.getListingId(), securityCapital.getListingType(), (double)order.getContractSize());
+        }
+
     }
 }

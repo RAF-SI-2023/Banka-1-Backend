@@ -3,11 +3,10 @@ package rs.edu.raf.banka1.stocksimulation;
 import lombok.RequiredArgsConstructor;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
 import rs.edu.raf.banka1.model.*;
-import rs.edu.raf.banka1.repositories.BankAccountRepository;
-import rs.edu.raf.banka1.repositories.CapitalRepository;
-import rs.edu.raf.banka1.repositories.TransactionRepository;
+import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.OrderService;
+import rs.edu.raf.banka1.services.TransactionService;
 
 import java.util.Optional;
 import java.util.Random;
@@ -17,12 +16,12 @@ public class StockSimulationJob implements Runnable {
 
     private final OrderService orderService;
     private final MarketService marketService;
-    private final TransactionRepository transactionRepository;
-    private final CapitalRepository capitalRepository;
-    private final BankAccountRepository bankAccountRepository;
+    private final TransactionService transactionService;
+    private final CapitalService capitalService;
     private final Long orderId;
     private final Random random = new Random();
     private final Double PERCENT = 0.1;
+    private final String DEFAULT_CURRENCY = "RSD";
 
     @Override
     public void run() {
@@ -53,8 +52,7 @@ public class StockSimulationJob implements Runnable {
             order.getContractSize() - order.getProcessedNumber()
         );
 
-        createTransaction(order,listingBaseDto, processedNumber, "RSD");
-//        transaction.setBankAccount(order.); TODO bank account trebalo bi employee da radi u banci i prebaciti u neki servis
+        createTransaction(order,listingBaseDto, processedNumber, DEFAULT_CURRENCY);
 
         if(order.getContractSize() == order.getProcessedNumber() + processedNumber) {
             orderService.finishOrder(orderId);
@@ -88,64 +86,17 @@ public class StockSimulationJob implements Runnable {
 
         return (marketOrder.getOrderType().equals(OrderType.BUY) && ask > marketOrder.getStopValue())
             || (bid < marketOrder.getStopValue());
-
-//        if(marketOrder.getOrderType().equals(OrderType.BUY) && ask > marketOrder.getStopValue()) {
-//
-//            if(marketOrder.getLimitValue() == null) {
-//                marketOrder.setPrice(calculatePrice(ask, marketOrder.getContractSize()));
-//            } else {
-//                marketOrder.setPrice(calculatePriceForLimitOrder(
-//                    marketOrder.getOrderType(),
-//                    marketOrder.getContractSize(),
-//                    marketOrder.getLimitValue(),
-//                    ask));
-//            }
-//            marketOrder.setFee(calculateFee(marketOrder.getLimitValue(), marketOrder.getPrice()));
-//
-//        } else if (bid < marketOrder.getStopValue()){ // SELL
-//            if(marketOrder.getLimitValue() == null) {
-//                marketOrder.setPrice(calculatePrice(bid, marketOrder.getContractSize()));
-//            } else {
-//                marketOrder.setPrice(calculatePriceForLimitOrder(
-//                    marketOrder.getOrderType(),
-//                    marketOrder.getContractSize(),
-//                    marketOrder.getLimitValue(),
-//                    bid));
-//            }
-//            marketOrder.setFee(calculateFee(marketOrder.getLimitValue(), marketOrder.getPrice()));
-//            return true;
-//        }
     }
 
     //todo treba da se radi sa currency i da se doda u listingdto exchangedto koji ce da ima i currency u sebi
     private void createTransaction(MarketOrder order, ListingBaseDto listingBaseDto, Long processedNum, String currencyCode){
+        Capital bankAccountCapital = capitalService.getCapitalByCurrencyCode(currencyCode);
+        Capital securityCapital = capitalService.getCapitalByListingIdAndType(listingBaseDto.getListingId(), ListingType.valueOf(listingBaseDto.getListingType()));
+
         Double price = orderService.calculatePrice(order,listingBaseDto,processedNum);
         price = convertPrice(price,null,null);
-        Capital capitalBankAccount = capitalRepository.getCapitalByCurrency_CurrencyCode(currencyCode); // vraca bank account u odredjenoj valuti
-        // uvek racun u Dinarima
-        BankAccount bankAccount = capitalBankAccount.getBankAccount();
-        Capital capitalStock = capitalRepository.getCapitalByListingIdAndListingType(order.getListingId(),ListingType.STOCK);
 
-        Transaction transaction = new Transaction();
-        transaction.setCurrency(capitalBankAccount.getCurrency());
-        transaction.setBankAccount(bankAccount);
-
-        if(order.getOrderType().equals(OrderType.BUY)){
-            transaction.setBuy(price);
-            capitalStock.setTotal( capitalStock.getTotal() + processedNum);
-            bankAccount.setBalance(bankAccount.getBalance() - price);
-        } else{
-            transaction.setSell(price);
-            capitalStock.setTotal( capitalStock.getTotal() - processedNum);
-            bankAccount.setBalance( bankAccount.getBalance() + price );
-        }
-        transaction.setEmployee(order.getOwner());
-
-        transactionRepository.save(transaction);
-        capitalRepository.save(capitalStock);
-        capitalRepository.save(capitalBankAccount);
-        bankAccountRepository.save(bankAccount);
-
+        transactionService.createTransaction(bankAccountCapital, securityCapital, price, order, processedNum);
     }
 
     //todo zvati market servis da konvertuje
