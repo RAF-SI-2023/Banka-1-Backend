@@ -21,4 +21,6 @@ public interface OrderService {
 
     List<OrderDto> getAllOrdersForEmployee(Employee currentAuth);
     List<OrderDto> getAllOrders();
+
+    void cancelOrder(Long orderId);
 }

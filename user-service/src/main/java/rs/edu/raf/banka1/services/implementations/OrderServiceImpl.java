@@ -121,6 +121,11 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findAll().stream().map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
     }
 
+    @Override
+    public void cancelOrder(Long orderId) {
+        orderRepository.cancelOrder(OrderStatus.CANCELLED, orderId);
+    }
+
     public Boolean checkStockPriceForStopOrder(Long marketOrderId, Long stockId) {
         Optional<MarketOrder> optMarketOrder = orderRepository.findById(marketOrderId);
         if (optMarketOrder.isEmpty()) return false;

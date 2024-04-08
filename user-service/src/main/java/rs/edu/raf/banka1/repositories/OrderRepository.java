@@ -36,5 +36,10 @@ public interface OrderRepository extends JpaRepository<MarketOrder, Long> {
     @Query("UPDATE MarketOrder m SET m.updatedAt = ?1 WHERE m.id = ?2")
     void updateUpdatedAtById(Instant updatedAt, Long id);
 
+    @org.springframework.transaction.annotation.Transactional
+    @Modifying
+    @Query("update MarketOrder m set m.status = ?1 where m.id = ?2")
+    int cancelOrder(OrderStatus status, Long id);
+
     List<MarketOrder> getAllByOwner(User owner);
 }

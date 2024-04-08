@@ -152,11 +152,17 @@ public class CapitalServiceImpl implements CapitalService {
     private void processReservationCommited(Capital capital, Double amount) {
         BankAccount bankAccount = capital.getBankAccount();
 
-        if(amount <= 0 || capital.getReserved() < amount)
+        if(amount <= 0)
             throw new InvalidReservationAmountException();
 
+        if(amount > capital.getReserved()) {
+            double leftAmount = amount - capital.getReserved();
+            double available = capital.getTotal() - capital.getReserved();
+            if(leftAmount > available) throw new InvalidReservationAmountException();
+        }
+
         capital.setTotal(capital.getTotal() - amount);
-        capital.setReserved(capital.getReserved() - amount);
+        capital.setReserved(Math.min(capital.getReserved() - amount, 0)); // In case amount is higher than reserved
 
         if(bankAccount != null) {
             bankAccount.setBalance(bankAccount.getBalance() - amount);

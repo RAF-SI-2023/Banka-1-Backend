@@ -98,26 +98,6 @@ public class StockSimulationJob implements Runnable {
         price = convertPrice(price,null,null);
 
         transactionService.createTransaction(bankAccountCapital, securityCapital, price, order, processedNum);
-
-//        Capital capitalBankAccount = capitalRepository.getCapitalByCurrency_CurrencyCode(currencyCode); // vraca bank account u odredjenoj valuti
-//        // uvek racun u Dinarima
-//        BankAccount bankAccount = capitalBankAccount.getBankAccount();
-//        Capital capitalStock = capitalRepository.getCapitalByListingIdAndListingType(order.getListingId(), ListingType.STOCK);
-//
-//        Transaction transaction = new Transaction();
-//        transaction.setCurrency(capitalBankAccount.getCurrency());
-//        transaction.setBankAccount(bankAccount);
-//
-//        if(order.getOrderType().equals(OrderType.BUY)){
-//            transaction.setBuy(price);
-//            capitalStock.setTotal( capitalStock.getTotal() + processedNum);
-//            bankAccount.setBalance(bankAccount.getBalance() - price);
-//        } else{
-//            transaction.setSell(price);
-//            capitalStock.setTotal( capitalStock.getTotal() - processedNum);
-//            bankAccount.setBalance( bankAccount.getBalance() + price );
-//        }
-//        transaction.setEmployee(order.getOwner());
     }
 
     //todo zvati market servis da konvertuje
