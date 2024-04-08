@@ -48,7 +48,7 @@ public class StockSimulationJob implements Runnable {
         if(!processOrder)
             return;
 
-        Long processedNumber = order.getAllOrNone() ? order.getContractSize() : Math.min(
+        Long processedNumber = (order.getAllOrNone() || order.getListingType().equals(ListingType.FUTURE) || order.getListingType().equals(ListingType.FOREX)) ? order.getContractSize() : Math.min(
             random.nextLong(order.getContractSize()) + 1,
             order.getContractSize() - order.getProcessedNumber()
         );
