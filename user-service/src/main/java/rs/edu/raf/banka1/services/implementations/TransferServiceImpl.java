@@ -18,7 +18,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -45,8 +48,21 @@ public class TransferServiceImpl implements TransferService {
     @Override
     public void seedExchangeRates(){
         List<String> supportedCurrencies = List.of("USD", "AUD", "EUR", "CHF", "GBP", "JPY", "CAD");
+        if (initRsdCurrency()) return;
         seedExchangeRatesFromRsd(supportedCurrencies);
         seedExchangeRatesToRsd(supportedCurrencies);
+    }
+
+    private boolean initRsdCurrency() {
+        Currency rsdCurrency = currencyRepository.findCurrencyByCurrencyCode("RSD").orElse(null);
+        if (rsdCurrency == null) {
+            System.out.println("Failed to load exchange rate for RSD!");
+            return true;
+        }
+        rsdCurrency.setToRSD(1.0);
+        rsdCurrency.setFromRSD(1.0);
+        currencyRepository.save(rsdCurrency);
+        return false;
     }
 
     private void seedExchangeRatesToRsd(List<String> supportedCurrencies) {
@@ -121,20 +137,116 @@ public class TransferServiceImpl implements TransferService {
 //    }
 
     @Override
-    public Transfer createTransfer(CreateTransferRequest request) {
+    public Long createTransfer(CreateTransferRequest request) {
         Optional<BankAccount> senderAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(request.getSenderAccountNumber());
-        if (senderAccountOpt.isEmpty()) return null;
+        Optional<BankAccount> recipientAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(request.getRecipientAccountNumber());
+
+        if (senderAccountOpt.isEmpty() || recipientAccountOpt.isEmpty()) {
+            return -1L;
+        }
         BankAccount senderAccount = senderAccountOpt.get();
+        BankAccount recipientAccount = recipientAccountOpt.get();
 
         Transfer transfer = new Transfer();
         transfer.setSenderBankAccount(senderAccount);
-//        transfer.setRecipientAccountNumber(request.getRecipientAccountNumber());
+        transfer.setRecipientBankAccount(recipientAccount);
         transfer.setAmount(request.getAmount());
-
         transfer.setStatus(TransactionStatus.PROCESSING);
-//        payment.setCommissionFee(Payment.calculateCommission(request.getAmount()));
-//        payment.setDateOfPayment(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toEpochSecond());
-       return null;
+        transfer.setDateOfPayment(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toEpochSecond());
+
+        // set on processing transfer
+        transfer.setConvertedAmount(null);
+        transfer.setCurrencyFrom(null);
+        transfer.setCurrencyTo(null);
+        transfer.setExchangeRate(null);
+        transfer.setCommission(null);
+
+        transferRepository.save(transfer);
+       return transfer.getId();
+    }
+
+    @Override
+    public void processTransfer(Long id) {
+        Optional<Transfer> transferOpt = transferRepository.findById(id);
+        if (transferOpt.isEmpty()) {
+            return;
+        }
+        Transfer transfer = transferOpt.get();
+        BankAccount senderAccount = transfer.getSenderBankAccount();
+        BankAccount recipientAccount = transfer.getRecipientBankAccount();
+        Currency senderCurrency = senderAccount.getCurrency();
+        Currency recipientCurrency = recipientAccount.getCurrency();
+        double commission = Payment.calculateCommission(transfer.getAmount());
+
+        //todo isto customer
+
+        if (
+                transfer.getStatus() != TransactionStatus.PROCESSING
+            || transfer.getAmount() + commission > senderAccount.getAvailableBalance()
+            || transfer.getAmount() + commission > senderAccount.getBalance()
+            || senderCurrency == null
+            || senderCurrency.getFromRSD() == null
+            || senderCurrency.getToRSD() == null
+            || recipientCurrency == null
+            || recipientCurrency.getFromRSD() == null
+            || recipientCurrency.getToRSD() == null
+            || recipientCurrency.getId().equals(senderCurrency.getId())
+            || !Objects.equals(senderAccount.getCustomer().getUserId(), recipientAccount.getCustomer().getUserId())
+        ) {
+            transfer.setStatus(TransactionStatus.DENIED);
+            transferRepository.save(transfer);
+            return;
+        }
+
+        BankAccount rsdBank = bankAccountRepository.findBankByCurrencyCode("RSD").orElse(null);
+        BankAccount toBank = null;
+        BankAccount fromBank = null;
+
+        if (senderAccount.getAccountType() == AccountType.CURRENT) {
+            toBank = rsdBank;
+        }
+        if (senderAccount.getAccountType() == AccountType.FOREIGN_CURRENCY) {
+            toBank = bankAccountRepository.findBankByCurrencyCode(senderCurrency.getCurrencyCode()).orElse(null);
+        }
+        if (recipientAccount.getAccountType() == AccountType.CURRENT) {
+            fromBank = rsdBank;
+        }
+        if (recipientAccount.getAccountType() == AccountType.FOREIGN_CURRENCY) {
+            fromBank = bankAccountRepository.findBankByCurrencyCode(recipientCurrency.getCurrencyCode()).orElse(null);
+        }
+
+        if (fromBank == null || toBank == null) {
+            transfer.setStatus(TransactionStatus.DENIED);
+            transferRepository.save(transfer);
+            return;
+        }
+
+        double exchangeRate = senderCurrency.getToRSD() * recipientCurrency.getFromRSD();
+        double convertedAmount = transfer.getAmount() * exchangeRate;
+
+        //available balance
+        senderAccount.setAvailableBalance(senderAccount.getAvailableBalance() - transfer.getAmount() - commission);
+        toBank.setAvailableBalance(toBank.getAvailableBalance() + transfer.getAmount() + commission);
+
+        fromBank.setAvailableBalance(fromBank.getAvailableBalance() - convertedAmount);
+        recipientAccount.setAvailableBalance(recipientAccount.getAvailableBalance() + convertedAmount);
+
+        // balance
+        senderAccount.setBalance(senderAccount.getBalance() - transfer.getAmount() - commission);
+        toBank.setBalance(toBank.getBalance() + transfer.getAmount() + commission);
+
+        fromBank.setBalance(fromBank.getBalance() - convertedAmount);
+        recipientAccount.setBalance(recipientAccount.getBalance() + convertedAmount);
+
+        transfer.setStatus(TransactionStatus.COMPLETE);
+        transfer.setConvertedAmount(convertedAmount);
+        transfer.setCommission(commission);
+        transfer.setCurrencyFrom(senderCurrency);
+        transfer.setCurrencyTo(recipientCurrency);
+        transfer.setExchangeRate(exchangeRate);
+
+        transferRepository.save(transfer);
+        bankAccountRepository.saveAll(List.of(fromBank, toBank, senderAccount, recipientAccount));
     }
 
 }

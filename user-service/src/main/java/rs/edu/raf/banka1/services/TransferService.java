@@ -11,5 +11,7 @@ public interface TransferService {
 
     void seedExchangeRates();
 
-    Transfer createTransfer(CreateTransferRequest createTransferRequest);
+    Long createTransfer(CreateTransferRequest createTransferRequest);
+
+    void processTransfer(Long id);
 }

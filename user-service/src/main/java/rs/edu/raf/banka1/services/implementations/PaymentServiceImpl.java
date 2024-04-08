@@ -64,7 +64,6 @@ public class PaymentServiceImpl implements PaymentService {
         BankAccount senderAccount = payment.getSenderBankAccount();
         Optional<BankAccount> recipientAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(payment.getRecipientAccountNumber());
         double commission = Payment.calculateCommission(payment.getAmount());
-        //TODO: da li availableBalance ili balance??
         if (
                 recipientAccountOpt.isEmpty()
                 || payment.getStatus() != TransactionStatus.PROCESSING

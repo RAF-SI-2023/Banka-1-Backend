@@ -34,4 +34,7 @@ public class Transfer {
     @JoinColumn(name = "currencyTo_id", referencedColumnName = "id")
     private Currency currencyTo;
 
+    public static Double calculateCommission(Double amount) {
+        return 0.03 * amount;
+    }
 }

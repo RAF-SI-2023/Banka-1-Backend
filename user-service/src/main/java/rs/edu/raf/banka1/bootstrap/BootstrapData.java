@@ -141,6 +141,60 @@ public class BootstrapData implements CommandLineRunner {
         bankAccountService.saveBankAccount(bankAccount);
         // dovde
 
+        //ovo samo za test moze da se obrise
+        BankAccount bankAccount1 = new BankAccount();
+        bankAccount1.setAccountStatus(true);
+        bankAccount1.setAccountType(AccountType.FOREIGN_CURRENCY);
+        bankAccount1.setAvailableBalance(10000.0);
+        bankAccount1.setBalance(10000.0);
+        bankAccount1.setMaintenanceCost(240.0);
+        bankAccount1.setCreatedByAgentId(52L);
+        bankAccount1.setCreationDate(new Date().getTime());
+        bankAccount1.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("USD").orElse(null));
+        bankAccount1.setCustomer(customer);
+        bankAccount1.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+        bankAccount1.setAccountName("1asd");
+        bankAccount1.setAccountNumber("usd");
+        bankAccount1.setSubtypeOfAccount("LICNI");
+        bankAccountService.saveBankAccount(bankAccount1);
+        // dovde
+
+        //ovo samo za test moze da se obrise
+        BankAccount bankAccount2 = new BankAccount();
+        bankAccount2.setAccountStatus(true);
+        bankAccount2.setAccountType(AccountType.FOREIGN_CURRENCY);
+        bankAccount2.setAvailableBalance(10000.0);
+        bankAccount2.setBalance(10000.0);
+        bankAccount2.setMaintenanceCost(240.0);
+        bankAccount2.setCreatedByAgentId(52L);
+        bankAccount2.setCreationDate(new Date().getTime());
+        bankAccount2.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("EUR").orElse(null));
+        bankAccount2.setCustomer(customer);
+        bankAccount2.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+        bankAccount2.setAccountName("1asd");
+        bankAccount2.setAccountNumber("eur");
+        bankAccount2.setSubtypeOfAccount("LICNI");
+        bankAccountService.saveBankAccount(bankAccount2);
+        // dovde
+
+        //ovo samo za test moze da se obrise
+        BankAccount bankAccount3 = new BankAccount();
+        bankAccount3.setAccountStatus(true);
+        bankAccount3.setAccountType(AccountType.CURRENT);
+        bankAccount3.setAvailableBalance(10000.0);
+        bankAccount3.setBalance(10000.0);
+        bankAccount3.setMaintenanceCost(240.0);
+        bankAccount3.setCreatedByAgentId(52L);
+        bankAccount3.setCreationDate(new Date().getTime());
+        bankAccount3.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElse(null));
+        bankAccount3.setCustomer(customer);
+        bankAccount3.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+        bankAccount3.setAccountName("1asd");
+        bankAccount3.setAccountNumber("rsd");
+        bankAccount3.setSubtypeOfAccount("LICNI");
+        bankAccountService.saveBankAccount(bankAccount3);
+        // dovde
+
         BankAccountRequest bankAccountRequest = new BankAccountRequest();
         bankAccountRequest.setAccountType(AccountType.FOREIGN_CURRENCY);
         bankAccountRequest.setBalance(1000.0);
