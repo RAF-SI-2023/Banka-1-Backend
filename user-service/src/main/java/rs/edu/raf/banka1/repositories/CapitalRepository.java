@@ -15,4 +15,6 @@ public interface CapitalRepository extends JpaRepository<Capital, Long> {
     Capital getCapitalByCurrency_CurrencyCode(String curr);
     Capital getCapitalByListingIdAndListingType(Long listingId, ListingType listingType);
     List<Capital> getCapitalsByBankAccountAndListingType(BankAccount bankAccount, ListingType listingType);
+    Capital getCapitalByListingIdAndBankAccount(Long listingId, BankAccount bankAccount);
+    List<Capital> getCapitalsByBankAccount(BankAccount bankAccount);
 }
