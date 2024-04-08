@@ -1,7 +1,7 @@
 package rs.edu.raf.banka1.services;
 
 import rs.edu.raf.banka1.dtos.TransactionDto;
-import rs.edu.raf.banka1.model.Transaction;
+import rs.edu.raf.banka1.model.*;
 
 import java.util.List;
 
@@ -9,6 +9,6 @@ public interface TransactionService {
 
     List<TransactionDto> getAllTransaction(final String accNum);
 
-    Long createTransaction(Transaction transaction);
+    void createTransaction(Capital bankCapital, Capital securityCapital, Double price, MarketOrder order, Long securityAmount);
 
 }
