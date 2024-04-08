@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.TransactionDto;
-import rs.edu.raf.banka1.exceptions.InvalidReservationAmountException;
 import rs.edu.raf.banka1.mapper.TransactionMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.TransactionRepository;
@@ -14,7 +13,6 @@ import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Transaction;
 import rs.edu.raf.banka1.requests.CreateTransactionRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
-import rs.edu.raf.banka1.services.OrderService;
 import rs.edu.raf.banka1.services.TransactionService;
 
 import java.util.List;
@@ -28,14 +26,12 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final CapitalService capitalService;
     private final BankAccountService bankAccountService;
-    private final OrderService orderService;
 
     public TransactionServiceImpl(TransactionMapper transactionMapper, TransactionRepository transactionRepository, BankAccountService bankAccountService, CapitalService capitalService, OrderService orderService) {
         this.transactionMapper = transactionMapper;
         this.transactionRepository = transactionRepository;
         this.bankAccountService = bankAccountService;
         this.capitalService = capitalService;
-        this.orderService = orderService;
     }
 
     @Override
@@ -56,14 +52,7 @@ public class TransactionServiceImpl implements TransactionService {
             //Add stocks to capital
             capitalService.addBalance(securityCapital.getListingId(), securityCapital.getListingType(), (double) securityAmount);
             //Commit reserved
-            try {
-                capitalService.commitReserved(bankCapital.getBankAccount().getCurrency().getCurrencyCode(), price);
-            } catch(InvalidReservationAmountException e) {
-                // If there is no more available capital, cancel the order.
-                orderService.cancelOrder(order.getId());
-                return;
-            }
-
+            capitalService.commitReserved(bankCapital.getBankAccount().getCurrency().getCurrencyCode(), price);
         } else {
             transaction.setSell(price);
             //Remove stocks
