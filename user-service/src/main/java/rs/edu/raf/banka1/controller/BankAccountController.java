@@ -16,8 +16,8 @@ import rs.edu.raf.banka1.dtos.CardDto;
 import rs.edu.raf.banka1.mapper.*;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
-import rs.edu.raf.banka1.requests.customer.AccountData;
 import rs.edu.raf.banka1.services.BankAccountService;
+import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.CardService;
 
 import java.util.List;
@@ -29,14 +29,16 @@ public class BankAccountController {
 
     private final BankAccountService bankAccountService;
 
+    private final CapitalService capitalService;
     private final CardService cardService;
     private final CardMapper cardMapper;
     private final BankAccountMapper bankAccountMapper;
 
     @Autowired
-    public BankAccountController(BankAccountService bankAccountService, CardService cardService, CardMapper cardMapper,
+    public BankAccountController(BankAccountService bankAccountService, CapitalService capitalService, CardService cardService, CardMapper cardMapper,
                                  BankAccountMapper bankAccountMapper) {
         this.bankAccountService = bankAccountService;
+        this.capitalService = capitalService;
         this.cardService = cardService;
         this.cardMapper = cardMapper;
         this.bankAccountMapper = bankAccountMapper;
@@ -155,7 +157,7 @@ public class BankAccountController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<List<CapitalDto>> getCapitalForStock(@PathVariable(name = "accountNumber") String accountNumber) {
-        return new ResponseEntity<>(bankAccountService.getCapitalForListing(accountNumber, ListingType.STOCK), HttpStatus.OK);
+        return new ResponseEntity<>(capitalService.getCapitalForListing(accountNumber, ListingType.STOCK), HttpStatus.OK);
     }
 
     @GetMapping(value = "/future/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -169,7 +171,7 @@ public class BankAccountController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<List<CapitalDto>> getCapitalForFuture(@PathVariable(name = "accountNumber") String accountNumber) {
-        return new ResponseEntity<>(bankAccountService.getCapitalForListing(accountNumber, ListingType.FUTURE), HttpStatus.OK);
+        return new ResponseEntity<>(capitalService.getCapitalForListing(accountNumber, ListingType.FUTURE), HttpStatus.OK);
     }
 
     @GetMapping(value = "/forex/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -183,6 +185,6 @@ public class BankAccountController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<List<CapitalDto>> getCapitalForForex(@PathVariable(name = "accountNumber") String accountNumber) {
-        return new ResponseEntity<>(bankAccountService.getCapitalForListing(accountNumber, ListingType.FOREX), HttpStatus.OK);
+        return new ResponseEntity<>(capitalService.getCapitalForListing(accountNumber, ListingType.FOREX), HttpStatus.OK);
     }
 }
