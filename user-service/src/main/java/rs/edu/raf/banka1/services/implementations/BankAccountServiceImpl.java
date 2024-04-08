@@ -37,10 +37,6 @@ public class BankAccountServiceImpl implements BankAccountService {
     private CompanyRepository companyRepository;
     @Autowired
     private BankAccountRepository bankAccountRepository;
-
-    @Autowired
-    private CapitalRepository capitalRepository;
-
     @Autowired
     private PaymentRepository paymentRepository;
 
@@ -51,9 +47,6 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     @Autowired
     private BankAccountMapper bankAccountMapper;
-
-    @Autowired
-    private CapitalMapper capitalMapper;
 
     @Autowired
     EmployeeService userService;
@@ -191,11 +184,7 @@ public class BankAccountServiceImpl implements BankAccountService {
         return 0.0;
     }
 
-    @Override
-    public List<CapitalDto> getCapitalForListing(String accountNumber, ListingType listingType) {
-        BankAccount bankAccount = this.bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
-        return this.capitalRepository.getCapitalsByBankAccountAndListingType(bankAccount, listingType).stream().map(capitalMapper::capitalToCapitalDto).collect(Collectors.toList());
-    }
+
 
     private Long getEmployeeId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

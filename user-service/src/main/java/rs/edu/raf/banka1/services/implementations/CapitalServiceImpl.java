@@ -4,12 +4,19 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.exceptions.*;
+import rs.edu.raf.banka1.dtos.CapitalDto;
+import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
+import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Capital;
 import rs.edu.raf.banka1.model.Currency;
 import rs.edu.raf.banka1.model.ListingType;
+import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.CapitalRepository;
 import rs.edu.raf.banka1.services.CapitalService;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -17,10 +24,15 @@ import rs.edu.raf.banka1.services.CapitalService;
 @Setter
 public class CapitalServiceImpl implements CapitalService {
 
-    private final CapitalRepository capitalRepository;
-
-    public CapitalServiceImpl(CapitalRepository capitalRepository) {
+    private BankAccountRepository bankAccountRepository;
+    private CapitalRepository capitalRepository;
+    private CapitalMapper capitalMapper;
+    public CapitalServiceImpl(BankAccountRepository bankAccountRepository,
+                              CapitalRepository capitalRepository,
+                              CapitalMapper capitalMapper) {
+        this.bankAccountRepository = bankAccountRepository;
         this.capitalRepository = capitalRepository;
+        this.capitalMapper = capitalMapper;
     }
 
     @Override
@@ -207,4 +219,8 @@ public class CapitalServiceImpl implements CapitalService {
         capitalRepository.save(capital);
     }
 
+    public List<CapitalDto> getCapitalForListing(String accountNumber, ListingType listingType) {
+        BankAccount bankAccount = this.bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
+        return this.capitalRepository.getCapitalsByBankAccountAndListingType(bankAccount, listingType).stream().map(capitalMapper::capitalToCapitalDto).collect(Collectors.toList());
+    }
 }

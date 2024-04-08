@@ -10,4 +10,7 @@ import java.util.List;
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
     List<Transaction> getTransactionsByBankAccount_AccountNumber(String accountNumber);
+
+    List<Transaction> getTransactionsByEmployee_UserId(Long id);
+
 }

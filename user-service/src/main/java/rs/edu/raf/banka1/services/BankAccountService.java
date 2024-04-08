@@ -17,5 +17,4 @@ public interface BankAccountService {
     BankAccount findBankAccountByAccountNumber(String accountNumber);
     void activateBankAccount(BankAccount bankAccount);
     Double estimateBalanceForAccount(String accountNumber);
-    List<CapitalDto> getCapitalForListing(String accountNumber, ListingType listingType);
 }

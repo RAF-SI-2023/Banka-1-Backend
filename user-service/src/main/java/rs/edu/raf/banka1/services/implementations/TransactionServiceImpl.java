@@ -9,6 +9,10 @@ import rs.edu.raf.banka1.mapper.TransactionMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.TransactionRepository;
 import rs.edu.raf.banka1.services.CapitalService;
+import rs.edu.raf.banka1.model.BankAccount;
+import rs.edu.raf.banka1.model.Transaction;
+import rs.edu.raf.banka1.requests.CreateTransactionRequest;
+import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.TransactionService;
 
 import java.util.List;
@@ -21,10 +25,12 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionMapper transactionMapper;
     private final TransactionRepository transactionRepository;
     private final CapitalService capitalService;
+    private final BankAccountService bankAccountService;
 
-    public TransactionServiceImpl(TransactionMapper transactionMapper, TransactionRepository transactionRepository, CapitalService capitalService) {
+    public TransactionServiceImpl(TransactionMapper transactionMapper, TransactionRepository transactionRepository, BankAccountService bankAccountService, CapitalService capitalService) {
         this.transactionMapper = transactionMapper;
         this.transactionRepository = transactionRepository;
+        this.bankAccountService = bankAccountService;
         this.capitalService = capitalService;
     }
 
@@ -57,4 +63,35 @@ public class TransactionServiceImpl implements TransactionService {
         transactionRepository.save(transaction);
     }
 
+    @Override
+    public Long createTransaction(Transaction transaction) {
+        return null;
+    }
+
+    @Override
+    public TransactionDto createBuyTransaction(CreateTransactionRequest request) {
+        Transaction transaction = new Transaction();
+        BankAccount bankAccount = bankAccountService.findBankAccountByAccountNumber(request.getAccountNumber());
+        transaction.setBankAccount(bankAccount);
+        transaction.setBuy(request.getValue());
+        transaction.setCurrency(request.getCurrency());
+        return transactionMapper.transactionToTransactionDto(transactionRepository.save(transaction));
+    }
+
+    @Override
+    public TransactionDto createSellTransaction(CreateTransactionRequest request) {
+        Transaction transaction = new Transaction();
+        BankAccount bankAccount = bankAccountService.findBankAccountByAccountNumber(request.getAccountNumber());
+        transaction.setBankAccount(bankAccount);
+        transaction.setSell(request.getValue());
+        transaction.setCurrency(request.getCurrency());
+        return transactionMapper.transactionToTransactionDto(transactionRepository.save(transaction));
+    }
+
+    @Override
+    public List<TransactionDto> getTransactionsForEmployee(Long userId) {
+        return transactionRepository.getTransactionsByEmployee_UserId(userId)
+            .stream()
+            .map(transactionMapper::transactionToTransactionDto).toList();
+    }
 }

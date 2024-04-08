@@ -1,9 +1,12 @@
 package rs.edu.raf.banka1.services;
 
+import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Capital;
 import rs.edu.raf.banka1.model.Currency;
 import rs.edu.raf.banka1.model.ListingType;
+
+import java.util.List;
 
 public interface CapitalService {
     Capital createCapitalForBankAccount(BankAccount bankAccount, Currency currency, Double total, Double reserved);
@@ -20,5 +23,5 @@ public interface CapitalService {
     void releaseReserved(Long listingId, ListingType type, Double amount);
     void addBalance(Long listingId, ListingType type, Double amount);
     void removeBalance(Long listingId, ListingType type, Double amount);
-
+    List<CapitalDto> getCapitalForListing(String accountNumber, ListingType listingType);
 }
