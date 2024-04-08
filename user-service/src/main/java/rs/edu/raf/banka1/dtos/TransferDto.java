@@ -11,19 +11,15 @@ import rs.edu.raf.banka1.model.TransactionStatus;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-//NAPOMENA POSTOJI EXCHANGE U DTO/MARKET SERVICE
 public class TransferDto {
    private Long id;
-   private String senderAccountOwnerName;
+   private String senderName;
    private String senderAccountNumber;
-   private String recipientAccountOwnerName;
    private String recipientAccountNumber;
    private Double amount;
-   private String paymentCode;
-   private String model;
-   private String referenceNumber;
+   private Double convertedAmount; //Konvertovani iznos sa prvog računa
+   private Double exchangeRate;
    private TransactionStatus status;
-   private Double commissionFee;
+   private Double commission;
    private Long dateOfPayment;
-   private String channel;
 }

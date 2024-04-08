@@ -9,21 +9,19 @@ import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.ExchangeRateRepository;
 import rs.edu.raf.banka1.repositories.TransferRepository;
 import rs.edu.raf.banka1.requests.CreateTransferRequest;
-import rs.edu.raf.banka1.services.ExchangeService;
+import rs.edu.raf.banka1.services.TransferService;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ExchangeServiceImpl implements ExchangeService {
+public class TransferServiceImpl implements TransferService {
 
     private final ExchangeRateRepository exchangeRateRepository;
 
@@ -38,7 +36,7 @@ public class ExchangeServiceImpl implements ExchangeService {
     @Value("${exchangeRateApiUrl}")
     private String exchangeRateApiUrl;
 
-    public ExchangeServiceImpl(ExchangeRateRepository exchangeRateRepository,TransferRepository transferRepository,BankAccountRepository bankAccountRepository) {
+    public TransferServiceImpl(ExchangeRateRepository exchangeRateRepository, TransferRepository transferRepository, BankAccountRepository bankAccountRepository) {
         objectMapper = new ObjectMapper();
         this.exchangeRateRepository = exchangeRateRepository;
         this.transferRepository = transferRepository;
@@ -131,14 +129,8 @@ public class ExchangeServiceImpl implements ExchangeService {
 
         Transfer transfer = new Transfer();
         transfer.setSenderBankAccount(senderAccount);
-      //sender name
-        transfer.setRecipientName(request.getRecipientName());
-        transfer.setRecipientAccountNumber(request.getRecipientAccountNumber());
+//        transfer.setRecipientAccountNumber(request.getRecipientAccountNumber());
         transfer.setAmount(request.getAmount());
-
-        transfer.setPaymentCode(request.getPaymentCode());
-        transfer.setModel(request.getModel());
-        transfer.setReferenceNumber(request.getReferenceNumber());
 
         transfer.setStatus(TransactionStatus.PROCESSING);
 //        payment.setCommissionFee(Payment.calculateCommission(request.getAmount()));

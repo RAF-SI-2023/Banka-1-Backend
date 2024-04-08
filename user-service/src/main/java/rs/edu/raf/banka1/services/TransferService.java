@@ -6,7 +6,7 @@ import rs.edu.raf.banka1.requests.CreateTransferRequest;
 
 import java.util.List;
 
-public interface ExchangeService {
+public interface TransferService {
     List<ExchangeRate> getExchangeRates(String fromCurrency);
     //dto
 

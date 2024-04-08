@@ -13,15 +13,6 @@ import lombok.Setter;
 //pravljen po uzoru na Detalji transfera str 92
 public class CreateTransferRequest {
     private String senderAccountNumber;
-    private String senderName;
-    private String recipientName;
     private String recipientAccountNumber;
-    //htela sam da kazem da ovo ne treba jer je menjacnica za jednu
-    //te istu osobu ali moramo da imamo distinkciju izmedju
-    // tekuceg i deviznog
-
     private Double amount;
-    private String paymentCode;
-    private String model;
-    private String referenceNumber;
 }

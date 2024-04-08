@@ -15,25 +15,23 @@ public class Transfer {
     @ManyToOne
     @JoinColumn(name = "sender_bankaccount_id", referencedColumnName = "id")
     private BankAccount senderBankAccount;
+    @ManyToOne
+    @JoinColumn(name = "recipient_bankaccount_id", referencedColumnName = "id")
+    private BankAccount recipientBankAccount;
 
-//    private String senderAccountNumber; ?  u payment je isto bilo ovo al ima samo citav acc
-    //ne znam je l treba i ime da se izvuce rekla bih da da jer u create tranfer stoji ime
-
-    private String recipientName;
-    private String recipientAccountNumber;
     private Double amount;
-    private Double convertedAmount;
-    //Konvertovani iznos sa prvog računa
-    private Double exchange;
-    //trenutni kurs izmedju valute
-    private Double commision;
-    //
+    private Double convertedAmount; //Konvertovani iznos sa prvog računa
+    private Double exchangeRate;
+    private Double commission;
     private TransactionStatus status;
-    private String paymentCode;
-    private String model;
-    private String referenceNumber;
-    private String channel;
-    private Long transferDate;
+    private Long dateOfPayment;
 
+    @ManyToOne
+    @JoinColumn(name = "currencyFrom_id", referencedColumnName = "id")
+    private Currency currencyFrom;
+
+    @ManyToOne
+    @JoinColumn(name = "currencyTo_id", referencedColumnName = "id")
+    private Currency currencyTo;
 
 }

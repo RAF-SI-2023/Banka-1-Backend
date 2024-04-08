@@ -12,19 +12,19 @@ import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.model.ExchangeRate;
 import rs.edu.raf.banka1.model.Transfer;
 import rs.edu.raf.banka1.requests.CreateTransferRequest;
-import rs.edu.raf.banka1.services.ExchangeService;
+import rs.edu.raf.banka1.services.TransferService;
 
 import java.util.List;
 
 @RestController
-//@CrossOrigin /////////////!
-@RequestMapping("/exchange")
-public class ExchangeController {
+@CrossOrigin
+@RequestMapping("/transfer")
+public class TransferController {
 
-    private final ExchangeService exchangeService;
+    private final TransferService transferService;
 
-    public ExchangeController(ExchangeService exchangeService) {
-        this.exchangeService = exchangeService;
+    public TransferController(TransferService transferService) {
+        this.transferService = transferService;
     }
 
 
@@ -39,13 +39,13 @@ public class ExchangeController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<List<ExchangeRate>> getExchangeRates(@PathVariable(name = "baseCode") String baseCode) {
-        List<ExchangeRate> rates = exchangeService.getExchangeRates(baseCode);
+        List<ExchangeRate> rates = transferService.getExchangeRates(baseCode);
         return ResponseEntity.ok(rates);
     }
 
     @PostMapping("/transfer")
     public ResponseEntity<Boolean> createTransfer(@RequestBody CreateTransferRequest createTransferRequest) {
-        Transfer transfer = exchangeService.createTransfer(createTransferRequest);
+        Transfer transfer = transferService.createTransfer(createTransferRequest);
         if(transfer != null)
             return ResponseEntity.ok(true);
         return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
