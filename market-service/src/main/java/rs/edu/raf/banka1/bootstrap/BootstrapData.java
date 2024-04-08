@@ -129,15 +129,7 @@ public class BootstrapData implements CommandLineRunner {
         BufferedReader br = null;
 
         try {
-            Resource resource = null;
-
-            if(environment){
-                resource = new ClassPathResource(currencyFilePath);
-            }
-            else {
-                String fileStr = currencyFilePath.substring(currencyFilePath.lastIndexOf("/") + 1);
-                resource = new ClassPathResource("classpath:" + fileStr, this.getClass().getClassLoader());
-            }
+            Resource resource = new ClassPathResource(currencyFilePath, this.getClass().getClassLoader());
 
             InputStream in = resource.getInputStream();
             InputStreamReader inputStreamReader = new InputStreamReader(in);
@@ -158,6 +150,7 @@ public class BootstrapData implements CommandLineRunner {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            Logger.error("[BootstrapData] Caught exception " + e.getMessage());
         } finally {
             try {
                 if(br != null) {
