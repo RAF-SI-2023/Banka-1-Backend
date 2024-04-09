@@ -12,9 +12,6 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    private String senderAccountOwnerName;
-//    private String senderAccountNumber;
-
     @ManyToOne
     @JoinColumn(name = "sender_bankaccount_id", referencedColumnName = "id")
     private BankAccount senderBankAccount;

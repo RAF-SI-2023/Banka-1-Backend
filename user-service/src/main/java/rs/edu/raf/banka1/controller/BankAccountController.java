@@ -9,13 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.dtos.BankAccountDto;
 import rs.edu.raf.banka1.dtos.CardDto;
 import rs.edu.raf.banka1.mapper.*;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
+import rs.edu.raf.banka1.requests.EditBankAccountNameRequest;
 import rs.edu.raf.banka1.requests.customer.AccountData;
+import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
+import rs.edu.raf.banka1.responses.EditUserResponse;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CardService;
 
@@ -54,6 +58,22 @@ public class BankAccountController {
     public ResponseEntity<List<CardDto>> getCardsByAccountNumber(@PathVariable(name = "accountNumber") String accountNumber) {
        List<Card> cards = cardService.getAllCardsByAccountNumber(accountNumber);
        return ResponseEntity.ok(cards.stream().map(cardMapper::toDto).toList());
+    }
+
+    @PutMapping()
+    @Operation(summary = "Edit bank account name", description = "Customer can edit a bank account's name")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Name edited successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))}),
+            @ApiResponse(responseCode = "404", description = "Bank account not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Boolean> editCustomer(@RequestBody EditBankAccountNameRequest editBankAccountNameRequest) {
+        int edited = bankAccountService.editBankAccount(editBankAccountNameRequest.getBankAccountNumber(), editBankAccountNameRequest.getNewName());
+        if (edited == 0) return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
+        else if (edited == -1) return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
     @GetMapping(value = "/getAllCards/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
