@@ -12,7 +12,6 @@ public interface TransactionService {
     List<TransactionDto> getAllTransaction(final String accNum);
 
     void createTransaction(Capital bankCapital, Capital securityCapital, Double price, MarketOrder order, Long securityAmount);
-    Long createTransaction(Transaction transaction);
     TransactionDto createBuyTransaction(CreateTransactionRequest transaction);
     TransactionDto createSellTransaction(CreateTransactionRequest transaction);
 

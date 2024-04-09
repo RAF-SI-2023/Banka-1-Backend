@@ -20,6 +20,7 @@ import rs.edu.raf.banka1.utils.Constants;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -58,7 +59,7 @@ public class OrderServiceImpl implements OrderService {
         this.transactionService = transactionService;
         this.capitalService = capitalService;
 
-        scheduledFutureMap = new HashMap<>();
+        scheduledFutureMap = new ConcurrentHashMap<>();
     }
 
     @Override

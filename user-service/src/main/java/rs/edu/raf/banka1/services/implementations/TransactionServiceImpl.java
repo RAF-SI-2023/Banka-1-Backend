@@ -66,11 +66,6 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Long createTransaction(Transaction transaction) {
-        return null;
-    }
-
-    @Override
     public TransactionDto createBuyTransaction(CreateTransactionRequest request) {
         Transaction transaction = new Transaction();
         BankAccount bankAccount = bankAccountService.findBankAccountByAccountNumber(request.getAccountNumber());
