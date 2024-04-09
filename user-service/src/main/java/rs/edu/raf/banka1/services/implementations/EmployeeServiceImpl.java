@@ -273,6 +273,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    public Employee getEmployeeEntityByEmail(String email) {
+        return this.employeeRepository.findByEmail(email).orElseThrow(ForbiddenException::new);
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Employee> myEmployee = this.employeeRepository.findByEmail(username);
 

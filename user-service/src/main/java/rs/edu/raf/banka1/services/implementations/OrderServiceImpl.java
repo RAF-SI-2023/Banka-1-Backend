@@ -18,6 +18,7 @@ import rs.edu.raf.banka1.utils.Constants;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -59,13 +60,13 @@ public class OrderServiceImpl implements OrderService {
         this.capitalService = capitalService;
         this.employeeRepository = employeeRepository;
 
-        scheduledFutureMap = new HashMap<>();
+        scheduledFutureMap = new ConcurrentHashMap<>();
     }
 
     @Override
     public void createOrder(final CreateOrderRequest request, final Employee currentAuth) {
         final MarketOrder order = orderMapper.requestToMarketOrder(request, currentAuth);
-        ListingBaseDto listingBaseDto;
+        ListingBaseDto listingBaseDto = null;
 
         if(order.getListingType().equals(ListingType.STOCK)) {
             listingBaseDto = marketService.getStockById(order.getListingId());
@@ -80,6 +81,7 @@ public class OrderServiceImpl implements OrderService {
         order.setPrice(calculatePrice(order,listingBaseDto,order.getContractSize()));
         order.setFee(calculateFee(request.getLimitValue(), order.getPrice()));
         order.setOwner(currentAuth);
+        order.setProcessedNumber(0L);
 
         if(!currentAuth.getPosition().equalsIgnoreCase(Constants.SUPERVIZOR)) {
             if(currentAuth.getOrderlimit() < currentAuth.getLimitNow() + order.getPrice()) {
@@ -261,7 +263,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private boolean orderRequiresApprove(final Employee currentAuth) {
-        System.out.println(currentAuth);
         return currentAuth.getRequireApproval() || (currentAuth.getOrderlimit() != null && currentAuth.getLimitNow() != null && currentAuth.getLimitNow() >= currentAuth.getOrderlimit());
     }
 

@@ -9,12 +9,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.configuration.authproviders.CurrentAuth;
 import rs.edu.raf.banka1.dtos.OrderDto;
+import rs.edu.raf.banka1.exceptions.ForbiddenException;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.requests.StatusRequest;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
+import rs.edu.raf.banka1.services.EmployeeService;
 import rs.edu.raf.banka1.services.OrderService;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
@@ -28,10 +32,12 @@ public class OrderController {
 
     private final OrderService orderService;
     private final JwtUtil jwtUtil;
+    private final EmployeeService employeeService;
 
-    public OrderController(OrderService orderService, JwtUtil jwtUtil) {
+    public OrderController(OrderService orderService, JwtUtil jwtUtil, EmployeeService employeeService) {
         this.orderService = orderService;
         this.jwtUtil = jwtUtil;
+        this.employeeService = employeeService;
     }
 
     @PutMapping(value = "/{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -66,9 +72,10 @@ public class OrderController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Void> createOrder(
-        @RequestBody final CreateOrderRequest request,
-        @CurrentAuth final Employee currentAuth
-        ) {
+            @RequestBody final CreateOrderRequest request,
+            @AuthenticationPrincipal User userPrincipal
+            ) {
+        Employee currentAuth = employeeService.getEmployeeEntityByEmail(userPrincipal.getUsername());
         orderService.createOrder(request, currentAuth);
         return ResponseEntity.ok().build();
     }

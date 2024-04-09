@@ -180,27 +180,48 @@ public class BootstrapData implements CommandLineRunner {
         seedLoanRequest();
 
         MarketOrder marketOrder = new MarketOrder();
-        marketOrder.setStatus(OrderStatus.PROCESSING);
+        marketOrder.setStatus(OrderStatus.DONE);
         marketOrder.setUpdatedAt(Instant.now());
         marketOrder.setOwner(user1);
         marketOrder.setApprovedBy(user1);
         marketOrder.setPrice(123.0);
+        marketOrder.setOrderType(OrderType.BUY);
+        marketOrder.setListingType(ListingType.STOCK);
+        marketOrder.setListingId(1L);
+        marketOrder.setContractSize(100L);
+        marketOrder.setProcessedNumber(100L);
+        marketOrder.setAllOrNone(false);
+        marketOrder.setFee(7.00);
         this.orderRepository.save(marketOrder);
 
         MarketOrder marketOrder1 = new MarketOrder();
-        marketOrder1.setStatus(OrderStatus.PROCESSING);
+        marketOrder1.setStatus(OrderStatus.DONE);
         marketOrder1.setUpdatedAt(Instant.now());
         marketOrder1.setPrice(456.0);
+        marketOrder1.setOrderType(OrderType.SELL);
         marketOrder1.setOwner(client);
         marketOrder1.setApprovedBy(user1);
+        marketOrder1.setListingType(ListingType.FOREX);
+        marketOrder1.setListingId(1L);
+        marketOrder1.setContractSize(20L);
+        marketOrder1.setProcessedNumber(20L);
+        marketOrder1.setAllOrNone(false);
+        marketOrder1.setFee(7.00);
         this.orderRepository.save(marketOrder1);
 
         MarketOrder marketOrder2 = new MarketOrder();
-        marketOrder2.setStatus(OrderStatus.PROCESSING);
+        marketOrder2.setStatus(OrderStatus.DONE);
         marketOrder2.setUpdatedAt(Instant.now());
         marketOrder2.setPrice(789.0);
+        marketOrder2.setOrderType(OrderType.BUY);
         marketOrder2.setOwner(client);
         marketOrder2.setApprovedBy(user1);
+        marketOrder2.setListingType(ListingType.FUTURE);
+        marketOrder2.setListingId(1L);
+        marketOrder2.setContractSize(160L);
+        marketOrder2.setProcessedNumber(160L);
+        marketOrder2.setAllOrNone(false);
+        marketOrder2.setFee(7.00);
         this.orderRepository.save(marketOrder2);
 
         LocalDateTime now = LocalDateTime.now();
