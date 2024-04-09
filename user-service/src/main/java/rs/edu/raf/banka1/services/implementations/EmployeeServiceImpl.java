@@ -15,6 +15,7 @@ import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.exceptions.EmployeeNotFoundException;
+import rs.edu.raf.banka1.exceptions.ForbiddenException;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
 import rs.edu.raf.banka1.mapper.LimitMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
@@ -266,6 +267,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public List<LimitDto> getAllLimits(Employee currentAuth) {
         return this.employeeRepository.findAll().stream().map(limitMapper::toLimitDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public Employee getEmployeeEntityByEmail(String email) {
+        return this.employeeRepository.findByEmail(email).orElseThrow(ForbiddenException::new);
     }
 
     @Override

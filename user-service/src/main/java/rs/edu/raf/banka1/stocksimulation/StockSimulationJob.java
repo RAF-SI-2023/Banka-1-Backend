@@ -8,7 +8,6 @@ import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.OrderService;
 import rs.edu.raf.banka1.services.TransactionService;
 
-import java.util.Optional;
 import java.util.Random;
 
 @RequiredArgsConstructor
@@ -35,7 +34,6 @@ public class StockSimulationJob implements Runnable {
             return;
 
         MarketOrder order = orderService.getOrderById(orderId);
-
         if(order.getStatus().equals(OrderStatus.DONE) || !order.getStatus().equals(OrderStatus.APPROVED))
             return;
 
@@ -91,7 +89,7 @@ public class StockSimulationJob implements Runnable {
     //todo treba da se radi sa currency i da se doda u listingdto exchangedto koji ce da ima i currency u sebi
     private void createTransaction(MarketOrder order, ListingBaseDto listingBaseDto, Long processedNum, String currencyCode){
         Capital bankAccountCapital = capitalService.getCapitalByCurrencyCode(currencyCode);
-        Capital securityCapital = capitalService.getCapitalByListingIdAndType(listingBaseDto.getListingId(), ListingType.valueOf(listingBaseDto.getListingType()));
+        Capital securityCapital = capitalService.getCapitalByListingIdAndType(listingBaseDto.getListingId(), ListingType.valueOf(listingBaseDto.getListingType().toUpperCase()));
 
         Double price = orderService.calculatePrice(order,listingBaseDto,processedNum);
         price = convertPrice(price,null,null);
