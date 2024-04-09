@@ -39,6 +39,7 @@ import java.util.Date;
 
 import static rs.edu.raf.banka1.utils.Constants.businessHoursFilePath;
 import static rs.edu.raf.banka1.utils.Constants.countryTimezoneOffsetsFilePath;
+import static rs.edu.raf.banka1.utils.Constants.micCsvFilePath;
 
 @Service
 public class ExchangeServiceImpl implements ExchangeService {
@@ -46,10 +47,6 @@ public class ExchangeServiceImpl implements ExchangeService {
     private final HolidayRepository holidayRepository;
     private final ExchangeRepository exchangeRepository;
     private final ExchangeMapper exchangeMapper;
-
-
-    @Value("${dev.environment}")
-    private Boolean environment;
 
     @Autowired
     public ExchangeServiceImpl(
@@ -90,15 +87,9 @@ public class ExchangeServiceImpl implements ExchangeService {
 //        try (CSVReader reader = new CSVReader(new FileReader(Constants.micCsvFilePath))) {
         try {
 
-            if (this.environment) {
-                reader = new CSVReader(new FileReader(Constants.micCsvFilePath));
-            } else {
-                String classpath = "classpath:" + Constants.micCsvFilePath
-                        .substring(Constants.micCsvFilePath.lastIndexOf("/") + 1);
-                resource = new ClassPathResource(classpath);
-                InputStream in = resource.getInputStream();
-                reader = new CSVReader(new InputStreamReader(in));
-            }
+            resource = new ClassPathResource(micCsvFilePath, this.getClass().getClassLoader());
+            InputStream in = resource.getInputStream();
+            reader = new CSVReader(new InputStreamReader(in));
 
             // e.g. 17:00:00
             SimpleDateFormat hoursDateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -146,6 +137,7 @@ public class ExchangeServiceImpl implements ExchangeService {
             saveAllHolidays(countryIsoToCountryMap, countryIsoToAllHolidayDatesMap);
         } catch (IOException | CsvValidationException | ParseException e) {
             e.printStackTrace();
+            Logger.error("[ExchangeSericeImpl] Caught exception during " + e.getMessage());
         } finally {
             try {
                 if (reader != null) {
@@ -199,17 +191,11 @@ public class ExchangeServiceImpl implements ExchangeService {
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-            if (this.environment) {
-                countryTimezones = mapper.readValue(new File(countryTimezoneOffsetsFilePath), CountryTimezoneDto[].class);
-            } else {
-                String classpath = "classpath:" + countryTimezoneOffsetsFilePath
-                        .substring(countryTimezoneOffsetsFilePath.lastIndexOf("/") + 1);
-
-                resource = new ClassPathResource(classpath);
-                countryTimezones = mapper.readValue(resource.getInputStream(), CountryTimezoneDto[].class);
-            }
+            resource = new ClassPathResource(countryTimezoneOffsetsFilePath, this.getClass().getClassLoader());
+            countryTimezones = mapper.readValue(resource.getInputStream(), CountryTimezoneDto[].class);
         } catch (IOException e) {
             e.printStackTrace();
+            Logger.error("[ExchangeServiceImpl] Caught exception " + e.getMessage());
         }
 
         return countryTimezones;
@@ -220,21 +206,17 @@ public class ExchangeServiceImpl implements ExchangeService {
         Resource resource = null;
 
         try {
+
             ObjectMapper mapper = new ObjectMapper();
-            if (this.environment) {
-                resultMap = mapper.readValue(new File(businessHoursFilePath), HashMap.class);
-            } else {
-                String classpath = "classpath:" + businessHoursFilePath
-                        .substring(businessHoursFilePath.lastIndexOf("/") + 1);
-                resource = new ClassPathResource(classpath);
-                resultMap = mapper.readValue(resource.getInputStream(), HashMap.class);
-            }
+            resource = new ClassPathResource(businessHoursFilePath, this.getClass().getClassLoader());
+            resultMap = mapper.readValue(resource.getInputStream(), HashMap.class);
 
             for (Map.Entry<String, BusinessHoursDto> entry : resultMap.entrySet()) {
                 resultMap.put(entry.getKey(), mapper.convertValue(entry.getValue(), BusinessHoursDto.class));
             }
         } catch (IOException e) {
             e.printStackTrace();
+            Logger.error("[ExchangeServiceImpl] Caught exception " + e.getMessage());
         }
 
         return resultMap;

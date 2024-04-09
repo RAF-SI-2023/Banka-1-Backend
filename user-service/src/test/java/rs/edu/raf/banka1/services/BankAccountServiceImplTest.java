@@ -3,10 +3,11 @@ package rs.edu.raf.banka1.services;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
@@ -164,6 +165,79 @@ public class BankAccountServiceImplTest {
         when(bankAccountService.getCustomerRepository().findById(customerId)).thenReturn(Optional.empty());
         List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCustomer(customerId);
         assertEquals(bankAccounts.size(), 0);
+    }
+
+    @Test
+    public void testEditBankAccountPassed() {
+        // Mocking data
+        String accountNumber = "123456789";
+        String newName = "New Account Name";
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber(accountNumber);
+        bankAccount.setAccountName("Old Account Name");
+        Customer customer = new Customer();
+        customer.setEmail("test@example.com");
+        bankAccount.setCustomer(customer);
+
+        try (MockedStatic<SecurityContextHolder> securityContextHolderMockedStatic = Mockito.mockStatic(SecurityContextHolder.class)) {
+            Authentication authentication = mock(Authentication.class);
+            SecurityContext securityContext = mock(SecurityContext.class);
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.getName()).thenReturn("test@example.com");
+            securityContextHolderMockedStatic.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+
+            when(bankAccountRepository.findBankAccountByAccountNumber(accountNumber)).thenReturn(Optional.of(bankAccount));
+            int result = bankAccountService.editBankAccount(accountNumber, newName);
+
+            assertEquals(1, result);
+            assertEquals(newName, bankAccount.getAccountName());
+            verify(bankAccountRepository, times(1)).save(bankAccount);
+        }
+    }
+
+    @Test
+    public void testEditBankAccountWrongOwner() {
+        // Mocking data
+        String accountNumber = "123456789";
+        String newName = "New Account Name";
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber(accountNumber);
+        bankAccount.setAccountName("Old Account Name");
+        Customer customer = new Customer();
+        customer.setEmail("test@example.com");
+        bankAccount.setCustomer(customer);
+
+        try (MockedStatic<SecurityContextHolder> securityContextHolderMockedStatic = Mockito.mockStatic(SecurityContextHolder.class)) {
+            Authentication authentication = mock(Authentication.class);
+            SecurityContext securityContext = mock(SecurityContext.class);
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            when(authentication.getName()).thenReturn("wrong@email.com");
+            securityContextHolderMockedStatic.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+
+            when(bankAccountRepository.findBankAccountByAccountNumber(accountNumber)).thenReturn(Optional.of(bankAccount));
+            int result = bankAccountService.editBankAccount(accountNumber, newName);
+
+            assertEquals(-1, result);
+            assertEquals("Old Account Name", bankAccount.getAccountName());
+            verify(bankAccountRepository, times(0)).save(bankAccount);
+        }
+    }
+
+
+    @Test
+    public void testEditBankAccountAccountNotFound() {
+        String accountNumber = "123456789";
+        String newName = "New Account Name";
+
+        // Mocking repository behavior
+        when(bankAccountRepository.findBankAccountByAccountNumber(accountNumber)).thenReturn(Optional.empty());
+
+        // Call the method
+        int result = bankAccountService.editBankAccount(accountNumber, newName);
+
+        // Verify the method behavior
+        assertEquals(0, result);
+        verify(bankAccountRepository, never()).save(any());
     }
 
     @Test

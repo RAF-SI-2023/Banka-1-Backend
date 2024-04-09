@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.services.implementations;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,6 +27,7 @@ import java.util.List;
 @Getter
 @Setter
 @Service
+
 public class BankAccountServiceImpl implements BankAccountService {
     @Autowired
     private CustomerRepository customerRepository;
@@ -174,6 +176,21 @@ public class BankAccountServiceImpl implements BankAccountService {
     public void activateBankAccount(BankAccount bankAccount) {
         bankAccount.setAccountStatus(true);
         bankAccountRepository.save(bankAccount);
+    }
+
+    @Override
+    public int editBankAccount(String accountNumber, String newName) {
+        BankAccount b = bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElse(null);
+        if (b == null) return 0;
+
+        String loggedUserMail = SecurityContextHolder.getContext().getAuthentication().getName();
+        if(!b.getCustomer().getEmail().equals(loggedUserMail)){
+            return -1;
+        }
+
+        b.setAccountName(newName);
+        bankAccountRepository.save(b);
+        return 1;
     }
 
     private Long getEmployeeId() {
