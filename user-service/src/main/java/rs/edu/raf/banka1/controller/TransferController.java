@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.dtos.ExchangeRateDto;
 import rs.edu.raf.banka1.dtos.PaymentDto;
 import rs.edu.raf.banka1.dtos.TransferDto;
 import rs.edu.raf.banka1.model.Transfer;
@@ -29,20 +30,20 @@ public class TransferController {
     }
 
 
-//ovde fali subTypes = {ExchangeDto.class} nakon schema
-//    @GetMapping(value = "/rates/{baseCode}", produces = MediaType.APPLICATION_JSON_VALUE)
-//    @Operation(summary = "Get all exchange rates", description = "Get all rates")
-//    @ApiResponses({
-//            @ApiResponse(responseCode = "200", description = "Successful operation",
-//                    content = {@Content(mediaType = "application/json",
-//                            schema = @Schema(implementation = List.class))}),
-//            @ApiResponse(responseCode = "403", description = "Unauthorized"),
-//            @ApiResponse(responseCode = "500", description = "Internal server error")
-//    })
-//    public ResponseEntity<List<ExchangeRate>> getExchangeRates(@PathVariable(name = "baseCode") String baseCode) {
-//        List<ExchangeRate> rates = transferService.getExchangeRates(baseCode);
-//        return ResponseEntity.ok(rates);
-//    }
+    @GetMapping(value = "/exchangeRates", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all exchange rates", description = "Get all rates")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {ExchangeRateDto.class}))}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<ExchangeRateDto>> getExchangeRates() {
+        List<ExchangeRateDto> rates = transferService.getExchangeRates();
+        return ResponseEntity.ok(rates);
+    }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create new transfer", description = "Create new transfer")
