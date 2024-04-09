@@ -245,10 +245,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public void resetEmployeeLimits() {
-        if(LocalDate.now().getDayOfWeek().equals(DayOfWeek.SATURDAY) ||
-                LocalDate.now().getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
-            return;
-        }
         List<Employee> users = employeeRepository.findAll();
         users.forEach(user->user.setLimitNow(0.0));
         employeeRepository.saveAll(users);
