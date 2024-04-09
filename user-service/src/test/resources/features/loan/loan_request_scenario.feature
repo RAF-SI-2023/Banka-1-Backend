@@ -22,8 +22,10 @@ Feature: employee can create and manage loan requests
       When User calls get on "/loan/requests"
       Then i should get response with status 200
 
-    Scenario: employee can get loan request by id
+    Scenario: employee can change loan request using id
       Given i am logged in with email "admin@admin.com" and password "admin"
-      And i know which loan id i am searching
-        When User calls get on "/loan/requests/"
+      And i know which loan id i am changing
+      And i want to change status to "ACCEPTED"
+        When i send PUT request to "/loan/requests/"
         Then i should get response with status 200
+      And loan request status should be "ACCEPTED"

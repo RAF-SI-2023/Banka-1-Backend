@@ -7,6 +7,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import jakarta.transaction.Transactional;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -112,6 +113,7 @@ public class UserControllerSteps {
     private PaymentRecipientDto paymentRecipientDto = new PaymentRecipientDto();
     private CreateTransferRequest createTransferRequest = new CreateTransferRequest();
     private CreateLoanRequest createLoanRequest = new CreateLoanRequest();
+    private StatusRequest statusRequest = new StatusRequest();
 
     @Given("customer wants to send money from account {string} to account {string}")
     public void customerWantsToSendMoneyFromAccountToAccount(String arg0, String arg1) {
@@ -248,7 +250,7 @@ public class UserControllerSteps {
         }
     }
 
-    @Given("i know which loan id i am searching")
+    @Given("i know which loan id i am changing")
     public void iKnowWhichLoanIdIAmSearching() {
         lastid = loanRequestRepository.findAll().get(0).getId();
 
@@ -277,6 +279,18 @@ public class UserControllerSteps {
         catch (JsonProcessingException e) {
             fail(e.getMessage());
         }
+    }
+
+    @And("i want to change status to {string}")
+    public void iWantToChangeStatusTo(String arg0) {
+        statusRequest.setStatus(arg0);
+    }
+
+    @Then("loan request status should be {string}")
+    public void loanRequestStatusShouldBe(String arg0) {
+        LoanRequest loanRequest = loanRequestRepository.findById(lastid).orElse(null);
+        assertThat(loanRequest).isNotNull();
+        assertThat(loanRequest.getStatus()).isEqualTo(LoanRequestStatus.valueOf(arg0));
     }
 
 
@@ -676,6 +690,7 @@ public class UserControllerSteps {
     }
 
 
+    @Transactional
     @When("User calls get on {string}")
     public void iSendAGETRequestTo(String path) {
         userResponses.clear();
@@ -689,12 +704,7 @@ public class UserControllerSteps {
             else if (path.equals("/customer/getAll")) {
                 lastReadAllCustomersResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<CustomerResponse>>() {
                 });
-                //TODO: POPRAVI OVO DA RADI BEZ EAGER
-                bankAccountRepository.findAll().forEach(account -> {
-                    if (account.getCustomer() == null) return;
-                    customerResponses.add(customerMapper.customerToCustomerResponse(account.getCustomer()));
-                });
-                //customerRepository.findAll().forEach(user -> customerResponses.add(customerMapper.customerToCustomerResponse(user)));
+                customerRepository.findAll().forEach(user -> customerResponses.add(customerMapper.customerToCustomerResponse(user)));
             }
             else if (path.startsWith("/employee/get/")) {
                     lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), EmployeeDto.class);
@@ -732,9 +742,6 @@ public class UserControllerSteps {
                 getBody(url + port + path + "/" + paymentId);
             }
             else if(path.equals("/transfer/")){
-                getBody(url + port + path + lastid);
-            }
-            else if(path.equals("/loan/requests/")){
                 getBody(url + port + path + lastid);
             }
             else{
@@ -836,6 +843,9 @@ public class UserControllerSteps {
         }
         else if(path.equals("/recipients/edit")){
             put(url + port + path, paymentRecipientDto);
+        }
+        else if(path.equals("/loan/requests/")){
+            put(url + port + path + lastid, statusRequest);
         }
     }
 
@@ -1005,6 +1015,8 @@ public class UserControllerSteps {
     }
 
     private ObjectMapper objectMapper = new ObjectMapper();
+
+    @Transactional
     @Then("i should get all customers")
     public void iShouldGetAllCustomers() {
         try{
