@@ -21,8 +21,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
 //import rs.edu.raf.banka1.mapper.ForeignCurrencyAccountMapper;
+import rs.edu.raf.banka1.dtos.LoanRequestDto;
 import rs.edu.raf.banka1.dtos.PaymentDto;
 import rs.edu.raf.banka1.dtos.PaymentRecipientDto;
+import rs.edu.raf.banka1.dtos.TransferDto;
 import rs.edu.raf.banka1.dtos.customer.CustomerDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
@@ -91,6 +93,8 @@ public class UserControllerSteps {
     private CustomerRepository customerRepository;
     private BankAccountRepository bankAccountRepository;
     private PaymentRecipientRepository paymentRecipientRepository;
+    private TransferRepository transferRepository;
+    private LoanRequestRepository loanRequestRepository;
     private EmployeeMapper userMapper = new EmployeeMapper(new PermissionMapper(), passwordEncoder, permissionRepository);
     private CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper());
     private List<EmployeeDto> userResponses = new ArrayList<>();
@@ -108,6 +112,149 @@ public class UserControllerSteps {
     private Long paymentId;
     private CreatePaymentRecipientRequest createPaymentRecipientRequest = new CreatePaymentRecipientRequest();
     private PaymentRecipientDto paymentRecipientDto = new PaymentRecipientDto();
+    private CreateTransferRequest createTransferRequest = new CreateTransferRequest();
+    private CreateLoanRequest createLoanRequest = new CreateLoanRequest();
+
+    @Given("customer wants to send money from account {string} to account {string}")
+    public void customerWantsToSendMoneyFromAccountToAccount(String arg0, String arg1) {
+        createTransferRequest.setSenderAccountNumber(arg0);
+        createTransferRequest.setRecipientAccountNumber(arg1);
+    }
+
+    @Given("customer wants to transfer {double}")
+    public void customerWantsToTransfer(double arg0) {
+        createTransferRequest.setAmount(arg0);
+    }
+
+    @Then("response should contain transfer i made")
+    public void responseShouldContainTransferIMade() {
+        try {
+            List<TransferDto> transfers = objectMapper.readValue(lastResponse.getBody().toString(), new TypeReference<List<TransferDto>>() {
+            });
+            assertThat(transfers).isNotEmpty();
+            assertThat(transfers).filteredOn(transferDto -> transferDto.getSenderAccountNumber().equals("1234567890") &&
+                    transferDto.getRecipientAccountNumber().equals("0987654321") &&
+                    transferDto.getAmount().equals(1000.00)).isNotEmpty();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Given("customer is aware of transfer id")
+    public void customerIsAwareOfTransferId() {
+        List<Transfer> transfer = transferRepository.findAll();
+
+        for(var t:transfer){
+            if(t.getSenderBankAccount().getAccountNumber().equals("1234567890") && t.getRecipientBankAccount().getAccountNumber().equals("0987654321") && t.getAmount().equals(1000.00)){
+                lastid = t.getId();
+                break;
+            }
+        }
+
+    }
+
+    @Then("response should contain only the transfer i made")
+    public void responseShouldContainOnlyTheTransferIMade() {
+        TransferDto transferDto = null;
+        try {
+            transferDto = objectMapper.readValue(lastResponse.getBody().toString(), TransferDto.class);
+        } catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+        assertThat(transferDto).isNotNull();
+        assertThat(transferDto.getSenderAccountNumber()).isEqualTo("1234567890");
+        assertThat(transferDto.getRecipientAccountNumber()).isEqualTo("0987654321");
+        assertThat(transferDto.getAmount()).isEqualTo(1000.00);
+    }
+
+    @Given("loanType is {string}")
+    public void loantypeIs(String arg0) {
+        createLoanRequest.setLoanType(LoanType.valueOf(arg0));
+    }
+
+    @Given("loanAmount is {double}")
+    public void loanammountIs(double arg) {
+        createLoanRequest.setLoanAmount(arg);
+    }
+
+    @Given("currency is {string}")
+    public void currencyIs(String arg0) {
+        createLoanRequest.setCurrency(arg0);
+    }
+
+    @Given("loanPurpose is {string}")
+    public void loanpurposeIs(String arg0) {
+        createLoanRequest.setLoanPurpose(arg0);
+    }
+
+    @Given("monthlyIncomeAmount is {string}")
+    public void monthlyincomeamountIs(String arg0) {
+        createLoanRequest.setMonthlyIncomeAmount(Double.parseDouble(arg0));
+    }
+
+    @Given("monthlyIncomeCurrency is {string}")
+    public void monthlyincomecurrencyIs(String arg0) {
+        createLoanRequest.setMonthlyIncomeCurrency(arg0);
+    }
+
+    @Given("permanentEmployee is true")
+    public void permanentemployeeIsTrue() {
+        createLoanRequest.setPermanentEmployee(true);
+    }
+
+    @Given("employmentPeriod is {string}")
+    public void employmentperiodIs(String arg0) {
+        createLoanRequest.setEmploymentPeriod(Long.parseLong(arg0));
+    }
+
+    @Given("loanTerm is {string}")
+    public void loantermIs(String arg0) {
+        createLoanRequest.setLoanTerm(Long.parseLong(arg0));
+    }
+
+    @Given("branchOffice is {string}")
+    public void branchofficeIs(String arg0) {
+        createLoanRequest.setBranchOffice(arg0);
+    }
+
+    @Given("phoneNumber is {string}")
+    public void phonenumberIs(String arg0) {
+        createLoanRequest.setPhoneNumber(arg0);
+    }
+
+    @Given("accountNumber is {string}")
+    public void accountnumberIs(String arg0) {
+        createLoanRequest.setAccountNumber(arg0);
+    }
+
+    @Then("response should be correct loanRequestDto")
+    public void responseShouldBeCorrectLoanRequestDto() {
+        try{
+            LoanRequestDto loanRequestDto = objectMapper.readValue(lastResponse.getBody().toString(), LoanRequestDto.class);
+            assertThat(loanRequestDto).isNotNull();
+            assertThat(loanRequestDto.getLoanType()).isEqualTo(createLoanRequest.getLoanType());
+            assertThat(loanRequestDto.getLoanAmount()).isEqualTo(createLoanRequest.getLoanAmount());
+            assertThat(loanRequestDto.getCurrency()).isEqualTo(createLoanRequest.getCurrency());
+            assertThat(loanRequestDto.getLoanPurpose()).isEqualTo(createLoanRequest.getLoanPurpose());
+            assertThat(loanRequestDto.getMonthlyIncomeAmount()).isEqualTo(createLoanRequest.getMonthlyIncomeAmount());
+            assertThat(loanRequestDto.getMonthlyIncomeCurrency()).isEqualTo(createLoanRequest.getMonthlyIncomeCurrency());
+            assertThat(loanRequestDto.getPermanentEmployee()).isEqualTo(createLoanRequest.getPermanentEmployee());
+            assertThat(loanRequestDto.getEmploymentPeriod()).isEqualTo(createLoanRequest.getEmploymentPeriod());
+            assertThat(loanRequestDto.getLoanTerm()).isEqualTo(createLoanRequest.getLoanTerm());
+            assertThat(loanRequestDto.getBranchOffice()).isEqualTo(createLoanRequest.getBranchOffice());
+            assertThat(loanRequestDto.getPhoneNumber()).isEqualTo(createLoanRequest.getPhoneNumber());
+            assertThat(loanRequestDto.getAccountNumber()).isEqualTo(createLoanRequest.getAccountNumber());
+        } catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Given("i know which loan id i am searching")
+    public void iKnowWhichLoanIdIAmSearching() {
+        lastid = loanRequestRepository.findAll().get(0).getId();
+
+    }
 
 
     @Data
@@ -232,7 +379,9 @@ public class UserControllerSteps {
                                CustomerRepository customerRepository,
                                BankAccountRepository bankAccountRepository,
                                PaymentRepository paymentRepository,
-                               PaymentRecipientRepository paymentRecipientRepository) {
+                               PaymentRecipientRepository paymentRecipientRepository,
+                               TransferRepository transferRepository,
+                               LoanRequestRepository loanRequestRepository) {
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
         this.passwordEncoder = passwordEncoder;
@@ -240,6 +389,8 @@ public class UserControllerSteps {
         this.bankAccountRepository = bankAccountRepository;
         this.paymentRepository = paymentRepository;
         this.paymentRecipientRepository = paymentRecipientRepository;
+        this.transferRepository = transferRepository;
+        this.loanRequestRepository = loanRequestRepository;
     }
 
     @Given("i have email {string}")
@@ -513,7 +664,12 @@ public class UserControllerSteps {
             else if (path.equals("/customer/getAll")) {
                 lastReadAllCustomersResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<CustomerResponse>>() {
                 });
-                customerRepository.findAll().forEach(user -> customerResponses.add(customerMapper.customerToCustomerResponse(user)));
+                //TODO: POPRAVI OVO DA RADI BEZ EAGER
+                bankAccountRepository.findAll().forEach(account -> {
+                    if (account.getCustomer() == null) return;
+                    customerResponses.add(customerMapper.customerToCustomerResponse(account.getCustomer()));
+                });
+                //customerRepository.findAll().forEach(user -> customerResponses.add(customerMapper.customerToCustomerResponse(user)));
             }
             else if (path.startsWith("/employee/get/")) {
                     lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), EmployeeDto.class);
@@ -562,6 +718,18 @@ public class UserControllerSteps {
             else if(path.equals("/recipients/getAll")){
                 getBody(url + port + path);
             }
+            else if(path.equals("/transter/")){
+                getBody(url + port + path + lastid);
+            }
+            else if(path.equals("/transfer/getAll/1234567890")){
+                getBody(url + port + path);
+            }
+            else if(path.equals("/loan/requests")){
+                getBody(url + port + path);
+            }
+            else if(path.equals("/loan/requests/")){
+                getBody(url + port + path + lastid);
+            }
         }
         catch (Exception e){
             e.printStackTrace();
@@ -604,6 +772,12 @@ public class UserControllerSteps {
             }
             else if(path.equals("/recipients/add")){
                 post(url + port + path, createPaymentRecipientRequest);
+            }
+            else if(path.equals("/transfer")){
+                post(url + port + path, createTransferRequest);
+            }
+            else if(path.equals("/loan/requests")){
+                post(url + port + path, createLoanRequest);
             }
 
 //            else if (path.equals("/balance/foreign_currency/create")) {

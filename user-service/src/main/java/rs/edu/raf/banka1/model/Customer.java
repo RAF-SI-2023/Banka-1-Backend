@@ -62,8 +62,7 @@ public class Customer extends User {
     @OneToMany(
             mappedBy = "customer",
             cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.EAGER
+            orphanRemoval = true
     )
     private List<BankAccount> accountIds;
 
