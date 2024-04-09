@@ -23,9 +23,8 @@ public interface CapitalService {
     void releaseReserved(Long listingId, ListingType type, Double amount);
     void addBalance(Long listingId, ListingType type, Double amount);
     void removeBalance(Long listingId, ListingType type, Double amount);
-    List<CapitalDto> getCapitalForListing(String accountNumber, ListingType listingType);
-    List<CapitalDto> getAllCapitals(String accountNumber);
-    Double estimateBalanceForex(String accountNumber, Long forexId);
-    Double estimateBalanceFuture(String accountNumber, Long futureId);
-    Double estimateBalanceStock(String accountNumber, Long stockId);
+    Double getCapital(String accountNumber);
+    Double estimateBalanceForex(Long forexId);
+    Double estimateBalanceFuture(Long futureId);
+    Double estimateBalanceStock(Long stockId);
 }

@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.services.implementations;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.dtos.CapitalDto;
@@ -23,9 +24,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-@Service
 @Getter
 @Setter
+@Service
 public class CapitalServiceImpl implements CapitalService {
 
     private MarketService marketService;
@@ -134,6 +135,13 @@ public class CapitalServiceImpl implements CapitalService {
         processRemoveBalance(capital, amount);
     }
 
+    @Override
+    public Double getCapital(String accountNumber) { // currencyID ?
+        BankAccount bankAccount = this.bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
+        Capital capital = this.capitalRepository.getCapitalByBankAccount(bankAccount).orElseThrow(() -> new CapitalNotFoundByBankAccountException(accountNumber));
+        return capital.getTotal()-capital.getReserved();
+    }
+
     private void processReservation(Capital capital, Double amount) {
         if(amount <= 0)
             throw new InvalidReservationAmountException();
@@ -231,39 +239,26 @@ public class CapitalServiceImpl implements CapitalService {
 
         capitalRepository.save(capital);
     }
-
-    public List<CapitalDto> getCapitalForListing(String accountNumber, ListingType listingType) {
-        BankAccount bankAccount = this.bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
-        return this.capitalRepository.getCapitalsByBankAccountAndListingType(bankAccount, listingType).stream().map(capitalMapper::capitalToCapitalDto).collect(Collectors.toList());
-    }
-
     @Override
-    public List<CapitalDto> getAllCapitals(String accountNumber) {
-        BankAccount bankAccount = this.bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
-        return this.capitalRepository.getCapitalsByBankAccount(bankAccount).stream().map(capitalMapper::capitalToCapitalDto).collect(Collectors.toList());
-    }
-
-    @Override
-    public Double estimateBalanceForex(String accountNumber, Long forexId) {
-        BankAccount bankAccount = this.bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
+    public Double estimateBalanceForex(Long forexId) {
         ListingForexDto listingForexDto = this.marketService.getForexById(forexId);
-        Capital capital = this.capitalRepository.getCapitalByListingIdAndBankAccount(forexId, bankAccount);
-        return capital.getTotal()*listingForexDto.getPrice();
+        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingType(forexId, ListingType.FOREX).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(forexId, ListingType.FOREX));
+        return (capital.getTotal()-capital.getReserved())*listingForexDto.getPrice();
     }
 
     @Override
-    public Double estimateBalanceFuture(String accountNumber, Long futureId) {
-        BankAccount bankAccount = this.bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
+    public Double estimateBalanceFuture(Long futureId) {
         ListingFutureDto listingFutureDto = this.marketService.getFutureById(futureId);
-        Capital capital = this.capitalRepository.getCapitalByListingIdAndBankAccount(futureId, bankAccount);
-        return capital.getTotal()*listingFutureDto.getPrice();
+        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingType(futureId, ListingType.FUTURE).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(futureId, ListingType.FUTURE));
+        return (capital.getTotal()-capital.getReserved())*listingFutureDto.getPrice();
     }
 
     @Override
-    public Double estimateBalanceStock(String accountNumber, Long stockId) {
-        BankAccount bankAccount = this.bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
+    public Double estimateBalanceStock(Long stockId) {
         ListingStockDto listingStockDto = this.marketService.getStockById(stockId);
-        Capital capital = this.capitalRepository.getCapitalByListingIdAndBankAccount(stockId, bankAccount);
-        return capital.getTotal()*listingStockDto.getPrice();
+        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingType(stockId, ListingType.STOCK).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(stockId, ListingType.STOCK));
+        return (capital.getTotal()-capital.getReserved())*listingStockDto.getPrice();
     }
+
 }
+
