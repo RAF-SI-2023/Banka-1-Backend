@@ -255,7 +255,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public LimitDto setLimitForEmployee(NewLimitDto newLimitDto) {
+    public LimitDto setOrderLimitForEmployee(NewLimitDto newLimitDto) {
         Long employeeId = newLimitDto.getUserId();
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(()-> new EmployeeNotFoundException(employeeId));
         if(!employee.getPosition().equalsIgnoreCase(Constants.AGENT)) {

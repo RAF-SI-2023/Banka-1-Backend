@@ -288,7 +288,7 @@ public class EmployeeController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<LimitDto> setOrderLimitForUser(@RequestBody NewLimitDto newLimitDto) {
-        return new ResponseEntity<>(employeeService.setLimitForEmployee(newLimitDto), HttpStatus.OK);
+        return new ResponseEntity<>(employeeService.setOrderLimitForEmployee(newLimitDto), HttpStatus.OK);
     }
 
     @GetMapping(value = "/limits/getAll", produces = MediaType.APPLICATION_JSON_VALUE)

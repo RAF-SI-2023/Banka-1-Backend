@@ -4,14 +4,12 @@ package rs.edu.raf.banka1.services.implementations;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.OrderDto;
+import rs.edu.raf.banka1.dtos.TransactionDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
 import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.*;
-import rs.edu.raf.banka1.repositories.BankAccountRepository;
-import rs.edu.raf.banka1.repositories.CapitalRepository;
-import rs.edu.raf.banka1.repositories.OrderRepository;
-import rs.edu.raf.banka1.repositories.TransactionRepository;
+import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.services.*;
 import rs.edu.raf.banka1.stocksimulation.StockSimulationJob;
@@ -34,6 +32,8 @@ public class OrderServiceImpl implements OrderService {
     private final TransactionService transactionService;
     private final CapitalService capitalService;
 
+    private final EmployeeRepository employeeRepository;
+
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private final Random random = new Random();
     private final TaskScheduler taskScheduler;
@@ -49,21 +49,22 @@ public class OrderServiceImpl implements OrderService {
         final MarketService marketService,
         final TaskScheduler taskScheduler,
         final TransactionService transactionService,
-        final CapitalService capitalService
-    ) {
+        final CapitalService capitalService,
+        EmployeeRepository employeeRepository) {
         this.orderMapper = orderMapper;
         this.orderRepository = orderRepository;
         this.marketService = marketService;
         this.taskScheduler = taskScheduler;
         this.transactionService = transactionService;
         this.capitalService = capitalService;
+        this.employeeRepository = employeeRepository;
 
         scheduledFutureMap = new HashMap<>();
     }
 
     @Override
     public void createOrder(final CreateOrderRequest request, final Employee currentAuth) {
-        final MarketOrder order = orderMapper.requestToMarketOrder(request);
+        final MarketOrder order = orderMapper.requestToMarketOrder(request, currentAuth);
         ListingBaseDto listingBaseDto;
 
         if(order.getListingType().equals(ListingType.STOCK)) {
@@ -83,6 +84,8 @@ public class OrderServiceImpl implements OrderService {
         if(!currentAuth.getPosition().equalsIgnoreCase(Constants.SUPERVIZOR)) {
             if(currentAuth.getOrderlimit() < currentAuth.getLimitNow() + order.getPrice()) {
                 order.setStatus(OrderStatus.DENIED);
+            } else {
+                currentAuth.setLimitNow(currentAuth.getLimitNow() + order.getPrice());
             }
         }
 
@@ -217,6 +220,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void finishOrder(Long orderId) {
         this.orderRepository.finishOrder(orderId, OrderStatus.DONE);
+        updateLimit(orderId);
         this.scheduledFutureMap.get(orderId).cancel(false);
     }
 
@@ -274,5 +278,19 @@ public class OrderServiceImpl implements OrderService {
             capitalService.reserveBalance(securityCapital.getListingId(), securityCapital.getListingType(), (double)order.getContractSize());
         }
 
+    }
+
+    private void updateLimit(Long orderId) {
+        List<TransactionDto> transactionsForOrder=this.transactionService.getTransactionsForOrderId(orderId);
+        MarketOrder order = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
+        Employee owner = order.getOwner();
+        double spentMoney = transactionsForOrder.stream()
+                .mapToDouble(TransactionDto::getBuy)
+                .sum();
+
+        double difference = spentMoney - order.getPrice();
+
+        owner.setLimitNow(owner.getLimitNow() + Math.max(difference, 0) - Math.min(difference, 0));
+        this.employeeRepository.save(owner);
     }
 }

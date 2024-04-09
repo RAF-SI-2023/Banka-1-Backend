@@ -14,8 +14,10 @@ import rs.edu.raf.banka1.model.Transaction;
 import rs.edu.raf.banka1.requests.CreateTransactionRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.TransactionService;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Getter
@@ -95,5 +97,10 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.getTransactionsByEmployee_UserId(userId)
             .stream()
             .map(transactionMapper::transactionToTransactionDto).toList();
+    }
+
+    @Override
+    public List<TransactionDto> getTransactionsForOrderId(Long orderId) {
+        return this.transactionRepository.getTransactionsByMarketOrder_Id(orderId).stream().map(transactionMapper::transactionToTransactionDto).collect(Collectors.toList());
     }
 }

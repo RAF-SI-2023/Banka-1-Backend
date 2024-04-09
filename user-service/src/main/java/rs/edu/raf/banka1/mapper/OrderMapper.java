@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.mapper;
 
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.dtos.OrderDto;
+import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.MarketOrder;
 import rs.edu.raf.banka1.model.OrderStatus;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
@@ -15,7 +16,7 @@ public class OrderMapper {
         this.employeeMapper = employeeMapper;
     }
 
-    public MarketOrder requestToMarketOrder(CreateOrderRequest request) {
+    public MarketOrder requestToMarketOrder(CreateOrderRequest request, Employee owner) {
         MarketOrder marketOrder = new MarketOrder();
         marketOrder.setListingId(request.getListingId());
         marketOrder.setListingType(request.getListingType());
@@ -26,6 +27,7 @@ public class OrderMapper {
         marketOrder.setLimitValue(request.getLimitValue());
         marketOrder.setStopValue(request.getStopValue());
         marketOrder.setAllOrNone(request.getAllOrNone());
+        marketOrder.setOwner(owner);
         return marketOrder;
     }
 
