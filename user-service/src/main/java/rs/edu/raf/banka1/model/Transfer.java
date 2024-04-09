@@ -1,9 +1,6 @@
 package rs.edu.raf.banka1.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,17 +10,31 @@ import lombok.Setter;
 public class Transfer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long transferId;
+    private Long id;
 
-    private String senderAccountNumber;
+    @ManyToOne
+    @JoinColumn(name = "sender_bankaccount_id", referencedColumnName = "id")
+    private BankAccount senderBankAccount;
+    @ManyToOne
+    @JoinColumn(name = "recipient_bankaccount_id", referencedColumnName = "id")
+    private BankAccount recipientBankAccount;
+
     private Double amount;
-    private String recipientAccountNumber;
-    private Double convertedAmount;
-    //Konvertovani iznos sa prvog računa
-    private Double exchange;
-    //trenutni kurs izmedju valute
-    private Double commision;
-    //provizija
-    private Long transferDate;
+    private Double convertedAmount; //Konvertovani iznos sa prvog računa
+    private Double exchangeRate;
+    private Double commission;
+    private TransactionStatus status;
+    private Long dateOfPayment;
 
+    @ManyToOne
+    @JoinColumn(name = "currencyFrom_id", referencedColumnName = "id")
+    private Currency currencyFrom;
+
+    @ManyToOne
+    @JoinColumn(name = "currencyTo_id", referencedColumnName = "id")
+    private Currency currencyTo;
+
+    public static Double calculateCommission(Double amount) {
+        return 0.03 * amount;
+    }
 }
