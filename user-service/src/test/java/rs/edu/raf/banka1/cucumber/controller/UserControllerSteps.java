@@ -731,7 +731,7 @@ public class UserControllerSteps {
             else if(path.equals("/payment/get")){
                 getBody(url + port + path + "/" + paymentId);
             }
-            else if(path.equals("/transter/")){
+            else if(path.equals("/transfer/")){
                 getBody(url + port + path + lastid);
             }
             else if(path.equals("/loan/requests/")){
