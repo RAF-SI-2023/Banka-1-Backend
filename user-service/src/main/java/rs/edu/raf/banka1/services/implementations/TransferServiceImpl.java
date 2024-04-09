@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.ExchangeRateDto;
 import rs.edu.raf.banka1.dtos.TransferDto;
 import rs.edu.raf.banka1.mapper.TransferMapper;
 import rs.edu.raf.banka1.model.*;
@@ -44,6 +45,8 @@ public class TransferServiceImpl implements TransferService {
     @Value("${exchangeRateApiUrl}")
     private String exchangeRateApiUrl;
 
+    private final List<String> supportedCurrencies = List.of("USD", "AUD", "EUR", "CHF", "GBP", "JPY", "CAD");
+
     public TransferServiceImpl(TransferRepository transferRepository, BankAccountRepository bankAccountRepository, CurrencyRepository currencyRepository, TransferMapper transferMapper) {
         this.transferMapper = transferMapper;
         objectMapper = new ObjectMapper();
@@ -54,7 +57,6 @@ public class TransferServiceImpl implements TransferService {
 
     @Override
     public void seedExchangeRates(){
-        List<String> supportedCurrencies = List.of("USD", "AUD", "EUR", "CHF", "GBP", "JPY", "CAD");
         if (initRsdCurrency()) return;
         seedExchangeRatesFromRsd(supportedCurrencies);
         seedExchangeRatesToRsd(supportedCurrencies);
@@ -270,6 +272,29 @@ public class TransferServiceImpl implements TransferService {
                 bankAccount.getTransfers().stream()
                         .map(transferMapper::transferToTransferDto)
                         .collect(Collectors.toList())).orElseGet(ArrayList::new);
+    }
+
+    @Override
+    public List<ExchangeRateDto> getExchangeRates() {
+        List<ExchangeRateDto> exchangeRateDtos = new ArrayList<>();
+        List<String> currencies = new ArrayList<>(supportedCurrencies);
+        currencies.add("RSD");
+        for (String baseCurrencySymbol : currencies) {
+            for (String quoteCurrencySymbol : currencies) {
+                //we don't want exchange rate from EUR to EUR
+                if (baseCurrencySymbol.equals(quoteCurrencySymbol)) {
+                    continue;
+                }
+                Currency baseCurrency = currencyRepository.findCurrencyByCurrencyCode(baseCurrencySymbol).orElse(null);
+                Currency quoteCurrency = currencyRepository.findCurrencyByCurrencyCode(quoteCurrencySymbol).orElse(null);
+                if (baseCurrency == null || quoteCurrency == null) {
+                    continue;
+                }
+                double exchangeRate = baseCurrency.getToRSD() * quoteCurrency.getFromRSD();
+                exchangeRateDtos.add(new ExchangeRateDto(baseCurrencySymbol, quoteCurrencySymbol, exchangeRate));
+            }
+        }
+        return exchangeRateDtos;
     }
 
 }
