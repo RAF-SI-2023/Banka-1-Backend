@@ -21,10 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
 //import rs.edu.raf.banka1.mapper.ForeignCurrencyAccountMapper;
-import rs.edu.raf.banka1.dtos.LoanRequestDto;
-import rs.edu.raf.banka1.dtos.PaymentDto;
-import rs.edu.raf.banka1.dtos.PaymentRecipientDto;
-import rs.edu.raf.banka1.dtos.TransferDto;
+import rs.edu.raf.banka1.dtos.*;
 import rs.edu.raf.banka1.dtos.customer.CustomerDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
@@ -95,6 +92,7 @@ public class UserControllerSteps {
     private PaymentRecipientRepository paymentRecipientRepository;
     private TransferRepository transferRepository;
     private LoanRequestRepository loanRequestRepository;
+    private LoanRepository loanRepository;
     private EmployeeMapper userMapper = new EmployeeMapper(new PermissionMapper(), passwordEncoder, permissionRepository);
     private CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper());
     private List<EmployeeDto> userResponses = new ArrayList<>();
@@ -256,6 +254,31 @@ public class UserControllerSteps {
 
     }
 
+    @Then("i should get the correct loan")
+    public void iShouldGetTheCorrectLoan() {
+        try{
+            LoanFullDto loanFullDto = objectMapper.readValue(lastResponse.getBody().toString(), LoanFullDto.class);
+            assertThat(loanFullDto).isNotNull();
+            assertThat(loanFullDto.getId()).isEqualTo(100);
+        }
+        catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Then("i should get the correct loans")
+    public void iShouldGetTheCorrectLoans() {
+        try{
+            List<LoanDto> loanDtos = objectMapper.readValue(lastResponse.getBody().toString(), new TypeReference<List<LoanDto>>() {
+            });
+            assertThat(loanDtos).isNotEmpty();
+            assertThat(loanDtos).filteredOn(loanDto -> loanDto.getId().equals(100L)).isNotEmpty();
+        }
+        catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+    }
+
 
     @Data
     class SearchFilter {
@@ -381,7 +404,8 @@ public class UserControllerSteps {
                                PaymentRepository paymentRepository,
                                PaymentRecipientRepository paymentRecipientRepository,
                                TransferRepository transferRepository,
-                               LoanRequestRepository loanRequestRepository) {
+                               LoanRequestRepository loanRequestRepository,
+                               LoanRepository loanRepository) {
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
         this.passwordEncoder = passwordEncoder;
@@ -391,6 +415,7 @@ public class UserControllerSteps {
         this.paymentRecipientRepository = paymentRecipientRepository;
         this.transferRepository = transferRepository;
         this.loanRequestRepository = loanRequestRepository;
+        this.loanRepository = loanRepository;
     }
 
     @Given("i have email {string}")
@@ -694,12 +719,6 @@ public class UserControllerSteps {
                     userResponses.add(userMapper.employeeToEmployeeDto(user));
                 });
             }
-            else if (path.equals("/employee/permissions/employeeId/100") || path.equals("/employee/permissions/email/admin@admin.com")) {
-                getBody(url + port + path);
-            }
-            else if (path.equals("/balance/foreign_currency/100")) {
-                getBody(url + port + path);
-            }
 //            else if (path.equals("/balance/foreign_currency")) {
 //                lastReadAllForeignCurrencyAccountsResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<ForeignCurrencyAccountResponse>>() {
 //                });
@@ -709,26 +728,17 @@ public class UserControllerSteps {
                 String[] split = path.split("/");
                 lastid = Long.parseLong(split[split.length - 1]);
             }
-            else if(path.equals("/payment/getAll/1234567890")){
-                getBody(url + port + path);
-            }
             else if(path.equals("/payment/get")){
                 getBody(url + port + path + "/" + paymentId);
-            }
-            else if(path.equals("/recipients/getAll")){
-                getBody(url + port + path);
             }
             else if(path.equals("/transter/")){
                 getBody(url + port + path + lastid);
             }
-            else if(path.equals("/transfer/getAll/1234567890")){
-                getBody(url + port + path);
-            }
-            else if(path.equals("/loan/requests")){
-                getBody(url + port + path);
-            }
             else if(path.equals("/loan/requests/")){
                 getBody(url + port + path + lastid);
+            }
+            else{
+                getBody(url + port + path);
             }
         }
         catch (Exception e){

@@ -708,6 +708,9 @@ VALUES (b'1', 1, 1000.0, 1200.0, 100.0, NULL, 100, 1710959528, 10000, 101, 27109
 INSERT INTO `bank_account` (account_status, account_type, available_balance, balance, maintenance_cost, company_id, created_by_agent_id, creation_date, currency_id, customer_id, expiration_date, id, account_name, account_number, subtype_of_account)
 VALUES (b'1', 1, 1000.0, 1200.0, 100.0, NULL, 100, 1710959558, 10000, 102, 2710959528, 101, 'test1', '0987654321', 'subtest');
 
+INSERT INTO `loan` (account_number, currency, effective_interest_rate, installment_amount, loan_amount, loan_type, nominal_interest_rate, remaining_debt, repayment_period, agreement_date, id, maturity_date, next_installment_date)
+    VALUES ('1234567890', 'TST', 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0, 0, 100, 0, 0);
+
 -- INSERT INTO `foreign_currency_accounts` (`id`, `account_maintenance`, `account_number`, `account_status`, `available_balance`, `balance`, `created_by_agent_id`, `creation_date`, `currency`, `default_currency`, `expiration_date`, `owner_id`, `subtype_of_account`, `type_of_account`) VALUES
 --  (100, 100.0, '123456789', 'active', 1000.0, 1200.0, 100, 1710959528, 'CD1', 'CD1', 2710959528, 102, 'subtest', 'test');
 
