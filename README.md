@@ -64,3 +64,44 @@ These instructions are subject to change as the project evolves.
 
 Note: if you are running Docker desktop, make sure to close it after running the tests, and do wsl --shutdown in cmd to free up resources.
 
+## Setting Up Pre-commit Hook for Linting and Testing in Git
+
+After setting up the pre-commit hook, linting and tests will automatically run before each commit.
+
+1. Open notepad or any text editor
+2. Paste the following code into the editor:
+```
+#!/bin/bash
+
+# Run Checkstyle
+echo "Running Checkstyle..."
+mvn checkstyle:check
+lint_result=$?
+
+# Run tests
+echo "Running tests..."
+mvn test
+test_result=$?
+
+# Check results
+if [ $lint_result -ne 0 ] || [ $test_result -ne 0 ]; then
+    echo "Linting or tests failed. Aborting commit."
+    exit 1
+fi
+
+echo "Linting and tests passed. Committing..."
+exit 0
+```
+3. Save the file and name it "pre-commit" (without any file extension) 
+in the ".git/hooks" folder in your project root directory. For example:
+(C:\Users\your-name\Desktop\Banka-1-Backend\.git\hooks)
+4. Open a terminal and navigate to your project root directory.
+5. Run the following command in the terminal:
+```
+icacls .git\hooks\pre-commit /inheritance:r /grant:r "$($env:UserName):(RX)"
+```
+6. Everything should be set now.
+7. If you want to remove the pre-commit file, navigate to your project root directory in the terminal and execute the following command:
+```
+rm .git/hooks/pre-commit
+```
