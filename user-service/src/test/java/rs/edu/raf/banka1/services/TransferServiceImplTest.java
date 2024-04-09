@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.testcontainers.shaded.org.checkerframework.checker.units.qual.C;
 import rs.edu.raf.banka1.dtos.TransferDto;
 import rs.edu.raf.banka1.mapper.TransferMapper;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
@@ -22,6 +23,7 @@ import java.util.Optional;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
@@ -156,5 +158,277 @@ class TransferServiceImplTest {
         List<TransferDto> result = transferService.getAllTransfersForAccountNumber("emptyAccount");
 
         assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testSuccessfulTransfer() {
+        Customer customer = new Customer();
+        customer.setUserId(1L);
+
+        Currency currency1 = new Currency();
+        currency1.setId(1L);
+        currency1.setActive(true);
+        currency1.setCurrencyCode("rsd");
+        currency1.setFromRSD(1.0);
+        currency1.setToRSD(1.0);
+        String accountNumber = "1";
+        BankAccount senderBankAccount = new BankAccount();
+        senderBankAccount.setCustomer(customer);
+        senderBankAccount.setAccountNumber(accountNumber);
+        senderBankAccount.setCurrency(currency1);
+        senderBankAccount.setAvailableBalance(1000.0);
+        senderBankAccount.setBalance(1000.0);
+        senderBankAccount.setAccountType(AccountType.CURRENT);
+
+        Currency currency2 = new Currency();
+        currency2.setId(2L);
+        currency2.setActive(true);
+        currency2.setCurrencyCode("usd");
+        currency2.setFromRSD(1.0);
+        currency2.setToRSD(1.0);
+        String accountNumber2 = "2";
+        BankAccount recipientBankAccount = new BankAccount();
+        recipientBankAccount.setCustomer(customer);
+        recipientBankAccount.setCurrency(currency2);
+        recipientBankAccount.setAccountNumber(accountNumber2);
+        recipientBankAccount.setAvailableBalance(1000.0);
+        recipientBankAccount.setBalance(1000.0);
+        recipientBankAccount.setAccountType(AccountType.FOREIGN_CURRENCY);
+
+        BankAccount bank = new BankAccount();
+        bank.setAvailableBalance(1000.0);
+        bank.setBalance(1000.0);
+        when(bankAccountRepository.findBankByCurrencyCode(anyString()))
+                .thenReturn(Optional.of(bank));
+
+
+        Transfer transfer = new Transfer();
+        transfer.setStatus(TransactionStatus.PROCESSING);
+        transfer.setId(1l);
+        transfer.setAmount(5.0);
+        transfer.setSenderBankAccount(senderBankAccount);
+        transfer.setRecipientBankAccount(recipientBankAccount);
+        when(transferRepository.findById(5L)).thenReturn(Optional.of(transfer));
+
+        transferService.processTransfer(5L);
+
+        assertEquals(transfer.getStatus(), TransactionStatus.COMPLETE);
+    }
+
+    @Test
+    public void testInsufficentBalanceSender() {
+        Customer customer = new Customer();
+        customer.setUserId(1L);
+
+        Currency currency1 = new Currency();
+        currency1.setId(1L);
+        currency1.setActive(true);
+        currency1.setCurrencyCode("rsd");
+        currency1.setFromRSD(1.0);
+        currency1.setToRSD(1.0);
+        String accountNumber = "1";
+        BankAccount senderBankAccount = new BankAccount();
+        senderBankAccount.setCustomer(customer);
+        senderBankAccount.setAccountNumber(accountNumber);
+        senderBankAccount.setCurrency(currency1);
+        senderBankAccount.setAvailableBalance(0.0);
+        senderBankAccount.setBalance(0.0);
+        senderBankAccount.setAccountType(AccountType.CURRENT);
+
+        Currency currency2 = new Currency();
+        currency2.setId(2L);
+        currency2.setActive(true);
+        currency2.setCurrencyCode("usd");
+        currency2.setFromRSD(1.0);
+        currency2.setToRSD(1.0);
+        String accountNumber2 = "2";
+        BankAccount recipientBankAccount = new BankAccount();
+        recipientBankAccount.setCustomer(customer);
+        recipientBankAccount.setCurrency(currency2);
+        recipientBankAccount.setAccountNumber(accountNumber2);
+        recipientBankAccount.setAvailableBalance(1000.0);
+        recipientBankAccount.setBalance(1000.0);
+        recipientBankAccount.setAccountType(AccountType.FOREIGN_CURRENCY);
+
+        BankAccount bank = new BankAccount();
+        bank.setAvailableBalance(1000.0);
+        bank.setBalance(1000.0);
+        when(bankAccountRepository.findBankByCurrencyCode(anyString()))
+                .thenReturn(Optional.of(bank));
+
+
+        Transfer transfer = new Transfer();
+        transfer.setStatus(TransactionStatus.PROCESSING);
+        transfer.setId(1l);
+        transfer.setAmount(5.0);
+        transfer.setSenderBankAccount(senderBankAccount);
+        transfer.setRecipientBankAccount(recipientBankAccount);
+        when(transferRepository.findById(5L)).thenReturn(Optional.of(transfer));
+
+        transferService.processTransfer(5L);
+
+        assertEquals(transfer.getStatus(), TransactionStatus.DENIED);
+    }
+
+    @Test
+    public void testSameCurrencyOnSenderAndRecipient() {
+        Customer customer = new Customer();
+        customer.setUserId(1L);
+
+        Currency currency1 = new Currency();
+        currency1.setId(1L);
+        currency1.setActive(true);
+        currency1.setCurrencyCode("rsd");
+        currency1.setFromRSD(1.0);
+        currency1.setToRSD(1.0);
+        String accountNumber = "1";
+        BankAccount senderBankAccount = new BankAccount();
+        senderBankAccount.setCustomer(customer);
+        senderBankAccount.setAccountNumber(accountNumber);
+        senderBankAccount.setCurrency(currency1);
+        senderBankAccount.setAvailableBalance(1000.0);
+        senderBankAccount.setBalance(1000.0);
+        senderBankAccount.setAccountType(AccountType.CURRENT);
+
+        String accountNumber2 = "2";
+        BankAccount recipientBankAccount = new BankAccount();
+        recipientBankAccount.setCustomer(customer);
+        recipientBankAccount.setCurrency(currency1);
+        recipientBankAccount.setAccountNumber(accountNumber2);
+        recipientBankAccount.setAvailableBalance(1000.0);
+        recipientBankAccount.setBalance(1000.0);
+        recipientBankAccount.setAccountType(AccountType.FOREIGN_CURRENCY);
+
+        BankAccount bank = new BankAccount();
+        bank.setAvailableBalance(1000.0);
+        bank.setBalance(1000.0);
+        when(bankAccountRepository.findBankByCurrencyCode(anyString()))
+                .thenReturn(Optional.of(bank));
+
+
+        Transfer transfer = new Transfer();
+        transfer.setStatus(TransactionStatus.PROCESSING);
+        transfer.setId(1l);
+        transfer.setAmount(5.0);
+        transfer.setSenderBankAccount(senderBankAccount);
+        transfer.setRecipientBankAccount(recipientBankAccount);
+        when(transferRepository.findById(5L)).thenReturn(Optional.of(transfer));
+
+        transferService.processTransfer(5L);
+
+        assertEquals(transfer.getStatus(), TransactionStatus.DENIED);
+    }
+
+    @Test
+    public void testInvalidAccountType() {
+        Customer customer = new Customer();
+        customer.setUserId(1L);
+
+        Currency currency1 = new Currency();
+        currency1.setId(1L);
+        currency1.setActive(true);
+        currency1.setCurrencyCode("rsd");
+        currency1.setFromRSD(1.0);
+        currency1.setToRSD(1.0);
+        String accountNumber = "1";
+        BankAccount senderBankAccount = new BankAccount();
+        senderBankAccount.setCustomer(customer);
+        senderBankAccount.setAccountNumber(accountNumber);
+        senderBankAccount.setCurrency(currency1);
+        senderBankAccount.setAvailableBalance(1000.0);
+        senderBankAccount.setBalance(1000.0);
+        senderBankAccount.setAccountType(AccountType.CURRENT);
+
+        Currency currency2 = new Currency();
+        currency2.setId(2L);
+        currency2.setActive(true);
+        currency2.setCurrencyCode("usd");
+        currency2.setFromRSD(1.0);
+        currency2.setToRSD(1.0);
+        String accountNumber2 = "2";
+        BankAccount recipientBankAccount = new BankAccount();
+        recipientBankAccount.setCustomer(customer);
+        recipientBankAccount.setCurrency(currency2);
+        recipientBankAccount.setAccountNumber(accountNumber2);
+        recipientBankAccount.setAvailableBalance(1000.0);
+        recipientBankAccount.setBalance(1000.0);
+        recipientBankAccount.setAccountType(AccountType.BUSINESS);
+
+        BankAccount bank = new BankAccount();
+        bank.setAvailableBalance(1000.0);
+        bank.setBalance(1000.0);
+        when(bankAccountRepository.findBankByCurrencyCode(anyString()))
+                .thenReturn(Optional.of(bank));
+
+
+        Transfer transfer = new Transfer();
+        transfer.setStatus(TransactionStatus.PROCESSING);
+        transfer.setId(1l);
+        transfer.setAmount(5.0);
+        transfer.setSenderBankAccount(senderBankAccount);
+        transfer.setRecipientBankAccount(recipientBankAccount);
+        when(transferRepository.findById(5L)).thenReturn(Optional.of(transfer));
+
+        transferService.processTransfer(5L);
+
+        assertEquals(transfer.getStatus(), TransactionStatus.DENIED);
+    }
+
+    @Test
+    public void testDifferentCustomerTransfer() {
+        Customer customer = new Customer();
+        customer.setUserId(1L);
+
+        Customer customer2 = new Customer();
+        customer2.setUserId(2L);
+
+        Currency currency1 = new Currency();
+        currency1.setId(1L);
+        currency1.setActive(true);
+        currency1.setCurrencyCode("rsd");
+        currency1.setFromRSD(1.0);
+        currency1.setToRSD(1.0);
+        String accountNumber = "1";
+        BankAccount senderBankAccount = new BankAccount();
+        senderBankAccount.setCustomer(customer);
+        senderBankAccount.setAccountNumber(accountNumber);
+        senderBankAccount.setCurrency(currency1);
+        senderBankAccount.setAvailableBalance(1000.0);
+        senderBankAccount.setBalance(1000.0);
+        senderBankAccount.setAccountType(AccountType.CURRENT);
+
+        Currency currency2 = new Currency();
+        currency2.setId(2L);
+        currency2.setActive(true);
+        currency2.setCurrencyCode("usd");
+        currency2.setFromRSD(1.0);
+        currency2.setToRSD(1.0);
+        String accountNumber2 = "2";
+        BankAccount recipientBankAccount = new BankAccount();
+        recipientBankAccount.setCustomer(customer2);
+        recipientBankAccount.setCurrency(currency2);
+        recipientBankAccount.setAccountNumber(accountNumber2);
+        recipientBankAccount.setAvailableBalance(1000.0);
+        recipientBankAccount.setBalance(1000.0);
+        recipientBankAccount.setAccountType(AccountType.BUSINESS);
+
+        BankAccount bank = new BankAccount();
+        bank.setAvailableBalance(1000.0);
+        bank.setBalance(1000.0);
+        when(bankAccountRepository.findBankByCurrencyCode(anyString()))
+                .thenReturn(Optional.of(bank));
+
+
+        Transfer transfer = new Transfer();
+        transfer.setStatus(TransactionStatus.PROCESSING);
+        transfer.setId(1l);
+        transfer.setAmount(5.0);
+        transfer.setSenderBankAccount(senderBankAccount);
+        transfer.setRecipientBankAccount(recipientBankAccount);
+        when(transferRepository.findById(5L)).thenReturn(Optional.of(transfer));
+
+        transferService.processTransfer(5L);
+
+        assertEquals(transfer.getStatus(), TransactionStatus.DENIED);
     }
 }

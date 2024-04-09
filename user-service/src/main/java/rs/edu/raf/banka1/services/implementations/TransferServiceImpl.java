@@ -184,7 +184,7 @@ public class TransferServiceImpl implements TransferService {
         BankAccount recipientAccount = transfer.getRecipientBankAccount();
         Currency senderCurrency = senderAccount.getCurrency();
         Currency recipientCurrency = recipientAccount.getCurrency();
-        double commission = Payment.calculateCommission(transfer.getAmount());
+        double commission = Transfer.calculateCommission(transfer.getAmount());
 
         //todo isto customer
 
