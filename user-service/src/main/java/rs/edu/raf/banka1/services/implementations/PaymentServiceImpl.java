@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.tinylog.Logger;
 import rs.edu.raf.banka1.dtos.PaymentDto;
 import rs.edu.raf.banka1.mapper.PaymentMapper;
 import rs.edu.raf.banka1.model.BankAccount;
@@ -49,7 +50,10 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public Long createPayment(CreatePaymentRequest request) {
         Payment payment = paymentMapper.createPaymentRequestToPayment(request);
-        if (payment == null) return -1L;
+        if (payment == null) {
+            Logger.error("Failed to create payment from request: {}", request);
+            return -1L;
+        }
         return paymentRepository.save(payment).getId();
     }
 
@@ -58,6 +62,7 @@ public class PaymentServiceImpl implements PaymentService {
     public void processPayment(Long paymentId) {
         Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
         if (paymentOpt.isEmpty()) {
+            Logger.error("Payment not found for processing: {}", paymentId);
             return;
         }
         Payment payment = paymentOpt.get();
@@ -71,6 +76,8 @@ public class PaymentServiceImpl implements PaymentService {
                 || payment.getAmount() + commission > senderAccount.getBalance()
                 || !recipientAccountOpt.get().getCurrency().getId().equals(senderAccount.getCurrency().getId())
         ) {
+            Logger.info("Payment {} denied due to invalid parameters or insufficient balance.", paymentId);
+            payment.setStatus(TransactionStatus.DENIED);
             payment.setStatus(TransactionStatus.DENIED);
             paymentRepository.save(payment);
             return;
@@ -86,6 +93,7 @@ public class PaymentServiceImpl implements PaymentService {
         bankAccountRepository.save(recipientAccount);
         bankAccountRepository.save(senderAccount);
         paymentRepository.save(payment);
+        Logger.info("Payment {} processed successfully.", paymentId);
     }
 
     @Override
@@ -107,11 +115,15 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public boolean sendSingleUseCode(Long customerId) {
         Optional<Customer> customerOpt = customerRepository.findByUserId(customerId);
-        if (customerOpt.isEmpty()) return false;
+        if (customerOpt.isEmpty()) {
+            Logger.error("Customer not found for sending single use code: {}", customerId);
+            return false;
+        }
         Customer customer = customerOpt.get();
         String singleUseCode = jwtUtil.generateSingleUseCode(customer.getEmail());
         customer.setSingleUseCode(singleUseCode);
         customerRepository.save(customer);
+        Logger.info("Single use code sent successfully to customer: {}", customerId);
         return emailService.sendEmail(customer.getEmail(), "RAF Banka - Single use token",
                 "Your single use code:\n" + singleUseCode);
     }
@@ -120,6 +132,7 @@ public class PaymentServiceImpl implements PaymentService {
     public boolean validatePayment(CreatePaymentRequest request) {
         Optional<BankAccount> bankAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(request.getSenderAccountNumber());
         if (bankAccountOpt.isEmpty()) {
+            Logger.error("Bank account not found for validating payment: {}", request.getSenderAccountNumber());
             return false;
         }
         Customer customer = bankAccountOpt.get().getCustomer();
@@ -130,6 +143,9 @@ public class PaymentServiceImpl implements PaymentService {
         if (valid) {
             customer.setSingleUseCode(null);
             customerRepository.save(customer);
+            Logger.info("Payment validation successful for customer: {}", customer.getUserId());
+        }else{
+            Logger.info("Payment validation failed for customer: {}", customer.getUserId());
         }
         return valid;
     }
