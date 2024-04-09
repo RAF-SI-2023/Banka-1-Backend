@@ -178,14 +178,6 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccount.setAccountStatus(true);
         bankAccountRepository.save(bankAccount);
     }
-
-    @Override
-    public Double estimateBalanceForAccount(String accountNumber) {
-        return 0.0;
-    }
-
-
-
     private Long getEmployeeId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // Check if the user is authenticated

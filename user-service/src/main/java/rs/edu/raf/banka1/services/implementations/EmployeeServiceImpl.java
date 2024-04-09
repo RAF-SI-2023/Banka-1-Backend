@@ -258,6 +258,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     public LimitDto setLimitForEmployee(NewLimitDto newLimitDto) {
         Long employeeId = newLimitDto.getUserId();
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(()-> new EmployeeNotFoundException(employeeId));
+        if(!employee.getPosition().equalsIgnoreCase(Constants.AGENT)) {
+            throw new ForbiddenException("Employee with id: " + employeeId + " is not in agent position. Changing the limit is prohibited.");
+        }
         employee.setOrderlimit(newLimitDto.getLimit());
         employee.setRequireApproval(newLimitDto.getApprovalRequired());
         Employee saved = employeeRepository.save(employee);
