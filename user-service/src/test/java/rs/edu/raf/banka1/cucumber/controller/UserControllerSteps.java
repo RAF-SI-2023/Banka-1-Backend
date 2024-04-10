@@ -36,6 +36,7 @@ import rs.edu.raf.banka1.requests.*;
 import rs.edu.raf.banka1.requests.customer.AccountData;
 import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
 import rs.edu.raf.banka1.requests.customer.CustomerData;
+import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.responses.*;
 import rs.edu.raf.banka1.services.EmailService;
 
@@ -93,6 +94,7 @@ public class UserControllerSteps {
     private PaymentRecipientRepository paymentRecipientRepository;
     private TransferRepository transferRepository;
     private LoanRequestRepository loanRequestRepository;
+    private CardRepository cardRepository;
     private LoanRepository loanRepository;
     private EmployeeMapper userMapper = new EmployeeMapper(new PermissionMapper(), passwordEncoder, permissionRepository);
     private CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper());
@@ -114,7 +116,11 @@ public class UserControllerSteps {
     private CreateTransferRequest createTransferRequest = new CreateTransferRequest();
     private CreateLoanRequest createLoanRequest = new CreateLoanRequest();
     private StatusRequest statusRequest = new StatusRequest();
-
+    private CreateOrderRequest createOrderRequest = new CreateOrderRequest();
+    private BankAccountRequest bankAccountRequest = new BankAccountRequest();
+    private CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
+    private EditBankAccountNameRequest editBankAccountNameRequest = new EditBankAccountNameRequest();
+    
     @Given("customer wants to send money from account {string} to account {string}")
     public void customerWantsToSendMoneyFromAccountToAccount(String arg0, String arg1) {
         createTransferRequest.setSenderAccountNumber(arg0);
@@ -293,6 +299,172 @@ public class UserControllerSteps {
         assertThat(loanRequest.getStatus()).isEqualTo(LoanRequestStatus.valueOf(arg0));
     }
 
+    @Given("order type is {string}")
+    public void orderTypeIs(String arg0) {
+        createOrderRequest.setOrderType(OrderType.valueOf(arg0));
+    }
+
+    @And("listingId is {int}")
+    public void listingidIs(int arg0) {
+        createOrderRequest.setListingId((long) arg0);
+    }
+
+    @And("listingType is {string}")
+    public void listingtypeIs(String arg0) {
+        createOrderRequest.setListingType(ListingType.valueOf(arg0));
+    }
+
+    @And("contractSize is {int}")
+    public void contractsizeIs(int arg0) {
+        createOrderRequest.setContractSize((long) arg0);
+    }
+
+    @And("limitValue is {double}")
+    public void limitvalueIs(double arg0) {
+        createOrderRequest.setLimitValue(arg0);
+    }
+
+    @And("stopValue is {double}")
+    public void stopvalueIs(double arg0) {
+        createOrderRequest.setStopValue(arg0);
+    }
+
+    @And("allOrNone is True")
+    public void allornoneIsTrue() {
+        createOrderRequest.setAllOrNone(true);
+    }
+
+    @Then("response should contain all above orders")
+    public void responseShouldContainAllAboveOrders() {
+        try {
+            List<OrderDto> orderDtos = objectMapper.readValue(lastResponse.getBody().toString(), new TypeReference<List<OrderDto>>() {
+            });
+            assertThat(orderDtos).isNotEmpty();
+            assertThat(orderDtos).filteredOn(orderDto -> orderDto.getOrderType().equals(OrderType.BUY) &&
+                    orderDto.getListingId().equals(100000L));
+            assertThat(orderDtos).filteredOn(orderDto -> orderDto.getOrderType().equals(OrderType.BUY) &&
+                    orderDto.getListingId().equals(100001L));
+            assertThat(orderDtos).filteredOn(orderDto -> orderDto.getOrderType().equals(OrderType.BUY) &&
+                    orderDto.getListingId().equals(100002L));
+        } catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Given("new accountType is {string}")
+    public void newAccountTypeIs(String arg0) {
+        bankAccountRequest.setAccountType(AccountType.valueOf(arg0));
+    }
+
+    @And("new accountName is {string}")
+    public void newAccountNameIs(String arg0) {
+        bankAccountRequest.setAccountName(arg0);
+    }
+
+    @And("new accountBalance is {string}")
+    public void newAccountBalanceIs(String arg0) {
+        bankAccountRequest.setBalance(Double.parseDouble(arg0));
+    }
+
+    @And("new avaliableBalance is {string}")
+    public void newAvaliableBalanceIs(String arg0) {
+        bankAccountRequest.setAvailableBalance(Double.parseDouble(arg0));
+    }
+
+    @And("new currencyCode is {string}")
+    public void newCurrencyCodeIs(String arg0) {
+        bankAccountRequest.setCurrencyCode(arg0);
+    }
+
+    @And("new subtype is {string}")
+    public void newSubtypeIs(String arg0) {
+        bankAccountRequest.setSubtypeOfAccount(arg0);
+    }
+
+    @And("new maintenanceFee is {double}")
+    public void newMaintenanceFeeIs(double arg0) {
+        bankAccountRequest.setMaintenanceCost((double) arg0);
+    }
+
+    @And("new customerId is {int}")
+    public void newCustomerIdIs(int arg0) {
+        createBankAccountRequest.setCustomerId((long) arg0);
+    }
+
+    @And("new companyId is {int}")
+    public void newCompanyIdIs(int arg0) {
+        createBankAccountRequest.setCompanyId((long) arg0);
+    }
+
+    @And("i should get both bank account i created")
+    public void iShouldGetBothBankAccountICreated() {
+        try {
+            List<BankAccountDto> bankAccountDtos = objectMapper.readValue(lastResponse.getBody().toString(), new TypeReference<List<BankAccountDto>>() {
+            });
+            assertThat(bankAccountDtos).isNotEmpty();
+            assertThat(bankAccountDtos).filteredOn(bankAccountDto -> bankAccountDto.getAccountType().equals("CURRENT") &&
+                    bankAccountDto.getAccountName().equals("My Account") &&
+                    bankAccountDto.getBalance().equals(1000.00) &&
+                    bankAccountDto.getAvailableBalance().equals(1000.00)).isNotEmpty();
+
+            assertThat(bankAccountDtos).filteredOn(bankAccountDto -> bankAccountDto.getAccountType().equals("BUSINESS") &&
+                    bankAccountDto.getAccountName().equals("BUSINESS Account") &&
+                    bankAccountDto.getBalance().equals(1000.00) &&
+                    bankAccountDto.getAvailableBalance().equals(1000.00)).isNotEmpty();
+        } catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @And("i should get company bank account i created")
+    public void iShouldGetCompanyBankAccountICreated() {
+        try {
+            List<BankAccountDto> bankAccountDtos = objectMapper.readValue(lastResponse.getBody().toString(), new TypeReference<List<BankAccountDto>>() {
+            });
+
+            assertThat(bankAccountDtos).filteredOn(bankAccountDto -> bankAccountDto.getAccountType().equals("BUSINESS") &&
+                    bankAccountDto.getAccountName().equals("BUSINESS Account") &&
+                    bankAccountDto.getBalance().equals(1000.00) &&
+                    bankAccountDto.getAvailableBalance().equals(1000.00)).isNotEmpty();
+        } catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @And("i should get personal bank account i created")
+    public void iShouldGetPersonalBankAccountICreated() {
+        try {
+            List<BankAccountDto> bankAccountDtos = objectMapper.readValue(lastResponse.getBody().toString(), new TypeReference<List<BankAccountDto>>() {
+            });
+            assertThat(bankAccountDtos).isNotEmpty();
+            assertThat(bankAccountDtos).filteredOn(bankAccountDto -> bankAccountDto.getAccountType().equals("CURRENT") &&
+                    bankAccountDto.getAccountName().equals("My Account") &&
+                    bankAccountDto.getBalance().equals(1000.00) &&
+                    bankAccountDto.getAvailableBalance().equals(1000.00)).isNotEmpty();
+        } catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @And("bankaccountNumber is {string}")
+    public void bankaccountnumberIs(String arg0) {
+        editBankAccountNameRequest.setBankAccountNumber(arg0);
+    }
+
+    @And("new bank account name is {string}")
+    public void newBankAccountNameIs(String arg0) {
+        editBankAccountNameRequest.setNewName(arg0);
+    }
+
+    @And("bank account name should be changed")
+    public void bankAcountNameShouldBeChanged() {
+        BankAccount bankAccount = bankAccountRepository
+                .findBankAccountByAccountNumber(editBankAccountNameRequest.getBankAccountNumber())
+                .orElse(null);
+        assertThat(bankAccount).isNotNull();
+        assertThat(bankAccount.getAccountName()).isEqualTo(editBankAccountNameRequest.getNewName());
+    }
+
 
     @Data
     class SearchFilter {
@@ -419,7 +591,8 @@ public class UserControllerSteps {
                                PaymentRecipientRepository paymentRecipientRepository,
                                TransferRepository transferRepository,
                                LoanRequestRepository loanRequestRepository,
-                               LoanRepository loanRepository) {
+                               LoanRepository loanRepository,
+                               CardRepository cardRepository) {
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
         this.passwordEncoder = passwordEncoder;
@@ -430,6 +603,7 @@ public class UserControllerSteps {
         this.transferRepository = transferRepository;
         this.loanRequestRepository = loanRequestRepository;
         this.loanRepository = loanRepository;
+        this.cardRepository = cardRepository;
     }
 
     @Given("i have email {string}")
@@ -796,6 +970,13 @@ public class UserControllerSteps {
             else if(path.equals("/loan/requests")){
                 post(url + port + path, createLoanRequest);
             }
+            else if(path.equals("/orders")){
+                post(url + port + path, createOrderRequest);
+            }
+            else if(path.equals("/account/create")){
+                createBankAccountRequest.setAccount(bankAccountRequest);
+                post(url + port + path, createBankAccountRequest);
+            }
 
 //            else if (path.equals("/balance/foreign_currency/create")) {
 //                lastCreateForeignCurrencyAccountResponse = objectMapper.readValue(post(url + port + path, foreignCurrencyAccountRequest), CreateForeignCurrencyAccountResponse.class);
@@ -846,6 +1027,9 @@ public class UserControllerSteps {
         }
         else if(path.equals("/loan/requests/")){
             put(url + port + path + lastid, statusRequest);
+        }
+        else if(path.equals("/account")){
+            put(url + port + path, editBankAccountNameRequest);
         }
     }
 

@@ -1189,7 +1189,13 @@ INSERT INTO `inflations` (`id`, `inflation_rate`, `year`, `currency_id`) VALUES
         (100000, 3.57, 2024, 100000);
 
 INSERT INTO `listing_forex` (`listing_id`, `exchange`, `high`, `last_refresh`, `listing_type`, `low`, `name`, `price`, `price_change`, `ticker`, `volume`, `base_currency`, `quote_currency`) VALUES
-(NULL, 'oanda', '0.85381', '1710929683', 'testforex', '0.85376', 'Oanda CD1/CD2', '0.8538', '0.8538', 'CD1/CD2', '0', 'CD1', 'CD2');
+(100001, 'oanda', '0.85381', '1710929683', 'testforex', '0.85376', 'Oanda CD1/CD2', '0.8538', '0.8538', 'CD1/CD2', '0', 'CD1', 'CD2');
+
+INSERT INTO `listing_future` (`listing_id`, `exchange`, `high`, `last_refresh`, `listing_type`, `low`, `name`, `price`, `price_change`, `ticker`, `volume`, `contract_size`, `contract_unit`, `open_interest`, `settlement_date`) VALUES
+    (100002, 'test_exchange', '46.895', '1710929671', 'Future', '45.1708', 'testfuture', '46.49', '0.97', 'testticker', '3839039', '100', 'testunit', '0', '1713484800');
+
+INSERT INTO `listing_stock` (`listing_id`, `exchange`, `high`, `last_refresh`, `listing_type`, `low`, `name`, `price`, `price_change`, `ticker`, `volume`, `dividend_yield`, `outstanding_shares`) VALUES
+    (100003, 'test_exchange', '46.895', '1710929671', 'Stock', '45.1708', 'teststock', '46.49', '0.97', 'testticker', '3839039', '0', '295999000');
 
 
 INSERT INTO `options_model` (`id`, `currency`, `expiration_date`, `implied_volatility`, `open_interest`, `option_type`, `strike_price`, `ticker`) VALUES
