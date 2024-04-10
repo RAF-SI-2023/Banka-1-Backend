@@ -6,6 +6,7 @@ import rs.edu.raf.banka1.requests.InitialActivationRequest;
 import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
 import rs.edu.raf.banka1.responses.CustomerResponse;
+import rs.edu.raf.banka1.responses.NewPasswordResponse;
 
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface CustomerService extends UserDetailsService {
     List<CustomerResponse> findAll();
 
     boolean editCustomer(EditCustomerRequest editCustomerRequest);
+    Boolean sendResetPasswordEmail(String email);
+    NewPasswordResponse setNewPassword(String token, String password);
 }

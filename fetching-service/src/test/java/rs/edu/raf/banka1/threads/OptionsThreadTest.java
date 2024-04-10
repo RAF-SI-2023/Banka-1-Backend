@@ -1,4 +1,4 @@
-package threads;
+package rs.edu.raf.banka1.threads;
 
 
 import org.junit.jupiter.api.BeforeEach;

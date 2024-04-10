@@ -153,7 +153,7 @@ public class EmployeeController {
     }
 
     @PostMapping(value = "/reset/{email}")
-    @Operation(summary = "Reset password", description = "Send password reset email to user")
+    @Operation(summary = "Reset password", description = "Send password reset email to employee")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Email with password reset URL sent successfully",
                     content = {@Content(mediaType = "application/json",

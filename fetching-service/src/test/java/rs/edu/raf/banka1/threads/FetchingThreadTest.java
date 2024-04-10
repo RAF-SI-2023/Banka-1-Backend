@@ -1,4 +1,4 @@
-package threads;
+package rs.edu.raf.banka1.threads;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
