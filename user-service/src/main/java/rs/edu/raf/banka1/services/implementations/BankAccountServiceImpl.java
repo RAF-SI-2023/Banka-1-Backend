@@ -8,9 +8,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.CapitalDto;
 import org.tinylog.Logger;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
 import rs.edu.raf.banka1.mapper.BankAccountMapper;
+import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
@@ -23,6 +26,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Getter
@@ -36,7 +40,6 @@ public class BankAccountServiceImpl implements BankAccountService {
     private CompanyRepository companyRepository;
     @Autowired
     private BankAccountRepository bankAccountRepository;
-
     @Autowired
     private PaymentRepository paymentRepository;
 
