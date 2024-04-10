@@ -5,14 +5,24 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.configuration.authproviders.CurrentAuth;
+import rs.edu.raf.banka1.dtos.OrderDto;
+import rs.edu.raf.banka1.exceptions.ForbiddenException;
+import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.requests.StatusRequest;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
+import rs.edu.raf.banka1.services.EmployeeService;
 import rs.edu.raf.banka1.services.OrderService;
 import rs.edu.raf.banka1.utils.JwtUtil;
+
+import java.util.List;
 
 
 @RestController
@@ -22,10 +32,12 @@ public class OrderController {
 
     private final OrderService orderService;
     private final JwtUtil jwtUtil;
+    private final EmployeeService employeeService;
 
-    public OrderController(OrderService orderService, JwtUtil jwtUtil) {
+    public OrderController(OrderService orderService, JwtUtil jwtUtil, EmployeeService employeeService) {
         this.orderService = orderService;
         this.jwtUtil = jwtUtil;
+        this.employeeService = employeeService;
     }
 
     @PutMapping(value = "/{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -59,13 +71,43 @@ public class OrderController {
         @ApiResponse(responseCode = "404", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Void> createLoanRequest(
-        @RequestBody final CreateOrderRequest request
-    ) {
-//        orderService.createOrder(request);
-
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Boolean> createOrder(
+            @RequestBody final CreateOrderRequest request,
+            @AuthenticationPrincipal User userPrincipal
+            ) {
+        Employee currentAuth = employeeService.getEmployeeEntityByEmail(userPrincipal.getUsername());
+        orderService.createOrder(request, currentAuth);
+        return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all orders for current Employee", description = "Get all orders for current Employee")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))}),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to change status"),
+            @ApiResponse(responseCode = "404", description = "Loan not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<OrderDto>> getAllOrdersForLoggedUser(
+        @CurrentAuth Employee currentAuth
+    ) {
+        return new ResponseEntity<>(orderService.getAllOrdersForEmployee(currentAuth), HttpStatus.OK);
+    }
 
+    @GetMapping(value = "/supervisor/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get orders for all employees", description = "Supervisor gets orders for all employees")
+    @PreAuthorize("hasAuthority('manageOrderRequests')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))}),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to change status"),
+            @ApiResponse(responseCode = "404", description = "Loan not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<OrderDto>> getAllOrders() {
+        return new ResponseEntity<>(orderService.getAllOrders(), HttpStatus.OK);
+    }
 }

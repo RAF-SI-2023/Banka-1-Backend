@@ -12,15 +12,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.dtos.BankAccountDto;
+import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.dtos.CardDto;
 import rs.edu.raf.banka1.mapper.*;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
+
+
 import rs.edu.raf.banka1.requests.EditBankAccountNameRequest;
 import rs.edu.raf.banka1.requests.customer.AccountData;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
 import rs.edu.raf.banka1.responses.EditUserResponse;
+
 import rs.edu.raf.banka1.services.BankAccountService;
+import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.CardService;
 
 import java.util.List;
@@ -31,15 +36,16 @@ import java.util.List;
 public class BankAccountController {
 
     private final BankAccountService bankAccountService;
-
+    private final CapitalService capitalService;
     private final CardService cardService;
     private final CardMapper cardMapper;
     private final BankAccountMapper bankAccountMapper;
 
     @Autowired
-    public BankAccountController(BankAccountService bankAccountService, CardService cardService, CardMapper cardMapper,
+    public BankAccountController(BankAccountService bankAccountService, CapitalService capitalService, CardService cardService, CardMapper cardMapper,
                                  BankAccountMapper bankAccountMapper) {
         this.bankAccountService = bankAccountService;
+        this.capitalService = capitalService;
         this.cardService = cardService;
         this.cardMapper = cardMapper;
         this.bankAccountMapper = bankAccountMapper;
@@ -148,5 +154,57 @@ public class BankAccountController {
         if(bankAccount!=null)
             return ResponseEntity.ok(true);
         return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+    }
+
+    @GetMapping(value = "/balance/forex/{forexId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Double> estimateBalanceForex(@PathVariable(name = "forexId") Long forexId) {
+        return new ResponseEntity<>(capitalService.estimateBalanceForex(forexId), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/balance/future/{futureId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Double> estimateBalanceFuture(@PathVariable(name = "futureId") Long futureId) {
+        return new ResponseEntity<>(capitalService.estimateBalanceFuture(futureId), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/balance/stock/{stockId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Double> estimateBalanceStock(@PathVariable(name = "stockId") Long stockId) {
+        return new ResponseEntity<>(capitalService.estimateBalanceStock(stockId), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/capitals/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get total for bank account", description = "Get total for bank account")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Double> getAllCapitals(@PathVariable(name = "accountNumber") String accountNumber) {
+        return new ResponseEntity<>(capitalService.getCapital(accountNumber), HttpStatus.OK);
     }
 }
