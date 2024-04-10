@@ -123,7 +123,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Employee savedEmployee = this.employeeRepository.save(employee);
         emailService.sendEmail(createEmployeeDto.getEmail(), "RAF Banka - User activation",
-                "Visit this URL to activate your account: http://localhost:" + this.frontPort + "/employee/activate/" + activationToken);
+                "Visit this URL to activate your account: http://localhost:" + this.frontPort + "/employee/set-password/" + activationToken);
 
         return new CreateUserResponse(employee.getUserId(), "Employee created successfully");
     }
