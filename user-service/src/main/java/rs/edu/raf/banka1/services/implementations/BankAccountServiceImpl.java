@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.tinylog.Logger;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.mapper.BankAccountMapper;
 import rs.edu.raf.banka1.model.*;
@@ -61,6 +62,7 @@ public class BankAccountServiceImpl implements BankAccountService {
         try {
             type =createRequest.getAccount().getAccountType();
         } catch (IllegalArgumentException e) {
+            Logger.error("Invalid account type provided in createBankAccount request.");
             return null;
         }
         bankAccount.setAccountType(type);
@@ -88,6 +90,7 @@ public class BankAccountServiceImpl implements BankAccountService {
         }
 
         if(should_exit){
+            Logger.error("Failed to create bank account. Invalid account type or missing customer/company information.");
             return null;
         }
 //      currentDate
@@ -113,6 +116,7 @@ public class BankAccountServiceImpl implements BankAccountService {
 
         saveBankAccount(bankAccount);
 
+        Logger.info("Bank account created successfully: {}", bankAccount.getAccountNumber());
         return bankAccount;
     }
 
@@ -121,8 +125,10 @@ public class BankAccountServiceImpl implements BankAccountService {
     public List<BankAccount> getBankAccountsByCustomer(Long customerId) {
         Customer customer = customerRepository.findById(customerId).orElse(null);
         if(customer != null){
+            Logger.info("Retrieved bank accounts for customer: {}", customerId);
             return bankAccountRepository.findByCustomer(customer);
         }
+        Logger.error("Customer not found for retrieving bank accounts: {}", customerId);
         return new ArrayList<>();
     }
 
@@ -130,8 +136,10 @@ public class BankAccountServiceImpl implements BankAccountService {
     public List<BankAccount> getBankAccountsByCompany(Long companyId) {
         Company company = companyRepository.findById(companyId).orElse(null);
         if(company != null){
+            Logger.info("Retrieved bank accounts for company: {}", companyId);
             return bankAccountRepository.findByCompany(company);
         }
+        Logger.error("Company not found for retrieving bank accounts: {}", companyId);
         return new ArrayList<>();
     }
 
@@ -181,15 +189,20 @@ public class BankAccountServiceImpl implements BankAccountService {
     @Override
     public int editBankAccount(String accountNumber, String newName) {
         BankAccount b = bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElse(null);
-        if (b == null) return 0;
+        if (b == null) {
+            Logger.error("Bank account not found for editing: {}", accountNumber);
+            return 0;
+        }
 
         String loggedUserMail = SecurityContextHolder.getContext().getAuthentication().getName();
         if(!b.getCustomer().getEmail().equals(loggedUserMail)){
+            Logger.error("Unauthorized access to edit bank account: {}", accountNumber);
             return -1;
         }
 
         b.setAccountName(newName);
         bankAccountRepository.save(b);
+        Logger.info("Bank account edited successfully: {}", accountNumber);
         return 1;
     }
 

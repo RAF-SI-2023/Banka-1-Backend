@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.testcontainers.shaded.org.checkerframework.checker.units.qual.C;
+import rs.edu.raf.banka1.dtos.ExchangeRateDto;
 import rs.edu.raf.banka1.dtos.TransferDto;
 import rs.edu.raf.banka1.mapper.TransferMapper;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
@@ -17,6 +18,7 @@ import rs.edu.raf.banka1.requests.CreateTransferRequest;
 import rs.edu.raf.banka1.services.implementations.TransferServiceImpl;
 import rs.edu.raf.banka1.model.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -431,4 +433,5 @@ class TransferServiceImplTest {
 
         assertEquals(transfer.getStatus(), TransactionStatus.DENIED);
     }
+
 }
