@@ -82,8 +82,8 @@ public class StockSimulationJob implements Runnable {
         boolean plusBid = random.nextBoolean();
         bid = plusBid ? (bid + changeBid) : (bid - changeBid);
 
-        return (marketOrder.getOrderType().equals(OrderType.BUY) && ask > marketOrder.getStopValue())
-            || (bid < marketOrder.getStopValue());
+        return marketOrder.getOrderType().equals(OrderType.BUY) ? ask > marketOrder.getStopValue() :
+            (bid < marketOrder.getStopValue());
     }
 
     //todo treba da se radi sa currency i da se doda u listingdto exchangedto koji ce da ima i currency u sebi
