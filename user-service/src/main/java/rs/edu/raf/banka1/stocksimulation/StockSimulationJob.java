@@ -67,8 +67,8 @@ public class StockSimulationJob implements Runnable {
         boolean plus = random.nextBoolean();
         stockPrice = plus ? (stockPrice + change) : (stockPrice - change);
 
-        return (order.getOrderType().equals(OrderType.BUY) && stockPrice < order.getLimitValue())
-            || stockPrice > order.getLimitValue();
+        return order.getOrderType().equals(OrderType.BUY) ? stockPrice < order.getLimitValue() :
+            stockPrice > order.getLimitValue();
     }
 
     public Boolean processStopOrder(MarketOrder marketOrder, ListingBaseDto listingBase) {
