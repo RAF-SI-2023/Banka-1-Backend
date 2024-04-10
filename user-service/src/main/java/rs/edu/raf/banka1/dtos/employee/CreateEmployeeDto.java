@@ -9,7 +9,6 @@ public class CreateEmployeeDto {
     private String position;
     private String phoneNumber;
     private Boolean active;
-    private Double limitNow;
     private Double orderlimit;
     private Boolean requireApproval;
 
@@ -67,14 +66,6 @@ public class CreateEmployeeDto {
 
     public void setActive(Boolean active) {
         this.active = active;
-    }
-
-    public Double getLimitNow() {
-        return limitNow;
-    }
-
-    public void setLimitNow(Double limitNow) {
-        this.limitNow = limitNow;
     }
 
     public Double getOrderlimit() {
