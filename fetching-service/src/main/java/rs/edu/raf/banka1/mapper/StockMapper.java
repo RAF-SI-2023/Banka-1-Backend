@@ -61,24 +61,4 @@ public class StockMapper {
 
         return oldModel;
     }
-
-    public ListingStockDto stockDto(ListingStock stock) {
-        ListingStockDto dto = new ListingStockDto();
-        dto.setListingId(stock.getListingId());
-        dto.setTicker(stock.getTicker());
-        dto.setName(stock.getName());
-        dto.setListingType(stock.getListingType());
-        dto.setPrice(stock.getPrice());
-        dto.setHigh(stock.getHigh());
-        dto.setLow(stock.getLow());
-        dto.setPriceChange(stock.getPriceChange());
-        dto.setVolume(stock.getVolume());
-        dto.setExchange(stock.getExchange());
-        dto.setExchangeName(stock.getExchangeName());
-        dto.setOutstandingShares(stock.getOutstandingShares());
-        dto.setDividendYield(stock.getDividendYield());
-        dto.setLastRefresh(stock.getLastRefresh());
-        return dto;
-    }
-
 }
