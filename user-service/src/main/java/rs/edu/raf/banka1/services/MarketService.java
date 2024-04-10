@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services;
 
+import org.springframework.http.HttpMethod;
 import rs.edu.raf.banka1.dtos.market_service.*;
 import rs.edu.raf.banka1.model.WorkingHoursStatus;
 
@@ -9,8 +10,9 @@ public interface MarketService {
     List<ListingStockDto> getAllStocks();
     List<ListingFutureDto> getAllFutures();
     List<ListingForexDto> getAllForex();
-
     ListingStockDto getStockById(Long stockId);
     ListingFutureDto getFutureById(Long futureId);
     ListingForexDto getForexById(Long forexId);
+    WorkingHoursStatus getWorkingHoursForStock(Long stockId);
+
 }
