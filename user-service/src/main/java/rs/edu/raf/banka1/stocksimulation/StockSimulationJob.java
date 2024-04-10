@@ -30,10 +30,15 @@ public class StockSimulationJob implements Runnable {
     private void processOrder(
             final Long orderId
     ){
+        MarketOrder order = orderService.getOrderById(orderId);
+        if(!order.getListingType().equals(ListingType.STOCK)) {
+            orderService.setProcessedNumber(orderId, order.getProcessedNumber()+order.getContractSize());
+            orderService.finishOrder(orderId);
+            return;
+        }
         if(marketService.getWorkingHoursForStock(orderId) == WorkingHoursStatus.CLOSED)
             return;
 
-        MarketOrder order = orderService.getOrderById(orderId);
         if(order.getStatus().equals(OrderStatus.DONE) || !order.getStatus().equals(OrderStatus.APPROVED))
             return;
 
@@ -45,7 +50,7 @@ public class StockSimulationJob implements Runnable {
         if(!processOrder)
             return;
 
-        Long processedNumber = (order.getAllOrNone() || order.getListingType().equals(ListingType.FUTURE) || order.getListingType().equals(ListingType.FOREX)) ? order.getContractSize() : Math.min(
+        Long processedNumber = (order.getAllOrNone()) ? order.getContractSize() : Math.min(
             random.nextLong(order.getContractSize()) + 1,
             order.getContractSize() - order.getProcessedNumber()
         );
