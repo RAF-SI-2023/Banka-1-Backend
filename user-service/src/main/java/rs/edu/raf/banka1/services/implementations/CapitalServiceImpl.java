@@ -260,5 +260,12 @@ public class CapitalServiceImpl implements CapitalService {
         return (capital.getTotal()-capital.getReserved())*listingStockDto.getPrice();
     }
 
+    @Override
+    public List<CapitalDto> getListingCapitalsQuantity() {
+        return this.capitalRepository.findAll().stream()
+                .filter(capital -> capital.getListingType() != null)
+                .map(capitalMapper::capitalToCapitalDto)
+                .toList();
+    }
 }
 

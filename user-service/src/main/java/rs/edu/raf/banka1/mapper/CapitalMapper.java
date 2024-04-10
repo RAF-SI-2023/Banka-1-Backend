@@ -8,11 +8,11 @@ public class CapitalMapper {
     public CapitalDto capitalToCapitalDto(Capital capital) {
         CapitalDto capitalDto = new CapitalDto();
         capitalDto.setListingId(capital.getListingId());
-        capitalDto.setListingType(capitalDto.getListingType());
+        capitalDto.setListingType(capital.getListingType());
         capitalDto.setTotal(capital.getTotal());
-        capitalDto.setReserved(capitalDto.getReserved());
-        capitalDto.setBankAccountNumber(capital.getBankAccount().getAccountNumber());
-        capitalDto.setCurrencyName(capital.getCurrency().getCurrencyName());
+        capitalDto.setReserved(capital.getReserved());
+        capitalDto.setBankAccountNumber(capital.getBankAccount() == null ? null : capital.getBankAccount().getAccountNumber());
+        capitalDto.setCurrencyName(capital.getCurrency() == null ? null : capital.getCurrency().getCurrencyName());
         return capitalDto;
     }
 }
