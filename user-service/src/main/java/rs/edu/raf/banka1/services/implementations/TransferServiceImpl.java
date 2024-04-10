@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.tinylog.Logger;
 import rs.edu.raf.banka1.dtos.ExchangeRateDto;
 import rs.edu.raf.banka1.dtos.TransferDto;
 import rs.edu.raf.banka1.mapper.TransferMapper;
@@ -65,13 +66,14 @@ public class TransferServiceImpl implements TransferService {
     private boolean initRsdCurrency() {
         Currency rsdCurrency = currencyRepository.findCurrencyByCurrencyCode("RSD").orElse(null);
         if (rsdCurrency == null) {
-            System.out.println("Failed to load exchange rate for RSD!");
+            Logger.error("Failed to load exchange rate for RSD!");
             return true;
         }
         rsdCurrency.setToRSD(1.0);
         rsdCurrency.setFromRSD(1.0);
         currencyRepository.save(rsdCurrency);
         return false;
+
     }
 
     private void seedExchangeRatesToRsd(List<String> supportedCurrencies) {
@@ -92,16 +94,17 @@ public class TransferServiceImpl implements TransferService {
 
                     Currency currency = currencyRepository.findCurrencyByCurrencyCode(currencyCode).orElse(null);
                     if (currency == null) {
-                        System.out.println("Failed to load exchange rate for currency: " + currencyCode);
+                        Logger.error("Failed to load exchange rate for currency: {}", currencyCode);
                         return;
                     }
                     currency.setToRSD(exchangeRate);
                     currencyRepository.save(currency);
                 }else{
-                    System.out.println("Error response code" + response.statusCode());
+                    Logger.error("Error response code {}", response.statusCode());;
                 }
             }
         } catch (IOException | InterruptedException e) {
+            Logger.error(e, "An error occurred during exchange rate seeding");
             throw new RuntimeException(e);
         }
     }
@@ -125,7 +128,7 @@ public class TransferServiceImpl implements TransferService {
                     double exchangeRate = conversionRateNode.get(currencyCode).asDouble();
                     Currency currency = currencyRepository.findCurrencyByCurrencyCode(currencyCode).orElse(null);
                     if (currency == null) {
-                        System.out.println("Failed to load exchange rate for currency: " + currencyCode);
+                        Logger.error("Failed to load exchange rate for currency: {}",currencyCode);
                         return;
                     }
                     currency.setFromRSD(exchangeRate);
@@ -133,18 +136,13 @@ public class TransferServiceImpl implements TransferService {
                 }
 
             }else{
-                System.out.println("Error response code" + response.statusCode());
+                Logger.error("Error response code {}", response.statusCode());
             }
         } catch (IOException | InterruptedException e) {
+            Logger.error(e, "An error occurred during exchange rate seeding");
             e.printStackTrace();
         }
     }
-
-//    @Override
-//    public List<ExchangeRate> getExchangeRates(String fromCurrencyCode) {
-//
-//    }
-
 
     @Override
     public Long createTransfer(CreateTransferRequest request) {
@@ -152,6 +150,7 @@ public class TransferServiceImpl implements TransferService {
         Optional<BankAccount> recipientAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(request.getRecipientAccountNumber());
 
         if (senderAccountOpt.isEmpty() || recipientAccountOpt.isEmpty()) {
+            Logger.error("Sender or recipient account not found for transfer creation");
             return -1L;
         }
         BankAccount senderAccount = senderAccountOpt.get();
@@ -179,6 +178,7 @@ public class TransferServiceImpl implements TransferService {
     public void processTransfer(Long id) {
         Optional<Transfer> transferOpt = transferRepository.findById(id);
         if (transferOpt.isEmpty()) {
+            Logger.error("Transfer not found for processing: {}", id);
             return;
         }
         Transfer transfer = transferOpt.get();
@@ -205,6 +205,7 @@ public class TransferServiceImpl implements TransferService {
         ) {
             transfer.setStatus(TransactionStatus.DENIED);
             transferRepository.save(transfer);
+            Logger.info("Transfer {} denied. Reason: invalid parameters or insufficient balance.", id);
             return;
         }
 
@@ -226,6 +227,7 @@ public class TransferServiceImpl implements TransferService {
         }
 
         if (fromBank == null || toBank == null) {
+            Logger.info("Transfer {} denied. Reason: bank not found for currency conversion.", id);
             transfer.setStatus(TransactionStatus.DENIED);
             transferRepository.save(transfer);
             return;
@@ -248,6 +250,7 @@ public class TransferServiceImpl implements TransferService {
         fromBank.setBalance(fromBank.getBalance() - convertedAmount);
         recipientAccount.setBalance(recipientAccount.getBalance() + convertedAmount);
 
+        Logger.info("Transfer {} processed successfully.", id);
         transfer.setStatus(TransactionStatus.COMPLETE);
         transfer.setConvertedAmount(convertedAmount);
         transfer.setCommission(commission);
@@ -288,6 +291,7 @@ public class TransferServiceImpl implements TransferService {
                 Currency baseCurrency = currencyRepository.findCurrencyByCurrencyCode(baseCurrencySymbol).orElse(null);
                 Currency quoteCurrency = currencyRepository.findCurrencyByCurrencyCode(quoteCurrencySymbol).orElse(null);
                 if (baseCurrency == null || quoteCurrency == null) {
+                    Logger.error("Currency not found for exchange rate: {} to {}", baseCurrencySymbol, quoteCurrencySymbol);
                     continue;
                 }
                 double exchangeRate = baseCurrency.getToRSD() * quoteCurrency.getFromRSD();
