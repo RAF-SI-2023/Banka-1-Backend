@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
+import rs.edu.raf.banka1.model.ListingType;
 import rs.edu.raf.banka1.model.MarketOrder;
 import rs.edu.raf.banka1.model.WorkingHoursStatus;
 import rs.edu.raf.banka1.services.MarketService;
@@ -23,7 +24,9 @@ public class StockSimulationTrigger implements Trigger {
     public Instant nextExecution(TriggerContext triggerContext) {
         MarketOrder marketOrder = orderService.getOrderById(orderId);
 
-        final ListingBaseDto listingBaseDto = marketService.getStockById(marketOrder.getListingId());
+        ListingBaseDto listingBaseDto = marketService.getStockById(marketOrder.getListingId());
+        if(listingBaseDto == null) return Instant.now().plusMillis(500);
+
         final double volume = listingBaseDto.getVolume();
 
         long remainingQuantity = marketOrder.getContractSize() - marketOrder.getProcessedNumber();

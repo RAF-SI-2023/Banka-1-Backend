@@ -12,9 +12,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import rs.edu.raf.banka1.dtos.LimitDto;
+import rs.edu.raf.banka1.dtos.NewLimitDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.exceptions.EmployeeNotFoundException;
+import rs.edu.raf.banka1.exceptions.ForbiddenException;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
 import rs.edu.raf.banka1.mapper.LimitMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
@@ -346,4 +350,102 @@ public class UserServiceImplTest {
 
     }
 
+    @Test
+    void setOrderLimitForEmployeeTest() {
+        NewLimitDto newLimitDto = new NewLimitDto();
+        newLimitDto.setUserId(1L);
+        newLimitDto.setLimit(10005.0);
+        newLimitDto.setApprovalRequired(true);
+
+        Employee employee = new Employee();
+        employee.setUserId(1L);
+        employee.setPosition(Constants.AGENT);
+        employee.setEmail("email");
+        employee.setLimitNow(560.0);
+        employee.setRequireApproval(true);
+
+        LimitDto expected = new LimitDto();
+        expected.setLimit(10005.0);
+        expected.setEmail("email");
+        expected.setApprovalRequired(true);
+        expected.setUsedLimit(560.0);
+
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
+        when(limitMapper.toLimitDto(employee)).thenReturn(expected);
+
+        LimitDto actualLimitDto = this.userService.setOrderLimitForEmployee(newLimitDto);
+
+        assertEquals(actualLimitDto.getLimit(), 10005.0);
+        assertEquals(actualLimitDto.getEmail(), "email");
+        assertEquals(actualLimitDto.getApprovalRequired(), true);
+        assertEquals(actualLimitDto.getUsedLimit(), 560.0);
+    }
+    @Test
+    void setOrderLimitForEmployee_Exception_Test() {
+        NewLimitDto newLimitDto = new NewLimitDto();
+        newLimitDto.setUserId(1L);
+        newLimitDto.setLimit(10005.0);
+        newLimitDto.setApprovalRequired(true);
+
+        Employee employee = new Employee();
+        employee.setUserId(1L);
+        employee.setPosition(Constants.SUPERVIZOR);
+        employee.setEmail("email");
+        employee.setLimitNow(560.0);
+        employee.setRequireApproval(true);
+
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
+
+        assertThrows(ForbiddenException.class, () -> this.userService.setOrderLimitForEmployee(newLimitDto));
+    }
+
+    @Test
+    public void testResetEmployeeLimits() {
+        List<Employee> mockEmployees = new ArrayList<>();
+        Employee e1 = new Employee();
+        e1.setLimitNow(1000.0);
+        Employee e2 = new Employee();
+        e2.setLimitNow(2000.0);
+        mockEmployees.add(e1);
+        mockEmployees.add(e2);
+
+        when(employeeRepository.findAll()).thenReturn(mockEmployees);
+
+        userService.resetEmployeeLimits();
+
+        for (Employee employee : mockEmployees) {
+            assertEquals(0.0, employee.getLimitNow());
+        }
+
+        verify(employeeRepository, times(1)).saveAll(mockEmployees);
+    }
+
+    @Test
+    public void testResetLimitForEmployee() {
+        Long employeeId = 1L;
+        Employee mockEmployee = new Employee();
+        mockEmployee.setLimitNow(1000.0);
+        mockEmployee.setUserId(employeeId);
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(mockEmployee));
+
+        userService.resetLimitForEmployee(employeeId);
+
+        assertEquals(0.0, mockEmployee.getLimitNow());
+
+        verify(employeeRepository, times(1)).save(mockEmployee);
+    }
+
+    @Test
+    public void testResetLimitForEmployee_EmployeeNotFound() {
+        Long employeeId = 1L;
+
+        when(employeeRepository.findById(employeeId)).thenReturn(Optional.empty());
+
+        assertThrows(EmployeeNotFoundException.class, () -> {
+            userService.resetLimitForEmployee(employeeId);
+        });
+
+        verify(employeeRepository, never()).save(any());
+    }
 }

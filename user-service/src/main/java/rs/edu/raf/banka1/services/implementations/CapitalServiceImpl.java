@@ -2,10 +2,9 @@ package rs.edu.raf.banka1.services.implementations;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.CapitalProfitDto;
 import rs.edu.raf.banka1.exceptions.*;
-import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
@@ -21,7 +20,6 @@ import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.MarketService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Getter
@@ -260,5 +258,22 @@ public class CapitalServiceImpl implements CapitalService {
         return (capital.getTotal()-capital.getReserved())*listingStockDto.getPrice();
     }
 
+    @Override
+    public List<CapitalProfitDto> getListingCapitalsQuantity() {
+        return this.capitalRepository.findAll().stream()
+                .filter(capital -> capital.getListingType() != null)
+                .map(capital -> {
+                    Double price = 0.0;
+                    if(capital.getListingType().equals(ListingType.STOCK)) {
+                        price = this.marketService.getStockById(capital.getListingId()).getPrice();
+                    } else if(capital.getListingType().equals(ListingType.FUTURE)) {
+                        price = this.marketService.getFutureById(capital.getListingId()).getPrice();
+                    } else if(capital.getListingType().equals(ListingType.FOREX)) {
+                        price = this.marketService.getForexById(capital.getListingId()).getPrice();
+                    }
+                    return capitalMapper.capitalToCapitalProfitDto(capital, price);
+                })
+                .toList();
+    }
 }
 
