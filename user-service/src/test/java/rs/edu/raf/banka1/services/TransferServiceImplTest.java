@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,11 +43,16 @@ class TransferServiceImplTest {
     private TransferRepository transferRepository;
     @Mock
     private CurrencyRepository currencyRepository;
-    @Mock
+
     private TransferMapper transferMapper;
-    @InjectMocks
     private TransferServiceImpl transferService;
 
+    @BeforeEach
+    void setUp() {
+        transferMapper =new TransferMapper();
+        transferService = new TransferServiceImpl(transferRepository, bankAccountRepository,currencyRepository,transferMapper); // Inject the real TransferMapper instance into TransferServiceImpl
+
+    }
     @Test
     public void testCreateTransferSuccessful() {
         BankAccount senderAccount = new BankAccount();
@@ -92,7 +98,6 @@ class TransferServiceImplTest {
         expectedDto.setId(transferId);
 
         when(transferRepository.findById(transferId)).thenReturn(Optional.of(transfer));
-        when(transferMapper.transferToTransferDto(transfer)).thenReturn(expectedDto);
 
         TransferDto resultDto = transferService.getTransferById(transferId);
         assertNotNull(resultDto);
@@ -125,12 +130,6 @@ class TransferServiceImplTest {
         bankAccount.setTransfers(transfers);
 
         when(bankAccountRepository.findBankAccountByAccountNumber("123456789")).thenReturn(Optional.of(bankAccount));
-        when(transferMapper.transferToTransferDto(any(Transfer.class)))
-                .thenAnswer(invocation->{
-                    Transfer transfer = invocation.getArgument(0);
-                    return new TransferDto();
-                });
-
 
         List<TransferDto> result = transferService.getAllTransfersForAccountNumber("123456789");
 
