@@ -36,6 +36,7 @@ import rs.edu.raf.banka1.requests.*;
 import rs.edu.raf.banka1.requests.customer.AccountData;
 import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
 import rs.edu.raf.banka1.requests.customer.CustomerData;
+import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.responses.*;
 import rs.edu.raf.banka1.services.EmailService;
@@ -120,6 +121,7 @@ public class UserControllerSteps {
     private BankAccountRequest bankAccountRequest = new BankAccountRequest();
     private CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
     private EditBankAccountNameRequest editBankAccountNameRequest = new EditBankAccountNameRequest();
+    private EditCustomerRequest editCustomerRequest = new EditCustomerRequest();
     
     @Given("customer wants to send money from account {string} to account {string}")
     public void customerWantsToSendMoneyFromAccountToAccount(String arg0, String arg1) {
@@ -463,6 +465,28 @@ public class UserControllerSteps {
                 .orElse(null);
         assertThat(bankAccount).isNotNull();
         assertThat(bankAccount.getAccountName()).isEqualTo(editBankAccountNameRequest.getNewName());
+    }
+
+    @And("i should get correct customer")
+    public void iShouldGetCorrectCustomer() {
+
+    }
+
+    @And("i want to edit customer with email {string}")
+    public void iWantToEditCustomerWithEmail(String arg0) {
+        editCustomerRequest.setEmail(arg0);
+    }
+
+    @And("i want to set customers first name to {string}")
+    public void iWantToSetCustomersFirstNameTo(String arg0) {
+        editCustomerRequest.setFirstName(arg0);
+    }
+
+    @And("customers name should be set to {string}")
+    public void customersNameShouldBeSetTo(String arg0) {
+        Customer customer = customerRepository.findCustomerByEmail(editCustomerRequest.getEmail()).orElse(null);
+        assertThat(customer).isNotNull();
+        assertThat(customer.getFirstName()).isEqualTo(editCustomerRequest.getFirstName());
     }
 
 
@@ -1020,7 +1044,7 @@ public class UserControllerSteps {
     @When("i send PUT request to {string}")
     public void whenISendPUTRequestTo(String path) {
         if(path.equals( "/customer")) {
-            put(url + port + path, editUserRequest);
+            put(url + port + path, editCustomerRequest);
         }
         else if(path.equals("/recipients/edit")){
             put(url + port + path, paymentRecipientDto);
