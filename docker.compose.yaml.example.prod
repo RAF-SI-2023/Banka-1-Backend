@@ -70,7 +70,8 @@ services:
         "forexExchangeRateApiUrl":"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE",
         "forexDailyApiUrl":"https://www.alphavantage.co/query?function=FX_DAILY",
         "optionsUrl":"https://query2.finance.yahoo.com/v7/finance/options/",
-        "springdoc.packagesToScan": "rs.edu.raf.banka1.controller"
+        "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
+        "dev.environment": false
       }'
     depends_on:
       mysql:

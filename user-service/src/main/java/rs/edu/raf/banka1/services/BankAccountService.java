@@ -16,4 +16,6 @@ public interface BankAccountService {
     List<BankAccount> getBankAccountsByAgent(Long agentId);
     BankAccount findBankAccountByAccountNumber(String accountNumber);
     void activateBankAccount(BankAccount bankAccount);
+
+    int editBankAccount(String accountNumber, String newName);
 }

@@ -29,3 +29,10 @@ server.port=8080
 front.port=4200
 server.servlet.context-path=/
 oauth.jwt.secret=secret_key
+
+
+# API TOKENS:
+exchangeRateAPIToken=40f2aa4e59165c6aab10cd02
+
+# API URLs:
+exchangeRateApiUrl= https://v6.exchangerate-api.com/v6/
