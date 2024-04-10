@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.dtos.BankAccountDto;
 import rs.edu.raf.banka1.dtos.CapitalDto;
+import rs.edu.raf.banka1.dtos.CapitalProfitDto;
 import rs.edu.raf.banka1.dtos.CardDto;
 import rs.edu.raf.banka1.mapper.*;
 import rs.edu.raf.banka1.model.*;
@@ -214,11 +215,11 @@ public class BankAccountController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = List.class,
-                                    subTypes = {CapitalDto.class}))}),
+                                    subTypes = {CapitalProfitDto.class}))}),
             @ApiResponse(responseCode = "403", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<CapitalDto>> getCapitals() {
+    public ResponseEntity<List<CapitalProfitDto>> getCapitals() {
         return new ResponseEntity<>(capitalService.getListingCapitalsQuantity(), HttpStatus.OK);
     }
 }
