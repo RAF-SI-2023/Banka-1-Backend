@@ -106,7 +106,7 @@ public class BootstrapData implements CommandLineRunner {
         user1.setLastName("User1Prezime");
         user1.setPosition(Constants.ADMIN);
         user1.setActive(true);
-        user1.setOrderlimit(Double.MAX_VALUE);
+        user1.setOrderlimit(10000000.0);
         user1.setLimitNow(0.0);
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
         user1.setRequireApproval(false);

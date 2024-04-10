@@ -67,7 +67,7 @@ public class EmployeeMapper {
         employee.setActive(false);
         employee.setPassword(UUID.randomUUID().toString());
         employee.setRequireApproval(createEmployeeDto.getRequireApproval());
-        employee.setLimitNow(createEmployeeDto.getLimitNow());
+        employee.setLimitNow(0.0);
         employee.setOrderlimit(createEmployeeDto.getOrderlimit());
         employee.setPosition(createEmployeeDto.getPosition().toLowerCase(Locale.ROOT));
 
