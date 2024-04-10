@@ -1,4 +1,5 @@
 package rs.edu.raf.banka1.services;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -6,13 +7,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rs.edu.raf.banka1.dtos.TransactionDto;
 import rs.edu.raf.banka1.mapper.TransactionMapper;
-import rs.edu.raf.banka1.model.BankAccount;
-import rs.edu.raf.banka1.model.Transaction;
+import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.TransactionRepository;
 import rs.edu.raf.banka1.requests.CreateTransactionRequest;
 import rs.edu.raf.banka1.services.implementations.TransactionServiceImpl;
 
 import java.util.Arrays;
+import rs.edu.raf.banka1.model.Currency;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,6 +30,9 @@ class TransactionServiceImplTest {
 
     @Mock
     private BankAccountService bankAccountService;
+
+    @Mock
+    private CapitalService capitalService;
 
     @InjectMocks
     private TransactionServiceImpl transactionService;
@@ -100,5 +104,81 @@ class TransactionServiceImplTest {
 
         // Assert
         assertEquals(transactions.size(), result.size());
+    }
+    
+    @Nested
+    class CreateTransactionTests {
+        @Test
+        void shouldCreateBuyTransaction() {
+            ListingType listingType = ListingType.STOCK;
+            long listingId = 1;
+            double price = 100;
+            long securityAmount = 1;
+            String currencyCode = "RSD";
+
+            Currency currency = new Currency();
+            currency.setCurrencyCode(currencyCode);
+
+            Capital bankCapital = new Capital();
+            BankAccount bankAccount = new BankAccount();
+            bankAccount.setBalance(1000.0);
+            bankAccount.setAvailableBalance(500.0);
+            bankAccount.setCurrency(currency);
+            bankCapital.setBankAccount(bankAccount);
+            bankCapital.setTotal(1000.0);
+            bankCapital.setReserved(500.0);
+
+            Capital securityCapital = new Capital();
+            securityCapital.setListingType(listingType);
+            securityCapital.setListingId(listingId);
+            securityCapital.setTotal(1000.0);
+            securityCapital.setReserved(100.0);
+
+            MarketOrder order = new MarketOrder();
+            order.setOrderType(OrderType.BUY);
+
+            transactionService.createTransaction(bankCapital, securityCapital, price, order, securityAmount);
+
+            verify(capitalService).addBalance(eq(listingId), eq(listingType), eq((double) securityAmount));
+            verify(capitalService).commitReserved(eq(currencyCode), eq(price));
+            verify(transactionRepository).save(any(Transaction.class));
+        }
+
+        @Test
+        void shouldCreateSellTransaction() {
+            ListingType listingType = ListingType.STOCK;
+            long listingId = 1;
+            double price = 100;
+            long securityAmount = 1;
+            String currencyCode = "RSD";
+
+            Currency currency = new Currency();
+            currency.setCurrencyCode(currencyCode);
+
+            Capital bankCapital = new Capital();
+            BankAccount bankAccount = new BankAccount();
+            bankAccount.setBalance(1000.0);
+            bankAccount.setAvailableBalance(500.0);
+            bankAccount.setCurrency(currency);
+            bankCapital.setBankAccount(bankAccount);
+            bankCapital.setTotal(1000.0);
+            bankCapital.setReserved(500.0);
+            bankCapital.setCurrency(currency);
+
+            Capital securityCapital = new Capital();
+            securityCapital.setListingType(listingType);
+            securityCapital.setListingId(listingId);
+            securityCapital.setTotal(1000.0);
+            securityCapital.setReserved(100.0);
+
+            MarketOrder order = new MarketOrder();
+            order.setOrderType(OrderType.SELL);
+
+            transactionService.createTransaction(bankCapital, securityCapital, price, order, securityAmount);
+
+            verify(capitalService).commitReserved(eq(listingId), eq(listingType), eq((double) securityAmount));
+            verify(capitalService).addBalance(eq(currencyCode), eq(price));
+            verify(transactionRepository).save(any(Transaction.class));
+        }
     }
 }

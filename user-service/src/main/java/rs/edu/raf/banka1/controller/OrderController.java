@@ -71,13 +71,13 @@ public class OrderController {
         @ApiResponse(responseCode = "404", description = "Bad Request"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Void> createOrder(
+    public ResponseEntity<Boolean> createOrder(
             @RequestBody final CreateOrderRequest request,
             @AuthenticationPrincipal User userPrincipal
             ) {
         Employee currentAuth = employeeService.getEmployeeEntityByEmail(userPrincipal.getUsername());
         orderService.createOrder(request, currentAuth);
-        return ResponseEntity.ok().build();
+        return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
     @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
