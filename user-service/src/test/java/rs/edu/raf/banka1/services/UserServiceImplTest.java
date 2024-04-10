@@ -30,8 +30,7 @@ import rs.edu.raf.banka1.utils.JwtUtil;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -66,7 +65,7 @@ public class UserServiceImplTest {
 
     @InjectMocks
     @Autowired
-    private EmployeeServiceImpl userService;
+    private EmployeeServiceImpl employeeService;
 
     @InjectMocks
     @Autowired
@@ -119,7 +118,7 @@ public class UserServiceImplTest {
 
         when(employeeRepository.findByEmail(email)).thenReturn(java.util.Optional.of(user));
 
-        UserDetails userDetails = userService.loadUserByUsername(email);
+        UserDetails userDetails = employeeService.loadUserByUsername(email);
         assertEquals(userDetails.getUsername(), email);
         assertEquals(userDetails.getPassword(), user.getPassword());
         assertEquals(userDetails.getAuthorities().size(), 0);
@@ -145,7 +144,7 @@ public class UserServiceImplTest {
 
         when(employeeRepository.findByEmail(email)).thenReturn(java.util.Optional.of(user));
 
-        UserDetails userDetails = userService.loadUserByUsername(email);
+        UserDetails userDetails = employeeService.loadUserByUsername(email);
         assertEquals(userDetails.getUsername(), email);
         assertEquals(userDetails.getPassword(), user.getPassword());
         assertEquals(userDetails.getAuthorities().size(), 2);
@@ -157,7 +156,7 @@ public class UserServiceImplTest {
         String email = "user1";
         when(employeeRepository.findByEmail(email)).thenReturn(java.util.Optional.empty());
         assertThrows(org.springframework.security.core.userdetails.UsernameNotFoundException.class, () -> {
-            userService.loadUserByUsername(email);
+            employeeService.loadUserByUsername(email);
         });
     }
 
@@ -173,7 +172,7 @@ public class UserServiceImplTest {
         createUserRequest.setPosition(Constants.ADMIN);
         createUserRequest.setPhoneNumber("1234");
         createUserRequest.setActive(true);
-        userService.createEmployee(createUserRequest);
+        employeeService.createEmployee(createUserRequest);
 
         verify(emailService, times(1)).sendEmail(eq(createUserRequest.getEmail()), any(), any());
         verify(employeeRepository, times(1)).save(any());
@@ -186,9 +185,17 @@ public class UserServiceImplTest {
 
         String token = "1234";
         String password = "1234";
-        userService.activateAccount(token, password);
+        employeeService.activateAccount(token, password);
         verify(employeeRepository, times(1)).findByActivationToken(token);
         verify(employeeRepository, times(1)).save(any());
+    }
+
+    @Test
+    public void activateAccountEmployeeNotFound(){
+        when(employeeRepository.findByActivationToken("testactivationtoken")).thenReturn(Optional.empty());
+        var result = employeeService.activateAccount("testactivationtoken", "password");
+        assertNull(result.getUserId());
+        verify(employeeRepository, never()).save(any());
     }
 
     @Test
@@ -199,7 +206,7 @@ public class UserServiceImplTest {
         when(emailService.sendEmail(eq(email), any(), any()))
                 .thenReturn(true);
 
-        assertEquals(userService.sendResetPasswordEmail(email), true);
+        assertEquals(employeeService.sendResetPasswordEmail(email), true);
         verify(emailService, times(1)).sendEmail(eq(email), any(), any());
     }
 
@@ -211,7 +218,7 @@ public class UserServiceImplTest {
         when(emailService.sendEmail(eq(email), any(), any()))
                 .thenReturn(true);
 
-        assertEquals(userService.sendResetPasswordEmail(email), false);
+        assertEquals(employeeService.sendResetPasswordEmail(email), false);
         verify(emailService, times(0)).sendEmail(eq(email), any(), any());
     }
 
@@ -222,7 +229,7 @@ public class UserServiceImplTest {
 
         String token = "1234";
         String password = "1234";
-        userService.setNewPassword(token, password);
+        employeeService.setNewPassword(token, password);
         verify(employeeRepository, times(1)).findByResetPasswordToken(token);
         verify(employeeRepository, times(1)).save(any());
     }
@@ -233,7 +240,7 @@ public class UserServiceImplTest {
 
         String token = "1234";
         String password = "1234";
-        userService.setNewPassword(token, password);
+        employeeService.setNewPassword(token, password);
         verify(employeeRepository, times(1)).findByResetPasswordToken(token);
         verify(employeeRepository, times(0)).save(any());
     }
@@ -257,7 +264,7 @@ public class UserServiceImplTest {
         createUserRequest.setPosition(Constants.ADMIN);
         createUserRequest.setPhoneNumber("1234");
         createUserRequest.setActive(true);
-        userService.createEmployee(createUserRequest);
+        employeeService.createEmployee(createUserRequest);
 
         EditEmployeeDto editUserRequest = new EditEmployeeDto();
         editUserRequest.setEmail("noreply.rafbanka1@gmail.com");
@@ -271,7 +278,7 @@ public class UserServiceImplTest {
         Set<String> permissions = new HashSet<>();
         permissions.add(perm);
         editUserRequest.setPermissions(permissions.stream().toList());
-        userService.editEmployee(editUserRequest);
+        employeeService.editEmployee(editUserRequest);
 
         verify(employeeRepository, times(2)).save(any());
         verify(employeeRepository, times(1)).findByEmail(editUserRequest.getEmail());
@@ -283,7 +290,7 @@ public class UserServiceImplTest {
         when(employeeRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Optional.empty());
 
-        List<EmployeeDto> userResponses = userService.search(null, null, null, null);
+        List<EmployeeDto> userResponses = employeeService.search(null, null, null, null);
         assertEquals(0, userResponses.size());
     }
 
@@ -298,7 +305,7 @@ public class UserServiceImplTest {
                         this.user2
                 )));
 
-        List<EmployeeDto> userResponses = userService.search("", "", "", "");
+        List<EmployeeDto> userResponses = employeeService.search("", "", "", "");
         assertEquals(testCount, userResponses.size());
     }
 
@@ -310,7 +317,7 @@ public class UserServiceImplTest {
                         this.user1
                 )));
 
-        List<EmployeeDto> userResponses = userService.search("user", "user", "useric1", "position1");
+        List<EmployeeDto> userResponses = employeeService.search("user", "user", "useric1", "position1");
         assertEquals(testCount, userResponses.size());
 
     }
@@ -321,7 +328,7 @@ public class UserServiceImplTest {
                 .thenReturn(Optional.of(Arrays.asList(
                 )));
 
-        List<EmployeeDto> userResponses = userService.search("admin", "user", "useric1", "position1");
+        List<EmployeeDto> userResponses = employeeService.search("admin", "user", "useric1", "position1");
         assertEquals(0, userResponses.size());
 
     }
@@ -334,7 +341,7 @@ public class UserServiceImplTest {
                         this.user2
                 )));
 
-        List<EmployeeDto> userResponses = userService.search("user", "user", "useric", "position");
+        List<EmployeeDto> userResponses = employeeService.search("user", "user", "useric", "position");
         assertEquals(testCount, userResponses.size());
 
     }
