@@ -15,6 +15,11 @@ import org.mockito.quality.Strictness;
 import rs.edu.raf.banka1.exceptions.InvalidCapitalAmountException;
 import rs.edu.raf.banka1.exceptions.InvalidReservationAmountException;
 import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
+import org.junit.jupiter.api.Assertions;
+import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
+import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
+import rs.edu.raf.banka1.exceptions.CapitalNotFoundByBankAccountException;
+import rs.edu.raf.banka1.exceptions.CapitalNotFoundByListingIdAndTypeException;
 import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Capital;
@@ -530,4 +535,74 @@ class CapitalServiceImplTest {
         }
     }
 
+    @Test
+    public void testGetCapital() {
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("1234567890");
+
+        Capital capital = new Capital();
+        capital.setTotal(1000.0);
+        capital.setReserved(200.0);
+
+        when(bankAccountRepository.findBankAccountByAccountNumber("1234567890")).thenReturn(Optional.of(bankAccount));
+        when(capitalRepository.getCapitalByBankAccount(bankAccount)).thenReturn(Optional.of(capital));
+
+        Double result = capitalService.getCapital("1234567890");
+
+        Assertions.assertEquals(800.0, result);
+    }
+
+    @Test
+    public void testGetCapitalBankAccountNotFound() {
+        when(bankAccountRepository.findBankAccountByAccountNumber(anyString())).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(BankAccountNotFoundException.class, () -> capitalService.getCapital("nonexistent"));
+
+        verify(bankAccountRepository).findBankAccountByAccountNumber("nonexistent");
+        verifyNoMoreInteractions(capitalRepository);
+    }
+
+    @Test
+    public void testGetCapitalCapitalNotFound() {
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("1234567890");
+
+        when(bankAccountRepository.findBankAccountByAccountNumber("1234567890")).thenReturn(Optional.of(bankAccount));
+        when(capitalRepository.getCapitalByBankAccount(bankAccount)).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(CapitalNotFoundByBankAccountException.class, () -> capitalService.getCapital("1234567890"));
+
+        verify(bankAccountRepository).findBankAccountByAccountNumber("1234567890");
+        verify(capitalRepository).getCapitalByBankAccount(bankAccount);
+    }
+    @Test
+    public void testEstimateBalanceStock() {
+        Long stockId = 123L;
+        ListingStockDto listingStockDto = new ListingStockDto();
+        listingStockDto.setPrice(50.0);
+
+        Capital capital = new Capital();
+        capital.setTotal(1000.0);
+        capital.setReserved(200.0);
+
+        when(marketService.getStockById(stockId)).thenReturn(listingStockDto);
+        when(capitalRepository.getCapitalByListingIdAndListingType(stockId, ListingType.STOCK)).thenReturn(Optional.of(capital));
+
+        Double result = capitalService.estimateBalanceStock(stockId);
+
+        Assertions.assertEquals(40000.0, result);
+    }
+
+    @Test
+    public void testEstimateBalanceStockCapitalNotFound() {
+        Long stockId = 123L;
+
+        when(capitalRepository.getCapitalByListingIdAndListingType(stockId, ListingType.STOCK)).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(CapitalNotFoundByListingIdAndTypeException.class, () -> capitalService.estimateBalanceStock(stockId));
+
+        verify(capitalRepository).getCapitalByListingIdAndListingType(stockId, ListingType.STOCK);
+    }
+
 }
+

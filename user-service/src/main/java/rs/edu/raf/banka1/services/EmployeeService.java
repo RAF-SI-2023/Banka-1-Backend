@@ -36,7 +36,7 @@ public interface EmployeeService extends UserDetailsService {
     NewPasswordResponse setNewPassword(String token, String password);
     void resetLimitForEmployee(Long employeeId);
     void resetEmployeeLimits();
-    LimitDto setLimitForEmployee(NewLimitDto newLimitDto);
+    LimitDto setOrderLimitForEmployee(NewLimitDto newLimitDto);
     List<LimitDto> getAllLimits(Employee currentAuth);
     Employee getEmployeeEntityByEmail(String email);
 }

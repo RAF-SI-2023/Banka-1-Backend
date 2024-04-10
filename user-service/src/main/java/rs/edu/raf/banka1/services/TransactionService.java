@@ -16,4 +16,6 @@ public interface TransactionService {
     TransactionDto createSellTransaction(CreateTransactionRequest transaction);
 
     List<TransactionDto> getTransactionsForEmployee(Long userId);
+
+    List<TransactionDto> getTransactionsForOrderId(Long orderId);
 }

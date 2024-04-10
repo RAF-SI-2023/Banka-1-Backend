@@ -14,7 +14,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
+import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
+import rs.edu.raf.banka1.mapper.LimitMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.Permission;
@@ -26,17 +28,15 @@ import rs.edu.raf.banka1.services.implementations.EmployeeServiceImpl;
 import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+
 @SpringBootTest(classes = {EmployeeServiceImpl.class})
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -46,6 +46,8 @@ public class UserServiceImplTest {
 
     @MockBean
     private EmployeeMapper userMapper;
+    @MockBean
+    private LimitMapper limitMapper;
 
     @MockBean
     private PermissionRepository permissionRepository;
@@ -73,10 +75,38 @@ public class UserServiceImplTest {
     private Employee mockUser;
     private Permission mockPermission;
 
+    private Employee admin;
+    private Employee user1;
+    private Employee user2;
+
     @BeforeEach
     public void setUp() {
         this.mockPermission = new Permission();
         this.mockUser = new Employee();
+
+        this.admin = new Employee();
+        admin.setActive(true);
+        admin.setJmbg("000000000");
+        admin.setEmail("admin@gmail.com");
+        admin.setPassword("admin");
+        admin.setFirstName("admin");
+        admin.setLastName("adminic");
+
+        this.user1 = new Employee();
+        user1.setActive(true);
+        user1.setJmbg("123456789");
+        user1.setEmail("user1@gmail.com");
+        user1.setPassword("1234");
+        user1.setFirstName("user1");
+        user1.setLastName("useric1");
+
+        this.user2 = new Employee();
+        user2.setActive(true);
+        user2.setJmbg("987654321");
+        user2.setEmail("user2@gmail.com");
+        user2.setPassword("4321");
+        user2.setFirstName("user2");
+        user2.setLastName("useric2");
     }
 
     @Test
@@ -245,6 +275,68 @@ public class UserServiceImplTest {
 
         verify(employeeRepository, times(2)).save(any());
         verify(employeeRepository, times(1)).findByEmail(editUserRequest.getEmail());
+    }
+
+    @Test
+    void noParametersNull() {
+        // Mock the userRepository to return no user data
+        when(employeeRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(Optional.empty());
+
+        List<EmployeeDto> userResponses = userService.search(null, null, null, null);
+        assertEquals(0, userResponses.size());
+    }
+
+    @Test
+    void noParametersEmptyString() {
+        final Integer testCount = 3;
+        // Mock the userRepository to return no user data
+        when(employeeRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(Optional.of(Arrays.asList(
+                        this.admin,
+                        this.user1,
+                        this.user2
+                )));
+
+        List<EmployeeDto> userResponses = userService.search("", "", "", "");
+        assertEquals(testCount, userResponses.size());
+    }
+
+    @Test
+    void allParametersOneOutput() {
+        final Integer testCount = 1;
+        when(employeeRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(Optional.of(Arrays.asList(
+                        this.user1
+                )));
+
+        List<EmployeeDto> userResponses = userService.search("user", "user", "useric1", "position1");
+        assertEquals(testCount, userResponses.size());
+
+    }
+
+    @Test
+    void allParametersNoOutput() {
+        when(employeeRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(Optional.of(Arrays.asList(
+                )));
+
+        List<EmployeeDto> userResponses = userService.search("admin", "user", "useric1", "position1");
+        assertEquals(0, userResponses.size());
+
+    }
+    @Test
+    void allParametersTwoOutputs() {
+        final Integer testCount = 2;
+        when(employeeRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(Optional.of(Arrays.asList(
+                        this.user1,
+                        this.user2
+                )));
+
+        List<EmployeeDto> userResponses = userService.search("user", "user", "useric", "position");
+        assertEquals(testCount, userResponses.size());
+
     }
 
 }

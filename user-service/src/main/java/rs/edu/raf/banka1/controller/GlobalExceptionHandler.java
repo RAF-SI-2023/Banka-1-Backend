@@ -77,4 +77,10 @@ public class GlobalExceptionHandler {
         Logger.info("Error: " + e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(CapitalNotFoundByBankAccountException.class)
+    public ResponseEntity<String> handleCapitalNotFoundByBankAccountException(CapitalNotFoundByBankAccountException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
 }
