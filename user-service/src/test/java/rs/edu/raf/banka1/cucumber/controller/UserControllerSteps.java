@@ -95,6 +95,7 @@ public class UserControllerSteps {
     private PaymentRecipientRepository paymentRecipientRepository;
     private TransferRepository transferRepository;
     private LoanRequestRepository loanRequestRepository;
+    private EmployeeRepository employeeRepository;
     private CardRepository cardRepository;
     private LoanRepository loanRepository;
     private EmployeeMapper userMapper = new EmployeeMapper(new PermissionMapper(), passwordEncoder, permissionRepository);
@@ -122,7 +123,9 @@ public class UserControllerSteps {
     private CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
     private EditBankAccountNameRequest editBankAccountNameRequest = new EditBankAccountNameRequest();
     private EditCustomerRequest editCustomerRequest = new EditCustomerRequest();
-    
+    private CreateEmployeeDto createEmployeeDto = new CreateEmployeeDto();
+    ActivateAccountRequest activateAccountRequest = new ActivateAccountRequest();
+
     @Given("customer wants to send money from account {string} to account {string}")
     public void customerWantsToSendMoneyFromAccountToAccount(String arg0, String arg1) {
         createTransferRequest.setSenderAccountNumber(arg0);
@@ -489,6 +492,93 @@ public class UserControllerSteps {
         assertThat(customer.getFirstName()).isEqualTo(editCustomerRequest.getFirstName());
     }
 
+    @And("employee has first name {string}")
+    public void employeeHasFirstName(String arg0) {
+        createEmployeeDto.setFirstName(arg0);
+    }
+
+    @And("employee has last name {string}")
+    public void employeeHasLastName(String arg0) {
+        createEmployeeDto.setLastName(arg0);
+    }
+
+    @And("employee has phone number {string}")
+    public void employeeHasPhoneNumber(String arg0) {
+        createEmployeeDto.setPhoneNumber(arg0);
+    }
+
+    @And("employee has email {string}")
+    public void employeeHasEmail(String arg0) {
+        createEmployeeDto.setEmail(arg0);
+    }
+
+    @And("employee has jmbg {string}")
+    public void employeeHasJmbg(String arg0) {
+        createEmployeeDto.setJmbg(arg0);
+    }
+
+    @And("employee has position {string}")
+    public void employeeHasPosition(String arg0) {
+        createEmployeeDto.setPosition(arg0);
+    }
+
+    @And("employee is active")
+    public void employeeIsActive() {
+        createEmployeeDto.setActive(true);
+    }
+
+    @And("employee order limit is {string}")
+    public void employeeOrderLimitIs(String arg0) {
+        createEmployeeDto.setOrderlimit(Double.parseDouble(arg0));
+    }
+
+    @And("employee requireApproval is false")
+    public void employeeRequireApprovalIsFalse() {
+        createEmployeeDto.setRequireApproval(false);
+    }
+
+    @And("response should contain new employee")
+    public void responseShouldContainNewEmployee() {
+        try{
+            List<EmployeeDto> employeeDtos = objectMapper.readValue(lastResponse.getBody().toString(), new TypeReference<List<EmployeeDto>>() {
+            });
+            assertThat(employeeDtos).isNotEmpty();
+            assertThat(employeeDtos)
+                    .filteredOn(employeeDto -> employeeDto.getEmail().equals("drugizaposleni@gmail.rs"))
+                    .isNotEmpty();
+        }
+        catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @And("response should contain correct employee")
+    public void responseShouldContainCorrectEmployee() {
+        try {
+            EmployeeDto employeeDto = objectMapper.readValue(lastResponse.getBody().toString(), EmployeeDto.class);
+            assertThat(employeeDto).isNotNull();
+            assertThat(employeeDto.getEmail()).isEqualTo("drugizaposleni@gmail.rs");
+        }
+        catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Given("i got my token using email")
+    public void iGotMyTokenUsingEmail() {
+        token = employeeRepository.findByEmail("drugizaposleni@gmail.rs").get().getActivationToken();
+    }
+
+    @And("my account should be activated and password should be set to {string}")
+    public void myAccountShouldBeActivated(String arg0) {
+        assertThat(passwordEncoder.matches(arg0, employeeRepository.findByEmail("drugizaposleni@gmail.rs").get().getPassword())).isTrue();
+    }
+
+    @And("i want to set my password to {string}")
+    public void iWantToSetMyPasswordTo(String arg0) {
+        activateAccountRequest.setPassword(arg0);
+    }
+
 
     @Data
     class SearchFilter {
@@ -616,7 +706,8 @@ public class UserControllerSteps {
                                TransferRepository transferRepository,
                                LoanRequestRepository loanRequestRepository,
                                LoanRepository loanRepository,
-                               CardRepository cardRepository) {
+                               CardRepository cardRepository,
+                               EmployeeRepository employeeRepository) {
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
         this.passwordEncoder = passwordEncoder;
@@ -628,6 +719,7 @@ public class UserControllerSteps {
         this.loanRequestRepository = loanRequestRepository;
         this.loanRepository = loanRepository;
         this.cardRepository = cardRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     @Given("i have email {string}")
@@ -1001,6 +1093,11 @@ public class UserControllerSteps {
                 createBankAccountRequest.setAccount(bankAccountRequest);
                 post(url + port + path, createBankAccountRequest);
             }
+            else if(path.equals("/employee/activate/token")){
+                path = path.replaceAll("token", token);
+                postNoBody(url + port + path);
+            }
+
 
 //            else if (path.equals("/balance/foreign_currency/create")) {
 //                lastCreateForeignCurrencyAccountResponse = objectMapper.readValue(post(url + port + path, foreignCurrencyAccountRequest), CreateForeignCurrencyAccountResponse.class);
