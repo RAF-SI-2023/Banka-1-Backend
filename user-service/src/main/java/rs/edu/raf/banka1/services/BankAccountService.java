@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.services;
 
+import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.model.BankAccount;
+import rs.edu.raf.banka1.model.ListingType;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 
 import java.util.List;
@@ -14,4 +16,6 @@ public interface BankAccountService {
     List<BankAccount> getBankAccountsByAgent(Long agentId);
     BankAccount findBankAccountByAccountNumber(String accountNumber);
     void activateBankAccount(BankAccount bankAccount);
+
+    int editBankAccount(String accountNumber, String newName);
 }

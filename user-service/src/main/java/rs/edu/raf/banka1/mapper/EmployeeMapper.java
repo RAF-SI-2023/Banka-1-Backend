@@ -67,7 +67,7 @@ public class EmployeeMapper {
         employee.setActive(false);
         employee.setPassword(UUID.randomUUID().toString());
         employee.setRequireApproval(createEmployeeDto.getRequireApproval());
-        employee.setLimitNow(createEmployeeDto.getLimitNow());
+        employee.setLimitNow(0.0);
         employee.setOrderlimit(createEmployeeDto.getOrderlimit());
         employee.setPosition(createEmployeeDto.getPosition().toLowerCase(Locale.ROOT));
 
@@ -89,27 +89,27 @@ public class EmployeeMapper {
     }
 
     public Employee editEmployeeDtoToEmployee(Employee employee, EditEmployeeDto employeeDto) {
-        if (employeeDto.getEmail() != null && (employee.getEmail() == null || employee.getEmail().isEmpty())) {
+        if (employeeDto.getEmail() != null) {
             employee.setEmail(employeeDto.getEmail());
         }
 
-        if (employeeDto.getPassword() != null && (employee.getPassword() == null || employee.getPassword().isEmpty())) {
-            employee.setPassword(employeeDto.getPassword());
+        if (employeeDto.getPassword() != null) {
+            employee.setPassword(passwordEncoder.encode(employeeDto.getPassword()));
         }
 
-        if (employeeDto.getFirstName() != null && (employee.getFirstName() == null || employee.getFirstName().isEmpty())) {
+        if (employeeDto.getFirstName() != null) {
             employee.setFirstName(employeeDto.getFirstName());
         }
 
-        if (employeeDto.getLastName() != null && (employee.getLastName() == null || employee.getLastName().isEmpty())) {
+        if (employeeDto.getLastName() != null) {
             employee.setLastName(employeeDto.getLastName());
         }
 
-        if (employeeDto.getPosition() != null && (employee.getPosition() == null || employee.getPosition().isEmpty())) {
+        if (employeeDto.getPosition() != null) {
             employee.setPosition(employeeDto.getPosition());
         }
 
-        if (employeeDto.getPhoneNumber() != null && (employee.getPhoneNumber() == null || employee.getPhoneNumber().isEmpty())) {
+        if (employeeDto.getPhoneNumber() != null) {
             employee.setPhoneNumber(employeeDto.getPhoneNumber());
         }
 
@@ -129,7 +129,7 @@ public class EmployeeMapper {
             employee.setOrderlimit(employeeDto.getOrderlimit());
         }
 
-        if (employeeDto.getPermissions() != null && !employeeDto.getPermissions().isEmpty()) {
+        if (employeeDto.getPermissions() != null) {
             employee.setPermissions(employeeDto.getPermissions()
                     .stream()
                     .map(permission -> permissionRepository.findByName(permission).orElseThrow())

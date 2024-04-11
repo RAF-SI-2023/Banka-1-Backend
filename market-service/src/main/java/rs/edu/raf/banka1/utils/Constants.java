@@ -26,7 +26,7 @@ public class Constants {
 //            "country_timezone_offsets.json");
     public static final List<String> sectors = List.of(
             "Technology", "Electronic Technology", "Health Technology", "Health Services", "Finance", "Energy");
-    public static final int maxStockListings = 20;
+    public static final int maxStockListings = 10;
     public static final int maxStockListingsHistory = 10;
     public static final int maxFutures = 10;
     public static final int maxFutureHistories = 20;

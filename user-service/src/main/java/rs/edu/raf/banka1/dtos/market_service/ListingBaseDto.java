@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.dtos.market_service;
 
 import lombok.Getter;
 import lombok.Setter;
+import rs.edu.raf.banka1.model.ListingType;
 
 @Getter
 @Setter
@@ -17,5 +18,4 @@ public class ListingBaseDto {
     private Double low;
     private Double priceChange;
     private Integer volume;
-
 }

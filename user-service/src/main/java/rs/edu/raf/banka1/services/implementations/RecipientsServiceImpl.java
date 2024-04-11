@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.tinylog.Logger;
 import rs.edu.raf.banka1.mapper.RecipientMapper;
 import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.model.PaymentRecipient;
@@ -39,10 +40,12 @@ public class RecipientsServiceImpl implements RecipientsService {
     public boolean editRecipient(PaymentRecipientDto request) {
         Optional<PaymentRecipient> recipient = paymentRecipientRepository.findById(request.getId());
         if (recipient.isEmpty()) {
+            Logger.error("Recipient not found for editing: {}", request.getId());
             return false;
         }
         PaymentRecipient newRecipient = recipientMapper.PaymentRecipientDtoToRecipient(recipient.get(), request);
         paymentRecipientRepository.save(newRecipient);
+        Logger.info("Recipient edited successfully: {}", newRecipient.getId());
         return true;
     }
 
@@ -59,9 +62,11 @@ public class RecipientsServiceImpl implements RecipientsService {
     public boolean removeRecipient(Long id) {
         Optional<PaymentRecipient> recipient = paymentRecipientRepository.findById(id);
         if (recipient.isEmpty()) {
+            Logger.error("Recipient not found for removal: {}", id);
             return false;
         }
         paymentRecipientRepository.delete(recipient.get());
+        Logger.info("Recipient removed successfully: {}", id);
         return true;
     }
 }

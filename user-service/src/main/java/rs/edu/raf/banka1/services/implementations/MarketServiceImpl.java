@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.dtos.market_service.*;
 import org.springframework.web.client.HttpClientErrorException;
+import rs.edu.raf.banka1.model.WorkingHoursStatus;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
@@ -48,11 +49,43 @@ public class MarketServiceImpl implements MarketService {
 
     @Override
     public ListingFutureDto getFutureById(Long futureId) {
-        return null;
+        return Retry.decorateSupplier(serviceRetry, () -> getFutureByIdFromMarket(futureId)).get();
     }
 
     @Override
     public ListingForexDto getForexById(Long forexId) {
+        return Retry.decorateSupplier(serviceRetry, () -> getForexByIdFromMarket(forexId)).get();
+    }
+
+    @Override
+    public WorkingHoursStatus getWorkingHoursForStock(Long stockId) {
+        try {
+            // Create header with JWT token
+            HttpEntity<?> httpEntity = createHeader();
+
+            ResponseEntity<String> response = marketServiceRestTemplate.exchange(
+                "market/exchange/stock/" + stockId + "/time",
+                HttpMethod.GET,
+                httpEntity,
+                String.class
+            );
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return WorkingHoursStatus.valueOf(response.getBody());
+            } else {
+                // Log the unsuccessful response status code
+                System.out.println("Unsuccessful response status code: " + response.getStatusCode());
+                return null;
+            }
+        }catch(HttpClientErrorException e){
+            if(e.getStatusCode().equals(HttpStatus.NOT_FOUND)){
+                System.out.println("Stock not found: getStockByIdFromMarket");
+            }
+            if(e.getStatusCode().equals(HttpStatus.BAD_REQUEST)){
+                System.out.println("Bad request: getStockByIdFromMarket");
+            }
+        }catch (Exception e){
+            System.out.println("Error: getStockByIdFromMarket");
+        }
         return null;
     }
 
@@ -60,7 +93,7 @@ public class MarketServiceImpl implements MarketService {
     //////////////////////////////////////////////////
     // implementations
 
-    private ListingStockDto getStockByIdFromMarket(Long stockId) {
+    public ListingStockDto getStockByIdFromMarket(Long stockId) {
 
         try {
             // Create header with JWT token
@@ -93,7 +126,73 @@ public class MarketServiceImpl implements MarketService {
         return null;
     }
 
-    private List<Object> getAllListingsFromMarket(String listType) {
+    public ListingForexDto getForexByIdFromMarket(Long forexId) {
+
+        try {
+            // Create header with JWT token
+            HttpEntity<?> httpEntity = createHeader();
+
+            ResponseEntity<ListingForexDto> response = marketServiceRestTemplate.exchange(
+                    "market/listing/forex/" + forexId,
+                    HttpMethod.GET,
+                    httpEntity,
+                    ListingForexDto.class
+            );
+            System.out.println(response.getBody());
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return response.getBody();
+            } else {
+                // Log the unsuccessful response status code
+                System.out.println("Unsuccessful response status code: " + response.getStatusCode());
+                return null;
+            }
+        }catch(HttpClientErrorException e){
+            if(e.getStatusCode().equals(HttpStatus.NOT_FOUND)){
+                System.out.println("Stock not found: getStockByIdFromMarket");
+            }
+            if(e.getStatusCode().equals(HttpStatus.BAD_REQUEST)){
+                System.out.println("Bad request: getStockByIdFromMarket");
+            }
+        }catch (Exception e){
+            System.out.println("Error: getStockByIdFromMarket");
+        }
+        return null;
+    }
+
+    public ListingFutureDto getFutureByIdFromMarket(Long futureId) {
+
+        try {
+            // Create header with JWT token
+            HttpEntity<?> httpEntity = createHeader();
+
+            ResponseEntity<ListingFutureDto> response = marketServiceRestTemplate.exchange(
+                    "market/listing/future/" + futureId,
+                    HttpMethod.GET,
+                    httpEntity,
+                    ListingFutureDto.class
+            );
+            System.out.println(response.getBody());
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return response.getBody();
+            } else {
+                // Log the unsuccessful response status code
+                System.out.println("Unsuccessful response status code: " + response.getStatusCode());
+                return null;
+            }
+        }catch(HttpClientErrorException e){
+            if(e.getStatusCode().equals(HttpStatus.NOT_FOUND)){
+                System.out.println("Stock not found: getStockByIdFromMarket");
+            }
+            if(e.getStatusCode().equals(HttpStatus.BAD_REQUEST)){
+                System.out.println("Bad request: getStockByIdFromMarket");
+            }
+        }catch (Exception e){
+            System.out.println("Error: getStockByIdFromMarket");
+        }
+        return null;
+    }
+
+    public List<Object> getAllListingsFromMarket(String listType) {
         // get valid response type
         ParameterizedTypeReference responseType = getValidType(listType);
 
