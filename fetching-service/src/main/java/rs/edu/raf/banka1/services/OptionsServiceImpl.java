@@ -21,6 +21,7 @@ import rs.edu.raf.banka1.threads.OptionsThread;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -84,10 +85,16 @@ public class OptionsServiceImpl implements OptionsService{
 
     List<String> fetchTickers() {
         try {
-            File file = new File(Constants.listingsFilePath);
+            InputStream inputStream = Constants.getInputStreamForResource(Constants.listingsFilePath);
+
+            if (inputStream == null) {
+                return new ArrayList<>();
+            }
+
+//            File file = new File(Constants.listingsFilePath);
 
             // Read JSON data from the file
-            JsonNode rootNode = objectMapper.readTree(file);
+            JsonNode rootNode = objectMapper.readTree(inputStream);
             List<String> tickers = new ArrayList<>();
             // Iterate over each element in the JSON array
             for (JsonNode node : rootNode) {
