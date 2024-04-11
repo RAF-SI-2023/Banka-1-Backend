@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,6 +10,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +21,7 @@ import rs.edu.raf.banka1.model.ListingHistory;
 
 import rs.edu.raf.banka1.model.ListingStock;
 
+import rs.edu.raf.banka1.model.dtos.CountryTimezoneDto;
 import rs.edu.raf.banka1.model.entities.Country;
 import rs.edu.raf.banka1.model.entities.Exchange;
 import rs.edu.raf.banka1.model.entities.Holiday;
@@ -116,12 +120,9 @@ public class ListingStockServiceImpl implements ListingStockService {
     @Override
     public List<ListingStock> fetchNListingStocks(int n) {
         try {
-            File file = new File(Constants.listingsFilePath);
-
-            // Read JSON data from the file
-            JsonNode rootNode = objectMapper.readTree(file);
-
-            List<ListingStock> listingStocks = new ArrayList<>();
+            var listingStocks = new ArrayList<ListingStock>();
+            Resource resource = new ClassPathResource(Constants.listingsFilePath, this.getClass().getClassLoader());
+            JsonNode rootNode = objectMapper.readTree(resource.getInputStream());
 
             int i = 1;
             // Iterate over n element in the listings JSON
@@ -130,13 +131,16 @@ public class ListingStockServiceImpl implements ListingStockService {
                 String companyName = node.path("companyName").asText();
                 String primaryExchange = node.path("primaryExchange").asText();
                 ListingStock listingStock = createListingStock(symbol, companyName, primaryExchange);
-                if (listingStock != null) listingStocks.add(listingStock);
-                if (i++ > n) break;
+                if (listingStock != null) {
+                    listingStocks.add(listingStock);
+                    i++;
+                }
+                if (i > n) break;
             }
             return listingStocks;
 
         } catch (Exception e){
-            System.err.println("[populateNListingStocks] Exception occured:"+e.getMessage());
+            Logger.error("[populateNListingStocks] Exception occured:"+e.getMessage());
             return new ArrayList<>();
         }
 
