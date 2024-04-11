@@ -253,12 +253,12 @@ public class OrderServiceImpl implements OrderService {
             return proccessNum * (order.getLimitValue() != null ?
                 Math.min(listingBaseDto.getHigh(), order.getLimitValue()) :
                 order.getStopValue() !=null ? listingBaseDto.getHigh() :
-                listingBaseDto.getPrice());
+                listingBaseDto.getPrice()) * 100;
         } else {
             return proccessNum * (order.getLimitValue() != null ?
                 Math.max(listingBaseDto.getLow(), order.getLimitValue()) :
                 order.getStopValue() !=null ? listingBaseDto.getHigh() :
-                listingBaseDto.getPrice());
+                listingBaseDto.getPrice()) * 100;
         }
     }
 
@@ -272,9 +272,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private void reserveStockCapital(MarketOrder order) {
-        if(!order.getListingType().equals(ListingType.STOCK))
-            return;
-
         Capital bankAccountCapital = capitalService.getCapitalByCurrencyCode("RSD");
         Capital securityCapital = capitalService.getCapitalByListingIdAndType(order.getListingId(), order.getListingType());
 

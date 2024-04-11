@@ -192,8 +192,7 @@ class StockSimulationJobTest {
 
     @Test
     void shouldFinishOrder() {
-        double originalPrice = 100;
-        double convertedPrice = 100*100;
+        double price = 100;
 
         Employee employee = new Employee();
         MarketOrder order = new MarketOrder();
@@ -230,7 +229,7 @@ class StockSimulationJobTest {
         when(orderService.getListingByOrder(any(MarketOrder.class))).thenReturn(listingBaseDto);
         when(capitalService.getCapitalByCurrencyCode(anyString())).thenReturn(bankAccountCapital);
         when(capitalService.getCapitalByListingIdAndType(anyLong(), any(ListingType.class))).thenReturn(securityCapital);
-        when(orderService.calculatePrice(any(MarketOrder.class), any(ListingBaseDto.class), anyLong())).thenReturn(originalPrice);
+        when(orderService.calculatePrice(any(MarketOrder.class), any(ListingBaseDto.class), anyLong())).thenReturn(price);
 
 
         stockSimulationJob.run();
@@ -241,13 +240,12 @@ class StockSimulationJobTest {
         verify(capitalService).getCapitalByCurrencyCode(eq(Constants.DEFAULT_CURRENCY));
         verify(capitalService).getCapitalByListingIdAndType(eq(order.getListingId()), eq(ListingType.valueOf(listingBaseDto.getListingType().toUpperCase())));
         verify(orderService).calculatePrice(eq(order), eq(listingBaseDto), eq(order.getContractSize()));
-        verify(transactionService).createTransaction(eq(bankAccountCapital), eq(securityCapital), eq(convertedPrice), eq(order), eq(order.getContractSize()));
+        verify(transactionService).createTransaction(eq(bankAccountCapital), eq(securityCapital), eq(price), eq(order), eq(order.getContractSize()));
         verify(orderService).finishOrder(eq(orderId));
     }
     @Test
     void shouldUpdateProcessedNumber() {
-        double originalPrice = 100;
-        double convertedPrice = 100*100;
+        double price = 100;
 
         Employee employee = new Employee();
         MarketOrder order = new MarketOrder();
@@ -284,7 +282,7 @@ class StockSimulationJobTest {
         when(orderService.getListingByOrder(any(MarketOrder.class))).thenReturn(listingBaseDto);
         when(capitalService.getCapitalByCurrencyCode(anyString())).thenReturn(bankAccountCapital);
         when(capitalService.getCapitalByListingIdAndType(anyLong(), any(ListingType.class))).thenReturn(securityCapital);
-        when(orderService.calculatePrice(any(MarketOrder.class), any(ListingBaseDto.class), anyLong())).thenReturn(originalPrice);
+        when(orderService.calculatePrice(any(MarketOrder.class), any(ListingBaseDto.class), anyLong())).thenReturn(price);
 
 
         stockSimulationJob.run();
@@ -295,7 +293,7 @@ class StockSimulationJobTest {
         verify(capitalService).getCapitalByCurrencyCode(eq(Constants.DEFAULT_CURRENCY));
         verify(capitalService).getCapitalByListingIdAndType(eq(order.getListingId()), eq(ListingType.valueOf(listingBaseDto.getListingType().toUpperCase())));
         verify(orderService).calculatePrice(eq(order), eq(listingBaseDto), anyLong());
-        verify(transactionService).createTransaction(eq(bankAccountCapital), eq(securityCapital), eq(convertedPrice), eq(order), anyLong());
+        verify(transactionService).createTransaction(eq(bankAccountCapital), eq(securityCapital), eq(price), eq(order), anyLong());
         verify(orderService).setProcessedNumber(eq(orderId), anyLong());
     }
 }
