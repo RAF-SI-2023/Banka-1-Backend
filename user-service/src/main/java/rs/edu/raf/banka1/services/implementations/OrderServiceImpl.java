@@ -66,15 +66,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void createOrder(final CreateOrderRequest request, final Employee currentAuth) {
         final MarketOrder order = orderMapper.requestToMarketOrder(request, currentAuth);
-        ListingBaseDto listingBaseDto = null;
-
-        if(order.getListingType().equals(ListingType.STOCK)) {
-            listingBaseDto = marketService.getStockById(order.getListingId());
-        } else if(order.getListingType().equals(ListingType.FOREX)) {
-            listingBaseDto = marketService.getForexById(order.getListingId());
-        } else {
-            listingBaseDto = marketService.getFutureById(order.getListingId());
-        }
+        ListingBaseDto listingBaseDto = getListingByOrder(order);
 
         if(listingBaseDto == null) return;
 
@@ -125,6 +117,17 @@ public class OrderServiceImpl implements OrderService {
             )
         );
         this.scheduledFutureMap.put(orderId, future);
+    }
+
+    @Override
+    public ListingBaseDto getListingByOrder(MarketOrder order) {
+        if(order.getListingType().equals(ListingType.STOCK)) {
+            return marketService.getStockById(order.getListingId());
+        } else if(order.getListingType().equals(ListingType.FOREX)) {
+            return marketService.getForexById(order.getListingId());
+        }
+        return marketService.getFutureById(order.getListingId());
+
     }
 
     @Override

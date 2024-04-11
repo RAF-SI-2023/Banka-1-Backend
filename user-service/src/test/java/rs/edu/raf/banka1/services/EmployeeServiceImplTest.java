@@ -43,7 +43,7 @@ import static org.mockito.Mockito.mock;
 @SpringBootTest(classes = {EmployeeServiceImpl.class})
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class UserServiceImplTest {
+class EmployeeServiceImplTest {
     @MockBean
     private EmployeeRepository employeeRepository;
 
