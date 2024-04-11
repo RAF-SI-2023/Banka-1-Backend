@@ -16,9 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import rs.edu.raf.banka1.mapper.CustomerMapper;
-import rs.edu.raf.banka1.mapper.EmployeeMapper;
-import rs.edu.raf.banka1.mapper.PermissionMapper;
-import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.requests.InitialActivationRequest;
@@ -56,9 +53,11 @@ public class CustomerServiceImplTest {
     private BankAccountService bankAccountService;
 
     @InjectMocks
-    private CustomerServiceImpl sut;
+    private CustomerServiceImpl customerService;
 
     private InitialActivationRequest initialActivationRequest;
+
+    private Customer user1;
 
 
     @BeforeEach
@@ -67,6 +66,14 @@ public class CustomerServiceImplTest {
         initialActivationRequest.setEmail("test@gmail.com");
         initialActivationRequest.setPhoneNumber("123456789");
         initialActivationRequest.setAccountNumber("123456789");
+
+        this.user1 = new Customer();
+        user1.setActive(true);
+        user1.setJmbg("123456789");
+        user1.setEmail("user1@gmail.com");
+        user1.setPassword("1234");
+        user1.setFirstName("user1");
+        user1.setLastName("useric1");
     }
 
     @Test
@@ -137,7 +144,7 @@ public class CustomerServiceImplTest {
         bankAccount.setCustomer(customer);
         when(bankAccountService.findBankAccountByAccountNumber("123456789")).thenReturn(bankAccount);
 
-        boolean result = sut.initialActivation(initialActivationRequest);
+        boolean result = customerService.initialActivation(initialActivationRequest);
 
         assertTrue(result);
         verify(emailService).sendEmail(eq("test@gmail.com"), anyString(), anyString());
@@ -147,7 +154,7 @@ public class CustomerServiceImplTest {
     public void initialActivationBankAccountDoesntExist(){
         when(bankAccountService.findBankAccountByAccountNumber("123456789")).thenReturn(null);
 
-        boolean result = sut.initialActivation(initialActivationRequest);
+        boolean result = customerService.initialActivation(initialActivationRequest);
 
         assertFalse(result);
         verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
@@ -163,7 +170,7 @@ public class CustomerServiceImplTest {
         bankAccount.setCustomer(customer);
         when(bankAccountService.findBankAccountByAccountNumber("123456789")).thenReturn(bankAccount);
 
-        boolean result = sut.initialActivation(initialActivationRequest);
+        boolean result = customerService.initialActivation(initialActivationRequest);
 
         assertFalse(result);
         verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
@@ -179,7 +186,7 @@ public class CustomerServiceImplTest {
         bankAccount.setCustomer(customer);
         when(bankAccountService.findBankAccountByAccountNumber("123456789")).thenReturn(bankAccount);
 
-        boolean result = sut.initialActivation(initialActivationRequest);
+        boolean result = customerService.initialActivation(initialActivationRequest);
 
         assertFalse(result);
         verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
@@ -198,7 +205,7 @@ public class CustomerServiceImplTest {
         when(customerRepository.findCustomerByActivationToken("testactivationtoken")).thenReturn(Optional.of(customer));
         when(customerRepository.save(customer)).thenReturn(customer);
 
-        Long result = sut.activateNewCustomer("testactivationtoken", "password");
+        Long result = customerService.activateNewCustomer("testactivationtoken", "password");
 
         assertTrue(customer.getActive());
         assertNull(customer.getActivationToken());
@@ -213,11 +220,58 @@ public class CustomerServiceImplTest {
     public void activateNewCustomerTokenDoesntExist(){
         when(customerRepository.findCustomerByActivationToken("testactivationtoken")).thenReturn(Optional.empty());
 
-        Long result = sut.activateNewCustomer("testactivationtoken", "password");
+        Long result = customerService.activateNewCustomer("testactivationtoken", "password");
 
         assertNull(result);
         verify(customerRepository, never()).save(any());
         verify(bankAccountService, never()).activateBankAccount(any());
+    }
+
+    @Test
+    void sendResetPasswordEmail() {
+        String email = "1234";
+        when(customerRepository.findCustomerByEmail(any()))
+                .thenReturn(Optional.of(user1));
+        when(emailService.sendEmail(eq(email), any(), any()))
+                .thenReturn(true);
+
+        assertEquals(customerService.sendResetPasswordEmail(email), true);
+        verify(emailService, times(1)).sendEmail(eq(email), any(), any());
+    }
+
+    @Test
+    void sendResetPasswordEmailUserNotFound() {
+        String email = "1234";
+        when(customerRepository.findCustomerByEmail(any()))
+                .thenReturn(Optional.empty());
+        when(emailService.sendEmail(eq(email), any(), any()))
+                .thenReturn(true);
+
+        assertEquals(customerService.sendResetPasswordEmail(email), false);
+        verify(emailService, times(0)).sendEmail(eq(email), any(), any());
+    }
+
+    @Test
+    void setNewPassword() {
+        when(customerRepository.findByResetPasswordToken(any()))
+                .thenReturn(Optional.of(user1));
+
+        String token = "1234";
+        String password = "1234";
+        customerService.setNewPassword(token, password);
+        verify(customerRepository, times(1)).findByResetPasswordToken(token);
+        verify(customerRepository, times(1)).save(any());
+    }
+
+    @Test
+    void setNewPasswordUserNotFound() {
+        when(customerRepository.findByResetPasswordToken(any())).thenReturn(Optional.empty());
+
+        String token = "1234";
+        String password = "1234";
+        customerService.setNewPassword(token, password);
+        verify(customerRepository, times(1)).findByResetPasswordToken(token);
+        verify(customerRepository, times(0)).save(any());
     }
 
     @Test
@@ -251,7 +305,7 @@ public class CustomerServiceImplTest {
 //        when(passwordEncoder.encode("newPassword")).thenReturn("encodedPassword");
 
         // Perform the method call
-        boolean result = sut.editCustomer(editCustomerRequest);
+        boolean result = customerService.editCustomer(editCustomerRequest);
 
         // Assertions
         assertTrue(result);
@@ -279,7 +333,7 @@ public class CustomerServiceImplTest {
         when(customerRepository.findCustomerByEmail("test@gmail.com")).thenReturn(Optional.empty());
 
         // Perform the method call
-        boolean result = sut.editCustomer(editCustomerRequest);
+        boolean result = customerService.editCustomer(editCustomerRequest);
 
         // Assertions
         assertFalse(result); // Expecting false because customer not found

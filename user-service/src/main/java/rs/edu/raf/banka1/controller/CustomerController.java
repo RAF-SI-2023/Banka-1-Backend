@@ -13,11 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.requests.ActivateAccountRequest;
 import rs.edu.raf.banka1.requests.InitialActivationRequest;
+import rs.edu.raf.banka1.requests.NewPasswordRequest;
 import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
-import rs.edu.raf.banka1.responses.CustomerResponse;
-import rs.edu.raf.banka1.responses.EditUserResponse;
-import rs.edu.raf.banka1.responses.UserResponse;
+import rs.edu.raf.banka1.responses.*;
 import rs.edu.raf.banka1.services.CustomerService;
 
 import java.util.List;
@@ -136,4 +135,34 @@ public class CustomerController {
         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
+    @PostMapping(value = "/reset/{email}")
+    @Operation(summary = "Reset password", description = "Send password reset email to customer")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Email with password reset URL sent successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ActivateAccountResponse.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> sendResetPasswordEmail(@PathVariable String email) {
+        customerService.sendResetPasswordEmail(email);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/newpassword/{token}")
+    @Operation(summary = "Activate account", description = "Activate an account by assigning a password")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Account activated successfully",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ActivateAccountResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid token or password"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<NewPasswordResponse> setNewPassword(@PathVariable String token, @RequestBody NewPasswordRequest newPasswordRequest) {
+        String password = newPasswordRequest.getPassword();
+        if (password.length() < 4) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        NewPasswordResponse newPasswordResponse = customerService.setNewPassword(token, password);
+        return new ResponseEntity<>(newPasswordResponse, newPasswordResponse.getUserId() != null ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
+    }
 }

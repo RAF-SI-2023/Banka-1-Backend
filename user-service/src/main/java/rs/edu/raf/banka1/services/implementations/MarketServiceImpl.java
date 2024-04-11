@@ -93,7 +93,7 @@ public class MarketServiceImpl implements MarketService {
     //////////////////////////////////////////////////
     // implementations
 
-    private ListingStockDto getStockByIdFromMarket(Long stockId) {
+    public ListingStockDto getStockByIdFromMarket(Long stockId) {
 
         try {
             // Create header with JWT token
@@ -126,7 +126,7 @@ public class MarketServiceImpl implements MarketService {
         return null;
     }
 
-    private ListingForexDto getForexByIdFromMarket(Long forexId) {
+    public ListingForexDto getForexByIdFromMarket(Long forexId) {
 
         try {
             // Create header with JWT token
@@ -159,7 +159,7 @@ public class MarketServiceImpl implements MarketService {
         return null;
     }
 
-    private ListingFutureDto getFutureByIdFromMarket(Long futureId) {
+    public ListingFutureDto getFutureByIdFromMarket(Long futureId) {
 
         try {
             // Create header with JWT token
@@ -192,7 +192,7 @@ public class MarketServiceImpl implements MarketService {
         return null;
     }
 
-    private List<Object> getAllListingsFromMarket(String listType) {
+    public List<Object> getAllListingsFromMarket(String listType) {
         // get valid response type
         ParameterizedTypeReference responseType = getValidType(listType);
 

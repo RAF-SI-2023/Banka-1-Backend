@@ -123,14 +123,16 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Employee savedEmployee = this.employeeRepository.save(employee);
         emailService.sendEmail(createEmployeeDto.getEmail(), "RAF Banka - User activation",
-                "Visit this URL to activate your account: http://localhost:" + this.frontPort + "/user/set-password/" + activationToken);
+                "Visit this URL to activate your account: http://localhost:" + this.frontPort + "/employee/set-password/" + activationToken);
 
         return new CreateUserResponse(employee.getUserId(), "Employee created successfully");
     }
 
     @Override
     public ActivateAccountResponse activateAccount(String token, String password) {
-        Employee employee = employeeRepository.findByActivationToken(token).orElseThrow();
+        Optional<Employee> optionalEmployee = employeeRepository.findByActivationToken(token);
+        if (optionalEmployee.isEmpty()) return new ActivateAccountResponse(null);
+        Employee employee = optionalEmployee.get();
         employee.setActivationToken(null);
         employee.setPassword(passwordEncoder.encode(password));
         employeeRepository.save(employee);
@@ -216,7 +218,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.employeeRepository.save(employee);
 
         return this.emailService.sendEmail(email, "RAF Banka - Password reset",
-                "Visit this URL to reset your password: http://localhost:" + frontPort + "/user/reset-password/" + resetPasswordToken);
+                "Visit this URL to reset your password: http://localhost:" + frontPort + "/employee/reset-password/" + resetPasswordToken);
     }
 
     @Override
