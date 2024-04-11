@@ -62,11 +62,23 @@ public class UserControllerSteps {
 
     @Autowired
     private EmailService emailService;
-    //@LocalServerPort
-    //private String port;
-
     private String port = Integer.toString(SpringIntegrationTest.enviroment.getServicePort("user-service", 8080));
-    //private String port = "8080";
+
+    private EmployeeRepository userRepository;
+    //    private ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
+//    private ForeignCurrencyAccountRequest foreignCurrencyAccountRequest = new ForeignCurrencyAccountRequest();
+    private PermissionRepository permissionRepository;
+    private PaymentRepository paymentRepository;
+    private CustomerRepository customerRepository;
+    private BankAccountRepository bankAccountRepository;
+    private PaymentRecipientRepository paymentRecipientRepository;
+    private TransferRepository transferRepository;
+    private LoanRequestRepository loanRequestRepository;
+    private EmployeeRepository employeeRepository;
+    private CardRepository cardRepository;
+    private LoanRepository loanRepository;
+
+
 
     private String jwt = "";
 
@@ -85,19 +97,6 @@ public class UserControllerSteps {
     private String email;
     private ResponseEntity<?> lastResponse;
 
-    private EmployeeRepository userRepository;
-//    private ForeignCurrencyAccountRepository foreignCurrencyAccountRepository;
-//    private ForeignCurrencyAccountRequest foreignCurrencyAccountRequest = new ForeignCurrencyAccountRequest();
-    private PermissionRepository permissionRepository;
-    private PaymentRepository paymentRepository;
-    private CustomerRepository customerRepository;
-    private BankAccountRepository bankAccountRepository;
-    private PaymentRecipientRepository paymentRecipientRepository;
-    private TransferRepository transferRepository;
-    private LoanRequestRepository loanRequestRepository;
-    private EmployeeRepository employeeRepository;
-    private CardRepository cardRepository;
-    private LoanRepository loanRepository;
     private EmployeeMapper userMapper = new EmployeeMapper(new PermissionMapper(), passwordEncoder, permissionRepository);
     private CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper());
     private List<EmployeeDto> userResponses = new ArrayList<>();
@@ -130,15 +129,40 @@ public class UserControllerSteps {
     private ModifyPermissionsRequest modifyPermissionsRequest = new ModifyPermissionsRequest();
     private NewLimitDto newLimitDto = new NewLimitDto();
 
-    @Given("customer wants to send money from account {string} to account {string}")
-    public void customerWantsToSendMoneyFromAccountToAccount(String arg0, String arg1) {
-        createTransferRequest.setSenderAccountNumber(arg0);
-        createTransferRequest.setRecipientAccountNumber(arg1);
+    @Data
+    class SearchFilter {
+        private String email;
+        private String firstName;
+        private String lastName;
+        private String position;
     }
 
-    @Given("customer wants to transfer {double}")
-    public void customerWantsToTransfer(double arg0) {
-        createTransferRequest.setAmount(arg0);
+    private SearchFilter searchFilter = new SearchFilter();
+
+    public UserControllerSteps(EmployeeRepository userRepository,
+                               PermissionRepository permissionRepository,
+                               PasswordEncoder passwordEncoder,
+                               CustomerRepository customerRepository,
+                               BankAccountRepository bankAccountRepository,
+                               PaymentRepository paymentRepository,
+                               PaymentRecipientRepository paymentRecipientRepository,
+                               TransferRepository transferRepository,
+                               LoanRequestRepository loanRequestRepository,
+                               LoanRepository loanRepository,
+                               CardRepository cardRepository,
+                               EmployeeRepository employeeRepository) {
+        this.userRepository = userRepository;
+        this.permissionRepository = permissionRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.customerRepository = customerRepository;
+        this.bankAccountRepository = bankAccountRepository;
+        this.paymentRepository = paymentRepository;
+        this.paymentRecipientRepository = paymentRecipientRepository;
+        this.transferRepository = transferRepository;
+        this.loanRequestRepository = loanRequestRepository;
+        this.loanRepository = loanRepository;
+        this.cardRepository = cardRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     @Then("response should contain transfer i made")
@@ -716,55 +740,6 @@ public class UserControllerSteps {
         assertThat(employee.getActive()).isFalse();
     }
 
-
-    @Data
-    class SearchFilter {
-        private String email;
-        private String firstName;
-        private String lastName;
-        private String position;
-    }
-
-    private SearchFilter searchFilter = new SearchFilter();
-
-//    @Given("ownerId is {string}")
-//    public void owneridIs(String arg0) {
-//        foreignCurrencyAccountRequest.setOwnerId(Long.parseLong(arg0));
-//    }
-//
-//    @Given("createdByAgentId is {string}")
-//    public void createdbyagentidIs(String arg0) {
-//        foreignCurrencyAccountRequest.setCreatedByAgentId(Long.parseLong(arg0));
-//    }
-//
-//    @Given("currency is {string}")
-//    public void currencyIs(String arg0) {
-//        foreignCurrencyAccountRequest.setCurrency(arg0);
-//    }
-//
-//    @Given("subtypeOfAccount is {string}")
-//    public void subtypeofaccountIs(String arg0) {
-//        foreignCurrencyAccountRequest.setSubtypeOfAccount(arg0);
-//    }
-////    @Given("typeOfAccount is {string}")
-////    public void typeofaccountIs(String arg0) {
-////        foreignCurrencyAccountRequest.setTypeOfAccount(arg0);
-////    }
-//    @Given("accountMaintenance is {string}")
-//    public void accountmaintenanceIs(String arg0) {
-//        foreignCurrencyAccountRequest.setAccountMaintenance(Double.parseDouble(arg0));
-//    }
-//    @Given("defaultCurrency is {string}")
-//    public void defaultcurrencyIs(String arg0) {
-//        foreignCurrencyAccountRequest.setDefaultCurrency(Boolean.valueOf(arg0));
-//    }
-//    @Given("allowedCurrencies is {string}")
-//    public void allowedcurrenciesIs(String arg0) {
-//        List<String> allowedCurrencies = new ArrayList<>();
-//        allowedCurrencies.add(arg0);
-//        foreignCurrencyAccountRequest.setAllowedCurrencies(allowedCurrencies);
-//    }
-
     @Given("i am logged in with email {string} and password {string}")
     public void iAmLoggedIn(String email, String password) {
         LoginRequest loginRequest = new LoginRequest();
@@ -790,6 +765,17 @@ public class UserControllerSteps {
         user.setLastName("nebitno");
 //        user.setPosition("nebitno");
         userRepository.save(user);
+    }
+
+    @Given("customer wants to send money from account {string} to account {string}")
+    public void customerWantsToSendMoneyFromAccountToAccount(String arg0, String arg1) {
+        createTransferRequest.setSenderAccountNumber(arg0);
+        createTransferRequest.setRecipientAccountNumber(arg1);
+    }
+
+    @Given("customer wants to transfer {double}")
+    public void customerWantsToTransfer(double arg0) {
+        createTransferRequest.setAmount(arg0);
     }
 
     @Given("there is a permission with name {string}")
@@ -831,32 +817,6 @@ public class UserControllerSteps {
     @Given("admin wants to remove user with id {string}")
     public void adminWantsToRemoveUserWithId(String id) {
         userToRemove = Long.parseLong(id);
-    }
-
-    public UserControllerSteps(EmployeeRepository userRepository,
-                               PermissionRepository permissionRepository,
-                               PasswordEncoder passwordEncoder,
-                               CustomerRepository customerRepository,
-                               BankAccountRepository bankAccountRepository,
-                               PaymentRepository paymentRepository,
-                               PaymentRecipientRepository paymentRecipientRepository,
-                               TransferRepository transferRepository,
-                               LoanRequestRepository loanRequestRepository,
-                               LoanRepository loanRepository,
-                               CardRepository cardRepository,
-                               EmployeeRepository employeeRepository) {
-        this.userRepository = userRepository;
-        this.permissionRepository = permissionRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.customerRepository = customerRepository;
-        this.bankAccountRepository = bankAccountRepository;
-        this.paymentRepository = paymentRepository;
-        this.paymentRecipientRepository = paymentRecipientRepository;
-        this.transferRepository = transferRepository;
-        this.loanRequestRepository = loanRequestRepository;
-        this.loanRepository = loanRepository;
-        this.cardRepository = cardRepository;
-        this.employeeRepository = employeeRepository;
     }
 
     @Given("i have email {string}")
