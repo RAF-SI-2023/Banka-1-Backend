@@ -13,9 +13,7 @@ import rs.edu.raf.banka1.model.PaymentRecipient;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
 import rs.edu.raf.banka1.requests.CreatePaymentRecipientRequest;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,7 +55,7 @@ class RecipientMapperTest {
 
         PaymentRecipient res = recipientMapper.PaymentRecipientDtoToRecipient(recipient, dto);
 
-        assertEquals(res.getRecipientAccountNumber(), "4321");
+        assertEquals(res.getRecipientAccountNumber(), dto.getBankAccountNumber());
     }
 
     @Test
@@ -70,9 +68,9 @@ class RecipientMapperTest {
 
         PaymentRecipientDto dto = recipientMapper.recipientToRecipientDto(recipient);
 
-        assertEquals("1234", dto.getBankAccountNumber());
-        assertEquals("name", dto.getFirstName());
-        assertEquals("lastName", dto.getLastName());
-        assertEquals(1L, dto.getId());
+        assertEquals(recipient.getRecipientAccountNumber(), dto.getBankAccountNumber());
+        assertEquals(recipient.getFirstName(), dto.getFirstName());
+        assertEquals(recipient.getLastName(), dto.getLastName());
+        assertEquals(recipient.getId(), dto.getId());
     }
 }
