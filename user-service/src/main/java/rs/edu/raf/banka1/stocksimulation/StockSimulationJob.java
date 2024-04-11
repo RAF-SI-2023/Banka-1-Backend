@@ -97,13 +97,13 @@ public class StockSimulationJob implements Runnable {
         Capital securityCapital = capitalService.getCapitalByListingIdAndType(listingBaseDto.getListingId(), ListingType.valueOf(listingBaseDto.getListingType().toUpperCase()));
 
         Double price = orderService.calculatePrice(order,listingBaseDto,processedNum);
-        price = convertPrice(price,null,null);
+        //price = convertPrice(price,null,null);
 
         transactionService.createTransaction(bankAccountCapital, securityCapital, price, order, processedNum);
     }
 
     //todo zvati market servis da konvertuje
-    private Double convertPrice(Double price, Currency currency, Currency currencyDest){
-        return price * 100;
-    }
+//    private Double convertPrice(Double price, Currency currency, Currency currencyDest){
+//        return price * 100;
+//    }
 }
