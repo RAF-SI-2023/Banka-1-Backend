@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.stocksimulation;
 
 import lombok.RequiredArgsConstructor;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
+import rs.edu.raf.banka1.exceptions.InvalidReservationAmountException;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.MarketService;
@@ -97,13 +98,16 @@ public class StockSimulationJob implements Runnable {
         Capital securityCapital = capitalService.getCapitalByListingIdAndType(listingBaseDto.getListingId(), ListingType.valueOf(listingBaseDto.getListingType().toUpperCase()));
 
         Double price = orderService.calculatePrice(order,listingBaseDto,processedNum);
-        price = convertPrice(price,null,null);
-
-        transactionService.createTransaction(bankAccountCapital, securityCapital, price, order, processedNum);
+        //price = convertPrice(price,null,null);
+        try {
+            transactionService.createTransaction(bankAccountCapital, securityCapital, price, order, processedNum);
+        } catch (InvalidReservationAmountException e) {
+            orderService.cancelOrder(orderId);
+        }
     }
 
     //todo zvati market servis da konvertuje
-    private Double convertPrice(Double price, Currency currency, Currency currencyDest){
-        return price * 100;
-    }
+//    private Double convertPrice(Double price, Currency currency, Currency currencyDest){
+//        return price * 100;
+//    }
 }
