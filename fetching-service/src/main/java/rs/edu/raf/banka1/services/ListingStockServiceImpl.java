@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import java.io.InputStream;
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -116,10 +117,17 @@ public class ListingStockServiceImpl implements ListingStockService {
     @Override
     public List<ListingStock> fetchNListingStocks(int n) {
         try {
-            File file = new File(Constants.listingsFilePath);
+
+            InputStream inputStream = Constants.getInputStreamForResource(Constants.listingsFilePath);
+
+            if(inputStream == null) {
+                return new ArrayList<ListingStock>();
+            }
+
+//            File file = new File(Constants.listingsFilePath);
 
             // Read JSON data from the file
-            JsonNode rootNode = objectMapper.readTree(file);
+            JsonNode rootNode = objectMapper.readTree(inputStream);
 
             List<ListingStock> listingStocks = new ArrayList<>();
 

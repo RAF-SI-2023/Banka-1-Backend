@@ -34,6 +34,7 @@ public class EmployeeMapper {
     }
 
     public EmployeeDto employeeToEmployeeDto(Employee employee) {
+        if(employee == null) return null;
         EmployeeDto employeeDto = new EmployeeDto();
         employeeDto.setUserId(employee.getUserId());
         employeeDto.setEmail(employee.getEmail());
