@@ -124,7 +124,11 @@ public class UserControllerSteps {
     private EditBankAccountNameRequest editBankAccountNameRequest = new EditBankAccountNameRequest();
     private EditCustomerRequest editCustomerRequest = new EditCustomerRequest();
     private CreateEmployeeDto createEmployeeDto = new CreateEmployeeDto();
-    ActivateAccountRequest activateAccountRequest = new ActivateAccountRequest();
+    private ActivateAccountRequest activateAccountRequest = new ActivateAccountRequest();
+    private NewPasswordRequest newPasswordRequest = new NewPasswordRequest();
+    private EditEmployeeDto editEmployeeDto = new EditEmployeeDto();
+    private ModifyPermissionsRequest modifyPermissionsRequest = new ModifyPermissionsRequest();
+    private NewLimitDto newLimitDto = new NewLimitDto();
 
     @Given("customer wants to send money from account {string} to account {string}")
     public void customerWantsToSendMoneyFromAccountToAccount(String arg0, String arg1) {
@@ -579,6 +583,139 @@ public class UserControllerSteps {
         activateAccountRequest.setPassword(arg0);
     }
 
+    @Given("employee wants new password to be {string}")
+    public void employeeWantsNewPasswordToBe(String arg0) {
+        newPasswordRequest.setPassword(arg0);
+    }
+
+    @And("employee got his reset password token using email")
+    public void employeeGotHisResetPasswordTokenUsingEmail() {
+        token = employeeRepository
+                .findByEmail("drugizaposleni@gmail.rs")
+                .get()
+                .getResetPasswordToken();
+    }
+
+    @And("i want to edit employee with email {string}")
+    public void iWantToEditEmployeeWithEmail(String arg0) {
+        editEmployeeDto.setEmail(arg0);
+    }
+
+    @And("i want to set employees first name to {string}")
+    public void iWantToSetEmployeesFirstNameTo(String arg0) {
+        editEmployeeDto.setFirstName(arg0);
+    }
+
+    @And("i want to set employees last name to {string}")
+    public void iWantToSetEmployeesLastNameTo(String arg0) {
+        editEmployeeDto.setLastName(arg0);
+    }
+
+    @And("employee first name should be {string}")
+    public void employeeFirstNameShouldBe(String arg0) {
+        Employee employee = employeeRepository.findByEmail(editEmployeeDto.getEmail()).orElse(null);
+        assertThat(employee).isNotNull();
+        assertThat(employee.getFirstName()).isEqualTo(editEmployeeDto.getFirstName());
+    }
+
+    @And("employee last name should be {string}")
+    public void employeeLastNameShouldBe(String arg0) {
+        Employee employee = employeeRepository.findByEmail(editEmployeeDto.getEmail()).orElse(null);
+        assertThat(employee).isNotNull();
+        assertThat(employee.getLastName()).isEqualTo(editEmployeeDto.getLastName());
+    }
+
+    @And("i want to change employee permisions with email {string}")
+    public void iWantToChangeEmployeePermisionsWithEmail(String arg0) {
+        Employee employee = employeeRepository.findByEmail(arg0).orElse(null);
+        lastid = employee.getUserId();
+    }
+
+    @And("i want to give him permission {string}")
+    public void iWantToGiveHimPermission(String arg0) {
+        modifyPermissionsRequest.setPermissions(new ArrayList<>());
+        modifyPermissionsRequest.getPermissions().add(arg0);
+    }
+
+    @And("employee should have permission {string}")
+    public void employeeShouldHavePermission(String arg0) {
+        Employee employee = employeeRepository.findById(lastid).orElse(null);
+        assertThat(employee).isNotNull();
+        assertThat(employee.getPermissions()).isNotEmpty();
+        assertThat(employee.getPermissions()).filteredOn(permission -> permission.getName().equals(arg0)).isNotEmpty();
+    }
+
+    @And("admin knows id of the employee")
+    public void adminKnowsIdOfTheEmployee() {
+        lastid = employeeRepository
+                .findByEmail("drugizaposleni@gmail.rs")
+                .get()
+                .getUserId();
+    }
+
+    @And("response should contain all permissions of the employee")
+    public void responseShouldContainAllPermissionsOfTheEmployee() {
+        try{
+            List<PermissionDto> permissionDtos = objectMapper.readValue(lastResponse.getBody().toString(), new TypeReference<List<PermissionDto>>() {
+            });
+            assertThat(permissionDtos).isNotEmpty();
+            assertThat(permissionDtos).filteredOn(permissionDto -> permissionDto.getName().equals("addUser")).isNotEmpty();
+        }
+        catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @And("employee limit should be reset")
+    public void employeeLimitShouldBeReset() {
+        Employee employee = employeeRepository
+                .findByEmail("drugizaposleni@gmail.rs")
+                .get();
+        assertThat(employee.getLimitNow()).isEqualTo(0.0);
+    }
+
+    @And("limit is {string}")
+    public void limitIs(String arg0) {
+        newLimitDto.setLimit(Double.parseDouble(arg0));
+    }
+
+    @And("approvalRequired is True")
+    public void approvalrequiredIsTrue() {
+        newLimitDto.setApprovalRequired(true);
+    }
+
+    @And("employee limit should be set to {string}")
+    public void employeeLimitShouldBeSetTo(String arg0) {
+        Employee employee = employeeRepository.findById(lastid).get();
+        assertThat(employee.getLimitNow()).isEqualTo(Double.parseDouble(arg0));
+    }
+
+    @And("response should contain limit of user with email {string}")
+    public void responseShouldContainLimitOfUserWithEmail(String arg0) {
+        try{
+            List<LimitDto> limits = objectMapper.readValue(lastResponse.getBody().toString(), new TypeReference<List<LimitDto>>() {
+            });
+            assertThat(limits).isNotEmpty();
+            assertThat(limits).filteredOn(limitDto -> limitDto.getLimit().equals(300.00)).isNotEmpty();
+        }
+        catch (JsonProcessingException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @When("i send DELETE request to {string}")
+    public void iSendDELETERequestTo(String path) {
+        if(path.equalsIgnoreCase("/employee/remove/id")){
+            delete(url + port + path);
+        }
+    }
+
+    @And("user with email {string} should not exist anymore")
+    public void userWithEmailShouldNotExistAnymore(String arg0) {
+        Employee employee = employeeRepository.findByEmail(arg0).orElse(null);
+        assertThat(employee.getActive()).isFalse();
+    }
+
 
     @Data
     class SearchFilter {
@@ -968,6 +1105,17 @@ public class UserControllerSteps {
         lastResponse = restTemplate.exchange(path, org.springframework.http.HttpMethod.PUT, request, String.class);
     }
 
+    private void putNoBody(String path){
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
+        HttpEntity<Object> request = new HttpEntity<>(headers);
+
+        lastResponse = restTemplate.exchange(path, org.springframework.http.HttpMethod.PUT, request, String.class);
+    }
+
     private void delete(String path) {
         RestTemplate restTemplate = new RestTemplate();
 
@@ -996,11 +1144,6 @@ public class UserControllerSteps {
                 });
                 customerRepository.findAll().forEach(user -> customerResponses.add(customerMapper.customerToCustomerResponse(user)));
             }
-            else if (path.startsWith("/employee/get/")) {
-                    lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), EmployeeDto.class);
-                String[] split = path.split("/");
-                email = split[split.length - 1];
-            }
             else if (path.equals("/employee/search")) {
                 lastReadAllUsersResponse = objectMapper.readValue(getFiltered(url + port + path), new TypeReference<List<EmployeeDto>>() {
                 });
@@ -1019,20 +1162,29 @@ public class UserControllerSteps {
                     userResponses.add(userMapper.employeeToEmployeeDto(user));
                 });
             }
+//            else if (path.startsWith("/employee/get/")) {
+//                lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), EmployeeDto.class);
+//                String[] split = path.split("/");
+//                email = split[split.length - 1];
+//            }
 //            else if (path.equals("/balance/foreign_currency")) {
 //                lastReadAllForeignCurrencyAccountsResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<ForeignCurrencyAccountResponse>>() {
 //                });
 //            }
-            else if (path.startsWith("/employee/")) {
-                lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), EmployeeDto.class);
-                String[] split = path.split("/");
-                lastid = Long.parseLong(split[split.length - 1]);
-            }
+//            else if (path.startsWith("/employee/")) {
+//                lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), EmployeeDto.class);
+//                String[] split = path.split("/");
+//                lastid = Long.parseLong(split[split.length - 1]);
+//            }
             else if(path.equals("/payment/get")){
                 getBody(url + port + path + "/" + paymentId);
             }
             else if(path.equals("/transfer/")){
                 getBody(url + port + path + lastid);
+            }
+            else if(path.equals("/employee/permissions/employeeId/id")){
+                path = path.replaceAll("id", String.valueOf(lastid));
+                getBody(url + port + path);
             }
             else{
                 getBody(url + port + path);
@@ -1095,6 +1247,19 @@ public class UserControllerSteps {
             }
             else if(path.equals("/employee/activate/token")){
                 path = path.replaceAll("token", token);
+                post(url + port + path, activateAccountRequest);
+            }
+            else if(path.equals("/employee/resetPassword")){
+                postNoBody(path);
+            }
+            else if(path.equals("/employee/newpassword/token")){
+                path = path.replaceAll("token", token);
+                post(url + port + path, newPasswordRequest);
+            }
+            else if(path.equals("/employee/createEmployee")){
+                post(url + port + path, createEmployeeDto);
+            }
+            else if(path.equals("/employee/reset/drugizaposleni@gmail.rs")){
                 postNoBody(url + port + path);
             }
 
@@ -1151,6 +1316,21 @@ public class UserControllerSteps {
         }
         else if(path.equals("/account")){
             put(url + port + path, editBankAccountNameRequest);
+        }
+        else if(path.equals("/employee/")){
+            put(url + port + path, editEmployeeDto);
+        }
+        else if(path.equals("/employee/permission/employeeId")){
+            path = path.replaceAll("employeeId", String.valueOf(lastid));
+            put(url + port + path, modifyPermissionsRequest);
+        }
+        else if(path.equals("/employee/limits/reset/id")){
+            path = path.replaceAll("id", String.valueOf(lastid));
+            putNoBody(url + port + path);
+        }
+        else if(path.equals("/employee/limits/newLimit")){
+            newLimitDto.setUserId(lastid);
+            put(url + port + path, newLimitDto);
         }
     }
 
