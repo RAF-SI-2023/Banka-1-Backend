@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.dtos.BankAccountDto;
 import rs.edu.raf.banka1.dtos.CapitalDto;
+import rs.edu.raf.banka1.dtos.CapitalProfitDto;
 import rs.edu.raf.banka1.dtos.CardDto;
 import rs.edu.raf.banka1.mapper.*;
 import rs.edu.raf.banka1.model.*;
@@ -195,7 +196,7 @@ public class BankAccountController {
         return new ResponseEntity<>(capitalService.estimateBalanceStock(stockId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/capitals/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/balance/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get total for bank account", description = "Get total for bank account")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -204,7 +205,21 @@ public class BankAccountController {
             @ApiResponse(responseCode = "403", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Double> getAllCapitals(@PathVariable(name = "accountNumber") String accountNumber) {
+    public ResponseEntity<Double> estimateBalanceBankAccount(@PathVariable(name = "accountNumber") String accountNumber) {
         return new ResponseEntity<>(capitalService.getCapital(accountNumber), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/capitals/listings", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get total for bank account", description = "Get total for bank account")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {CapitalProfitDto.class}))}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<CapitalProfitDto>> getCapitals() {
+        return new ResponseEntity<>(capitalService.getListingCapitalsQuantity(), HttpStatus.OK);
     }
 }

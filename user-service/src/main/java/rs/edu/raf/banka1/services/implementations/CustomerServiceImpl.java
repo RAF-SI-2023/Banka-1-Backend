@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +24,7 @@ import rs.edu.raf.banka1.requests.InitialActivationRequest;
 import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
 import rs.edu.raf.banka1.responses.CustomerResponse;
+import rs.edu.raf.banka1.responses.NewPasswordResponse;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.*;
 
@@ -34,6 +36,8 @@ import java.util.stream.Collectors;
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
+    @Value("${front.port}")
+    private String frontPort;
     private final CustomerRepository customerRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
@@ -196,5 +200,38 @@ public class CustomerServiceImpl implements CustomerService {
         return new org.springframework.security.core.userdetails.User(customer.getEmail(),
                 customer.getPassword(),
                 authorities);
+    }
+
+    @Override
+    public Boolean sendResetPasswordEmail(String email) {
+        Optional<Customer> optionalCustomer = this.customerRepository.findCustomerByEmail(email);
+
+        if (optionalCustomer.isEmpty()) return false;
+
+        Customer customer = optionalCustomer.get();
+        String resetPasswordToken = UUID.randomUUID().toString();
+
+        customer.setResetPasswordToken(resetPasswordToken);
+        this.customerRepository.save(customer);
+
+        return this.emailService.sendEmail(email, "RAF Banka - Password reset",
+                "Visit this URL to reset your password: http://localhost:" + frontPort + "/customer/reset-password/" + resetPasswordToken);
+    }
+
+    @Override
+    public NewPasswordResponse setNewPassword(String token, String password) {
+        Optional<Customer> optionalCustomer = this.customerRepository.findByResetPasswordToken(token);
+
+        if (optionalCustomer.isEmpty()) {
+            return new NewPasswordResponse();
+        }
+
+        Customer customer = optionalCustomer.get();
+
+        customer.setResetPasswordToken(null);
+        customer.setPassword(passwordEncoder.encode(password));
+        this.customerRepository.save(customer);
+
+        return new NewPasswordResponse(customer.getUserId());
     }
 }

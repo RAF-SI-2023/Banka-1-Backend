@@ -35,30 +35,4 @@ public class FutureMapper {
         listingFuture.setLastRefresh((int) (System.currentTimeMillis() / 1000));
         return listingFuture;
     }
-
-    public ListingFutureDto toDto(ListingFuture listingFuture) {
-        ListingFutureDto dto = new ListingFutureDto();
-        settingFieldsForListingBaseDto(listingFuture, dto);
-        dto.setOpenInterest(listingFuture.getOpenInterest());
-        dto.setSettlementDate(listingFuture.getSettlementDate());
-        dto.setContractSize(listingFuture.getContractSize());
-        dto.setContractUnit(listingFuture.getContractUnit());
-        dto.setAlternativeTicker(listingFuture.getAlternativeTicker());
-        dto.setLastPrice(listingFuture.getPrice() - listingFuture.getPriceChange());
-        return dto;
-    }
-
-    public void settingFieldsForListingBaseDto(ListingFuture listingFuture, ListingBaseDto dto) {
-        dto.setListingId(listingFuture.getListingId());
-        dto.setListingType(listingFuture.getListingType());
-        dto.setTicker(listingFuture.getTicker());
-        dto.setName(listingFuture.getName());
-        dto.setExchangeName(listingFuture.getExchangeName());
-        dto.setLastRefresh(listingFuture.getLastRefresh());
-        dto.setPrice(listingFuture.getPrice());
-        dto.setHigh(listingFuture.getHigh());
-        dto.setLow(listingFuture.getLow());
-        dto.setPriceChange(listingFuture.getPriceChange());
-        dto.setVolume(listingFuture.getVolume());
-    }
 }

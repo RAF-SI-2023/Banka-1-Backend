@@ -35,34 +35,4 @@ public class ForexMapper {
 
         return forex;
     }
-
-    public ListingForexDto toDto(ListingForex listingForex) {
-        ListingForexDto dto = new ListingForexDto();
-        settingFieldsForListingBaseDto(listingForex, dto);
-        dto.setBaseCurrency(listingForex.getBaseCurrency());
-        dto.setQuoteCurrency(listingForex.getQuoteCurrency());
-
-        return dto;
-    }
-
-    public ListingBaseDto forexToListingBaseDto(ListingForex listingForex) {
-        ListingBaseDto dto = new ListingBaseDto();
-        settingFieldsForListingBaseDto(listingForex, dto);
-
-        return dto;
-    }
-
-    public void settingFieldsForListingBaseDto(ListingForex listingForex, ListingBaseDto dto) {
-        dto.setListingId(listingForex.getListingId());
-        dto.setListingType(listingForex.getListingType());
-        dto.setTicker(listingForex.getTicker());
-        dto.setName(listingForex.getName());
-        dto.setLastRefresh(listingForex.getLastRefresh());
-        dto.setPrice(listingForex.getPrice());
-        dto.setHigh(listingForex.getHigh());
-        dto.setLow(listingForex.getLow());
-        dto.setPriceChange(listingForex.getPriceChange());
-        dto.setVolume(listingForex.getVolume());
-    }
-
 }
