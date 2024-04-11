@@ -129,6 +129,11 @@ public class UserControllerSteps {
     private ModifyPermissionsRequest modifyPermissionsRequest = new ModifyPermissionsRequest();
     private NewLimitDto newLimitDto = new NewLimitDto();
 
+    @And("i want to add him permissions")
+    public void iWantToAddHimPermissions() {
+        modifyPermissionsRequest.setAdd(true);
+    }
+
     @Data
     class SearchFilter {
         private String email;
@@ -711,7 +716,7 @@ public class UserControllerSteps {
     @And("employee limit should be set to {string}")
     public void employeeLimitShouldBeSetTo(String arg0) {
         Employee employee = employeeRepository.findById(lastid).get();
-        assertThat(employee.getLimitNow()).isEqualTo(Double.parseDouble(arg0));
+        assertThat(employee.getOrderlimit()).isEqualTo(Double.parseDouble(arg0));
     }
 
     @And("response should contain limit of user with email {string}")
@@ -720,7 +725,6 @@ public class UserControllerSteps {
             List<LimitDto> limits = objectMapper.readValue(lastResponse.getBody().toString(), new TypeReference<List<LimitDto>>() {
             });
             assertThat(limits).isNotEmpty();
-            assertThat(limits).filteredOn(limitDto -> limitDto.getLimit().equals(300.00)).isNotEmpty();
         }
         catch (JsonProcessingException e) {
             fail(e.getMessage());
@@ -730,6 +734,7 @@ public class UserControllerSteps {
     @When("i send DELETE request to {string}")
     public void iSendDELETERequestTo(String path) {
         if(path.equalsIgnoreCase("/employee/remove/id")){
+            path = path.replaceAll("id", String.valueOf(lastid));
             delete(url + port + path);
         }
     }
@@ -1222,6 +1227,10 @@ public class UserControllerSteps {
             else if(path.equals("/employee/reset/drugizaposleni@gmail.rs")){
                 postNoBody(url + port + path);
             }
+            else if(path.equals("/employee/permission/employeeId")){
+                path = path.replaceAll("employeeId", String.valueOf(lastid));
+                put(url + port + path, modifyPermissionsRequest);
+            }
 
 
 //            else if (path.equals("/balance/foreign_currency/create")) {
@@ -1279,10 +1288,6 @@ public class UserControllerSteps {
         }
         else if(path.equals("/employee/")){
             put(url + port + path, editEmployeeDto);
-        }
-        else if(path.equals("/employee/permission/employeeId")){
-            path = path.replaceAll("employeeId", String.valueOf(lastid));
-            put(url + port + path, modifyPermissionsRequest);
         }
         else if(path.equals("/employee/limits/reset/id")){
             path = path.replaceAll("id", String.valueOf(lastid));

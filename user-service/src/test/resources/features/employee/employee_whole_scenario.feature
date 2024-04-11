@@ -70,7 +70,8 @@ Feature: admin can create new employees, view them and edit them
     Given i am logged in with email "admin@admin.com" and password "admin"
     And i want to change employee permisions with email "drugizaposleni@gmail.rs"
     And i want to give him permission "addUser"
-    When i send PUT request to "/employee/permission/employeeId"
+    And i want to add him permissions
+    When user calls POST on "/employee/permission/employeeId"
     Then i should get response with status 200
     And employee should have permission "addUser"
 
