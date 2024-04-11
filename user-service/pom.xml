@@ -294,6 +294,7 @@
 						<exclude>**/repositories/**</exclude>
 						<exclude>**/model/**</exclude>
 						<exclude>**/bootstrap/**</exclude>
+						<exclude>**/configuration/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>
