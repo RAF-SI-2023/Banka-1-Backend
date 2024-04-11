@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
@@ -21,7 +20,6 @@ import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
-import rs.edu.raf.banka1.mapper.UserMapper;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.User;
 //import rs.edu.raf.banka1.repositories.ForeignCurrencyAccountRepository;
@@ -33,7 +31,6 @@ import rs.edu.raf.banka1.responses.*;
 import rs.edu.raf.banka1.services.EmailService;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
