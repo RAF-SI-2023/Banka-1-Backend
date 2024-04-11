@@ -43,7 +43,7 @@ import static org.mockito.Mockito.mock;
 @SpringBootTest(classes = {EmployeeServiceImpl.class})
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class UserServiceImplTest {
+class EmployeeServiceImplTest {
     @MockBean
     private EmployeeRepository employeeRepository;
 
@@ -373,7 +373,7 @@ public class UserServiceImplTest {
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
         when(limitMapper.toLimitDto(employee)).thenReturn(expected);
 
-        LimitDto actualLimitDto = this.userService.setOrderLimitForEmployee(newLimitDto);
+        LimitDto actualLimitDto = this.employeeService.setOrderLimitForEmployee(newLimitDto);
 
         assertEquals(actualLimitDto.getLimit(), 10005.0);
         assertEquals(actualLimitDto.getEmail(), "email");
@@ -396,7 +396,7 @@ public class UserServiceImplTest {
 
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
 
-        assertThrows(ForbiddenException.class, () -> this.userService.setOrderLimitForEmployee(newLimitDto));
+        assertThrows(ForbiddenException.class, () -> this.employeeService.setOrderLimitForEmployee(newLimitDto));
     }
 
     @Test
@@ -411,7 +411,7 @@ public class UserServiceImplTest {
 
         when(employeeRepository.findAll()).thenReturn(mockEmployees);
 
-        userService.resetEmployeeLimits();
+        employeeService.resetEmployeeLimits();
 
         for (Employee employee : mockEmployees) {
             assertEquals(0.0, employee.getLimitNow());
@@ -429,7 +429,7 @@ public class UserServiceImplTest {
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(mockEmployee));
 
-        userService.resetLimitForEmployee(employeeId);
+        employeeService.resetLimitForEmployee(employeeId);
 
         assertEquals(0.0, mockEmployee.getLimitNow());
 
@@ -443,7 +443,7 @@ public class UserServiceImplTest {
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.empty());
 
         assertThrows(EmployeeNotFoundException.class, () -> {
-            userService.resetLimitForEmployee(employeeId);
+            employeeService.resetLimitForEmployee(employeeId);
         });
 
         verify(employeeRepository, never()).save(any());

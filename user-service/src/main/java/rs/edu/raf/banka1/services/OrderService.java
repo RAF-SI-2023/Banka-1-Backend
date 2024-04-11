@@ -17,6 +17,8 @@ public interface OrderService {
     List<MarketOrder> getInactiveOrders(Instant timeThreshold);
     void startOrderSimulation(Long orderId);
 
+    ListingBaseDto getListingByOrder(MarketOrder order);
+
     Double calculatePrice(final MarketOrder order, final ListingBaseDto listingBaseDto, long processNum);
 
     List<OrderDto> getAllOrdersForEmployee(Employee currentAuth);
