@@ -43,9 +43,60 @@ class MarketServiceImplTest {
         jwtUtil = mock(JwtUtil.class);
         marketService = new MarketServiceImpl(serviceRetry, marketServiceRestTemplate, jwtUtil);
     }
+/////////////////////////////////////////////////////////////////////////////////
+    @Test
+    public void testGetAllListingsFromMarket_Future_Successful() {
+        String listType = "future";
+        ParameterizedTypeReference responseType = new ParameterizedTypeReference<>() {};
+        List<Object> mockListings = new ArrayList<>();
+        mockListings.add(new ListingStockDto());
+        mockListings.add(new ListingStockDto());
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/get/" + listType),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                any(ParameterizedTypeReference.class)
+        )).thenReturn(new ResponseEntity<>(mockListings, HttpStatus.OK));
+
+        List<Object> result = marketService.getAllListingsFromMarket(listType);
+
+        assertEquals(mockListings, result);
+    }
 
     @Test
-    public void testGetAllListingsFromMarket_Successful() {
+    public void testGetAllListingsFromMarket_Future_NotFound() {
+        String listType = "future";
+        ParameterizedTypeReference<List<Object>> responseType = new ParameterizedTypeReference<>() {};
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/get/" + listType),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(responseType)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+        List<Object> result = marketService.getAllListingsFromMarket(listType);
+
+        assertEquals(new ArrayList<>(), result);
+    }
+
+    @Test
+    public void testGetAllListingsFromMarket_Future_BadRequest() {
+        String listType = "future";
+        ParameterizedTypeReference<List<Object>> responseType = new ParameterizedTypeReference<>() {};
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/get/" + listType),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(responseType)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        List<Object> result = marketService.getAllListingsFromMarket(listType);
+
+        assertEquals(new ArrayList<>(), result);
+    }
+//////////////////////////////////////////////////////////////////////////////////
+    @Test
+    public void testGetAllListingsFromMarket_Stock_Successful() {
         String listType = "stock";
         ParameterizedTypeReference responseType = new ParameterizedTypeReference<>() {};
         List<Object> mockListings = new ArrayList<>();
@@ -64,7 +115,7 @@ class MarketServiceImplTest {
     }
 
     @Test
-    public void testGetAllListingsFromMarket_NotFound() {
+    public void testGetAllListingsFromMarket_Stock_NotFound() {
         String listType = "stock";
         ParameterizedTypeReference<List<Object>> responseType = new ParameterizedTypeReference<>() {};
         when(marketServiceRestTemplate.exchange(
@@ -80,7 +131,7 @@ class MarketServiceImplTest {
     }
 
     @Test
-    public void testGetAllListingsFromMarket_BadRequest() {
+    public void testGetAllListingsFromMarket_Stock_BadRequest() {
         String listType = "stock";
         ParameterizedTypeReference<List<Object>> responseType = new ParameterizedTypeReference<>() {};
         when(marketServiceRestTemplate.exchange(
@@ -96,6 +147,57 @@ class MarketServiceImplTest {
     }
 
 /////////////////////////////////////////
+@Test
+public void testGetAllListingsFromMarket_Forex_Successful() {
+    String listType = "forex";
+    ParameterizedTypeReference responseType = new ParameterizedTypeReference<>() {};
+    List<Object> mockListings = new ArrayList<>();
+    mockListings.add(new ListingStockDto());
+    mockListings.add(new ListingStockDto());
+    when(marketServiceRestTemplate.exchange(
+            eq("market/listing/get/" + listType),
+            eq(HttpMethod.GET),
+            any(HttpEntity.class),
+            any(ParameterizedTypeReference.class)
+    )).thenReturn(new ResponseEntity<>(mockListings, HttpStatus.OK));
+
+    List<Object> result = marketService.getAllListingsFromMarket(listType);
+
+    assertEquals(mockListings, result);
+}
+
+    @Test
+    public void testGetAllListingsFromMarket_Forex_NotFound() {
+        String listType = "forex";
+        ParameterizedTypeReference<List<Object>> responseType = new ParameterizedTypeReference<>() {};
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/get/" + listType),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(responseType)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+        List<Object> result = marketService.getAllListingsFromMarket(listType);
+
+        assertEquals(new ArrayList<>(), result);
+    }
+
+    @Test
+    public void testGetAllListingsFromMarket_Forex_BadRequest() {
+        String listType = "forex";
+        ParameterizedTypeReference<List<Object>> responseType = new ParameterizedTypeReference<>() {};
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/get/" + listType),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(responseType)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        List<Object> result = marketService.getAllListingsFromMarket(listType);
+
+        assertEquals(new ArrayList<>(), result);
+    }
+/////////////////////////////////////////////////////////////
 
     @Test
     public void testGetStockByIdFromMarket_Successful() {

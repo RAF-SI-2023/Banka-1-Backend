@@ -26,6 +26,7 @@ import rs.edu.raf.banka1.model.Capital;
 import rs.edu.raf.banka1.model.OrderType;
 import rs.edu.raf.banka1.model.ListingType;
 import rs.edu.raf.banka1.model.Currency;
+import rs.edu.raf.banka1.model.OrderStatus;
 import rs.edu.raf.banka1.repositories.EmployeeRepository;
 import rs.edu.raf.banka1.repositories.OrderRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
@@ -428,5 +429,21 @@ class OrderServiceImplTest {
         Double fee = orderService.calculateFee(50.0, 100.0);
         Double expectedFee = 12.0;
         assertEquals(expectedFee, fee);
+    }
+
+    @Test
+    public void testGetInactiveOrders() {
+        Instant timeThreshold = Instant.parse("2024-04-01T18:35:24.00Z");
+
+        MarketOrder order1 = new MarketOrder();
+        order1.setId(1L);
+        order1.setStatus(OrderStatus.APPROVED);
+        order1.setUpdatedAt(timeThreshold.minusSeconds(60));
+
+        when(orderRepository.findByStatusAndUpdatedAtLessThanEqual(OrderStatus.APPROVED, timeThreshold)).thenReturn(List.of(order1));
+
+        List<MarketOrder> result = orderService.getInactiveOrders(timeThreshold);
+
+        assertEquals(1, result.size());
     }
 }
