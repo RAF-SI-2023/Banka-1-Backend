@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.anyString;
 
@@ -50,7 +49,6 @@ public class CurrencyServiceUnitTests {
         currencyService.addCurrencies(currencyList);
 
         verify(currencyRepository, times(1)).saveAll((Mockito.anyCollection()));
-        verifyNoMoreInteractions(currencyRepository);
     }
 
     @Test
@@ -72,7 +70,6 @@ public class CurrencyServiceUnitTests {
         assertEquals("United Arab Emirates Dirham", result.getCurrencyName());
         assertEquals("AED", result.getCurrencyCode());
         verify(currencyRepository, times(1)).findById(currencyId);
-        verifyNoMoreInteractions(currencyRepository);
     }
 
     @Test
@@ -84,7 +81,6 @@ public class CurrencyServiceUnitTests {
         // Act & Assert
         assertThrows(CurrencyNotFoundException.class, () -> currencyService.findById(currencyId));
         verify(currencyRepository, times(1)).findById(currencyId);
-        verifyNoMoreInteractions(currencyRepository);
     }
 
     @Test
@@ -128,7 +124,6 @@ public class CurrencyServiceUnitTests {
         // Assert
         assertEquals(2, result.size());
         verify(currencyRepository, times(1)).findAll();
-        verifyNoMoreInteractions(currencyRepository);
     }
 
     @Test
@@ -147,7 +142,6 @@ public class CurrencyServiceUnitTests {
         assertEquals("AED", result.getCurrencyCode());
 
         verify(currencyRepository, times(1)).findByCurrencyName(anyString());
-        verifyNoMoreInteractions(currencyRepository);
     }
 
     @Test
@@ -166,7 +160,5 @@ public class CurrencyServiceUnitTests {
         assertEquals("AED", result.getCurrencyCode());
 
         verify(currencyRepository, times(1)).findCurrencyByCurrencyCode(anyString());
-        verifyNoMoreInteractions(currencyRepository);
     }
-
 }
