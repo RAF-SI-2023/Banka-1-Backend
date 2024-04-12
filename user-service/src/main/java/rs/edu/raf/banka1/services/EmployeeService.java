@@ -37,6 +37,6 @@ public interface EmployeeService extends UserDetailsService {
     void resetLimitForEmployee(Long employeeId);
     void resetEmployeeLimits();
     LimitDto setOrderLimitForEmployee(NewLimitDto newLimitDto);
-    List<LimitDto> getAllLimits(Employee currentAuth);
+    List<LimitDto> getAllLimits();
     Employee getEmployeeEntityByEmail(String email);
 }

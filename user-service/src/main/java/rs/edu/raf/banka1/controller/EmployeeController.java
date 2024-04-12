@@ -298,11 +298,11 @@ public class EmployeeController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = List.class,
-                                    subTypes = {PermissionDto.class}))}),
+                                    subTypes = {LimitDto.class}))}),
             @ApiResponse(responseCode = "404", description = "Employee not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<LimitDto>> getAllLimits(@CurrentAuth Employee currentAuth) {
-        return new ResponseEntity<>(this.employeeService.getAllLimits(currentAuth), HttpStatus.OK);
+    public ResponseEntity<List<LimitDto>> getAllLimits() {
+        return new ResponseEntity<>(this.employeeService.getAllLimits(), HttpStatus.OK);
     }
 }

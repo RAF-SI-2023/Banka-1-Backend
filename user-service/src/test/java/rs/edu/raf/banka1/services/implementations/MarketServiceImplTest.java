@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
+import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
 import rs.edu.raf.banka1.model.WorkingHoursStatus;
 import rs.edu.raf.banka1.utils.JwtUtil;
@@ -244,4 +246,104 @@ class MarketServiceImplTest {
         assertNull(result);
     }
 
+    @Test
+    public void testGetForexByIdFromMarket_Successful() {
+        Long forexId = 1L;
+        ListingForexDto expectedForexDto = new ListingForexDto();
+
+        ResponseEntity<ListingForexDto> successfulResponseEntity = new ResponseEntity<>(expectedForexDto, HttpStatus.OK);
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/forex/" + forexId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(ListingForexDto.class)
+        )).thenReturn(successfulResponseEntity);
+
+        ListingForexDto actualForexDto = marketService.getForexByIdFromMarket(forexId);
+
+        assertNotNull(actualForexDto);
+        assertEquals(expectedForexDto, actualForexDto);
+    }
+
+    @Test
+    public void testGetForexByIdFromMarket_NotFoundException() {
+        Long forexId = 1L;
+
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/forex/" + forexId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(ListingForexDto.class)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+        ListingForexDto actualForexDto = marketService.getForexByIdFromMarket(forexId);
+
+        assertNull(actualForexDto);
+    }
+
+    @Test
+    public void testGetForexByIdFromMarket_BadRequestException() {
+
+        Long forexId = 1L;
+
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/forex/" + forexId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(ListingForexDto.class)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        ListingForexDto actualForexDto = marketService.getForexByIdFromMarket(forexId);
+
+        assertNull(actualForexDto);
+    }
+
+    @Test
+    public void testGetFutureByIdFromMarket_Successful() {
+        Long futureId = 1L;
+        ListingFutureDto expectedFutureDto = new ListingFutureDto();
+
+        ResponseEntity<ListingFutureDto> successfulResponseEntity = new ResponseEntity<>(expectedFutureDto, HttpStatus.OK);
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/future/" + futureId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(ListingFutureDto.class)
+        )).thenReturn(successfulResponseEntity);
+
+        ListingFutureDto actualFutureDto = marketService.getFutureByIdFromMarket(futureId);
+
+        assertNotNull(actualFutureDto);
+        assertEquals(expectedFutureDto, actualFutureDto);
+    }
+
+    @Test
+    public void testGetFutureByIdFromMarket_NotFoundException() {
+        Long futureId = 1L;
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/future/" + futureId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(ListingFutureDto.class)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+        ListingFutureDto actualFutureDto = marketService.getFutureByIdFromMarket(futureId);
+
+        assertNull(actualFutureDto);
+    }
+
+    @Test
+    public void testGetFutureByIdFromMarket_BadRequestException() {
+        Long futureId = 1L;
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/future/" + futureId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(ListingFutureDto.class)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        ListingFutureDto actualFutureDto = marketService.getFutureByIdFromMarket(futureId);
+
+        assertNull(actualFutureDto);
+    }
 }

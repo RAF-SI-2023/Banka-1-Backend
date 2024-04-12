@@ -4,12 +4,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import rs.edu.raf.banka1.dtos.LimitDto;
@@ -40,38 +43,39 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.mock;
 
-@SpringBootTest(classes = {EmployeeServiceImpl.class})
+//@SpringBootTest(classes = {EmployeeServiceImpl.class})
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class EmployeeServiceImplTest {
-    @MockBean
+    @Mock
     private EmployeeRepository employeeRepository;
-
-    @MockBean
+    
     private EmployeeMapper userMapper;
-    @MockBean
+//    @Mock
     private LimitMapper limitMapper;
 
-    @MockBean
+    @Mock
     private PermissionRepository permissionRepository;
 
-    @MockBean
+    @Mock
     private EmailServiceImpl emailServiceBean;
 
-    @MockBean
+    @Mock
     private JwtUtil jwtUtil;
 
-    @MockBean
     private PermissionMapper permissionMapper;
 
-    @MockBean
+    @Mock
     private PasswordEncoder passwordEncoder;
 
-    @InjectMocks
     @Autowired
     private EmployeeServiceImpl employeeService;
 
+    @Mock
+    private JavaMailSender javaMailSender;
+
     @InjectMocks
+    @Spy
     @Autowired
     private EmailServiceImpl emailService;
 
@@ -86,6 +90,14 @@ class EmployeeServiceImplTest {
     public void setUp() {
         this.mockPermission = new Permission();
         this.mockUser = new Employee();
+        this.permissionMapper = new PermissionMapper();
+        this.userMapper = new EmployeeMapper(this.permissionMapper,
+                this.passwordEncoder, this.permissionRepository);
+        this.limitMapper = new LimitMapper();
+
+        this.employeeService = new EmployeeServiceImpl(this.userMapper,
+                this.permissionMapper, this.employeeRepository, this.permissionRepository, this.emailService, this.jwtUtil, this.passwordEncoder,
+                this.limitMapper);
 
         this.admin = new Employee();
         admin.setActive(true);
@@ -166,8 +178,8 @@ class EmployeeServiceImplTest {
 
     @Test
     void createUser() {
-        when(userMapper.createEmployeeDtoToEmployee(any()))
-                .thenReturn(mockUser);
+//        when(userMapper.createEmployeeDtoToEmployee(any()))
+//                .thenReturn(mockUser);
         CreateEmployeeDto createUserRequest = new CreateEmployeeDto();
         createUserRequest.setEmail("noreply.rafbanka1@gmail.com");
         createUserRequest.setFirstName("asdf");
@@ -255,10 +267,6 @@ class EmployeeServiceImplTest {
                 .thenReturn(Optional.of(mockUser));
         when(permissionRepository.findByName(any()))
                 .thenReturn(Optional.of(mockPermission));
-        when(userMapper.createEmployeeDtoToEmployee(any()))
-                .thenReturn(mockUser);
-        when(userMapper.editEmployeeDtoToEmployee(any(), any()))
-                .thenReturn(mockUser);
 
         CreateEmployeeDto createUserRequest = new CreateEmployeeDto();
         createUserRequest.setEmail("noreply.rafbanka1@gmail.com");
@@ -290,7 +298,6 @@ class EmployeeServiceImplTest {
 
     @Test
     void noParametersNull() {
-        // Mock the userRepository to return no user data
         when(employeeRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Optional.empty());
 
@@ -301,7 +308,6 @@ class EmployeeServiceImplTest {
     @Test
     void noParametersEmptyString() {
         final Integer testCount = 3;
-        // Mock the userRepository to return no user data
         when(employeeRepository.searchUsersByEmailAndFirstNameAndLastNameAndPosition(anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(Optional.of(Arrays.asList(
                         this.admin,
@@ -371,7 +377,6 @@ class EmployeeServiceImplTest {
         expected.setUsedLimit(560.0);
 
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
-        when(limitMapper.toLimitDto(employee)).thenReturn(expected);
 
         LimitDto actualLimitDto = this.employeeService.setOrderLimitForEmployee(newLimitDto);
 
@@ -447,5 +452,56 @@ class EmployeeServiceImplTest {
         });
 
         verify(employeeRepository, never()).save(any());
+    }
+
+    @Test
+    public void testGetAllLimits() {
+        user1.setPosition(Constants.AGENT);
+        user1.setOrderlimit(1000.0);
+        user1.setLimitNow(450.0);
+
+        user2.setPosition(Constants.AGENT);
+        user2.setOrderlimit(1050.0);
+        user2.setLimitNow(400.0);
+
+        admin.setPosition(Constants.ADMIN);
+
+        LimitDto limitDto1 = new LimitDto();
+        limitDto1.setLimit(1000.0);
+        limitDto1.setUsedLimit(450.0);
+        limitDto1.setEmail("user1@gmail.com");
+        limitDto1.setApprovalRequired(true);
+
+        LimitDto limitDto2 = new LimitDto();
+        limitDto2.setLimit(1050.0);
+        limitDto2.setUsedLimit(400.0);
+        limitDto2.setEmail("user2@gmail.com");
+        limitDto2.setApprovalRequired(true);
+
+        List<Employee> employees = Arrays.asList(user1, user2);
+        List<LimitDto> expectedLimits = Arrays.asList(limitDto1, limitDto2);
+
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        List<LimitDto> actualLimits = employeeService.getAllLimits();
+
+        assertEquals(expectedLimits.size(), actualLimits.size());
+    }
+
+    @Test
+    public void testGetEmployeeEntityByEmail_EmployeeFound() {
+        String email = "user1@gmail.com";
+        Employee expectedEmployee = new Employee();
+        expectedEmployee.setEmail("user1@gmail.com");
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.of(expectedEmployee));
+        Employee actualEmployee = employeeService.getEmployeeEntityByEmail(email);
+        assertEquals(user1.getEmail(), actualEmployee.getEmail());
+    }
+
+    @Test
+    public void testGetEmployeeEntityByEmail_EmployeeNotFound() {
+        String email = "nonexistent@example.com";
+        when(employeeRepository.findByEmail(email)).thenReturn(Optional.empty());
+        assertThrows(ForbiddenException.class, () -> employeeService.getEmployeeEntityByEmail(email));
     }
 }

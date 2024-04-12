@@ -14,12 +14,4 @@ public class LimitMapper {
         limitDto.setApprovalRequired(employee.getRequireApproval());
         return limitDto;
     }
-
-    public NewLimitDto toNewLimitDto(Employee employee) {
-        NewLimitDto newLimitDto = new NewLimitDto();
-        newLimitDto.setUserId(employee.getUserId());
-        newLimitDto.setLimit(employee.getOrderlimit());
-        newLimitDto.setApprovalRequired(employee.getRequireApproval());
-        return newLimitDto;
-    }
 }
