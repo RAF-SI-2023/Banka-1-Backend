@@ -267,7 +267,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public List<LimitDto> getAllLimits(Employee currentAuth) {
-        return this.employeeRepository.findAll().stream().map(limitMapper::toLimitDto).collect(Collectors.toList());
+        return this.employeeRepository.findAll().stream()
+                .filter(employee -> employee.getPosition().equals(Constants.AGENT))
+                .map(limitMapper::toLimitDto).collect(Collectors.toList());
     }
 
     @Override

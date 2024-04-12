@@ -137,9 +137,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderDto> getAllOrders() {
-        return orderRepository.findAll().stream()
-                .filter(marketOrder -> marketOrder.getOwner().getPosition().equals(Constants.AGENT))
-                .map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
+        return orderRepository.findAll().stream().map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
     }
 
     @Override
