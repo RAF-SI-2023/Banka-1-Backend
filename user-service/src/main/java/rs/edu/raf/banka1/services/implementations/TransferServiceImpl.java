@@ -38,7 +38,7 @@ public class TransferServiceImpl implements TransferService {
     private final CurrencyRepository currencyRepository;
     private final ObjectMapper objectMapper;
     private final TransferMapper transferMapper;
-    HttpClient httpClient = HttpClient.newHttpClient();
+    private HttpClient httpClient = HttpClient.newHttpClient();
 
     @Value("${exchangeRateAPIToken}")
     private String exchangeRateAPIToken;
@@ -301,4 +301,18 @@ public class TransferServiceImpl implements TransferService {
         return exchangeRateDtos;
     }
 
+    //for testing only
+    public void setHttpClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
+
+    //for testing
+    public void setExchangeRateAPIToken(String exchangeRateAPIToken) {
+        this.exchangeRateAPIToken = exchangeRateAPIToken;
+    }
+
+    //for testing
+    public void setExchangeRateApiUrl(String exchangeRateApiUrl) {
+        this.exchangeRateApiUrl = exchangeRateApiUrl;
+    }
 }
