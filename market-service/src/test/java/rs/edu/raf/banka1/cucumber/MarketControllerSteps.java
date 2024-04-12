@@ -71,7 +71,7 @@ public class MarketControllerSteps {
         loginRequest.setPassword(password);
 
         HttpEntity<LoginRequest> entity = new HttpEntity<>(loginRequest);
-        ResponseEntity<LoginResponse> responseEntity = new RestTemplate().postForEntity(userurl + userport + "/auth/login", entity, LoginResponse.class);
+        ResponseEntity<LoginResponse> responseEntity = new RestTemplate().postForEntity(userurl + userport + "/auth/login/employee", entity, LoginResponse.class);
         jwt = responseEntity.getBody().getJwt();
     }
 

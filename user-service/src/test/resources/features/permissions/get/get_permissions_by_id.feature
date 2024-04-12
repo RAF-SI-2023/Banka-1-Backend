@@ -1,8 +1,6 @@
 @Ignore
-Feature: api wants to grab permissions of a user by id
-  Scenario: api wants to grab permissions of a user by id
-    Given I have a user with id 10
-    And there is a permission with name "test_permission"
-    And user has permission "test_permission"
-    When I send a GET request to "/users/10/permissions"
-    Then I should get all permission from user
+Feature: api wants to grab all permissions
+  Scenario: api wants to grab all permissions
+    Given i am logged in with email "admin@admin.com" and password "admin"
+    When User calls get on "/permission/getAll"
+    Then i should get response with status 200
