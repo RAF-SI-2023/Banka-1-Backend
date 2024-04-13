@@ -37,6 +37,7 @@ public class SpringIntegrationTest {
     public static ComposeContainer enviroment = new ComposeContainer(new File("../docker-compose-test.yaml"))
             .withExposedService("user-service", 8080)
             .withExposedService("market-service", 8081)
+            .withExposedService("fetching-service", 8082)
             .withExposedService("mysql", 3306)
             //.withLocalCompose(true)
             .withTailChildContainers(true)

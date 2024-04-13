@@ -2,12 +2,15 @@ package rs.edu.raf.banka1.stocksimulation;
 
 import lombok.RequiredArgsConstructor;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
+import rs.edu.raf.banka1.exceptions.InvalidReservationAmountException;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.OrderService;
 import rs.edu.raf.banka1.services.TransactionService;
+import rs.edu.raf.banka1.utils.Constants;
 
+import java.util.List;
 import java.util.Random;
 
 @RequiredArgsConstructor
@@ -20,7 +23,6 @@ public class StockSimulationJob implements Runnable {
     private final Long orderId;
     private final Random random = new Random();
     private final Double PERCENT = 0.1;
-    private final String DEFAULT_CURRENCY = "RSD";
 
     @Override
     public void run() {
@@ -30,14 +32,17 @@ public class StockSimulationJob implements Runnable {
     private void processOrder(
             final Long orderId
     ){
-        if(marketService.getWorkingHoursForStock(orderId) == WorkingHoursStatus.CLOSED)
-            return;
-
         MarketOrder order = orderService.getOrderById(orderId);
-        if(order.getStatus().equals(OrderStatus.DONE) || !order.getStatus().equals(OrderStatus.APPROVED))
+
+        //Check for stock open hours
+        if(order.getListingType().equals(ListingType.STOCK) && marketService.getWorkingHoursForStock(order.getListingId()) == WorkingHoursStatus.CLOSED)
             return;
 
-        final ListingBaseDto listingBaseDto = marketService.getStockById(order.getListingId());
+        //Check for order status
+        if(!order.getStatus().equals(OrderStatus.APPROVED))
+            return;
+
+        final ListingBaseDto listingBaseDto = orderService.getListingByOrder(order);
 
         boolean processOrder = (order.getLimitValue() == null || processLimitOrder(order,listingBaseDto))
             && (order.getStopValue() == null || processStopOrder(order,listingBaseDto));
@@ -51,7 +56,7 @@ public class StockSimulationJob implements Runnable {
             order.getContractSize() - order.getProcessedNumber()
         );
 
-        createTransaction(order,listingBaseDto, processedNumber, DEFAULT_CURRENCY);
+        createTransaction(order,listingBaseDto, processedNumber, Constants.DEFAULT_CURRENCY);
 
         if(order.getContractSize() == order.getProcessedNumber() + processedNumber) {
             orderService.finishOrder(orderId);
@@ -93,13 +98,16 @@ public class StockSimulationJob implements Runnable {
         Capital securityCapital = capitalService.getCapitalByListingIdAndType(listingBaseDto.getListingId(), ListingType.valueOf(listingBaseDto.getListingType().toUpperCase()));
 
         Double price = orderService.calculatePrice(order,listingBaseDto,processedNum);
-        price = convertPrice(price,null,null);
-
-        transactionService.createTransaction(bankAccountCapital, securityCapital, price, order, processedNum);
+        //price = convertPrice(price,null,null);
+        try {
+            transactionService.createTransaction(bankAccountCapital, securityCapital, price, order, processedNum);
+        } catch (InvalidReservationAmountException e) {
+            orderService.cancelOrder(orderId);
+        }
     }
 
     //todo zvati market servis da konvertuje
-    private Double convertPrice(Double price, Currency currency, Currency currencyDest){
-        return price * 100;
-    }
+//    private Double convertPrice(Double price, Currency currency, Currency currencyDest){
+//        return price * 100;
+//    }
 }

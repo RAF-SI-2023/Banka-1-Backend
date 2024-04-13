@@ -16,6 +16,8 @@ public class Constants {
     public static final String SUPERVIZOR = "supervizor";
     public static final String ADMIN = "admin";
 
+    public static final String DEFAULT_CURRENCY = "RSD";
+
     public static final List<String> allPermissions = Arrays.asList(
             "addUser", "modifyUser", "deleteUser", "readUser",
             "manageLoans", "manageLoanRequests", "modifyCustomer",

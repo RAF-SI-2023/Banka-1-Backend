@@ -11,6 +11,7 @@ import rs.edu.raf.banka1.model.Permission;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -30,4 +31,17 @@ public class CustomerResponse {
     private String gender;
     private String address;
     private List<BankAccountDto> accountIds;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CustomerResponse that = (CustomerResponse) o;
+        return Objects.equals(userId, that.userId) && Objects.equals(email, that.email) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(jmbg, that.jmbg) && Objects.equals(phoneNumber, that.phoneNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, email, firstName, lastName, jmbg, phoneNumber);
+    }
 }

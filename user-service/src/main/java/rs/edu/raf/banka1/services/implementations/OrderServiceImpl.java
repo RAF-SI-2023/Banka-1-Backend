@@ -66,15 +66,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void createOrder(final CreateOrderRequest request, final Employee currentAuth) {
         final MarketOrder order = orderMapper.requestToMarketOrder(request, currentAuth);
-        ListingBaseDto listingBaseDto = null;
-
-        if(order.getListingType().equals(ListingType.STOCK)) {
-            listingBaseDto = marketService.getStockById(order.getListingId());
-        } else if(order.getListingType().equals(ListingType.FOREX)) {
-            listingBaseDto = marketService.getForexById(order.getListingId());
-        } else {
-            listingBaseDto = marketService.getFutureById(order.getListingId());
-        }
+        ListingBaseDto listingBaseDto = getListingByOrder(order);
 
         if(listingBaseDto == null) return;
 
@@ -125,6 +117,17 @@ public class OrderServiceImpl implements OrderService {
             )
         );
         this.scheduledFutureMap.put(orderId, future);
+    }
+
+    @Override
+    public ListingBaseDto getListingByOrder(MarketOrder order) {
+        if(order.getListingType().equals(ListingType.STOCK)) {
+            return marketService.getStockById(order.getListingId());
+        } else if(order.getListingType().equals(ListingType.FOREX)) {
+            return marketService.getForexById(order.getListingId());
+        }
+        return marketService.getFutureById(order.getListingId());
+
     }
 
     @Override
@@ -250,12 +253,12 @@ public class OrderServiceImpl implements OrderService {
             return proccessNum * (order.getLimitValue() != null ?
                 Math.min(listingBaseDto.getHigh(), order.getLimitValue()) :
                 order.getStopValue() !=null ? listingBaseDto.getHigh() :
-                listingBaseDto.getPrice());
+                listingBaseDto.getPrice()) * 100;
         } else {
             return proccessNum * (order.getLimitValue() != null ?
                 Math.max(listingBaseDto.getLow(), order.getLimitValue()) :
                 order.getStopValue() !=null ? listingBaseDto.getHigh() :
-                listingBaseDto.getPrice());
+                listingBaseDto.getPrice()) * 100;
         }
     }
 
@@ -269,9 +272,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private void reserveStockCapital(MarketOrder order) {
-        if(!order.getListingType().equals(ListingType.STOCK))
-            return;
-
         Capital bankAccountCapital = capitalService.getCapitalByCurrencyCode("RSD");
         Capital securityCapital = capitalService.getCapitalByListingIdAndType(order.getListingId(), order.getListingType());
 

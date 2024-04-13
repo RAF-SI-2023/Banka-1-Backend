@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
+import org.apache.tomcat.util.bcel.Const;
+import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.ExchangeMapper;
@@ -21,6 +23,8 @@ import rs.edu.raf.banka1.utils.Constants;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -56,7 +60,15 @@ public class ExchangeServiceImpl implements ExchangeService {
     }
 
     private void parseCsv(Map<String, BusinessHoursDto> countryIsoToBusinessHoursMap, Map<String, Country> countryIsoToCountryMap) {
-        try (CSVReader reader = new CSVReader(new FileReader(Constants.micCsvFilePath))) {
+
+        InputStream inputStream = Constants.getInputStreamForResource(Constants.micCsvFilePath);
+
+        if (inputStream == null) {
+            Logger.info("[parseCsv] Input stream for " + Constants.micCsvFilePath + " is null");
+            return;
+        }
+
+        try (CSVReader reader = new CSVReader(new InputStreamReader(inputStream))) {
             // e.g. 17:00:00
             SimpleDateFormat hoursDateFormat = new SimpleDateFormat("HH:mm:ss");
             // e.g. 2024-01-01
@@ -142,10 +154,18 @@ public class ExchangeServiceImpl implements ExchangeService {
 
     private CountryTimezoneDto[] parseCountryTimezonesJson() {
         CountryTimezoneDto[] countryTimezones = null;
+
+        InputStream inputStream = Constants.getInputStreamForResource(Constants.countryTimezoneOffsetsFilePath);
+
+        if (inputStream == null) {
+            Logger.error("[ParseCountryTimezonesJson] Input stream for " + Constants.countryTimezoneOffsetsFilePath + " is null");
+            return null;
+        }
+
         try {
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            countryTimezones = mapper.readValue(new File(Constants.countryTimezoneOffsetsFilePath), CountryTimezoneDto[].class);
+            countryTimezones = mapper.readValue(inputStream, CountryTimezoneDto[].class);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -155,9 +175,17 @@ public class ExchangeServiceImpl implements ExchangeService {
 
     private Map<String, BusinessHoursDto> parseBusinessHoursJson() {
         Map<String, BusinessHoursDto> resultMap = null;
+
+        InputStream inputStream = Constants.getInputStreamForResource(Constants.businessHoursFilePath);
+
+        if (inputStream == null) {
+            Logger.error("[ParseBusinessHoursJson] Input stream for " + Constants.businessHoursFilePath + " is null");
+            return null;
+        }
+
         try {
             ObjectMapper mapper = new ObjectMapper();
-            resultMap = mapper.readValue(new File(Constants.businessHoursFilePath), HashMap.class);
+            resultMap = mapper.readValue(inputStream, HashMap.class);
 
             for (Map.Entry<String, BusinessHoursDto> entry : resultMap.entrySet()) {
                 resultMap.put(entry.getKey(), mapper.convertValue(entry.getValue(), BusinessHoursDto.class));
