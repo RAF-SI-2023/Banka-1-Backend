@@ -24,8 +24,8 @@ public class OrderMapper {
         marketOrder.setStatus(OrderStatus.PROCESSING);
         marketOrder.setContractSize(request.getContractSize());
         marketOrder.setProcessedNumber(0L);
-        marketOrder.setLimitValue(request.getLimitValue());
-        marketOrder.setStopValue(request.getStopValue());
+        marketOrder.setLimitValue(request.getLimitValue() == 0.0 ? null : request.getLimitValue());
+        marketOrder.setStopValue(request.getStopValue() == 0.0 ? null : request.getStopValue());
         marketOrder.setAllOrNone(request.getAllOrNone());
         marketOrder.setOwner(owner);
         return marketOrder;
