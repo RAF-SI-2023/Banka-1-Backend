@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -13,10 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import rs.edu.raf.banka1.dtos.LimitDto;
 import rs.edu.raf.banka1.dtos.NewLimitDto;
+import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
@@ -29,6 +34,8 @@ import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.Permission;
 import rs.edu.raf.banka1.repositories.EmployeeRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
+import rs.edu.raf.banka1.requests.ModifyPermissionsRequest;
+import rs.edu.raf.banka1.responses.CreateUserResponse;
 import rs.edu.raf.banka1.services.implementations.EmailServiceImpl;
 import rs.edu.raf.banka1.services.implementations.EmployeeServiceImpl;
 
@@ -37,6 +44,7 @@ import rs.edu.raf.banka1.utils.JwtUtil;
 
 import java.util.*;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -87,7 +95,7 @@ class EmployeeServiceImplTest {
     private Employee user2;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp(){
         this.mockPermission = new Permission();
         this.mockUser = new Employee();
         this.permissionMapper = new PermissionMapper();
@@ -503,5 +511,189 @@ class EmployeeServiceImplTest {
         String email = "nonexistent@example.com";
         when(employeeRepository.findByEmail(email)).thenReturn(Optional.empty());
         assertThrows(ForbiddenException.class, () -> employeeService.getEmployeeEntityByEmail(email));
+    public void editEmployeePermissionEmployeeNotFound(){
+        when(employeeRepository.findById(1L)).thenReturn(Optional.empty());
+        var result = employeeService.modifyEmployeePermissions(new ModifyPermissionsRequest(), 1L);
+
+        assertThat(result).isFalse();
+
+        verify(employeeRepository, never()).save(any());
+    }
+
+    @Test
+    public void editEmployeePermissionAddPermisson(){
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(user1));
+        ModifyPermissionsRequest modifyPermissionsRequest = new ModifyPermissionsRequest();
+        modifyPermissionsRequest.setPermissions(new ArrayList<>(Arrays.asList("can_manage_users")));
+        modifyPermissionsRequest.setAdd(true);
+        mockPermission.setName("can_manage_users");
+        when(permissionRepository.findByName("can_manage_users")).thenReturn(Optional.of(mockPermission));
+
+        var result = employeeService.modifyEmployeePermissions(modifyPermissionsRequest, 1L);
+
+        assertThat(result).isTrue();
+
+        verify(employeeRepository, times(1)).save(user1);
+    }
+
+    @Test
+    public void editEmployeePermissionRemovePermisson(){
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(user1));
+        ModifyPermissionsRequest modifyPermissionsRequest = new ModifyPermissionsRequest();
+        modifyPermissionsRequest.setPermissions(new ArrayList<>(Arrays.asList("can_manage_users")));
+        modifyPermissionsRequest.setAdd(false);
+        mockPermission.setName("can_manage_users");
+        when(permissionRepository.findByName("can_manage_users")).thenReturn(Optional.of(mockPermission));
+
+        var result = employeeService.modifyEmployeePermissions(modifyPermissionsRequest, 1L);
+
+        assertThat(result).isTrue();
+
+        verify(employeeRepository, times(1)).save(user1);
+    }
+
+    @Test
+    public void deleteEmployeeNotFound(){
+        when(employeeRepository.findById(1L)).thenReturn(Optional.empty());
+        var result = employeeService.deleteEmployee(1L);
+        assertThat(result).isFalse();
+
+        verify(employeeRepository, never()).deactivateUser(any());
+    }
+
+    @Test
+    public void deleteEmployeeSuccess(){
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(user1));
+        user1.setUserId(1L);
+        var result = employeeService.deleteEmployee(1L);
+        assertThat(result).isTrue();
+
+        verify(employeeRepository, times(1)).deactivateUser(1L);
+    }
+
+    @Test
+    public void findPermissionsById(){
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(user1));
+        mockPermission.setName("test");
+        user1.getPermissions().add(mockPermission);
+        PermissionDto permissionDto = new PermissionDto();
+        permissionDto.setPermissionId(1L);
+        permissionDto.setName("test");
+        permissionDto.setDescription("test");
+        when(permissionMapper.permissionToPermissionDto(mockPermission)).thenReturn(permissionDto);
+
+        List<PermissionDto> result = employeeService.findPermissions(1L);
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(result.get(0).getName()).isEqualTo("test");
+    }
+
+    @Test
+    public void findPermissionsByString(){
+        when(employeeRepository.findByEmail("test")).thenReturn(Optional.of(user1));
+        mockPermission.setName("test");
+        user1.getPermissions().add(mockPermission);
+        PermissionDto permissionDto = new PermissionDto();
+        permissionDto.setPermissionId(1L);
+        permissionDto.setName("test");
+        permissionDto.setDescription("test");
+        when(permissionMapper.permissionToPermissionDto(mockPermission)).thenReturn(permissionDto);
+
+        List<PermissionDto> result = employeeService.findPermissions("test");
+
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(result.get(0).getName()).isEqualTo("test");
+    }
+
+    @Test
+    public void findByJWTAuthNull(){
+        try(MockedStatic<SecurityContextHolder> security = mockStatic(SecurityContextHolder.class)) {
+            SecurityContext mycontext = mock(SecurityContext.class);
+            when(SecurityContextHolder.getContext()).thenReturn(mycontext);
+            when(mycontext.getAuthentication()).thenReturn(null);
+            security.when(SecurityContextHolder::getContext).thenReturn(mycontext);
+
+            var result = employeeService.findByJwt();
+
+            assertThat(result).isNull();
+        }
+    }
+
+    @Test
+    public void findByJWTAuthNotNull(){
+        try(MockedStatic<SecurityContextHolder> security = mockStatic(SecurityContextHolder.class)) {
+            SecurityContext mycontext = mock(SecurityContext.class);
+            when(SecurityContextHolder.getContext()).thenReturn(mycontext);
+            Authentication myauth = mock(Authentication.class);
+            when(mycontext.getAuthentication()).thenReturn(myauth);
+            UserDetails userDetails = mock(UserDetails.class);
+            when(userDetails.getUsername()).thenReturn("test");
+            when(employeeRepository.findByEmail("test")).thenReturn(Optional.of(user1));
+            when(myauth.getPrincipal()).thenReturn(userDetails);
+            when(mycontext.getAuthentication()).thenReturn(myauth);
+            security.when(SecurityContextHolder::getContext).thenReturn(mycontext);
+            when(userMapper.employeeToEmployeeDto(user1)).thenReturn(new EmployeeDto());
+
+            var result = employeeService.findByJwt();
+
+            assertThat(result).isNotNull();
+        }
+    }
+
+    @Test
+    public void findById(){
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(user1));
+        when(userMapper.employeeToEmployeeDto(user1)).thenReturn(new EmployeeDto());
+
+        var result = employeeService.findById(1L);
+
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    public void getAllLimits(){
+        List<Employee> employees = new ArrayList<>();
+        employees.add(user1);
+        employees.add(user2);
+        when(employeeRepository.findAll()).thenReturn(employees);
+        when(limitMapper.toLimitDto(user1)).thenReturn(new LimitDto());
+        when(limitMapper.toLimitDto(user2)).thenReturn(new LimitDto());
+
+        var result = employeeService.getAllLimits(user1);
+
+        assertThat(result.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void findAll(){
+        List<Employee> employees = new ArrayList<>();
+        employees.add(user1);
+        employees.add(user2);
+        when(employeeRepository.findAll()).thenReturn(employees);
+        when(userMapper.employeeToEmployeeDto(user1)).thenReturn(new EmployeeDto());
+        when(userMapper.employeeToEmployeeDto(user2)).thenReturn(new EmployeeDto());
+
+        var result = employeeService.findAll();
+
+        assertThat(result.size()).isEqualTo(2);
+    }
+
+    @Test
+    public void getEmployeeEntityById(){
+        when(employeeRepository.findByEmail("test")).thenReturn(Optional.of(user1));
+        var result = employeeService.getEmployeeEntityByEmail("test");
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    public void createEmployeeNotValidPosition(){
+        CreateEmployeeDto createUserRequest = new CreateEmployeeDto();
+        createUserRequest.setEmail("test");
+        createUserRequest.setPosition("asdjkasdkasd");
+
+        CreateUserResponse result = employeeService.createEmployee(createUserRequest);
+
+        assertThat(result.getUserId()).isNull();
+        verify(employeeRepository, never()).save(any());
+        verify(emailService, never()).sendEmail(anyString(), any(), any());
     }
 }
