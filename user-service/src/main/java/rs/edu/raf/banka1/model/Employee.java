@@ -31,7 +31,7 @@ public class Employee extends User {
 
     // Agent fields
     @Column
-    private Double limitNow;
+    private Double limitNow = 0.0;
 
     @Column
     private Double orderlimit;
