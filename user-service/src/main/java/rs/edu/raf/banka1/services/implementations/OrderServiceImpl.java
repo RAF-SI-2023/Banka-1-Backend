@@ -137,9 +137,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderDto> getAllOrders() {
-        return orderRepository.findAll().stream()
-                .filter(marketOrder -> marketOrder.getOwner().getPosition().equals(Constants.AGENT))
-                .map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
+        return orderRepository.findAll().stream().map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
     }
 
     @Override
@@ -147,77 +145,77 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.cancelOrder(OrderStatus.CANCELLED, orderId);
     }
 
-    public Boolean checkStockPriceForStopOrder(Long marketOrderId, Long stockId) {
-        Optional<MarketOrder> optMarketOrder = orderRepository.findById(marketOrderId);
-        if (optMarketOrder.isEmpty()) return false;
-        MarketOrder marketOrder = optMarketOrder.get();
-        ListingBaseDto listingBase = marketService.getStockById(stockId);
+//    public Boolean checkStockPriceForStopOrder(Long marketOrderId, Long stockId) {
+//        Optional<MarketOrder> optMarketOrder = orderRepository.findById(marketOrderId);
+//        if (optMarketOrder.isEmpty()) return false;
+//        MarketOrder marketOrder = optMarketOrder.get();
+//        ListingBaseDto listingBase = marketService.getStockById(stockId);
+//
+//        Double ask = listingBase.getHigh();
+//        Double bid = listingBase.getLow();
+//
+//        Double changeAsk = random.nextDouble(ask * PERCENT);
+//        boolean plusAsk = random.nextBoolean();
+//        ask = plusAsk ? (ask + changeAsk) : (ask - changeAsk);
+//        Double changeBid = random.nextDouble(bid * PERCENT);
+//        boolean plusBid = random.nextBoolean();
+//        bid = plusBid ? (bid + changeBid) : (bid - changeBid);
+//
+//
+//        if(marketOrder.getOrderType().equals(OrderType.BUY) && ask > marketOrder.getStopValue()) {
+//
+//            if(marketOrder.getLimitValue() == null) {
+//                marketOrder.setPrice(calculatePrice(ask, marketOrder.getContractSize()));
+//            } else {
+//                marketOrder.setPrice(calculatePriceForLimitOrder(
+//                    marketOrder.getOrderType(),
+//                    marketOrder.getContractSize(),
+//                    marketOrder.getLimitValue(),
+//                    ask));
+//            }
+//            marketOrder.setFee(calculateFee(marketOrder.getLimitValue(), marketOrder.getPrice()));
+//            if (!orderRequiresApprove(marketOrder.getOwner())) {
+//                marketOrder.setStatus(OrderStatus.APPROVED);
+//            } else {
+//                marketOrder.setStatus(OrderStatus.PROCESSING);
+//            }
+//            orderRepository.save(marketOrder);
+//            return true;
+//
+//        } else if (bid < marketOrder.getStopValue()){ // SELL
+//            if(marketOrder.getLimitValue() == null) {
+//                marketOrder.setPrice(calculatePrice(bid, marketOrder.getContractSize()));
+//            } else {
+//                marketOrder.setPrice(calculatePriceForLimitOrder(
+//                    marketOrder.getOrderType(),
+//                    marketOrder.getContractSize(),
+//                    marketOrder.getLimitValue(),
+//                    bid));
+//            }
+//            marketOrder.setFee(calculateFee(marketOrder.getLimitValue(), marketOrder.getPrice()));
+//            if (!orderRequiresApprove(marketOrder.getOwner())) {
+//                marketOrder.setStatus(OrderStatus.APPROVED);
+//            } else {
+//                marketOrder.setStatus(OrderStatus.PROCESSING);
+//            }
+//            orderRepository.save(marketOrder);
+//            return true;
+//
+//        }
+//        return false;
+//    }
 
-        Double ask = listingBase.getHigh();
-        Double bid = listingBase.getLow();
-
-        Double changeAsk = random.nextDouble(ask * PERCENT);
-        boolean plusAsk = random.nextBoolean();
-        ask = plusAsk ? (ask + changeAsk) : (ask - changeAsk);
-        Double changeBid = random.nextDouble(bid * PERCENT);
-        boolean plusBid = random.nextBoolean();
-        bid = plusBid ? (bid + changeBid) : (bid - changeBid);
-
-
-        if(marketOrder.getOrderType().equals(OrderType.BUY) && ask > marketOrder.getStopValue()) {
-
-            if(marketOrder.getLimitValue() == null) {
-                marketOrder.setPrice(calculatePrice(ask, marketOrder.getContractSize()));
-            } else {
-                marketOrder.setPrice(calculatePriceForLimitOrder(
-                    marketOrder.getOrderType(),
-                    marketOrder.getContractSize(),
-                    marketOrder.getLimitValue(),
-                    ask));
-            }
-            marketOrder.setFee(calculateFee(marketOrder.getLimitValue(), marketOrder.getPrice()));
-            if (!orderRequiresApprove(marketOrder.getOwner())) {
-                marketOrder.setStatus(OrderStatus.APPROVED);
-            } else {
-                marketOrder.setStatus(OrderStatus.PROCESSING);
-            }
-            orderRepository.save(marketOrder);
-            return true;
-
-        } else if (bid < marketOrder.getStopValue()){ // SELL
-            if(marketOrder.getLimitValue() == null) {
-                marketOrder.setPrice(calculatePrice(bid, marketOrder.getContractSize()));
-            } else {
-                marketOrder.setPrice(calculatePriceForLimitOrder(
-                    marketOrder.getOrderType(),
-                    marketOrder.getContractSize(),
-                    marketOrder.getLimitValue(),
-                    bid));
-            }
-            marketOrder.setFee(calculateFee(marketOrder.getLimitValue(), marketOrder.getPrice()));
-            if (!orderRequiresApprove(marketOrder.getOwner())) {
-                marketOrder.setStatus(OrderStatus.APPROVED);
-            } else {
-                marketOrder.setStatus(OrderStatus.PROCESSING);
-            }
-            orderRepository.save(marketOrder);
-            return true;
-
-        }
-        return false;
-    }
-
-    private Double calculatePriceForLimitOrder(OrderType orderType, Long contractSize, Double limitValue, Double stockPrice) {
-        if(orderType.equals(OrderType.BUY)) {
-            return contractSize * Math.min(stockPrice, limitValue); // high(ask) umesto stockPrice
-        } else {
-            return contractSize * Math.max(stockPrice, limitValue); // low(bid) umesto stockPrice
-        }
-    }
-
-    private Double calculatePrice(final Double price, final Long contractSize) {
-        return price * contractSize;
-    }
+//    private Double calculatePriceForLimitOrder(OrderType orderType, Long contractSize, Double limitValue, Double stockPrice) {
+//        if(orderType.equals(OrderType.BUY)) {
+//            return contractSize * Math.min(stockPrice, limitValue); // high(ask) umesto stockPrice
+//        } else {
+//            return contractSize * Math.max(stockPrice, limitValue); // low(bid) umesto stockPrice
+//        }
+//    }
+//
+//    private Double calculatePrice(final Double price, final Long contractSize) {
+//        return price * contractSize;
+//    }
 
     @Override
     public MarketOrder getOrderById(Long orderId) {
@@ -262,16 +260,16 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private Double calculateFee(final Double limitValue, final Double price) {
+    public Double calculateFee(final Double limitValue, final Double price) {
         return limitValue == null ?
                 Math.min(0.14 * price, 7) : Math.min(0.24 * price, 12);
     }
 
-    private boolean orderRequiresApprove(final Employee currentAuth) {
+    boolean orderRequiresApprove(final Employee currentAuth) {
         return currentAuth.getRequireApproval() || (currentAuth.getOrderlimit() != null && currentAuth.getLimitNow() != null && currentAuth.getLimitNow() >= currentAuth.getOrderlimit());
     }
 
-    private void reserveStockCapital(MarketOrder order) {
+    void reserveStockCapital(MarketOrder order) {
         Capital bankAccountCapital = capitalService.getCapitalByCurrencyCode("RSD");
         Capital securityCapital = capitalService.getCapitalByListingIdAndType(order.getListingId(), order.getListingType());
 
@@ -283,7 +281,7 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-    private void updateLimit(Long orderId) {
+    void updateLimit(Long orderId) {
         List<TransactionDto> transactionsForOrder=this.transactionService.getTransactionsForOrderId(orderId);
         MarketOrder order = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
         Employee owner = order.getOwner();
