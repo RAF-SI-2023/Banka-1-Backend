@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services;
 
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +15,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import rs.edu.raf.banka1.dtos.customer.CustomerDto;
+import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.mapper.CustomerMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
@@ -23,11 +27,13 @@ import rs.edu.raf.banka1.requests.customer.AccountData;
 import rs.edu.raf.banka1.requests.customer.CreateCustomerRequest;
 import rs.edu.raf.banka1.requests.customer.CustomerData;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
+import rs.edu.raf.banka1.responses.CustomerResponse;
 import rs.edu.raf.banka1.services.implementations.CustomerServiceImpl;
 
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -58,6 +64,7 @@ public class CustomerServiceImplTest {
     private InitialActivationRequest initialActivationRequest;
 
     private Customer user1;
+    private Employee admin;
 
 
     @BeforeEach
@@ -74,6 +81,14 @@ public class CustomerServiceImplTest {
         user1.setPassword("1234");
         user1.setFirstName("user1");
         user1.setLastName("useric1");
+
+        this.admin = new Employee();
+        admin.setActive(true);
+        admin.setJmbg("000000000");
+        admin.setEmail("admin@gmail.com");
+        admin.setPassword("admin");
+        admin.setFirstName("admin");
+        admin.setLastName("adminic");
     }
 
     @Test
@@ -113,23 +128,152 @@ public class CustomerServiceImplTest {
             UserDetails userDetails = mock(UserDetails.class);
             when(authentication.getPrincipal()).thenReturn(userDetails);
             when(userDetails.getUsername()).thenReturn("admin@admin.com");
+            Currency currency = new Currency();
+            currency.setCurrencyCode("RSD");
+            when(currencyService.findCurrencyByCode("RSD")).thenReturn(new Currency());
 
-//            User user = new User();
-//            user.setUserId(1L);
-//            when(employeeService.findByEmail("admin@admin.com")).thenReturn(userMapper.userToUserResponse(user));
-//            Customer customer = new Customer();
-//            customer.setEmail("test@gmail.com");
-//            customer.setUserId(2L);
-//            when(customerRepository.save(any())).thenReturn(customer);
-//
-//            BankAccount bankAccount = new BankAccount();
-//            bankAccount.setAccountNumber("3921893");
-//            when(bankAccountService.createBankAccount(any())).thenReturn(bankAccount);
-//
-//            sut.createNewCustomer(createCustomerRequest);
-//
-//            verify(customerRepository).save(any());
-//            verify(emailService).sendEmail(anyString(), anyString(), anyString());
+            EmployeeDto employeeDto = new EmployeeDto();
+            when(employeeService.findByEmail("admin@admin.com")).thenReturn(employeeDto);
+
+            User user = new User();
+            user.setUserId(1L);
+            Customer customer = new Customer();
+            customer.setEmail("test@gmail.com");
+            customer.setUserId(2L);
+            when(customerRepository.save(any())).thenReturn(customer);
+
+            BankAccount bankAccount = new BankAccount();
+            bankAccount.setAccountNumber("3921893");
+            when(bankAccountService.createBankAccount(any())).thenReturn(bankAccount);
+
+            customerService.createNewCustomer(createCustomerRequest);
+
+            verify(customerRepository).save(any());
+            verify(emailService).sendEmail(anyString(), anyString(), anyString());
+        }
+    }
+
+    @Test
+    public void createNewCustomerCurrencyNotFound() {
+        CustomerData customerData = new CustomerData();
+        customerData.setFirstName("Test");
+        customerData.setLastName("Test");
+//        customerData.setPosition("Test");
+        customerData.setDateOfBirth(123456789L);
+        customerData.setGender("Test");
+        customerData.setEmail("test@gmail.com");
+        customerData.setPhoneNumber("123456789");
+        customerData.setAddress("Test");
+        customerData.setJmbg("Test");
+
+        AccountData accountData = new AccountData();
+        accountData.setAccountType(AccountType.CURRENT);
+        accountData.setCurrencyCode("RSD");
+        accountData.setMaintenanceCost(123.0);
+//        accountData.setBalance(1000.0);
+//        accountData.setAvailableBalance(1000.0);
+//        accountData.setSubtypeOfAccount("Personal");
+        accountData.setAccountName("Probni");
+
+        CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest();
+        createCustomerRequest.setCustomer(customerData);
+        createCustomerRequest.setAccount(accountData);
+
+        when(currencyService.findCurrencyByCode("RSD")).thenReturn(new Currency());
+        try (MockedStatic<SecurityContextHolder> securityContextHolderMockedStatic =
+                     Mockito.mockStatic(SecurityContextHolder.class)) {
+            Authentication authentication = mock(Authentication.class);
+            SecurityContext securityContext = mock(SecurityContext.class);
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            securityContextHolderMockedStatic.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+
+            UserDetails userDetails = mock(UserDetails.class);
+            when(authentication.getPrincipal()).thenReturn(userDetails);
+            when(userDetails.getUsername()).thenReturn("admin@admin.com");
+            Currency currency = new Currency();
+            currency.setCurrencyCode("RSD");
+            when(currencyService.findCurrencyByCode("RSD")).thenThrow(new RuntimeException("Currency not found"));
+
+            EmployeeDto employeeDto = new EmployeeDto();
+            when(employeeService.findByEmail("admin@admin.com")).thenReturn(employeeDto);
+
+            User user = new User();
+            user.setUserId(1L);
+            Customer customer = new Customer();
+            customer.setEmail("test@gmail.com");
+            customer.setUserId(2L);
+            when(customerRepository.save(any())).thenReturn(customer);
+
+            BankAccount bankAccount = new BankAccount();
+            bankAccount.setAccountNumber("3921893");
+            when(bankAccountService.createBankAccount(any())).thenReturn(bankAccount);
+
+            customerService.createNewCustomer(createCustomerRequest);
+
+            verify(customerRepository, never()).save(any());
+            verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
+        }
+    }
+
+    @Test
+    public void createNewCustomerEmployeeNotFound() {
+        CustomerData customerData = new CustomerData();
+        customerData.setFirstName("Test");
+        customerData.setLastName("Test");
+//        customerData.setPosition("Test");
+        customerData.setDateOfBirth(123456789L);
+        customerData.setGender("Test");
+        customerData.setEmail("test@gmail.com");
+        customerData.setPhoneNumber("123456789");
+        customerData.setAddress("Test");
+        customerData.setJmbg("Test");
+
+        AccountData accountData = new AccountData();
+        accountData.setAccountType(AccountType.CURRENT);
+        accountData.setCurrencyCode("RSD");
+        accountData.setMaintenanceCost(123.0);
+//        accountData.setBalance(1000.0);
+//        accountData.setAvailableBalance(1000.0);
+//        accountData.setSubtypeOfAccount("Personal");
+        accountData.setAccountName("Probni");
+
+        CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest();
+        createCustomerRequest.setCustomer(customerData);
+        createCustomerRequest.setAccount(accountData);
+
+        when(currencyService.findCurrencyByCode("RSD")).thenReturn(new Currency());
+        try (MockedStatic<SecurityContextHolder> securityContextHolderMockedStatic =
+                     Mockito.mockStatic(SecurityContextHolder.class)) {
+            Authentication authentication = mock(Authentication.class);
+            SecurityContext securityContext = mock(SecurityContext.class);
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            securityContextHolderMockedStatic.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+
+            UserDetails userDetails = mock(UserDetails.class);
+            when(authentication.getPrincipal()).thenReturn(userDetails);
+            when(userDetails.getUsername()).thenReturn("admin@admin.com");
+            Currency currency = new Currency();
+            currency.setCurrencyCode("RSD");
+            when(currencyService.findCurrencyByCode("RSD")).thenReturn(new Currency());
+
+            EmployeeDto employeeDto = new EmployeeDto();
+            when(employeeService.findByEmail("admin@admin.com")).thenReturn(null);
+
+            User user = new User();
+            user.setUserId(1L);
+            Customer customer = new Customer();
+            customer.setEmail("test@gmail.com");
+            customer.setUserId(2L);
+            when(customerRepository.save(any())).thenReturn(customer);
+
+            BankAccount bankAccount = new BankAccount();
+            bankAccount.setAccountNumber("3921893");
+            when(bankAccountService.createBankAccount(any())).thenReturn(bankAccount);
+
+            customerService.createNewCustomer(createCustomerRequest);
+
+            verify(customerRepository, never()).save(any());
+            verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
         }
     }
 
@@ -340,5 +484,70 @@ public class CustomerServiceImplTest {
         Mockito.verify(customerRepository).findCustomerByEmail("test@gmail.com");
         Mockito.verifyNoMoreInteractions(customerRepository); // Verify no other interactions with customerRepository
         Mockito.verifyNoInteractions(customerMapper, passwordEncoder); // Verify no interactions with other mocks
+    }
+
+    @Test
+    public void loadUserByUsernameNotFound(){
+        when(customerRepository.findCustomerByEmail("test")).thenReturn(Optional.empty());
+
+        assertThrows(UsernameNotFoundException.class, () -> customerService.loadUserByUsername("test"));
+    }
+
+    @Test
+    public void loadUserByUsername(){
+        when(customerRepository.findCustomerByEmail("test")).thenReturn(Optional.of(user1));
+
+        UserDetails userDetails = customerService.loadUserByUsername("test");
+
+        assertThat(userDetails).isNotNull();
+        assertThat(userDetails.getUsername()).isEqualTo(user1.getEmail());
+    }
+
+    @Test
+    public void findByEmail(){
+        when(customerRepository.findCustomerByEmail("test")).thenReturn(Optional.of(user1));
+        CustomerResponse customer123 = new CustomerResponse();
+        customer123.setEmail("test");
+        when(customerMapper.customerToCustomerResponse(user1)).thenReturn(customer123);
+
+        CustomerResponse customer = customerService.findByEmail("test");
+
+        assertThat(customer).isNotNull();
+        assertThat(customer.getEmail()).isEqualTo("test");
+    }
+
+    @Test
+    public void findByJwtSuccess(){
+        try(MockedStatic<SecurityContextHolder> security = mockStatic(SecurityContextHolder.class)) {
+            SecurityContext mycontext = mock(SecurityContext.class);
+            when(SecurityContextHolder.getContext()).thenReturn(mycontext);
+            Authentication myauth = mock(Authentication.class);
+            when(mycontext.getAuthentication()).thenReturn(myauth);
+            UserDetails userDetails = mock(UserDetails.class);
+            when(userDetails.getUsername()).thenReturn("test");
+            when(customerRepository.findCustomerByEmail("test")).thenReturn(Optional.of(user1));
+            when(myauth.getPrincipal()).thenReturn(userDetails);
+            when(mycontext.getAuthentication()).thenReturn(myauth);
+            security.when(SecurityContextHolder::getContext).thenReturn(mycontext);
+            when(customerMapper.customerToCustomerResponse(user1)).thenReturn(new CustomerResponse());
+
+            var result = customerService.findByJwt();
+
+            AssertionsForClassTypes.assertThat(result).isNotNull();
+        }
+    }
+
+    @Test
+    public void findByJwtUserNotFound(){
+        try(MockedStatic<SecurityContextHolder> security = mockStatic(SecurityContextHolder.class)) {
+            SecurityContext mycontext = mock(SecurityContext.class);
+            when(SecurityContextHolder.getContext()).thenReturn(mycontext);
+            when(mycontext.getAuthentication()).thenReturn(null);
+            security.when(SecurityContextHolder::getContext).thenReturn(mycontext);
+
+            var result = customerService.findByJwt();
+
+            AssertionsForClassTypes.assertThat(result).isNull();
+        }
     }
 }
