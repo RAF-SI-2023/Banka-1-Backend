@@ -109,7 +109,6 @@ public class BootstrapData implements CommandLineRunner {
         user1.setPosition(Constants.ADMIN);
         user1.setActive(true);
         user1.setOrderlimit(10000000.0);
-        user1.setLimitNow(0.0);
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
         user1.setRequireApproval(false);
         employeeRepository.save(user1);
@@ -120,7 +119,6 @@ public class BootstrapData implements CommandLineRunner {
         client.setFirstName("Client");
         client.setActive(true);
         client.setOrderlimit(1000.0);
-        client.setLimitNow(0.0);
         client.setPosition(Constants.SUPERVIZOR);
         client.setRequireApproval(false);
         client.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
