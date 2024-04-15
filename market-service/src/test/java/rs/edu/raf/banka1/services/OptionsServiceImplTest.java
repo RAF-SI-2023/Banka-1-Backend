@@ -259,11 +259,6 @@ class OptionsServiceImplTest {
 
     @Test
     public void getOptionsByTickerTest_EmptyDB_noCrumb(){
-        OptionsModel option1 = new OptionsModel();
-        option1.setTicker("AAPL");
-        OptionsModel option2 = new OptionsModel();
-        option2.setTicker("AAPL");
-
         optionsService.setCrumb(null);
         when(optionsRepository.findByTicker("AAPL")).thenReturn(Optional.of(List.of()));
 
