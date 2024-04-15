@@ -152,22 +152,10 @@ public class FuturesServiceImpl implements FuturesService {
         // Navigate to the webpage
         driver.get(url);
 
-
         WebElement tableDiv = driver.findElement(By.cssSelector("div.container.svelte-tx3nkj"));
 
         // Find all li elements within the parent div
         List<WebElement> tableRows = tableDiv.findElements(By.tagName("li"));
-
-        // Iterate through each row and extract label and value
-        for (WebElement row : tableRows) {
-            WebElement labelElement = row.findElement(By.className("label"));
-            WebElement valueElement = row.findElement(By.className("value"));
-
-            String label = labelElement.getText();
-            String value = valueElement.getText();
-
-            System.out.println(label + ": " + value);
-        }
 
         String settlementDate = tableRows.get(1).findElement(By.className("value")).getText();
         String bid = tableRows.get(3).findElement(By.className("value")).getText();
