@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.bootstrap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.tinylog.Logger;
@@ -31,6 +32,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Component
+@Profile("!test")
 public class BootstrapData implements CommandLineRunner {
 //    private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
@@ -107,7 +109,6 @@ public class BootstrapData implements CommandLineRunner {
         user1.setPosition(Constants.ADMIN);
         user1.setActive(true);
         user1.setOrderlimit(10000000.0);
-        user1.setLimitNow(0.0);
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
         user1.setRequireApproval(false);
         employeeRepository.save(user1);
@@ -118,7 +119,6 @@ public class BootstrapData implements CommandLineRunner {
         client.setFirstName("Client");
         client.setActive(true);
         client.setOrderlimit(1000.0);
-        client.setLimitNow(0.0);
         client.setPosition(Constants.SUPERVIZOR);
         client.setRequireApproval(false);
         client.setPermissions(new HashSet<>(getPermissionsForSupervisor()));

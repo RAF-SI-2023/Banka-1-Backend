@@ -8,6 +8,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
@@ -35,6 +37,9 @@ public class BankAccountServiceImplTest {
     private CurrencyRepository currencyRepository;
     @Mock
     private CardService cardService;
+
+    @Mock
+    private EmployeeService userService;
     @InjectMocks
     private BankAccountServiceImpl bankAccountService;
     @Test
@@ -93,6 +98,59 @@ public class BankAccountServiceImplTest {
         assertNull(bankAccount.getCustomer());
         assertNull(bankAccount.getSubtypeOfAccount());
         assertNull(bankAccount.getMaintenanceCost());
+    }
+
+    @Test
+    public void createBankAccountTestCompanyFoundAuthSuccessful() {
+        Company company = new Company();
+        company.setId(1L);
+        company.setCompanyName("Google DeepMind");
+        CreateBankAccountRequest createRequest = new CreateBankAccountRequest();
+        BankAccountRequest bankAccountRequest = new BankAccountRequest();
+        createRequest.setAccount(bankAccountRequest);
+        createRequest.getAccount().setAccountType(AccountType.BUSINESS);
+        createRequest.setCompanyId(1L);
+        createRequest.setCustomerId(null);
+        createRequest.getAccount().setBalance(1000.0);
+        createRequest.getAccount().setAvailableBalance(900.0);
+        createRequest.getAccount().setAccountName("Probni");
+        String curr = "USD";
+        createRequest.getAccount().setCurrencyCode(curr);
+        Currency currency = new Currency();
+        currency.setCurrencyCode(curr);
+
+        when(bankAccountService.getCurrencyRepository().findCurrencyByCurrencyCode(curr)).thenReturn(Optional.of(currency));
+
+        try(MockedStatic<SecurityContextHolder> security = mockStatic(SecurityContextHolder.class)) {
+            SecurityContext mycontext = mock(SecurityContext.class);
+            when(SecurityContextHolder.getContext()).thenReturn(mycontext);
+            Authentication myauth = mock(Authentication.class);
+            when(mycontext.getAuthentication()).thenReturn(myauth);
+            UserDetails userDetails = mock(UserDetails.class);
+            when(userDetails.getUsername()).thenReturn("test");
+            when(myauth.getPrincipal()).thenReturn(userDetails);
+            when(mycontext.getAuthentication()).thenReturn(myauth);
+            security.when(SecurityContextHolder::getContext).thenReturn(mycontext);
+
+            EmployeeDto employeeDto = new EmployeeDto();
+            employeeDto.setUserId(1L);
+            when(userService.findByEmail("test")).thenReturn(employeeDto);
+
+
+            when(bankAccountService.getCompanyRepository().findById(createRequest.getCompanyId())).thenReturn(Optional.of(company));
+
+            BankAccount bankAccount = bankAccountService.createBankAccount(createRequest);
+            // Assertions
+            assertEquals(bankAccount.getCompany().getId(), company.getId());
+            assertEquals(bankAccount.getBalance(), createRequest.getAccount().getBalance());
+            assertEquals(bankAccount.getAvailableBalance(), createRequest.getAccount().getAvailableBalance());
+            assertEquals(bankAccount.getCurrency().getCurrencyCode(), createRequest.getAccount().getCurrencyCode());
+            assertEquals(bankAccount.getAccountName(),createRequest.getAccount().getAccountName());
+            assertNull(bankAccount.getCustomer());
+            assertNull(bankAccount.getSubtypeOfAccount());
+            assertNull(bankAccount.getMaintenanceCost());
+
+        }
     }
 
     @Test
@@ -248,5 +306,25 @@ public class BankAccountServiceImplTest {
 
         verify(bankAccountService.getBankAccountRepository(), times(1)).save(bankAccount);
         verify(bankAccountService.getCardService(), times(numberOfCards)).saveCard(any());
+    }
+
+    @Test
+    public void getBankAccountByCompanyFound(){
+        Company company = new Company();
+        when(companyRepository.findById(1L)).thenReturn(Optional.of(company));
+
+        List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCompany(1L);
+
+        verify(bankAccountRepository, times(1)).findByCompany(company);
+    }
+
+    @Test
+    public void getBankAccountsByCustomerFound(){
+        Customer customer = new Customer();
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+
+        List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCustomer(1L);
+
+        verify(bankAccountRepository, times(1)).findByCustomer(customer);
     }
 }

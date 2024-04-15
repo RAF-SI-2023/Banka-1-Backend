@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import rs.edu.raf.banka1.dtos.PermissionDto;
 
 import java.util.List;
+import java.util.Objects;
 
 public class EmployeeDto {
 
@@ -133,5 +134,18 @@ public class EmployeeDto {
 
     public void setRequireApproval(Boolean requireApproval) {
         this.requireApproval = requireApproval;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EmployeeDto that = (EmployeeDto) o;
+        return Objects.equals(userId, that.userId) && Objects.equals(username, that.username) && Objects.equals(email, that.email) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(jmbg, that.jmbg) && Objects.equals(phoneNumber, that.phoneNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, username, email, firstName, lastName, jmbg, phoneNumber);
     }
 }
