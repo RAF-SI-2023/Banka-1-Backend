@@ -151,7 +151,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public DecideOrderResponse decideOrder(Long orderId, String status, Employee currentAuth) {
-        MarketOrder marketOrder = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
+        Optional<MarketOrder> marketOrderOpt = this.orderRepository.fetchById(orderId);
+        if(marketOrderOpt.isEmpty()) {
+            return DecideOrderResponse.NOT_POSSIBLE;
+        }
+        MarketOrder marketOrder = marketOrderOpt.get();
         if(!marketOrder.getStatus().equals(OrderStatus.PROCESSING)) return DecideOrderResponse.NOT_POSSIBLE;
 
         if(status.toUpperCase().equals(OrderStatus.APPROVED.name()) ||
