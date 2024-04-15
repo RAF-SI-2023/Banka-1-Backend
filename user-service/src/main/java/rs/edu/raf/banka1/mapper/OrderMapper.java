@@ -33,6 +33,7 @@ public class OrderMapper {
 
     public OrderDto marketOrderToOrderDto(MarketOrder marketOrder) {
         OrderDto orderDto = new OrderDto();
+        orderDto.setOrderId(marketOrder.getId());
 //        orderDto.setId(marketOrder.getId());
         orderDto.setListingId(marketOrder.getListingId());
         marketOrder.setListingType(marketOrder.getListingType());
