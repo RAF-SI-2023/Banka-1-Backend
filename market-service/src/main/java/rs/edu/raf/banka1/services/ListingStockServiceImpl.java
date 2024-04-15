@@ -152,7 +152,7 @@ public class ListingStockServiceImpl implements ListingStockService {
 
     }
 
-    private ListingStock createListingStock(String symbol, String companyName, String primaryExchange) {
+    public ListingStock createListingStock(String symbol, String companyName, String primaryExchange) {
         try {
             String listingBaseUrl = updateListingApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;
             String listingStockUrl = basicStockInfoApiUrl+symbol+"&apikey=" + alphaVantageAPIToken;
@@ -304,7 +304,7 @@ public class ListingStockServiceImpl implements ListingStockService {
         return listingHistoriesModels.stream().mapToInt(this::addListingToHistory).sum();
     }
 
-    private ListingHistory createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp){
+    public ListingHistory createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp){
         // Get specific fields from each data node
         double open = dataNode.get("1. open").asDouble();
         double high = dataNode.get("2. high").asDouble();
