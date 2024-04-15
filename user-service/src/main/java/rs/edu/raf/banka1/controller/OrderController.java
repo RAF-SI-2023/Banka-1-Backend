@@ -113,7 +113,7 @@ public class OrderController {
     }
 
 
-    @PutMapping(value = "/decideOrder/{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/decideOrder/{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Supervisor approves/denies order.", description = "Supervisor approves/denies order.")
     @PreAuthorize("hasAuthority('manageOrderRequests')")
     @ApiResponses({
