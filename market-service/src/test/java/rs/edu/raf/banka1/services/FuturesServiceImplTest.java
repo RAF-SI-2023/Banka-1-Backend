@@ -132,31 +132,25 @@ public class FuturesServiceImplTest {
         }
         when(tableElement.findElements(any())).thenReturn(webElements);
 
-        WebElement quoteSummary = mock(WebElement.class);
-        when(driver.findElement(By.id("quote-summary"))).thenReturn(quoteSummary);
-        WebElement leftSummaryTable = mock(WebElement.class);
-        WebElement settlementDate = mock(WebElement.class);
-        when(settlementDate.getText()).thenReturn("2018-12-27");//TODO FORMIRAJ DA BUDE DATUM
-        WebElement bid = mock(WebElement.class);
-        when(bid.getText()).thenReturn("100.0");
-        when(leftSummaryTable.findElement(By.cssSelector("[data-test=SETTLEMENT_DATE-value]"))).thenReturn(settlementDate);
-        when(leftSummaryTable.findElement(By.cssSelector("[data-test=BID-value]"))).thenReturn(bid);
-
-        WebElement rightSummaryTable = mock(WebElement.class);
-
-        WebElement lastPrice = mock(WebElement.class);
-        when(lastPrice.getText()).thenReturn("100.00");
-        when(rightSummaryTable.findElement(By.cssSelector("[data-test=LAST_PRICE-value]"))).thenReturn(lastPrice);
-        WebElement volume = mock(WebElement.class);
-        when(volume.getText()).thenReturn("100");
-        when(rightSummaryTable.findElement(By.cssSelector("[data-test=TD_VOLUME-value]"))).thenReturn(volume);
-        WebElement ask = mock(WebElement.class);
-        when(ask.getText()).thenReturn("120.0");
-        when(rightSummaryTable.findElement(By.cssSelector("[data-test=ASK-value]"))).thenReturn(ask);
-
-
-        when(quoteSummary.findElement(By.cssSelector("[data-test=left-summary-table]"))).thenReturn(leftSummaryTable);
-        when(quoteSummary.findElement(By.cssSelector("[data-test=right-summary-table]"))).thenReturn(rightSummaryTable);
+        WebElement tableDiv = mock(WebElement.class);
+        when(driver.findElement(By.cssSelector("div.container.svelte-tx3nkj"))).thenReturn(tableDiv);
+        List<WebElement> tableRows = new ArrayList<>();
+        when(tableDiv.findElements(By.tagName("li"))).thenReturn(tableRows);
+        for(int i =0;i<8;i++){
+            WebElement row = mock(WebElement.class);
+            WebElement content = mock(WebElement.class);
+            if(i == 3 || i == 7 || i==6 || i==4){
+                when(content.getText()).thenReturn("100");
+            }
+            else if (i==1){
+                when(content.getText()).thenReturn("2018-12-27");
+            }
+            else {
+                when(content.getText()).thenReturn("text");
+            }
+            when(row.findElement(By.className("value"))).thenReturn(content);
+            tableRows.add(row);
+        }
 
         when(driver.getPageSource()).thenReturn("NY Mercantile");
 
@@ -190,31 +184,25 @@ public class FuturesServiceImplTest {
         }
         when(tableElement.findElements(any())).thenReturn(webElements);
 
-        WebElement quoteSummary = mock(WebElement.class);
-        when(driver.findElement(By.id("quote-summary"))).thenReturn(quoteSummary);
-        WebElement leftSummaryTable = mock(WebElement.class);
-        WebElement settlementDate = mock(WebElement.class);
-        when(settlementDate.getText()).thenReturn("2018-12-27");//TODO FORMIRAJ DA BUDE DATUM
-        WebElement bid = mock(WebElement.class);
-        when(bid.getText()).thenReturn("100.0");
-        when(leftSummaryTable.findElement(By.cssSelector("[data-test=SETTLEMENT_DATE-value]"))).thenReturn(settlementDate);
-        when(leftSummaryTable.findElement(By.cssSelector("[data-test=BID-value]"))).thenReturn(bid);
-
-        WebElement rightSummaryTable = mock(WebElement.class);
-
-        WebElement lastPrice = mock(WebElement.class);
-        when(lastPrice.getText()).thenReturn("100.00");
-        when(rightSummaryTable.findElement(By.cssSelector("[data-test=LAST_PRICE-value]"))).thenReturn(lastPrice);
-        WebElement volume = mock(WebElement.class);
-        when(volume.getText()).thenReturn("100");
-        when(rightSummaryTable.findElement(By.cssSelector("[data-test=TD_VOLUME-value]"))).thenReturn(volume);
-        WebElement ask = mock(WebElement.class);
-        when(ask.getText()).thenReturn("120.0");
-        when(rightSummaryTable.findElement(By.cssSelector("[data-test=ASK-value]"))).thenReturn(ask);
-
-
-        when(quoteSummary.findElement(By.cssSelector("[data-test=left-summary-table]"))).thenReturn(leftSummaryTable);
-        when(quoteSummary.findElement(By.cssSelector("[data-test=right-summary-table]"))).thenReturn(rightSummaryTable);
+        WebElement tableDiv = mock(WebElement.class);
+        when(driver.findElement(By.cssSelector("div.container.svelte-tx3nkj"))).thenReturn(tableDiv);
+        List<WebElement> tableRows = new ArrayList<>();
+        when(tableDiv.findElements(By.tagName("li"))).thenReturn(tableRows);
+        for(int i =0;i<8;i++){
+            WebElement row = mock(WebElement.class);
+            WebElement content = mock(WebElement.class);
+            if(i == 3 || i == 7 || i==6 || i==4){
+                when(content.getText()).thenReturn("100");
+            }
+            else if (i==1){
+                when(content.getText()).thenReturn("2018-12-27");
+            }
+            else {
+                when(content.getText()).thenReturn("text");
+            }
+            when(row.findElement(By.className("value"))).thenReturn(content);
+            tableRows.add(row);
+        }
 
         when(driver.getPageSource()).thenReturn("CME");
 
@@ -248,31 +236,25 @@ public class FuturesServiceImplTest {
         }
         when(tableElement.findElements(any())).thenReturn(webElements);
 
-        WebElement quoteSummary = mock(WebElement.class);
-        when(driver.findElement(By.id("quote-summary"))).thenReturn(quoteSummary);
-        WebElement leftSummaryTable = mock(WebElement.class);
-        WebElement settlementDate = mock(WebElement.class);
-        when(settlementDate.getText()).thenReturn("2018-12-27");//TODO FORMIRAJ DA BUDE DATUM
-        WebElement bid = mock(WebElement.class);
-        when(bid.getText()).thenReturn("100.0");
-        when(leftSummaryTable.findElement(By.cssSelector("[data-test=SETTLEMENT_DATE-value]"))).thenReturn(settlementDate);
-        when(leftSummaryTable.findElement(By.cssSelector("[data-test=BID-value]"))).thenReturn(bid);
-
-        WebElement rightSummaryTable = mock(WebElement.class);
-
-        WebElement lastPrice = mock(WebElement.class);
-        when(lastPrice.getText()).thenReturn("100.00");
-        when(rightSummaryTable.findElement(By.cssSelector("[data-test=LAST_PRICE-value]"))).thenReturn(lastPrice);
-        WebElement volume = mock(WebElement.class);
-        when(volume.getText()).thenReturn("100");
-        when(rightSummaryTable.findElement(By.cssSelector("[data-test=TD_VOLUME-value]"))).thenReturn(volume);
-        WebElement ask = mock(WebElement.class);
-        when(ask.getText()).thenReturn("120.0");
-        when(rightSummaryTable.findElement(By.cssSelector("[data-test=ASK-value]"))).thenReturn(ask);
-
-
-        when(quoteSummary.findElement(By.cssSelector("[data-test=left-summary-table]"))).thenReturn(leftSummaryTable);
-        when(quoteSummary.findElement(By.cssSelector("[data-test=right-summary-table]"))).thenReturn(rightSummaryTable);
+        WebElement tableDiv = mock(WebElement.class);
+        when(driver.findElement(By.cssSelector("div.container.svelte-tx3nkj"))).thenReturn(tableDiv);
+        List<WebElement> tableRows = new ArrayList<>();
+        when(tableDiv.findElements(By.tagName("li"))).thenReturn(tableRows);
+        for(int i =0;i<8;i++){
+            WebElement row = mock(WebElement.class);
+            WebElement content = mock(WebElement.class);
+            if(i == 3 || i == 7 || i==6 || i==4){
+                when(content.getText()).thenReturn("100");
+            }
+            else if (i==1){
+                when(content.getText()).thenReturn("2018-12-27");
+            }
+            else {
+                when(content.getText()).thenReturn("text");
+            }
+            when(row.findElement(By.className("value"))).thenReturn(content);
+            tableRows.add(row);
+        }
 
         when(driver.getPageSource()).thenReturn("CBOT");
 
@@ -306,31 +288,25 @@ public class FuturesServiceImplTest {
         }
         when(tableElement.findElements(any())).thenReturn(webElements);
 
-        WebElement quoteSummary = mock(WebElement.class);
-        when(driver.findElement(By.id("quote-summary"))).thenReturn(quoteSummary);
-        WebElement leftSummaryTable = mock(WebElement.class);
-        WebElement settlementDate = mock(WebElement.class);
-        when(settlementDate.getText()).thenReturn("2018-12-27");//TODO FORMIRAJ DA BUDE DATUM
-        WebElement bid = mock(WebElement.class);
-        when(bid.getText()).thenReturn("100.0");
-        when(leftSummaryTable.findElement(By.cssSelector("[data-test=SETTLEMENT_DATE-value]"))).thenReturn(settlementDate);
-        when(leftSummaryTable.findElement(By.cssSelector("[data-test=BID-value]"))).thenReturn(bid);
-
-        WebElement rightSummaryTable = mock(WebElement.class);
-
-        WebElement lastPrice = mock(WebElement.class);
-        when(lastPrice.getText()).thenReturn("100.00");
-        when(rightSummaryTable.findElement(By.cssSelector("[data-test=LAST_PRICE-value]"))).thenReturn(lastPrice);
-        WebElement volume = mock(WebElement.class);
-        when(volume.getText()).thenReturn("100");
-        when(rightSummaryTable.findElement(By.cssSelector("[data-test=TD_VOLUME-value]"))).thenReturn(volume);
-        WebElement ask = mock(WebElement.class);
-        when(ask.getText()).thenReturn("120.0");
-        when(rightSummaryTable.findElement(By.cssSelector("[data-test=ASK-value]"))).thenReturn(ask);
-
-
-        when(quoteSummary.findElement(By.cssSelector("[data-test=left-summary-table]"))).thenReturn(leftSummaryTable);
-        when(quoteSummary.findElement(By.cssSelector("[data-test=right-summary-table]"))).thenReturn(rightSummaryTable);
+        WebElement tableDiv = mock(WebElement.class);
+        when(driver.findElement(By.cssSelector("div.container.svelte-tx3nkj"))).thenReturn(tableDiv);
+        List<WebElement> tableRows = new ArrayList<>();
+        when(tableDiv.findElements(By.tagName("li"))).thenReturn(tableRows);
+        for(int i =0;i<8;i++){
+            WebElement row = mock(WebElement.class);
+            WebElement content = mock(WebElement.class);
+            if(i == 3 || i == 7 || i==6 || i==4){
+                when(content.getText()).thenReturn("100");
+            }
+            else if (i==1){
+                when(content.getText()).thenReturn("2018-12-27");
+            }
+            else {
+                when(content.getText()).thenReturn("text");
+            }
+            when(row.findElement(By.className("value"))).thenReturn(content);
+            tableRows.add(row);
+        }
 
         when(driver.getPageSource()).thenReturn("COMEX");
 
@@ -370,7 +346,7 @@ public class FuturesServiceImplTest {
         }
         when(table.findElements(By.tagName("tr"))).thenReturn(rows);
 
-        when(driver.findElement(By.className("W(100%)"))).thenReturn(table);
+        when(driver.findElement(By.cssSelector("div.table-container.svelte-ta1t6m"))).thenReturn(table);
 
         List<ListingHistory> result = futuresService.getListingHistoriesByTimestamp(1L, 1, 2);
 
@@ -410,7 +386,7 @@ public class FuturesServiceImplTest {
         }
         when(table.findElements(By.tagName("tr"))).thenReturn(rows);
 
-        when(driver.findElement(By.className("W(100%)"))).thenReturn(table);
+        when(driver.findElement(By.cssSelector("div.table-container.svelte-ta1t6m"))).thenReturn(table);
 
         List<ListingHistory> result = futuresService.getListingHistoriesByTimestamp(1L, null, 2);
 
@@ -450,7 +426,7 @@ public class FuturesServiceImplTest {
         }
         when(table.findElements(By.tagName("tr"))).thenReturn(rows);
 
-        when(driver.findElement(By.className("W(100%)"))).thenReturn(table);
+        when(driver.findElement(By.cssSelector("div.table-container.svelte-ta1t6m"))).thenReturn(table);
 
         List<ListingHistory> result = futuresService.getListingHistoriesByTimestamp(1L, 1, null);
 
@@ -481,7 +457,7 @@ public class FuturesServiceImplTest {
         }
         when(table.findElements(By.tagName("tr"))).thenReturn(rows);
 
-        when(driver.findElement(By.className("W(100%)"))).thenReturn(table);
+        when(driver.findElement(By.cssSelector("div.table-container.svelte-ta1t6m"))).thenReturn(table);
 
         List<ListingFuture> listingFutures = new ArrayList<>();
         ListingFuture listingFuture = new ListingFuture();
