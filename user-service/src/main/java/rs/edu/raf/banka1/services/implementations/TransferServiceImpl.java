@@ -188,8 +188,6 @@ public class TransferServiceImpl implements TransferService {
         Currency recipientCurrency = recipientAccount.getCurrency();
         double commission = Transfer.calculateCommission(transfer.getAmount());
 
-        //todo isto customer
-
         if (
                 transfer.getStatus() != TransactionStatus.PROCESSING
             || transfer.getAmount() + commission > senderAccount.getAvailableBalance()
@@ -295,6 +293,7 @@ public class TransferServiceImpl implements TransferService {
                     continue;
                 }
                 double exchangeRate = baseCurrency.getToRSD() * quoteCurrency.getFromRSD();
+                exchangeRate /= 1 + Transfer.commissionPercentage();
                 exchangeRateDtos.add(new ExchangeRateDto(baseCurrencySymbol, quoteCurrencySymbol, exchangeRate));
             }
         }
