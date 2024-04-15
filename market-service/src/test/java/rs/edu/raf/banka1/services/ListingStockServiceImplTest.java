@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.services;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -409,7 +410,7 @@ public class ListingStockServiceImplTest {
         assertEquals(historiesAfterFrom, result3);
         assertEquals(historiesBetweenFromTo, result4);
     }
-    
+
 
 
 }

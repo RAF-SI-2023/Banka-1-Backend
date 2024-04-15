@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.configuration.authproviders.CurrentAuth;
 import rs.edu.raf.banka1.dtos.OrderDto;
 import rs.edu.raf.banka1.exceptions.ForbiddenException;
+import rs.edu.raf.banka1.model.DecideOrderResponse;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.requests.StatusRequest;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
@@ -109,5 +110,22 @@ public class OrderController {
     })
     public ResponseEntity<List<OrderDto>> getAllOrders() {
         return new ResponseEntity<>(orderService.getAllOrders(), HttpStatus.OK);
+    }
+
+
+    @PutMapping(value = "/decideOrder/{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Supervisor approves/denies order.", description = "Supervisor approves/denies order.")
+    @PreAuthorize("hasAuthority('manageOrderRequests')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = DecideOrderResponse.class))}),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to change status"),
+            @ApiResponse(responseCode = "404", description = "Loan not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<DecideOrderResponse> decideOrder(@PathVariable("orderId") Long orderId,
+                                                           @RequestBody StatusRequest request) {
+        return new ResponseEntity<>(orderService.decideOrder(orderId, request.getStatus(), null), HttpStatus.OK);
     }
 }

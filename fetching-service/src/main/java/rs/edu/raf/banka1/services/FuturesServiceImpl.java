@@ -151,25 +151,31 @@ public class FuturesServiceImpl implements FuturesService {
         // Navigate to the webpage
         driver.get(url);
 
-        // Find the quote summary element
-        WebElement quoteSummary = driver.findElement(By.id("quote-summary"));
+        WebElement tableDiv = driver.findElement(By.cssSelector("div.container.svelte-tx3nkj"));
 
-        // Find elements in the left summary table
-        WebElement leftSummaryTable = quoteSummary.findElement(By.cssSelector("[data-test=left-summary-table]"));
-        String settlementDate = leftSummaryTable.findElement(By.cssSelector("[data-test=SETTLEMENT_DATE-value]")).getText();
-        String bid = leftSummaryTable.findElement(By.cssSelector("[data-test=BID-value]")).getText();
+        // Find all li elements within the parent div
+        List<WebElement> tableRows = tableDiv.findElements(By.tagName("li"));
 
-        // Find elements in the right summary table
-        WebElement rightSummaryTable = quoteSummary.findElement(By.cssSelector("[data-test=right-summary-table]"));
-        String lastPrice = rightSummaryTable.findElement(By.cssSelector("[data-test=LAST_PRICE-value]")).getText();
-        String volume = rightSummaryTable.findElement(By.cssSelector("[data-test=TD_VOLUME-value]")).getText();
-        String ask = rightSummaryTable.findElement(By.cssSelector("[data-test=ASK-value]")).getText();
+        String settlementDate = tableRows.get(1).findElement(By.className("value")).getText();
+        String bid = tableRows.get(3).findElement(By.className("value")).getText();
+        String lastPrice = tableRows.get(4).findElement(By.className("value")).getText();
+        String volume = tableRows.get(6).findElement(By.className("value")).getText();
+        String ask = tableRows.get(7).findElement(By.className("value")).getText();
 
         ListingFutureDto listingFutureDto = new ListingFutureDto();
         listingFutureDto.setHigh(Double.parseDouble(ask.replaceAll(",", "")));
         listingFutureDto.setLow(Double.parseDouble(bid.replaceAll(",", "")));
         listingFutureDto.setSettlementDate((int) LocalDate.parse(settlementDate).atStartOfDay(ZoneOffset.UTC).toEpochSecond());
-        listingFutureDto.setVolume(Integer.parseInt(volume.replaceAll(",", "").replaceAll("-", "0")));
+
+        double volumeMultiplier = 1.0;
+        if (volume.contains("k") || volume.contains("K")) volumeMultiplier = 1000.0;
+        if (volume.contains("m") || volume.contains("M")) volumeMultiplier = 1000000.0;
+        if (volume.contains("b") || volume.contains("B")) volumeMultiplier = 1000000000.0;
+        volume = volume.replace("k", "").replace("K", "")
+                .replace("m", "").replace("M", "")
+                .replace("b", "").replace("B", "");
+        volumeMultiplier *= Double.parseDouble(volume.replaceAll(",", "").replaceAll("-", "0"));
+        listingFutureDto.setVolume((int) volumeMultiplier);
         listingFutureDto.setLastPrice(Double.parseDouble(lastPrice.replaceAll(",", "")));
 
         String pageSource = driver.getPageSource();
@@ -250,7 +256,7 @@ public class FuturesServiceImpl implements FuturesService {
     private List<ListingHistory> fetchNSingleFutureHistory(ListingFuture future, int n, WebDriver driver) {
         String url = "https://finance.yahoo.com/quote/" + future.getAlternativeTicker().replace("=", "%3D") + "/history";
         driver.get(url);
-        WebElement table = driver.findElement(By.className("W(100%)"));
+        WebElement table = driver.findElement(By.cssSelector("div.table-container.svelte-ta1t6m"));
         List<WebElement> rows = table.findElements(By.tagName("tr"));
         rows.removeFirst();
         rows = rows.subList(0, n);
