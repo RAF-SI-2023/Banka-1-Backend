@@ -286,6 +286,7 @@ public class ListingStockServiceImpl implements ListingStockService {
         }
     }
 
+
     @Override
     public int addListingToHistory(ListingHistory listingHistory) {
         Optional<ListingHistory> listingHistoryModelOptional = listingHistoryRepository.findByTickerAndDate(listingHistory.getTicker(), listingHistory.getDate());

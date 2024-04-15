@@ -24,6 +24,7 @@ import rs.edu.raf.banka1.model.entities.Country;
 import rs.edu.raf.banka1.model.entities.Exchange;
 import rs.edu.raf.banka1.model.entities.Holiday;
 import rs.edu.raf.banka1.repositories.*;
+import rs.edu.raf.banka1.threads.FetchingThread;
 import rs.edu.raf.banka1.utils.Requests;
 
 
@@ -67,6 +68,7 @@ public class ListingStockServiceImplTest {
     @Mock
     private JsonNode jsonNode;
 
+
     private ListingStockServiceImpl listingStockService;
 
     private ListingStock stockAAPL;
@@ -99,14 +101,13 @@ public class ListingStockServiceImplTest {
         listingStockService.setStockMapper(stockMapper);
 
         listingStockService.setListingAPItoken("mockToken");
+        listingStockService.setAlphaVantageAPIToken("mockAlphaToken");
         listingStockService.setUpdateListingApiUrl("mockUrlupdate");
         listingStockService.setHistoryListingApiUrl("mockUrlhistory");
         listingStockService.setListingNameApiUrl("mockUrlname");
         listingStockService.setBasicStockInfoApiUrl("mockUrlbasic");
 
         objectMapper = new ObjectMapper();
-//        requests = mock(Requests.class);
-//        listingStockService.setRequests(requests);
 
         // stock data
         stockAAPL = new ListingStock();
@@ -466,34 +467,7 @@ public class ListingStockServiceImplTest {
         assertEquals(historiesAfterFrom, result3);
         assertEquals(historiesBetweenFromTo, result4);
     }
-//
-//    @Test
-//    public void testGetListingHistoriesByTimestampForId() {
-//
-//        // Create a list of ListingHistory objects to return for each case
-//        List<ListingHistory> allHistories = new ArrayList<>();
-//        List<ListingHistory> historiesBeforeTo = new ArrayList<>();
-//        List<ListingHistory> historiesAfterFrom = new ArrayList<>();
-//        List<ListingHistory> historiesBetweenFromTo = new ArrayList<>();
-//
-//        // Set up the behavior of listingHistoryRepository methods to return the corresponding lists
-//        when(listingHistoryRepository.getListingHistoriesById(100L)).thenReturn(allHistories);
-//        when(listingHistoryRepository.getListingHistoriesByTickerAndDateBefore("AAPL", 20220101)).thenReturn(historiesBeforeTo);
-//        when(listingHistoryRepository.getListingHistoriesByTickerAndDateAfter("AAPL", 20220101)).thenReturn(historiesAfterFrom);
-//        when(listingHistoryRepository.getListingHistoriesByTickerAndDateBetween("AAPL", 20220101, 20220131)).thenReturn(historiesBetweenFromTo);
-//
-//        // Call the getListingHistoriesByTimestamp method with different parameters
-//        List<ListingHistory> result1 = listingStockService.getListingHistoriesByTimestamp(100L, null, null);
-//        List<ListingHistory> result2 = listingStockService.getListingHistoriesByTimestamp(100L, null, 20220101);
-//        List<ListingHistory> result3 = listingStockService.getListingHistoriesByTimestamp(100L, 20220101, null);
-//        List<ListingHistory> result4 = listingStockService.getListingHistoriesByTimestamp(100L, 20220101, 20220131);
-//
-//        // Verify that the results are the expected lists of ListingHistory objects
-//        assertEquals(allHistories, result1);
-//        assertEquals(historiesBeforeTo, result2);
-//        assertEquals(historiesAfterFrom, result3);
-//        assertEquals(historiesBetweenFromTo, result4);
-//    }
+
 
     @Test
     public void testGetListingHistoriesByTimestampForId() {
@@ -542,34 +516,88 @@ public class ListingStockServiceImplTest {
         verify(listingHistoryRepository, times(1)).getListingHistoriesByTickerAndDateBetween(ticker, from, to);
     }
 
+    @Test
+    public void testGetListingHistoriesByTimestamp_StockNotFound() {
+        Long id = 1L;
+        when(stockRepository.findById(id)).thenReturn(Optional.empty());
+
+        List<ListingHistory> result = listingStockService.getListingHistoriesByTimestamp(id, null, null);
+
+        assertEquals(0, result.size());
+    }
+
+    //ovaj je opasan
+    @Test
+    public void testGetListingHistoriesByTimestamp_NoHistoriesFound()
+    {
+        Long id = 1L;
+        ListingStock stock = new ListingStock();
+        stock.setListingId(id);
+        stock.setTicker("AAPL");
+        String apiUrl = "https://your_api_url_here/" + stock.getTicker() + "&outputsize=compact&apikey=" + "mockAlphaToken";
+
+        when(stockRepository.findById(id)).thenReturn(Optional.of(stock));
+        when(listingHistoryRepository.getListingHistoriesByTicker("AAPL")).thenReturn(new ArrayList<>());
+        when(listingHistoryRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        List<ListingHistory> result = listingStockService.getListingHistoriesByTimestamp(id, null, null);
+
+        assertEquals(0, result.size());
+        verify(listingHistoryRepository, times(1)).saveAll(anyList());
+    }
 
 
-//
-//    @Test
-//    public void testFetchNListingsHistory() {
-//        // Mock the behavior of fetchNStocks
-//        List<ListingStock> listingStocks = new ArrayList<>();
-//        ListingStock stock1 = mock(ListingStock.class);
-//        ListingStock stock2 = mock(ListingStock.class);
-//        listingStocks.add(stock1);
-//        listingStocks.add(stock2);
-//        when(listingStockService.fetchNStocks(anyInt())).thenReturn(listingStocks);
-//
-//        // Mock the behavior of fetchSingleListingHistory
-//        List<ListingHistory> singleStockHistory = new ArrayList<>();
-//        ListingHistory history1 = mock(ListingHistory.class);
-//        ListingHistory history2 = mock(ListingHistory.class);
-//        singleStockHistory.add(history1);
-//        singleStockHistory.add(history2);
-//        when(listingStockService.fetchSingleListingHistory(stock1.getTicker())).thenReturn(singleStockHistory);
-//        when(listingStockService.fetchSingleListingHistory(stock2.getTicker())).thenReturn(singleStockHistory);
-//
-//        // Call the method to be tested
-//        List<ListingHistory> result = listingStockService.fetchNListingsHistory(2);
-//
-//        // Verify the result
-//        assertEquals(4, result.size()); // Since each stock has two histories
-//    }
+    @Test
+    public void testFetchSingleListingHistory() {
+        // Arrange
+        String ticker = "AAPL";
+        String apiUrl = listingStockService.getHistoryListingApiUrl() + ticker + "&outputsize=compact&apikey=" + listingStockService.getListingAPItoken();
+        String response = "{\n" +
+                "    \"Meta Data\": {\n" +
+                "        \"1. Information\": \"Daily Prices (open, high, low, close) and Volumes\",\n" +
+                "        \"2. Symbol\": \"AAPL\",\n" +
+                "        \"3. Last Refreshed\": \"2024-04-12\",\n" +
+                "        \"4. Output Size\": \"Compact\",\n" +
+                "        \"5. Time Zone\": \"US/Eastern\"\n" +
+                "    },\n" +
+                "    \"Time Series (Daily)\": {\n" +
+                "        \"2024-04-12\": {\n" +
+                "            \"1. open\": \"174.2600\",\n" +
+                "            \"2. high\": \"178.3600\",\n" +
+                "            \"3. low\": \"174.2100\",\n" +
+                "            \"4. close\": \"176.5500\",\n" +
+                "            \"5. volume\": \"101670886\"\n" +
+                "        },\n" +
+                "        \"2024-04-11\": {\n" +
+                "            \"1. open\": \"168.3400\",\n" +
+                "            \"2. high\": \"175.4600\",\n" +
+                "            \"3. low\": \"168.1600\",\n" +
+                "            \"4. close\": \"175.0400\",\n" +
+                "            \"5. volume\": \"91070275\"\n" +
+                "        }}}";
+
+        try(MockedStatic<Requests> req = Mockito.mockStatic(Requests.class)) {
+            req.when(() -> Requests.sendRequest(any())).thenReturn(response);
+            List<ListingHistory> result = listingStockService.fetchSingleListingHistory(ticker);
+
+            assertEquals(2, result.size());
+        }
+
+    }
+
+    @Test
+    public void testSaveAllListingStocks() {
+        // Mock data
+        ListingStock stock1 = new ListingStock();
+        ListingStock stock2 = new ListingStock();
+        List<ListingStock> listingStocks = Arrays.asList(stock1, stock2);
+
+        // Test
+        listingStockService.saveAllListingStocks(listingStocks);
+
+        // Verify
+        verify(stockRepository, times(1)).saveAll(listingStocks);
+    }
 
 
 //    @Test
@@ -695,42 +723,7 @@ public class ListingStockServiceImplTest {
 //    }
 
 
-    @Test
-    public void testFetchSingleListingHistory() {
-        // Arrange
-        String ticker = "AAPL";
-        String apiUrl = listingStockService.getHistoryListingApiUrl() + ticker + "&outputsize=compact&apikey=" + listingStockService.getListingAPItoken();
-        String response = "{\n" +
-                "    \"Meta Data\": {\n" +
-                "        \"1. Information\": \"Daily Prices (open, high, low, close) and Volumes\",\n" +
-                "        \"2. Symbol\": \"AAPL\",\n" +
-                "        \"3. Last Refreshed\": \"2024-04-12\",\n" +
-                "        \"4. Output Size\": \"Compact\",\n" +
-                "        \"5. Time Zone\": \"US/Eastern\"\n" +
-                "    },\n" +
-                "    \"Time Series (Daily)\": {\n" +
-                "        \"2024-04-12\": {\n" +
-                "            \"1. open\": \"174.2600\",\n" +
-                "            \"2. high\": \"178.3600\",\n" +
-                "            \"3. low\": \"174.2100\",\n" +
-                "            \"4. close\": \"176.5500\",\n" +
-                "            \"5. volume\": \"101670886\"\n" +
-                "        },\n" +
-                "        \"2024-04-11\": {\n" +
-                "            \"1. open\": \"168.3400\",\n" +
-                "            \"2. high\": \"175.4600\",\n" +
-                "            \"3. low\": \"168.1600\",\n" +
-                "            \"4. close\": \"175.0400\",\n" +
-                "            \"5. volume\": \"91070275\"\n" +
-                "        }}}";
 
-        try(MockedStatic<Requests> req = Mockito.mockStatic(Requests.class)) {
-            req.when(() -> Requests.sendRequest(any())).thenReturn(response);
-            List<ListingHistory> result = listingStockService.fetchSingleListingHistory(ticker);
 
-            assertEquals(2, result.size());
-        }
-
-    }
 
 }
