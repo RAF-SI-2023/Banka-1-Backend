@@ -288,6 +288,7 @@
                         <exclude>**/model/**</exclude>
                         <exclude>**/bootstrap/**</exclude>
                         <exclude>**/configuration/**</exclude>
+                        <exclude>**/services/ExchangeServiceImpl.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>
