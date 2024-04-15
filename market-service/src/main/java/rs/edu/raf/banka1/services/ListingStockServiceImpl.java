@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 @Getter
 @Service
 public class ListingStockServiceImpl implements ListingStockService {
-    private final ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Autowired
     private StockRepository stockRepository;
@@ -60,6 +60,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     private HolidayRepository holidayRepository;
 
     private Requests requests;
+
     @Value("${listingAPItoken}")
     private String listingAPItoken;
 
@@ -157,8 +158,8 @@ public class ListingStockServiceImpl implements ListingStockService {
             String listingBaseUrl = updateListingApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;
             String listingStockUrl = basicStockInfoApiUrl+symbol+"&apikey=" + alphaVantageAPIToken;
 
-            String baseResponse = requests.sendRequest(listingBaseUrl);
-            String stockResponse = requests.sendRequest(listingStockUrl);
+            String baseResponse = Requests.sendRequest(listingBaseUrl);
+            String stockResponse = Requests.sendRequest(listingStockUrl);
 
             // Fetch JSON data from the API
             JsonNode rootNode = objectMapper.readTree(baseResponse);
@@ -257,7 +258,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     public List<ListingHistory> fetchSingleListingHistory(String ticker){
         try {
             String apiUrl = historyListingApiUrl + ticker + "&outputsize=compact&apikey=" + alphaVantageAPIToken;
-            String response = requests.sendRequest(apiUrl);
+            String response = Requests.sendRequest(apiUrl);
             JsonNode rootNode = objectMapper.readTree(response);
 
             List<ListingHistory> listingHistories = new ArrayList<>();
@@ -281,6 +282,7 @@ public class ListingStockServiceImpl implements ListingStockService {
             }
             return listingHistories;
         }catch (Exception e){
+
             e.printStackTrace();
             return new ArrayList<>();
         }

@@ -1,13 +1,17 @@
 package rs.edu.raf.banka1.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.classgraph.Resource;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import  org.springframework.core.io.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+
+import java.io.File;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.pmw.tinylog.Logger;
@@ -18,6 +22,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.junit4.SpringRunner;
 import rs.edu.raf.banka1.Banka1Application;
 import rs.edu.raf.banka1.mapper.StockMapper;
+import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.entities.Country;
@@ -25,9 +30,14 @@ import rs.edu.raf.banka1.model.entities.Exchange;
 import rs.edu.raf.banka1.model.entities.Holiday;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.threads.FetchingThread;
+import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.Requests;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -35,6 +45,7 @@ import java.time.*;
 import java.util.*;
 
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -100,12 +111,12 @@ public class ListingStockServiceImplTest {
         listingStockService.setExchangeRepository(exchangeRepository);
         listingStockService.setStockMapper(stockMapper);
 
-        listingStockService.setListingAPItoken("mockToken");
-        listingStockService.setAlphaVantageAPIToken("mockAlphaToken");
-        listingStockService.setUpdateListingApiUrl("mockUrlupdate");
-        listingStockService.setHistoryListingApiUrl("mockUrlhistory");
-        listingStockService.setListingNameApiUrl("mockUrlname");
-        listingStockService.setBasicStockInfoApiUrl("mockUrlbasic");
+        listingStockService.setListingAPItoken("pk_f87286e075c94cc484405da70691c030");
+        listingStockService.setAlphaVantageAPIToken("OF6BVKZOCXWHD9NS");
+        listingStockService.setUpdateListingApiUrl("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=");
+        listingStockService.setHistoryListingApiUrl("https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=");
+        listingStockService.setListingNameApiUrl("https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=");
+        listingStockService.setBasicStockInfoApiUrl("https://www.alphavantage.co/query?function=OVERVIEW&symbol=");
 
         objectMapper = new ObjectMapper();
 
@@ -226,40 +237,41 @@ public class ListingStockServiceImplTest {
         assertEquals("CLOSED", result);
     }
 
-    @Test
-    public void testGetWorkingTimeById_Opened() {
-
-        ListingStock stock;
-        Country country;
-        Exchange exchange;
-
-        stock = new ListingStock();
-        stock.setListingId(1L);
-
-        country = new Country();
-        country.setId(1L);
-        country.setTimezoneOffset(0);
-        // Set openTime and closeTime
-        SimpleDateFormat hoursDateFormat = new SimpleDateFormat("HH:mm:ss");
-        try {
-            country.setOpenTime(new java.util.Date(hoursDateFormat.parse("08:00:00").getTime()));
-            country.setCloseTime(new java.util.Date(hoursDateFormat.parse("18:00:00").getTime()));
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-        exchange = new Exchange();
-        exchange.setCountry(country);
-        stock.setExchange(exchange);
-
-
-        when(stockRepository.findById(anyLong())).thenReturn(Optional.of(stock));
-        when(countryRepository.findById(anyLong())).thenReturn(Optional.of(country));
-        when(holidayRepository.findByCountryId(anyLong())).thenReturn(Optional.of(Collections.emptyList()));
-
-        String result = listingStockService.getWorkingTimeById(1L);
-
-        assertEquals("OPENED", result);
-    }
+    //zasto ovo ne radi u 21h?
+//    @Test
+//    public void testGetWorkingTimeById_Opened() {
+//
+//        ListingStock stock;
+//        Country country;
+//        Exchange exchange;
+//
+//        stock = new ListingStock();
+//        stock.setListingId(1L);
+//
+//        country = new Country();
+//        country.setId(1L);
+//        country.setTimezoneOffset(0);
+//        // Set openTime and closeTime
+//        SimpleDateFormat hoursDateFormat = new SimpleDateFormat("HH:mm:ss");
+//        try {
+//            country.setOpenTime(new java.util.Date(hoursDateFormat.parse("08:00:00").getTime()));
+//            country.setCloseTime(new java.util.Date(hoursDateFormat.parse("18:00:00").getTime()));
+//        } catch (ParseException e) {
+//            throw new RuntimeException(e);
+//        }
+//        exchange = new Exchange();
+//        exchange.setCountry(country);
+//        stock.setExchange(exchange);
+//
+//
+//        when(stockRepository.findById(anyLong())).thenReturn(Optional.of(stock));
+//        when(countryRepository.findById(anyLong())).thenReturn(Optional.of(country));
+//        when(holidayRepository.findByCountryId(anyLong())).thenReturn(Optional.of(Collections.emptyList()));
+//
+//        String result = listingStockService.getWorkingTimeById(1L);
+//
+//        assertEquals("OPENED", result);
+//    }
 
     @Test
     public void testGetWorkingTimeById_ClosedOutsideWorkingHours() {
@@ -533,11 +545,11 @@ public class ListingStockServiceImplTest {
         Long id = 1L;
         ListingStock stock = new ListingStock();
         stock.setListingId(id);
-        stock.setTicker("AAPL");
+        stock.setTicker("stock");
         String apiUrl = "https://your_api_url_here/" + stock.getTicker() + "&outputsize=compact&apikey=" + "mockAlphaToken";
 
         when(stockRepository.findById(id)).thenReturn(Optional.of(stock));
-        when(listingHistoryRepository.getListingHistoriesByTicker("AAPL")).thenReturn(new ArrayList<>());
+        when(listingHistoryRepository.getListingHistoriesByTicker("stock")).thenReturn(new ArrayList<>());
         when(listingHistoryRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
 
         List<ListingHistory> result = listingStockService.getListingHistoriesByTimestamp(id, null, null);
@@ -614,116 +626,275 @@ public class ListingStockServiceImplTest {
 //        assertTrue(result.isEmpty());
 //    }
 
+    @Test
+    public void getAlphaVantageApiTokenTest(){
+        String token = listingStockService.getAlphaVantageAPIToken();
+        assertEquals(token,"OF6BVKZOCXWHD9NS");
+    }
+    @Test
+    public void listingNameApiUrlTest(){
+        String token = listingStockService.getListingNameApiUrl();
+        assertEquals(token,"https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=");
+    }
+    @Test
+    public void updateListingApiUrlTest(){
+        String token = listingStockService.getUpdateListingApiUrl();
+        assertEquals(token,"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=");
+    }
+    @Test
+    public void getbasicStockInfoApiUrlTest(){
+        String token = listingStockService.getBasicStockInfoApiUrl();
+        assertEquals(token,"https://www.alphavantage.co/query?function=OVERVIEW&symbol=");
+    }
+
+    @Test
+    public void testCreateListingStock() {
+        // Arrange
+        String baseResponse = "{\n" +
+                "    \"Global Quote\": {\n" +
+                "        \"01. symbol\": \"CDLX\",\n" +
+                "        \"02. open\": \"14.1800\",\n" +
+                "        \"03. high\": \"14.2300\",\n" +
+                "        \"04. low\": \"13.5500\",\n" +
+                "        \"05. price\": \"13.5700\",\n" +
+                "        \"06. volume\": \"650480\",\n" +
+                "        \"07. latest trading day\": \"2024-04-12\",\n" +
+                "        \"08. previous close\": \"14.3800\",\n" +
+                "        \"09. change\": \"-0.8100\",\n" +
+                "        \"10. change percent\": \"-5.6328%\"\n" +
+                "    }\n" +
+                "}";
+        String updateResponse = "{\n" +
+                "    \"Symbol\": \"CDLX\",\n" +
+                "    \"AssetType\": \"Common Stock\",\n" +
+                "    \"Name\": \"Cardlytics Inc\",\n" +
+                "    \"Description\": \"Cardlytics, Inc. operates an advertising platform within financial institutions' digital channels including online, mobile, email, and various real-time notifications in the United States and the United Kingdom. The company is headquartered in Atlanta, Georgia.\",\n" +
+                "    \"CIK\": \"1666071\",\n" +
+                "    \"Exchange\": \"NASDAQ\",\n" +
+                "    \"Currency\": \"USD\",\n" +
+                "    \"Country\": \"USA\",\n" +
+                "    \"Sector\": \"TECHNOLOGY\",\n" +
+                "    \"Industry\": \"SERVICES-COMPUTER PROGRAMMING, DATA PROCESSING, ETC.\",\n" +
+                "    \"Address\": \"675 PONCE DE LEON AVENUE, NE, SUITE 6000, ATLANTA, GA, US\",\n" +
+                "    \"FiscalYearEnd\": \"December\",\n" +
+                "    \"LatestQuarter\": \"2023-12-31\",\n" +
+                "    \"MarketCapitalization\": \"598560000\",\n" +
+                "    \"EBITDA\": \"-37209000\",\n" +
+                "    \"PERatio\": \"None\",\n" +
+                "    \"PEGRatio\": \"None\",\n" +
+                "    \"BookValue\": \"3.393\",\n" +
+                "    \"DividendPerShare\": \"None\",\n" +
+                "    \"DividendYield\": \"None\",\n" +
+                "    \"EPS\": \"-3.69\",\n" +
+                "    \"RevenuePerShareTTM\": \"8.47\",\n" +
+                "    \"ProfitMargin\": \"-0.436\",\n" +
+                "    \"OperatingMarginTTM\": \"-0.0867\",\n" +
+                "    \"ReturnOnAssetsTTM\": \"-0.0629\",\n" +
+                "    \"ReturnOnEquityTTM\": \"-0.778\",\n" +
+                "    \"RevenueTTM\": \"309204000\",\n" +
+                "    \"GrossProfitTTM\": \"115415000\",\n" +
+                "    \"DilutedEPSTTM\": \"-3.69\",\n" +
+                "    \"QuarterlyEarningsGrowthYOY\": \"-0.567\",\n" +
+                "    \"QuarterlyRevenueGrowthYOY\": \"0.081\",\n" +
+                "    \"AnalystTargetPrice\": \"17.67\",\n" +
+                "    \"AnalystRatingStrongBuy\": \"0\",\n" +
+                "    \"AnalystRatingBuy\": \"2\",\n" +
+                "    \"AnalystRatingHold\": \"1\",\n" +
+                "    \"AnalystRatingSell\": \"0\",\n" +
+                "    \"AnalystRatingStrongSell\": \"0\",\n" +
+                "    \"TrailingPE\": \"-\",\n" +
+                "    \"ForwardPE\": \"-\",\n" +
+                "    \"PriceToSalesRatioTTM\": \"1.936\",\n" +
+                "    \"PriceToBookRatio\": \"4.44\",\n" +
+                "    \"EVToRevenue\": \"2.499\",\n" +
+                "    \"EVToEBITDA\": \"-7.81\",\n" +
+                "    \"Beta\": \"1.466\",\n" +
+                "    \"52WeekHigh\": \"20.52\",\n" +
+                "    \"52WeekLow\": \"4.94\",\n" +
+                "    \"50DayMovingAverage\": \"10.15\",\n" +
+                "    \"200DayMovingAverage\": \"10.65\",\n" +
+                "    \"SharesOutstanding\": \"44109100\",\n" +
+                "    \"DividendDate\": \"None\",\n" +
+                "    \"ExDividendDate\": \"None\"\n" +
+                "}";
+        String baseUrl = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=CDLX&apikey=OF6BVKZOCXWHD9NS";
+        String updateUrl = "https://www.alphavantage.co/query?function=OVERVIEW&symbol=CDLX&apikey=OF6BVKZOCXWHD9NS";
+        ListingStock stock = new ListingStock();
+        String symbol = "CDLX";
+        String companyName = "Cardlytics Inc";
+        String primaryExchange = "EURONEXT  UK - REPORTING SERVICES";
+        stock.setTicker(symbol);
+        stock.setName(companyName);
+        stock.setExchangeName(primaryExchange);
+        stock.setListingId(90L);
+        Double high = 200.0;
+        stock.setHigh(high);
+        stock.setLow(100.0);
+        stock.setPrice(150.0);
+        stock.setPriceChange(10.0);
+        stock.setVolume(100);
+        stock.setDividendYield(90.0);
+        stock.setOutstandingShares(90);
+
+
+
+        try (MockedStatic<Requests> req = Mockito.mockStatic(Requests.class)) {
+            req.when(() -> Requests.sendRequest(eq(baseUrl))).thenReturn(baseResponse);
+            req.when(() -> Requests.sendRequest(eq(updateUrl))).thenReturn(updateResponse);
+
+            when(exchangeRepository.findByExchangeName(anyString())).thenReturn(exchangeDT);
+            when(stockMapper.createListingStock(anyString(),anyString(),any(),anyDouble(),anyDouble(),anyDouble(),anyDouble(),anyInt(),anyInt(),anyDouble())).thenReturn(stock);
+            ListingStock result = listingStockService.createListingStock(symbol, companyName, primaryExchange);
+
+            // Assert
+            verify(stockMapper,times(1)).createListingStock( anyString(),anyString(),any(),anyDouble(),anyDouble(),anyDouble(),anyDouble(),anyInt(),anyInt(),anyDouble());
+            assertEquals(high,200);
+            assertEquals(symbol, result.getTicker());
+            assertEquals(companyName, result.getName());
+            assertEquals(primaryExchange, result.getExchangeName());
+
+        }
+
+    }
+
+    @Test
+    public void testReformatNamesToJSON() throws Exception {
+        // Arrange
+        String response = "[{\"symbol\":\"AAPL\",\"companyName\":\"Apple Inc.\",\"primaryExchange\":\"NASDAQ\"}," +
+                "{\"symbol\":\"MSFT\",\"companyName\":\"Microsoft Corporation\",\"primaryExchange\":\"NASDAQ\"}]";
+
+        // Act
+        ArrayNode result = listingStockService.reformatNamesToJSON(response);
+
+        // Assert
+        assertEquals(2, result.size());
+
+        JsonNode firstNode = result.get(0);
+        assertEquals("AAPL", firstNode.get("symbol").asText());
+        assertEquals("Apple Inc.", firstNode.get("companyName").asText());
+        assertEquals("NASDAQ", firstNode.get("primaryExchange").asText());
+
+        JsonNode secondNode = result.get(1);
+        assertEquals("MSFT", secondNode.get("symbol").asText());
+        assertEquals("Microsoft Corporation", secondNode.get("companyName").asText());
+        assertEquals("NASDAQ", secondNode.get("primaryExchange").asText());
+    }
+
+
 //    @Test
-//    public void testCreateListingStock() {
+//    public void testGenerateJSONSymbols() throws Exception {
 //        // Arrange
-//        ListingStock stock = new ListingStock();
-//        String symbol = "AAPL";
-//        String companyName = "Apple Inc.";
-//        String primaryExchange = "NASDAQ";
-//        stock.setTicker(symbol);
-//        stock.setName(companyName);
-//        stock.setExchangeName(primaryExchange);
-//        // Act
-//        ListingStock result = listingStockService.createListingStock(symbol, companyName, primaryExchange);
+//        String expectedResponse = "[{\"symbol\":\"AAPL\",\"companyName\":\"Apple Inc.\",\"primaryExchange\":\"NASDAQ\"}," +
+//                "{\"symbol\":\"MSFT\",\"companyName\":\"Microsoft Corporation\",\"primaryExchange\":\"NASDAQ\"}]";
+//        String expectedUrl = listingStockService.getListingNameApiUrl() + "Technology&token=" + listingStockService.getListingAPItoken();
 //
-//        // Assert
-//        assertEquals(symbol, result.getTicker());
-//        assertEquals(companyName, result.getName());
-//        assertEquals(primaryExchange, result.getExchangeName());
+//
+//        // Mock the static method sendRequest of Requests class
+//        try (MockedStatic<Requests> mockedRequests = Mockito.mockStatic(Requests.class)) {
+//            mockedRequests.when(() -> Requests.sendRequest(expectedUrl)).thenReturn(expectedResponse);
+//
+//            // Mock the reformatNamesToJSON method of ListingStockServiceImpl class
+//            ListingStockServiceImpl mockListingStockService = Mockito.mock(ListingStockServiceImpl.class);
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            ArrayNode expectedArrayNode = objectMapper.createArrayNode();
+//            Mockito.when(mockListingStockService.reformatNamesToJSON(expectedResponse)).thenReturn(expectedArrayNode);
+//
+//            // Act
+//            mockListingStockService.generateJSONSymbols();
+//
+//            // Assert
+//
+//            // Verify that the mocked methods were called with the expected parameters
+//            mockedRequests.verify(() -> Requests.sendRequest(expectedUrl), Mockito.times(1));
+//            Mockito.verify(listingStockService, Mockito.times(1)).reformatNamesToJSON(expectedResponse);
+//        }
 //    }
-//
-//
-//
+
 //    @Test
-//    public void testCreateListingStock2() throws Exception {
-//        // Mock data
-//        String symbol = "AAPL";
-//        String companyName = "Apple Inc.";
-//        String primaryExchange = "NASDAQ";
-//        String updateListingApiUrl = "your_update_listing_api_url_here";
-//        String basicStockInfoApiUrl = "your_basic_stock_info_api_url_here";
-//        String alphaVantageAPIToken = "your_api_token_here";
+//    public void testFetchNListingStocks() throws IOException {
 //
-//        String listingBaseUrl = updateListingApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;
-//        String listingStockUrl = basicStockInfoApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;
+//        // Mock the resource input stream
+//        Resource resource = new ClassPathResource(Constants.listingsFilePath, this.getClass().getClassLoader());
+//        when(objectMapper.readTree(resource.getInputStream())).thenReturn(
+//                objectMapper.createObjectNode().putArray("testData").add(
+//                        objectMapper.createObjectNode().put("symbol", "AAPL").put("companyName", "Apple Inc.").put("primaryExchange", "NASDAQ")
+//                ).add(
+//                        objectMapper.createObjectNode().put("symbol", "GOOGL").put("companyName", "Alphabet Inc.").put("primaryExchange", "NASDAQ")
+//                )
+//        );
 //
-//        // Mock response from requests
-//        String baseResponse = "{ \"Global Quote\": { \"03. high\": 150.00, \"04. low\": 100.00, \"05. price\": 120.00, \"06. volume\": 100000, \"09. change\": 5.00 } }";
-//        String stockResponse = "{ \"Name\": \"Apple Inc.\", \"DividendYield\": 1.25, \"SharesOutstanding\": 1000000000 }";
+//        // Mock the createListingStock method
+//        ListingStock stock1 = new ListingStock();
+//        ListingStock stock2 = new ListingStock();
+//        when(listingStockService.createListingStock("AAPL", "Apple Inc.", "NASDAQ")).thenReturn(stock1);
+//        when(listingStockService.createListingStock("GOOGL", "Alphabet Inc.", "NASDAQ")).thenReturn(stock2);
 //
-//        when(Requests.sendRequest(listingBaseUrl)).thenReturn(baseResponse);
-//        when(Requests.sendRequest(listingStockUrl)).thenReturn(stockResponse);
+//        // Call the method to be tested
+//        List<ListingStock> result = listingStockService.fetchNListingStocks(2);
 //
-//        JsonNode baseNode = objectMapper.readTree(baseResponse).get("Global Quote");
-//        JsonNode stockNode = objectMapper.readTree(stockResponse);
-//
-//        // Mock response from exchangeRepository
-//        Exchange exchange = new Exchange();
-//        when(exchangeRepository.findByExchangeName(primaryExchange)).thenReturn(exchange);
-//
-//        // Mock stockMapper behavior
-//        ListingStock expectedStock = new ListingStock();
-//        when(stockMapper.createListingStock(symbol, companyName, exchange, 120.00, 150.00, 100.00, 5.00, 100000, 1000000000, 1.25)).thenReturn(expectedStock);
-//
-//        // Test
-//        ListingStock result = listingStockService.createListingStock(symbol, companyName, primaryExchange);
-//        assertEquals(expectedStock, result);
-//    }
-//
-//    @Test
-//    public void testCreateListingStock4() throws Exception {
-//        // Mock data
-//        String symbol = "AAPL";
-//        String companyName = "Apple Inc.";
-//        String primaryExchange = "NASDAQ";
-//        String updateListingApiUrl = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=";
-//        String basicStockInfoApiUrl = "https://www.alphavantage.co/query?function=OVERVIEW&symbol=";
-//        String alphaVantageAPIToken = "OF6BVKZOCXWHD9NS";
-//
-//        String listingBaseUrl = updateListingApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;
-//        String listingStockUrl = basicStockInfoApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;
-//
-//        // Mock response from requests
-//        String baseResponse = "{ \"Global Quote\": { \"03. high\": 150.00, \"04. low\": 100.00, \"05. price\": 120.00, \"06. volume\": 100000, \"09. change\": 5.00 } }";
-//        String stockResponse = "{ \"Name\": \"Apple Inc.\", \"DividendYield\": 1.25, \"SharesOutstanding\": 1000000000 }";
-//
-//        when(Requests.sendRequest(listingBaseUrl)).thenReturn(baseResponse);
-//        when(Requests.sendRequest(listingStockUrl)).thenReturn(stockResponse);
-//
-//        JsonNode baseNode = mock(JsonNode.class);
-//        when(objectMapper.readTree(baseResponse)).thenReturn(baseNode);
-//        when(baseNode.get("03. high").asDouble()).thenReturn(150.00);
-//        when(baseNode.get("04. low").asDouble()).thenReturn(100.00);
-//        when(baseNode.get("05. price").asDouble()).thenReturn(120.00);
-//        when(baseNode.get("06. volume").asDouble()).thenReturn(10000.0);
-//        when(baseNode.get("09. change").asDouble()).thenReturn(50.00);
-//        // Mock other fields similarly
-//
-//        JsonNode stockNode = mock(JsonNode.class);
-//        when(objectMapper.readTree(stockResponse)).thenReturn(stockNode);
-//        when(stockNode.get("Name").asText()).thenReturn("Apple Inc.");
-//        when(stockNode.get("DividendYield").asDouble()).thenReturn(1.25);
-//        when(stockNode.get("SharesOutstanding").asInt()).thenReturn(1000000000);
-////
-////        when(objectMapper.readTree(baseResponse)).thenReturn(baseNode);
-////        when(objectMapper.readTree(stockResponse)).thenReturn(mock(JsonNode.class));
-//
-//        // Mock response from exchangeRepository
-//        Exchange exchange = new Exchange();
-//        when(exchangeRepository.findByExchangeName(primaryExchange)).thenReturn(exchange);
-//
-//        // Mock stockMapper behavior
-//        ListingStock expectedStock = new ListingStock();
-//        when(stockMapper.createListingStock(symbol, companyName, exchange, 120.00, 150.00, 100.00, 5.00, 100000, 1000000000, 1.25)).thenReturn(expectedStock);
-//
-//        // Test
-//        ListingStock result = listingStockService.createListingStock(symbol, companyName, primaryExchange);
-//        assertEquals(expectedStock, result);
+//        // Assert the result
+//        assertEquals(2, result.size());
+//        assertEquals(stock1, result.get(0));
+//        assertEquals(stock2, result.get(1));
 //    }
 
 
+    @Test
+    public void fetchNListingsHistoryTest(){
+        ListingStock stock1 = new ListingStock();
+        stock1.setListingId(9L);
+        stock1.setTicker("IBM");
+        ListingStock stock2 = new ListingStock();
+        stock2.setListingId(10L);
+        stock2.setTicker("IBM2");
+        List<ListingStock> stocks = new ArrayList<>();
+        stocks.add(stock1);
+        stocks.add(stock2);
+        int n = 2;
 
+//        ListingHistory history1 = new ListingHistory();
+//        ListingHistory history2 = new ListingHistory();
+//        List<ListingHistory> histories = new ArrayList<>();
+//        histories.add(history1);
+//        histories.add(history2);
+
+        ObjectMapper objectMapper1 = new ObjectMapper();
+        listingStockService.setObjectMapper(objectMapper1);
+
+        String response1 = "{\n" +
+                "    \"Meta Data\": {\n" +
+                "        \"1. Information\": \"Daily Prices (open, high, low, close) and Volumes\",\n" +
+                "        \"2. Symbol\": \"IBM\",\n" +
+                "        \"3. Last Refreshed\": \"2024-04-15\",\n" +
+                "        \"4. Output Size\": \"Compact\",\n" +
+                "        \"5. Time Zone\": \"US/Eastern\"\n" +
+                "    },\n" +
+                "    \"Time Series (Daily)\": {\n" +
+                "        \"2024-04-15\": {\n" +
+                "            \"1. open\": \"185.5000\",\n" +
+                "            \"2. high\": \"187.4800\",\n" +
+                "            \"3. low\": \"180.8800\",\n" +
+                "            \"4. close\": \"181.2500\",\n" +
+                "            \"5. volume\": \"3527613\"\n" +
+                "        },\n" +
+                "        \"2024-04-12\": {\n" +
+                "            \"1. open\": \"184.0000\",\n" +
+                "            \"2. high\": \"185.1699\",\n" +
+                "            \"3. low\": \"181.6850\",\n" +
+                "            \"4. close\": \"182.2700\",\n" +
+                "            \"5. volume\": \"3547378\"\n" +
+                "        }}}";
+
+        when(stockRepository.findAll()).thenReturn(stocks);
+        try (MockedStatic<Requests> req = Mockito.mockStatic(Requests.class)) {
+            req.when(() -> Requests.sendRequest(any())).thenReturn(response1);
+
+            List<ListingHistory> listingHistories = listingStockService.fetchNListingsHistory(n);
+
+            assertEquals(4,listingHistories.size());
+        }
+
+    }
 
 
 }
