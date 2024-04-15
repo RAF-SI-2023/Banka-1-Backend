@@ -57,6 +57,7 @@ public class ForexMapper {
         dto.setListingType(listingForex.getListingType());
         dto.setTicker(listingForex.getTicker());
         dto.setName(listingForex.getName());
+        dto.setExchangeName(listingForex.getExchangeName());
         dto.setLastRefresh(listingForex.getLastRefresh());
         dto.setPrice(listingForex.getPrice());
         dto.setHigh(listingForex.getHigh());

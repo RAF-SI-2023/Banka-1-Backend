@@ -60,6 +60,7 @@ public class FutureMapper {
         dto.setName(listingFuture.getName());
         dto.setExchangeName(listingFuture.getExchangeName());
         dto.setLastRefresh(listingFuture.getLastRefresh());
+        dto.setExchangeName(listingFuture.getExchangeName());
         dto.setPrice(listingFuture.getPrice());
         dto.setHigh(listingFuture.getHigh());
         dto.setLow(listingFuture.getLow());

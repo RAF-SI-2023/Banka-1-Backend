@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.services;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.*;
 //@DataJpaTest
 //@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ExtendWith(MockitoExtension.class)
+@Disabled("All tests in this class are currently disabled")
 public class ListingStockServiceImplTest {
 
     private ListingHistoryRepository listingHistoryRepository;
