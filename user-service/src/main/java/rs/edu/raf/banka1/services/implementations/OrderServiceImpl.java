@@ -82,7 +82,7 @@ public class OrderServiceImpl implements OrderService {
                 currentAuth.setLimitNow(currentAuth.getLimitNow() + order.getPrice());
             }
 
-            if (!orderRequiresApprove(currentAuth)) {
+            if (!orderRequiresApprove(currentAuth) && !order.getStatus().equals(OrderStatus.PROCESSING)) {
                 order.setStatus(OrderStatus.APPROVED);
             } else {
                 order.setStatus(OrderStatus.PROCESSING);
