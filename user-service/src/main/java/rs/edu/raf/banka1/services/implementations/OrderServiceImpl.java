@@ -162,7 +162,7 @@ public class OrderServiceImpl implements OrderService {
             status.toUpperCase().equals(OrderStatus.DENIED.name())) {
             marketOrder.setStatus(OrderStatus.valueOf(status.toUpperCase()));
             marketOrder.setUpdatedAt(Instant.now());
-//            if(status.toUpperCase().equals(OrderStatus.APPROVED.name())) marketOrder.setApprovedBy(currentAuth);
+            if(status.toUpperCase().equals(OrderStatus.APPROVED.name())) marketOrder.setApprovedBy(currentAuth);
             this.orderRepository.save(marketOrder);
 
             return DecideOrderResponse.valueOf(status.toUpperCase());
