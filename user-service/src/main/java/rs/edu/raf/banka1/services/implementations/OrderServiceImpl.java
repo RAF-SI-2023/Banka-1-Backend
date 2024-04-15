@@ -77,13 +77,13 @@ public class OrderServiceImpl implements OrderService {
 
         if(!currentAuth.getPosition().equalsIgnoreCase(Constants.SUPERVIZOR)) {
             if(currentAuth.getOrderlimit() < currentAuth.getLimitNow() + order.getPrice()) {
-                order.setStatus(OrderStatus.DENIED);
+                order.setStatus(OrderStatus.PROCESSING);
             } else {
                 currentAuth.setLimitNow(currentAuth.getLimitNow() + order.getPrice());
             }
         }
 
-        if (!orderRequiresApprove(currentAuth)) {
+        if (!orderRequiresApprove(currentAuth) && !order.getStatus().equals(OrderStatus.PROCESSING)) {
             order.setStatus(OrderStatus.APPROVED);
         } else {
             order.setStatus(OrderStatus.PROCESSING);
