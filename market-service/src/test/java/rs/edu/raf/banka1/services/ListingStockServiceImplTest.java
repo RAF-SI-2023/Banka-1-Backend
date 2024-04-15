@@ -1,14 +1,18 @@
 package rs.edu.raf.banka1.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.classgraph.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.pmw.tinylog.Logger;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.junit4.SpringRunner;
 import rs.edu.raf.banka1.Banka1Application;
 import rs.edu.raf.banka1.mapper.StockMapper;
@@ -18,6 +22,8 @@ import rs.edu.raf.banka1.model.entities.Country;
 import rs.edu.raf.banka1.model.entities.Exchange;
 import rs.edu.raf.banka1.model.entities.Holiday;
 import rs.edu.raf.banka1.repositories.*;
+import rs.edu.raf.banka1.utils.Requests;
+
 
 import java.sql.Date;
 import java.text.ParseException;
@@ -28,7 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertTrue;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -48,7 +54,16 @@ public class ListingStockServiceImplTest {
 
     private HolidayRepository holidayRepository;
 
+    private ExchangeRepository exchangeRepository;
+
     private StockMapper stockMapper;
+
+    @Mock
+    private ObjectMapper objectMapper;
+    @Mock
+    private Resource resource;
+    @Mock
+    private Requests requests;
 
     private ListingStockServiceImpl listingStockService;
 
@@ -67,10 +82,13 @@ public class ListingStockServiceImplTest {
     @BeforeEach
     public void setUp(){
 
+        MockitoAnnotations.openMocks(this);
+
         listingHistoryRepository = mock(ListingHistoryRepository.class);
         stockRepository = mock(StockRepository.class);
         countryRepository = mock(CountryRepository.class);
         holidayRepository = mock(HolidayRepository.class);
+        exchangeRepository = mock(ExchangeRepository.class);
         stockMapper = mock(StockMapper.class);
         listingStockService = new ListingStockServiceImpl();
         listingStockService.setStockRepository(stockRepository);
@@ -196,50 +214,78 @@ public class ListingStockServiceImplTest {
         assertEquals("CLOSED", result);
     }
 
-//    @Test
-//    public void testGetWorkingTimeById_ClosedOutsideWorkingHours() {
-//        String result = listingStockService.getWorkingTimeById(testId);
-//        assertEquals("CLOSED ", result); // Note the space in "CLOSED "
-//    }
-//
-//    @Test
-//    public void testGetWorkingTimeById_AfterHours() {
-//        String result = listingStockService.getWorkingTimeById(testId);
-//        assertEquals("AFTER_HOURS", result);
-//    }
-//
-//    @Test
-//    public void testGetWorkingTimeById_Opened() {
-//        ListingStock listingStock = new ListingStock();
-//        listingStock.setExchange(new Exchange());
-//        when(stockRepository.findById(anyLong())).thenReturn(Optional.empty());
-//
-//        Country country = new Country();
-//        country.setTimezoneOffset(0);
-//
-//        ZoneId zoneId = ZoneId.systemDefault();
-//        LocalDate today = LocalDate.now(zoneId);
-//
-//        LocalTime openTime = LocalTime.of(9, 0); // Set the opening time
-//        LocalTime closeTime = LocalTime.of(17, 0); // Set the closing time
-//
-//        ZonedDateTime openZonedDateTime = ZonedDateTime.of(today, openTime, zoneId);
-//        ZonedDateTime closeZonedDateTime = ZonedDateTime.of(today, closeTime, zoneId);
-//
-//        country.setOpenTime(Date.from(openZonedDateTime.toInstant()));
-//        country.setCloseTime(Date.from(closeZonedDateTime.toInstant()));
-//
-//        when(countryRepository.findById(anyLong())).thenReturn(Optional.of(country));
-//
-//        when(holidayRepository.findByCountryId(anyLong())).thenReturn(Optional.of(Collections.emptyList()));
-//
-//        try (MockedStatic<LocalDateTime> mocked = mockStatic(LocalDateTime.class)) {
-//            mocked.when(() -> LocalDateTime.now(any(ZoneId.class))).thenReturn(LocalDateTime.of(LocalDate.now(), LocalTime.of(12, 0)));
-//            String result = listingStockService.getWorkingTimeById(1L);
-//
-//            assertEquals("OPENED", result);
-//        }
-//    }
+    @Test
+    public void testGetWorkingTimeById_Opened() {
+
+        ListingStock stock;
+        Country country;
+        Exchange exchange;
+
+        stock = new ListingStock();
+        stock.setListingId(1L);
+
+        country = new Country();
+        country.setId(1L);
+        country.setTimezoneOffset(0);
+        // Set openTime and closeTime
+        SimpleDateFormat hoursDateFormat = new SimpleDateFormat("HH:mm:ss");
+        try {
+            country.setOpenTime(new java.util.Date(hoursDateFormat.parse("08:00:00").getTime()));
+            country.setCloseTime(new java.util.Date(hoursDateFormat.parse("18:00:00").getTime()));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        exchange = new Exchange();
+        exchange.setCountry(country);
+        stock.setExchange(exchange);
+
+
+        when(stockRepository.findById(anyLong())).thenReturn(Optional.of(stock));
+        when(countryRepository.findById(anyLong())).thenReturn(Optional.of(country));
+        when(holidayRepository.findByCountryId(anyLong())).thenReturn(Optional.of(Collections.emptyList()));
+
+        String result = listingStockService.getWorkingTimeById(1L);
+
+        assertEquals("OPENED", result);
+    }
+
+    @Test
+    public void testGetWorkingTimeById_ClosedOutsideWorkingHours() {
+        ListingStock stock;
+        Country country;
+        Exchange exchange;
+
+        stock = new ListingStock();
+        stock.setListingId(10L);
+
+        country = new Country();
+        country.setId(10L);
+        country.setTimezoneOffset(0);
+        // Set openTime and closeTime da su jednaki pa je uvek zatvoren
+        SimpleDateFormat hoursDateFormat = new SimpleDateFormat("HH:mm:ss");
+        try {
+            country.setOpenTime(new java.util.Date(hoursDateFormat.parse("08:00:00").getTime()));
+            country.setCloseTime(new java.util.Date(hoursDateFormat.parse("08:00:00").getTime()));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        exchange = new Exchange();
+        exchange.setCountry(country);
+        stock.setExchange(exchange);
+
+        when(stockRepository.findById(anyLong())).thenReturn(Optional.of(stock));
+        when(countryRepository.findById(anyLong())).thenReturn(Optional.of(country));
+        when(holidayRepository.findByCountryId(anyLong())).thenReturn(Optional.of(Collections.emptyList()));
+
+        // Mock the current time to be outside the working hours
+        Clock fixedClock = Clock.fixed(Instant.parse("2022-01-01T20:00:00Z"), ZoneId.of("UTC"));
+        listingStockService.setClock(fixedClock);
+
+        String result = listingStockService.getWorkingTimeById(10L);
+
+        assertEquals("CLOSED", result);
+    }
 
 
     @Test
@@ -409,7 +455,46 @@ public class ListingStockServiceImplTest {
         assertEquals(historiesAfterFrom, result3);
         assertEquals(historiesBetweenFromTo, result4);
     }
-    
+
+//
+//    @Test
+//    public void testFetchNListingsHistory() {
+//        // Mock the behavior of fetchNStocks
+//        List<ListingStock> listingStocks = new ArrayList<>();
+//        ListingStock stock1 = mock(ListingStock.class);
+//        ListingStock stock2 = mock(ListingStock.class);
+//        listingStocks.add(stock1);
+//        listingStocks.add(stock2);
+//        when(listingStockService.fetchNStocks(anyInt())).thenReturn(listingStocks);
+//
+//        // Mock the behavior of fetchSingleListingHistory
+//        List<ListingHistory> singleStockHistory = new ArrayList<>();
+//        ListingHistory history1 = mock(ListingHistory.class);
+//        ListingHistory history2 = mock(ListingHistory.class);
+//        singleStockHistory.add(history1);
+//        singleStockHistory.add(history2);
+//        when(listingStockService.fetchSingleListingHistory(stock1.getTicker())).thenReturn(singleStockHistory);
+//        when(listingStockService.fetchSingleListingHistory(stock2.getTicker())).thenReturn(singleStockHistory);
+//
+//        // Call the method to be tested
+//        List<ListingHistory> result = listingStockService.fetchNListingsHistory(2);
+//
+//        // Verify the result
+//        assertEquals(4, result.size()); // Since each stock has two histories
+//    }
 
 
+//    @Test
+//    public void testFetchNListingsHistoryThrowsException() {
+//        // Mock the fetchNStocks method to throw an exception
+//        doThrow(new RuntimeException("Test exception")).when(listingStockService).fetchNStocks(anyInt());
+//
+//        // Call the method under test
+//        List<ListingHistory> result = listingStockService.fetchNListingsHistory(10);
+//
+//        // Assert that the exception was thrown
+//        verify(listingStockService, times(1)).fetchNStocks(10);
+//        verify(listingStockService, never()).fetchSingleListingHistory(anyString());
+//        assertTrue(result.isEmpty());
+//    }
 }

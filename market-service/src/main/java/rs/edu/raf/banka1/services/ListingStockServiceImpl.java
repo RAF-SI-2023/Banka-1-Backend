@@ -78,6 +78,12 @@ public class ListingStockServiceImpl implements ListingStockService {
     @Value("${HistoryListingApiUrl}")
     private String historyListingApiUrl;
 
+    //treba zbog testova Clock
+    private Clock clock = Clock.systemDefaultZone();
+    public void setClock(Clock clock) {
+        this.clock = clock;
+    }
+
 
     public ListingStockServiceImpl() {
         objectMapper = new ObjectMapper();
