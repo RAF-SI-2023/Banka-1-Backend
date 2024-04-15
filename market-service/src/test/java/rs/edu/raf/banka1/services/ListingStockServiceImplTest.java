@@ -58,10 +58,14 @@ public class ListingStockServiceImplTest {
     private StockMapper stockMapper;
 
     private ObjectMapper objectMapper;
+
     @Mock
     private Resource resource;
-
+    @Mock
     private Requests requests;
+
+    @Mock
+    private JsonNode jsonNode;
 
     private ListingStockServiceImpl listingStockService;
 
@@ -80,8 +84,6 @@ public class ListingStockServiceImplTest {
     @BeforeEach
     public void setUp(){
 
-        MockitoAnnotations.openMocks(this);
-
         listingHistoryRepository = mock(ListingHistoryRepository.class);
         stockRepository = mock(StockRepository.class);
         countryRepository = mock(CountryRepository.class);
@@ -96,9 +98,15 @@ public class ListingStockServiceImplTest {
         listingStockService.setExchangeRepository(exchangeRepository);
         listingStockService.setStockMapper(stockMapper);
 
+        listingStockService.setListingAPItoken("mockToken");
+        listingStockService.setUpdateListingApiUrl("mockUrlupdate");
+        listingStockService.setHistoryListingApiUrl("mockUrlhistory");
+        listingStockService.setListingNameApiUrl("mockUrlname");
+        listingStockService.setBasicStockInfoApiUrl("mockUrlbasic");
+
         objectMapper = new ObjectMapper();
-        requests = mock(Requests.class);
-        listingStockService.setRequests(requests);
+//        requests = mock(Requests.class);
+//        listingStockService.setRequests(requests);
 
         // stock data
         stockAAPL = new ListingStock();
@@ -432,7 +440,7 @@ public class ListingStockServiceImplTest {
     }
 
     @Test
-    public void testGetListingHistoriesByTimestamp() {
+    public void testGetListingHistoriesByTimestampForTicker() {
 
         // Create a list of ListingHistory objects to return for each case
         List<ListingHistory> allHistories = new ArrayList<>();
@@ -458,6 +466,83 @@ public class ListingStockServiceImplTest {
         assertEquals(historiesAfterFrom, result3);
         assertEquals(historiesBetweenFromTo, result4);
     }
+//
+//    @Test
+//    public void testGetListingHistoriesByTimestampForId() {
+//
+//        // Create a list of ListingHistory objects to return for each case
+//        List<ListingHistory> allHistories = new ArrayList<>();
+//        List<ListingHistory> historiesBeforeTo = new ArrayList<>();
+//        List<ListingHistory> historiesAfterFrom = new ArrayList<>();
+//        List<ListingHistory> historiesBetweenFromTo = new ArrayList<>();
+//
+//        // Set up the behavior of listingHistoryRepository methods to return the corresponding lists
+//        when(listingHistoryRepository.getListingHistoriesById(100L)).thenReturn(allHistories);
+//        when(listingHistoryRepository.getListingHistoriesByTickerAndDateBefore("AAPL", 20220101)).thenReturn(historiesBeforeTo);
+//        when(listingHistoryRepository.getListingHistoriesByTickerAndDateAfter("AAPL", 20220101)).thenReturn(historiesAfterFrom);
+//        when(listingHistoryRepository.getListingHistoriesByTickerAndDateBetween("AAPL", 20220101, 20220131)).thenReturn(historiesBetweenFromTo);
+//
+//        // Call the getListingHistoriesByTimestamp method with different parameters
+//        List<ListingHistory> result1 = listingStockService.getListingHistoriesByTimestamp(100L, null, null);
+//        List<ListingHistory> result2 = listingStockService.getListingHistoriesByTimestamp(100L, null, 20220101);
+//        List<ListingHistory> result3 = listingStockService.getListingHistoriesByTimestamp(100L, 20220101, null);
+//        List<ListingHistory> result4 = listingStockService.getListingHistoriesByTimestamp(100L, 20220101, 20220131);
+//
+//        // Verify that the results are the expected lists of ListingHistory objects
+//        assertEquals(allHistories, result1);
+//        assertEquals(historiesBeforeTo, result2);
+//        assertEquals(historiesAfterFrom, result3);
+//        assertEquals(historiesBetweenFromTo, result4);
+//    }
+
+    @Test
+    public void testGetListingHistoriesByTimestampForId() {
+        // Mock data
+        Long id = 1L;
+        Integer from = 1000;
+        Integer to = 2000;
+        String ticker = "AAPL";
+        ListingStock stock = new ListingStock();
+        stock.setListingId(id);
+        stock.setTicker(ticker);
+        List<ListingHistory> listingHistories = new ArrayList<>();
+        ListingHistory history1 = new ListingHistory();
+        ListingHistory history2 = new ListingHistory();
+        listingHistories.add(history1);
+        listingHistories.add(history2);
+
+        // Mock stockRepository behavior
+        when(stockRepository.findById(id)).thenReturn(Optional.of(stock));
+
+        // Mock listingHistoryRepository behavior
+        when(listingHistoryRepository.getListingHistoriesByTicker(ticker)).thenReturn(listingHistories);
+        when(listingHistoryRepository.getListingHistoriesByTickerAndDateBefore(ticker, to)).thenReturn(listingHistories);
+        when(listingHistoryRepository.getListingHistoriesByTickerAndDateAfter(ticker, from)).thenReturn(listingHistories);
+        when(listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to)).thenReturn(listingHistories);
+
+        List<ListingHistory> result;
+
+        // Test from == null && to != null
+        result = listingStockService.getListingHistoriesByTimestamp(id, null, to);
+        assertEquals(listingHistories, result);
+
+        // Test from != null && to == null
+        result = listingStockService.getListingHistoriesByTimestamp(id, from, null);
+        assertEquals(listingHistories, result);
+
+        // Test from != null && to != null
+        result = listingStockService.getListingHistoriesByTimestamp(id, from, to);
+        assertEquals(listingHistories, result);
+
+        // Verify behavior
+        verify(stockRepository, times(3)).findById(id);
+        verify(listingHistoryRepository, times(3)).getListingHistoriesByTicker(ticker);
+        verify(listingHistoryRepository, times(1)).getListingHistoriesByTickerAndDateBefore(ticker, to);
+        verify(listingHistoryRepository, times(1)).getListingHistoriesByTickerAndDateAfter(ticker, from);
+        verify(listingHistoryRepository, times(1)).getListingHistoriesByTickerAndDateBetween(ticker, from, to);
+    }
+
+
 
 //
 //    @Test
@@ -610,128 +695,42 @@ public class ListingStockServiceImplTest {
 //    }
 
 
-//    @Test
-//    public void testFetchSingleListingHistory() {
-//        // Arrange
-//        String ticker = "AAPL";
-//        String historyURl= "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=";
-//        String apiKey = "OF6BVKZOCXWHD9NS";
-//        String apiUrl = historyURl + ticker + "&outputsize=compact&apikey=" + apiKey;
-//        String response = "{\n" +
-//                "    \"Meta Data\": {\n" +
-//                "        \"1. Information\": \"Daily Prices (open, high, low, close) and Volumes\",\n" +
-//                "        \"2. Symbol\": \"AAPL\",\n" +
-//                "        \"3. Last Refreshed\": \"2024-04-12\",\n" +
-//                "        \"4. Output Size\": \"Compact\",\n" +
-//                "        \"5. Time Zone\": \"US/Eastern\"\n" +
-//                "    },\n" +
-//                "    \"Time Series (Daily)\": {\n" +
-//                "        \"2024-04-12\": {\n" +
-//                "            \"1. open\": \"174.2600\",\n" +
-//                "            \"2. high\": \"178.3600\",\n" +
-//                "            \"3. low\": \"174.2100\",\n" +
-//                "            \"4. close\": \"176.5500\",\n" +
-//                "            \"5. volume\": \"101670886\"\n" +
-//                "        },\n" +
-//                "        \"2024-04-11\": {\n" +
-//                "            \"1. open\": \"168.3400\",\n" +
-//                "            \"2. high\": \"175.4600\",\n" +
-//                "            \"3. low\": \"168.1600\",\n" +
-//                "            \"4. close\": \"175.0400\",\n" +
-//                "            \"5. volume\": \"91070275\"\n" +
-//                "        }}}";
-//
-//        try {
-//            when(requests.sendRequest(apiUrl)).thenReturn(response);
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//
-//        // Act
-//        List<ListingHistory> result = listingStockService.fetchSingleListingHistory(ticker);
-//
-//        // Assert
-//        // Replace with appropriate assertions
-//        assertEquals(1, result.size());
-//        assertEquals(ticker, result.get(0).getTicker());
-//    }
-//
-//    @Test
-//    public void testFetchSingleListingHistory9() throws Exception {
-//        // Mock data
-//        String ticker = "AAPL";
-//        String historyURl= "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=";
-//        String apiKey = "OF6BVKZOCXWHD9NS";
-//        String response = "response_from_api_here";
-//
-//        // Mock requests.sendRequest behavior
-//        when(requests.sendRequest(anyString())).thenReturn(response);
-//
-//        // Mock objectMapper.readTree behavior
-//        JsonNode rootNode = mock(JsonNode.class);
-//        when(objectMapper.readTree(response)).thenReturn(rootNode);
-//
-//        JsonNode timeSeriesNode = mock(JsonNode.class);
-//        when(rootNode.get("Time Series (Daily)")).thenReturn(timeSeriesNode);
-//
-//        Iterator<Map.Entry<String, JsonNode>> fields = mock(Iterator.class);
-//        when(timeSeriesNode.fields()).thenReturn(fields);
-//        when(fields.hasNext()).thenReturn(true, false);
-//
-//        Map.Entry<String, JsonNode> entry = mock(Map.Entry.class);
-//        when(fields.next()).thenReturn(entry);
-//        when(entry.getKey()).thenReturn("2024-04-01");
-//
-//        JsonNode dataNode = mock(JsonNode.class);
-//        when(entry.getValue()).thenReturn(dataNode);
-//
-//        ListingHistory expectedListingHistory = new ListingHistory();
-//        when(listingStockService.createListingHistoryModelFromJson(dataNode, ticker, 123456789)).thenReturn(expectedListingHistory);
-//
-//        // Test fetchSingleListingHistory
-//        ListingStockServiceImpl  yourServiceClass = new ListingStockServiceImpl();
-//        yourServiceClass.setHistoryListingApiUrl(historyURl);
-//        yourServiceClass.setAlphaVantageAPIToken(apiKey);
-//        yourServiceClass.setRequests(requests);
-//
-//
-//        List<ListingHistory> result = yourServiceClass.fetchSingleListingHistory(ticker);
-//
-//        // Verify behavior
-//        assertEquals(1, result.size());
-//        assertEquals(expectedListingHistory, result.get(0));
-//    }
-//
-//    @Test
-//    public void testFetchSingleListingHistoryReturnsListOfListingHistories() throws Exception {
-//        String ticker = "AAPL";
-//        String apiUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + ticker + "&apikey=demo";
-//        String response = "{\"Time Series (Daily)\": {\"2023-03-13\": {\"1. open\": \"147.6400\", \"2. high\": \"148.8000\", \"3. low\": \"146.8300\", \"4. close\": \"147.5500\", \"5. volume\": \"78955600\"}}}";
-//        List<ListingHistory> expectedListingHistories = new ArrayList<>();
-//        JsonNode rootNode = null;
-//        try {
-//            rootNode = objectMapper.readTree(response);
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        }
-//        JsonNode timeSeriesNode = rootNode.get("Time Series (Daily)");
-//        Iterator<Map.Entry<String, JsonNode>> fields = timeSeriesNode.fields();
-//        while (fields.hasNext()) {
-//            Map.Entry<String, JsonNode> entry = fields.next();
-//            String dateStr = entry.getKey();
-//            LocalDate date = LocalDate.parse(dateStr);
-//            int unixTimestamp = (int) date.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
-//            JsonNode dataNode = entry.getValue();
-//            ListingHistory listingHistory = listingStockService.createListingHistoryModelFromJson(dataNode, ticker, unixTimestamp);
-//            expectedListingHistories.add(listingHistory);
-//        }
-//
-//        when(requests.sendRequest(apiUrl)).thenReturn(response);
-//
-//        List<ListingHistory> result = listingStockService.fetchSingleListingHistory(ticker);
-//
-//        assertEquals(expectedListingHistories, result);
-//    }
+    @Test
+    public void testFetchSingleListingHistory() {
+        // Arrange
+        String ticker = "AAPL";
+        String apiUrl = listingStockService.getHistoryListingApiUrl() + ticker + "&outputsize=compact&apikey=" + listingStockService.getListingAPItoken();
+        String response = "{\n" +
+                "    \"Meta Data\": {\n" +
+                "        \"1. Information\": \"Daily Prices (open, high, low, close) and Volumes\",\n" +
+                "        \"2. Symbol\": \"AAPL\",\n" +
+                "        \"3. Last Refreshed\": \"2024-04-12\",\n" +
+                "        \"4. Output Size\": \"Compact\",\n" +
+                "        \"5. Time Zone\": \"US/Eastern\"\n" +
+                "    },\n" +
+                "    \"Time Series (Daily)\": {\n" +
+                "        \"2024-04-12\": {\n" +
+                "            \"1. open\": \"174.2600\",\n" +
+                "            \"2. high\": \"178.3600\",\n" +
+                "            \"3. low\": \"174.2100\",\n" +
+                "            \"4. close\": \"176.5500\",\n" +
+                "            \"5. volume\": \"101670886\"\n" +
+                "        },\n" +
+                "        \"2024-04-11\": {\n" +
+                "            \"1. open\": \"168.3400\",\n" +
+                "            \"2. high\": \"175.4600\",\n" +
+                "            \"3. low\": \"168.1600\",\n" +
+                "            \"4. close\": \"175.0400\",\n" +
+                "            \"5. volume\": \"91070275\"\n" +
+                "        }}}";
+
+        try(MockedStatic<Requests> req = Mockito.mockStatic(Requests.class)) {
+            req.when(() -> Requests.sendRequest(any())).thenReturn(response);
+            List<ListingHistory> result = listingStockService.fetchSingleListingHistory(ticker);
+
+            assertEquals(2, result.size());
+        }
+
+    }
 
 }

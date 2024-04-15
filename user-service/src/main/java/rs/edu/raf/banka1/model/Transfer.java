@@ -35,6 +35,10 @@ public class Transfer {
     private Currency currencyTo;
 
     public static Double calculateCommission(Double amount) {
-        return 0.03 * amount;
+        return commissionPercentage() * amount;
+    }
+
+    public static double commissionPercentage() {
+        return 0.01;
     }
 }

@@ -81,8 +81,8 @@ public class ForexServiceImpl implements ForexService {
 
             return listingForexList;
         } catch (Exception e) {
-            e.printStackTrace();
-            Logger.error("Error while initializing forex returning empty list ");
+//            e.printStackTrace();
+            Logger.error("Error while initializing forex returning empty list");
             return new ArrayList<>();
         }
      }
@@ -116,7 +116,7 @@ public class ForexServiceImpl implements ForexService {
 
             return listingForexList;
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             return new ArrayList<>();
         }
     }
