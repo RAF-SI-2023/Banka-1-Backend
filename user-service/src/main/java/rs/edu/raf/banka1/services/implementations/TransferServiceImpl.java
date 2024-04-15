@@ -38,7 +38,7 @@ public class TransferServiceImpl implements TransferService {
     private final CurrencyRepository currencyRepository;
     private final ObjectMapper objectMapper;
     private final TransferMapper transferMapper;
-    HttpClient httpClient = HttpClient.newHttpClient();
+    private HttpClient httpClient = HttpClient.newHttpClient();
 
     @Value("${exchangeRateAPIToken}")
     private String exchangeRateAPIToken;
@@ -188,8 +188,6 @@ public class TransferServiceImpl implements TransferService {
         Currency recipientCurrency = recipientAccount.getCurrency();
         double commission = Transfer.calculateCommission(transfer.getAmount());
 
-        //todo isto customer
-
         if (
                 transfer.getStatus() != TransactionStatus.PROCESSING
             || transfer.getAmount() + commission > senderAccount.getAvailableBalance()
@@ -295,10 +293,25 @@ public class TransferServiceImpl implements TransferService {
                     continue;
                 }
                 double exchangeRate = baseCurrency.getToRSD() * quoteCurrency.getFromRSD();
+                exchangeRate /= 1 + Transfer.commissionPercentage();
                 exchangeRateDtos.add(new ExchangeRateDto(baseCurrencySymbol, quoteCurrencySymbol, exchangeRate));
             }
         }
         return exchangeRateDtos;
     }
 
+    //for testing only
+    public void setHttpClient(HttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
+
+    //for testing
+    public void setExchangeRateAPIToken(String exchangeRateAPIToken) {
+        this.exchangeRateAPIToken = exchangeRateAPIToken;
+    }
+
+    //for testing
+    public void setExchangeRateApiUrl(String exchangeRateApiUrl) {
+        this.exchangeRateApiUrl = exchangeRateApiUrl;
+    }
 }

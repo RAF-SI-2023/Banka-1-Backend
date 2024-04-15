@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.bootstrap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.tinylog.Logger;
@@ -31,6 +32,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Component
+@Profile("!test")
 public class BootstrapData implements CommandLineRunner {
 //    private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
@@ -107,7 +109,6 @@ public class BootstrapData implements CommandLineRunner {
         user1.setPosition(Constants.ADMIN);
         user1.setActive(true);
         user1.setOrderlimit(10000000.0);
-        user1.setLimitNow(0.0);
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
         user1.setRequireApproval(false);
         employeeRepository.save(user1);
@@ -118,12 +119,40 @@ public class BootstrapData implements CommandLineRunner {
         client.setFirstName("Client");
         client.setActive(true);
         client.setOrderlimit(1000.0);
-        client.setLimitNow(0.0);
         client.setPosition(Constants.SUPERVIZOR);
         client.setRequireApproval(false);
         client.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
         client.setLastName("ClientPrezime");
         employeeRepository.save(client);
+
+        // Sprint5 Bootstrap
+        // - Supervizor
+        //    - ray@gmail.com
+        //    - Dalio.0
+        Employee ray = new Employee();
+        ray.setEmail("ray@gmail.com");
+        ray.setPassword(passwordEncoder.encode("Dalio.0"));
+        ray.setFirstName("Ray");
+        ray.setLastName("Dalio");
+        ray.setPosition(Constants.SUPERVIZOR);
+        ray.setActive(true);
+        ray.setPermissions(new HashSet<>(permissionRepository.findAll()));
+        employeeRepository.save(ray);
+
+        // - Agent koji ima realan limit i nema cekiran fleg za odobravanje
+        //    - donnie@gmail.com
+        //    - Azoff.1
+        Employee donnie = new Employee();
+        donnie.setEmail("donnie@gmail.com");
+        donnie.setPassword(passwordEncoder.encode("Azoff.1"));
+        donnie.setFirstName("Donnie");
+        donnie.setLastName("Azoff");
+        donnie.setPosition(Constants.AGENT);
+        donnie.setActive(true);
+        donnie.setOrderlimit(100000.0);
+        donnie.setRequireApproval(false);
+        donnie.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
+        employeeRepository.save(donnie);
 
         Company company = new Company();
         company.setCompanyName("Sony");
@@ -139,6 +168,7 @@ public class BootstrapData implements CommandLineRunner {
         customer.setFirstName("Customer1");
         customer.setEmail("customer@gmail.com");
         customer.setPassword(passwordEncoder.encode("customer"));
+        customer.setLastName("Trajkovic");
 //        customer.setPosition("customer");
         customer.setActive(true);
         customerRepository.save(customer);

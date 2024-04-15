@@ -250,7 +250,9 @@ public class MarketController {
         if (workingTime == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(workingTime, HttpStatus.OK);
+        //TEMPORARY
+        return new ResponseEntity<>("OPENED", HttpStatus.OK);
+//        return new ResponseEntity<>(workingTime, HttpStatus.OK);
     }
 
     @GetMapping(value = "/listing/forex/{forexId}", produces = MediaType.APPLICATION_JSON_VALUE)

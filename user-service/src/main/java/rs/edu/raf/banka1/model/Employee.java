@@ -31,7 +31,7 @@ public class Employee extends User {
 
     // Agent fields
     @Column
-    private Double limitNow;
+    private Double limitNow = 0.0;
 
     @Column
     private Double orderlimit;
@@ -41,7 +41,7 @@ public class Employee extends User {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_permissions",
+            name = "user_permissions_employee",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )

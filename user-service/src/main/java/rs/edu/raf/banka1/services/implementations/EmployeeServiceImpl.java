@@ -266,8 +266,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public List<LimitDto> getAllLimits(Employee currentAuth) {
-        return this.employeeRepository.findAll().stream().map(limitMapper::toLimitDto).collect(Collectors.toList());
+    public List<LimitDto> getAllLimits() {
+        return this.employeeRepository.findAll().stream()
+                .filter(employee -> employee.getPosition().equals(Constants.AGENT))
+                .map(limitMapper::toLimitDto).collect(Collectors.toList());
     }
 
     @Override
@@ -295,31 +297,31 @@ public class EmployeeServiceImpl implements EmployeeService {
                 authorities);
     }
 
-    private Employee updateFields(Employee dbEmployee, Employee editEmployee){
-        if(editEmployee.getPassword() != null)
-            dbEmployee.setPassword(this.passwordEncoder.encode(editEmployee.getPassword()));
-
-        if(editEmployee.getFirstName() != null)
-            dbEmployee.setFirstName(editEmployee.getFirstName());
-
-        if(editEmployee.getLastName() != null)
-            dbEmployee.setLastName(editEmployee.getLastName());
-
-        if(editEmployee.getPhoneNumber() != null)
-            dbEmployee.setPhoneNumber(editEmployee.getPhoneNumber());
-
-        if(editEmployee.getActive() != null)
-            dbEmployee.setActive(editEmployee.getActive());
-
-        if(editEmployee.getPosition() != null)
-            dbEmployee.setPosition(editEmployee.getPosition());
-
-        if(editEmployee.getPermissions() != null){
-           dbEmployee.setPermissions(editEmployee.getPermissions());
-        }
-
-        return dbEmployee;
-    }
+//    private Employee updateFields(Employee dbEmployee, Employee editEmployee){
+//        if(editEmployee.getPassword() != null)
+//            dbEmployee.setPassword(this.passwordEncoder.encode(editEmployee.getPassword()));
+//
+//        if(editEmployee.getFirstName() != null)
+//            dbEmployee.setFirstName(editEmployee.getFirstName());
+//
+//        if(editEmployee.getLastName() != null)
+//            dbEmployee.setLastName(editEmployee.getLastName());
+//
+//        if(editEmployee.getPhoneNumber() != null)
+//            dbEmployee.setPhoneNumber(editEmployee.getPhoneNumber());
+//
+//        if(editEmployee.getActive() != null)
+//            dbEmployee.setActive(editEmployee.getActive());
+//
+//        if(editEmployee.getPosition() != null)
+//            dbEmployee.setPosition(editEmployee.getPosition());
+//
+//        if(editEmployee.getPermissions() != null){
+//           dbEmployee.setPermissions(editEmployee.getPermissions());
+//        }
+//
+//        return dbEmployee;
+//    }
 
     private List<PermissionDto> extractPermissionsFromEmployee(Employee employee) {
         return employee.getPermissions()
