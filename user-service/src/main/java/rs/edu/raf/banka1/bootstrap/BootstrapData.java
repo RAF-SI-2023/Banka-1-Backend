@@ -168,6 +168,7 @@ public class BootstrapData implements CommandLineRunner {
         customer.setFirstName("Customer1");
         customer.setEmail("customer@gmail.com");
         customer.setPassword(passwordEncoder.encode("customer"));
+        customer.setLastName("Trajkovic");
 //        customer.setPosition("customer");
         customer.setActive(true);
         customerRepository.save(customer);

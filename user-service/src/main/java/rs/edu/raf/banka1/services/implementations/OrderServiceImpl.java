@@ -91,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
         } else {
             order.setStatus(OrderStatus.APPROVED);
         }
-        
+
         orderRepository.save(order);
 
         //Will automatically throw an exception if there is insufficient capital to create order
