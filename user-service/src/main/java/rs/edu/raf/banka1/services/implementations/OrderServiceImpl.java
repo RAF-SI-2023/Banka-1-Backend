@@ -75,19 +75,23 @@ public class OrderServiceImpl implements OrderService {
         order.setOwner(currentAuth);
         order.setProcessedNumber(0L);
 
-        if(!currentAuth.getPosition().equalsIgnoreCase(Constants.SUPERVIZOR)) {
+        if(currentAuth.getPosition().equalsIgnoreCase(Constants.AGENT)) {
             if(currentAuth.getOrderlimit() < currentAuth.getLimitNow() + order.getPrice()) {
-                order.setStatus(OrderStatus.DENIED);
+                order.setStatus(OrderStatus.PROCESSING);
             } else {
                 currentAuth.setLimitNow(currentAuth.getLimitNow() + order.getPrice());
             }
-        }
 
-        if (!orderRequiresApprove(currentAuth)) {
-            order.setStatus(OrderStatus.APPROVED);
+            if (!orderRequiresApprove(currentAuth)) {
+                order.setStatus(OrderStatus.APPROVED);
+            } else {
+                order.setStatus(OrderStatus.PROCESSING);
+            }
+
         } else {
-            order.setStatus(OrderStatus.PROCESSING);
+            order.setStatus(OrderStatus.APPROVED);
         }
+        
         orderRepository.save(order);
 
         //Will automatically throw an exception if there is insufficient capital to create order

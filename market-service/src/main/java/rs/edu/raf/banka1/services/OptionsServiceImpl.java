@@ -263,6 +263,11 @@ public class OptionsServiceImpl implements OptionsService{
     public void setCrumbHttpClient(HttpClient httpClient) {
         this.crumbHttpClient = httpClient;
     }
+
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void truncateAndFetch(){

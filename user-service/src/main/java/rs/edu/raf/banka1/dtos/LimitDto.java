@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class LimitDto {
     private String email;
+    private Long userId;
     private Double limit;
     private Double usedLimit;
     private Boolean approvalRequired;

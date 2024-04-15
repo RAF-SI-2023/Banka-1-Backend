@@ -125,6 +125,35 @@ public class BootstrapData implements CommandLineRunner {
         client.setLastName("ClientPrezime");
         employeeRepository.save(client);
 
+        // Sprint5 Bootstrap
+        // - Supervizor
+        //    - ray@gmail.com
+        //    - Dalio.0
+        Employee ray = new Employee();
+        ray.setEmail("ray@gmail.com");
+        ray.setPassword(passwordEncoder.encode("Dalio.0"));
+        ray.setFirstName("Ray");
+        ray.setLastName("Dalio");
+        ray.setPosition(Constants.SUPERVIZOR);
+        ray.setActive(true);
+        ray.setPermissions(new HashSet<>(permissionRepository.findAll()));
+        employeeRepository.save(ray);
+
+        // - Agent koji ima realan limit i nema cekiran fleg za odobravanje
+        //    - donnie@gmail.com
+        //    - Azoff.1
+        Employee donnie = new Employee();
+        donnie.setEmail("donnie@gmail.com");
+        donnie.setPassword(passwordEncoder.encode("Azoff.1"));
+        donnie.setFirstName("Donnie");
+        donnie.setLastName("Azoff");
+        donnie.setPosition(Constants.AGENT);
+        donnie.setActive(true);
+        donnie.setOrderlimit(100000.0);
+        donnie.setRequireApproval(false);
+        donnie.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
+        employeeRepository.save(donnie);
+
         Company company = new Company();
         company.setCompanyName("Sony");
         company.setTelephoneNumber("123456789");
