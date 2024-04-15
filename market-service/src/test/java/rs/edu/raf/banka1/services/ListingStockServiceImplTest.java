@@ -39,7 +39,6 @@ import static org.mockito.Mockito.*;
 //@DataJpaTest
 //@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ExtendWith(MockitoExtension.class)
-@Disabled("All tests in this class are currently disabled")
 public class ListingStockServiceImplTest {
 
     private ListingHistoryRepository listingHistoryRepository;
