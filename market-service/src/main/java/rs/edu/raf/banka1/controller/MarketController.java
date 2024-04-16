@@ -134,7 +134,7 @@ public class MarketController {
             return new ResponseEntity<>(listingStockService.getAllStocks().stream().map(stockMapper::stockDto), HttpStatus.OK);
         }
         else if(listingType.equalsIgnoreCase("futures")) {
-            return new ResponseEntity<>(this.futuresService.getAllFutures(), HttpStatus.OK);
+            return new ResponseEntity<>(this.futuresService.getAllFutures().stream().map(futureMapper::toDto), HttpStatus.OK);
         }
         else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -250,7 +250,9 @@ public class MarketController {
         if (workingTime == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(workingTime, HttpStatus.OK);
+        //TEMPORARY
+        return new ResponseEntity<>("OPENED", HttpStatus.OK);
+//        return new ResponseEntity<>(workingTime, HttpStatus.OK);
     }
 
     @GetMapping(value = "/listing/forex/{forexId}", produces = MediaType.APPLICATION_JSON_VALUE)

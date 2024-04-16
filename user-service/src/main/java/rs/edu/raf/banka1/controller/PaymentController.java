@@ -14,7 +14,6 @@ import rs.edu.raf.banka1.dtos.PaymentDto;
 import rs.edu.raf.banka1.requests.CreatePaymentRequest;
 import rs.edu.raf.banka1.services.CustomerService;
 import rs.edu.raf.banka1.services.PaymentService;
-import rs.edu.raf.banka1.services.UserService;
 
 import java.util.List;
 
@@ -35,8 +34,7 @@ public class PaymentController {
     @Operation(summary = "Create new payment", description = "Create new payment")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Boolean.class))}),
+                    content = {@Content(mediaType = "application/json")}),
             @ApiResponse(responseCode = "400", description = "Bad request"),
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "500", description = "Internal server error")

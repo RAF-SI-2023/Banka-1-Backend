@@ -6,15 +6,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import rs.edu.raf.banka1.dtos.PaymentDto;
 import rs.edu.raf.banka1.requests.CreatePaymentRecipientRequest;
 import rs.edu.raf.banka1.dtos.PaymentRecipientDto;
 import rs.edu.raf.banka1.services.CustomerService;
 import rs.edu.raf.banka1.services.RecipientsService;
-import rs.edu.raf.banka1.services.UserService;
 
 import java.util.List;
 
@@ -72,5 +71,19 @@ public class RecipientsController {
     public ResponseEntity<List<PaymentRecipientDto>> getAllRecipientsForCustomer() {
         Long customerId = customerService.findByJwt().getUserId();
         return ResponseEntity.ok(recipientsService.getAllRecipientsForCustomer(customerId));
+    }
+
+    @DeleteMapping(value = "/remove/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Delete recipient", description = "Delete recipient")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> removeRecipient(@PathVariable Long id) {
+        boolean deleted = recipientsService.removeRecipient(id);
+        return new ResponseEntity<>(deleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 }

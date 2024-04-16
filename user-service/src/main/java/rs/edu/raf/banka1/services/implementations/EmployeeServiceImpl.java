@@ -8,11 +8,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.LimitDto;
+import rs.edu.raf.banka1.dtos.NewLimitDto;
 import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.exceptions.EmployeeNotFoundException;
+import rs.edu.raf.banka1.exceptions.ForbiddenException;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
+import rs.edu.raf.banka1.mapper.LimitMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.Permission;
@@ -27,6 +32,8 @@ import rs.edu.raf.banka1.services.EmployeeService;
 import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,6 +44,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private String frontPort;
     private EmployeeMapper employeeMapper;
     private PermissionMapper permissionMapper;
+    private LimitMapper limitMapper;
     private EmployeeRepository employeeRepository;
     private PermissionRepository permissionRepository;
     private EmailService emailService;
@@ -49,7 +57,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                                PermissionRepository permissionRepository,
                                EmailService emailService,
                                JwtUtil jwtUtil,
-                               PasswordEncoder passwordEncoder){
+                               PasswordEncoder passwordEncoder,
+                               LimitMapper limitMapper){
         this.employeeMapper = employeeMapper;
         this.permissionMapper = permissionMapper;
         this.employeeRepository = employeeRepository;
@@ -57,6 +66,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.emailService = emailService;
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
+        this.limitMapper = limitMapper;
     }
 
     @Override
@@ -113,14 +123,16 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Employee savedEmployee = this.employeeRepository.save(employee);
         emailService.sendEmail(createEmployeeDto.getEmail(), "RAF Banka - User activation",
-                "Visit this URL to activate your account: http://localhost:" + this.frontPort + "/user/set-password/" + activationToken);
+                "Visit this URL to activate your account: http://localhost:" + this.frontPort + "/employee/set-password/" + activationToken);
 
         return new CreateUserResponse(employee.getUserId(), "Employee created successfully");
     }
 
     @Override
     public ActivateAccountResponse activateAccount(String token, String password) {
-        Employee employee = employeeRepository.findByActivationToken(token).orElseThrow();
+        Optional<Employee> optionalEmployee = employeeRepository.findByActivationToken(token);
+        if (optionalEmployee.isEmpty()) return new ActivateAccountResponse(null);
+        Employee employee = optionalEmployee.get();
         employee.setActivationToken(null);
         employee.setPassword(passwordEncoder.encode(password));
         employeeRepository.save(employee);
@@ -206,7 +218,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.employeeRepository.save(employee);
 
         return this.emailService.sendEmail(email, "RAF Banka - Password reset",
-                "Visit this URL to reset your password: http://localhost:" + frontPort + "/user/reset-password/" + resetPasswordToken);
+                "Visit this URL to reset your password: http://localhost:" + frontPort + "/employee/reset-password/" + resetPasswordToken);
     }
 
     @Override
@@ -224,6 +236,45 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.employeeRepository.save(employee);
 
         return new NewPasswordResponse(employee.getUserId());
+    }
+
+    @Override
+    public void resetLimitForEmployee(Long employeeId) {
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EmployeeNotFoundException(employeeId));
+        employee.setLimitNow(0.0);
+        employeeRepository.save(employee);
+    }
+
+    @Override
+    public void resetEmployeeLimits() {
+        List<Employee> users = employeeRepository.findAll();
+        users.forEach(user->user.setLimitNow(0.0));
+        employeeRepository.saveAll(users);
+    }
+
+    @Override
+    public LimitDto setOrderLimitForEmployee(NewLimitDto newLimitDto) {
+        Long employeeId = newLimitDto.getUserId();
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(()-> new EmployeeNotFoundException(employeeId));
+        if(!employee.getPosition().equalsIgnoreCase(Constants.AGENT)) {
+            throw new ForbiddenException("Employee with id: " + employeeId + " is not in agent position. Changing the limit is prohibited.");
+        }
+        employee.setOrderlimit(newLimitDto.getLimit());
+        employee.setRequireApproval(newLimitDto.getApprovalRequired());
+        Employee saved = employeeRepository.save(employee);
+        return limitMapper.toLimitDto(employee);
+    }
+
+    @Override
+    public List<LimitDto> getAllLimits() {
+        return this.employeeRepository.findAll().stream()
+                .filter(employee -> employee.getPosition().equals(Constants.AGENT))
+                .map(limitMapper::toLimitDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public Employee getEmployeeEntityByEmail(String email) {
+        return this.employeeRepository.findByEmail(email).orElseThrow(ForbiddenException::new);
     }
 
     @Override
@@ -246,31 +297,31 @@ public class EmployeeServiceImpl implements EmployeeService {
                 authorities);
     }
 
-    private Employee updateFields(Employee dbEmployee, Employee editEmployee){
-        if(editEmployee.getPassword() != null)
-            dbEmployee.setPassword(this.passwordEncoder.encode(editEmployee.getPassword()));
-
-        if(editEmployee.getFirstName() != null)
-            dbEmployee.setFirstName(editEmployee.getFirstName());
-
-        if(editEmployee.getLastName() != null)
-            dbEmployee.setLastName(editEmployee.getLastName());
-
-        if(editEmployee.getPhoneNumber() != null)
-            dbEmployee.setPhoneNumber(editEmployee.getPhoneNumber());
-
-        if(editEmployee.getActive() != null)
-            dbEmployee.setActive(editEmployee.getActive());
-
-        if(editEmployee.getPosition() != null)
-            dbEmployee.setPosition(editEmployee.getPosition());
-
-        if(editEmployee.getPermissions() != null){
-           dbEmployee.setPermissions(editEmployee.getPermissions());
-        }
-
-        return dbEmployee;
-    }
+//    private Employee updateFields(Employee dbEmployee, Employee editEmployee){
+//        if(editEmployee.getPassword() != null)
+//            dbEmployee.setPassword(this.passwordEncoder.encode(editEmployee.getPassword()));
+//
+//        if(editEmployee.getFirstName() != null)
+//            dbEmployee.setFirstName(editEmployee.getFirstName());
+//
+//        if(editEmployee.getLastName() != null)
+//            dbEmployee.setLastName(editEmployee.getLastName());
+//
+//        if(editEmployee.getPhoneNumber() != null)
+//            dbEmployee.setPhoneNumber(editEmployee.getPhoneNumber());
+//
+//        if(editEmployee.getActive() != null)
+//            dbEmployee.setActive(editEmployee.getActive());
+//
+//        if(editEmployee.getPosition() != null)
+//            dbEmployee.setPosition(editEmployee.getPosition());
+//
+//        if(editEmployee.getPermissions() != null){
+//           dbEmployee.setPermissions(editEmployee.getPermissions());
+//        }
+//
+//        return dbEmployee;
+//    }
 
     private List<PermissionDto> extractPermissionsFromEmployee(Employee employee) {
         return employee.getPermissions()

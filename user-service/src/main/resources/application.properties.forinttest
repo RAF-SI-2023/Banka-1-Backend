@@ -28,3 +28,9 @@ server.port=8080
 front.port=4200
 server.servlet.context-path=/
 oauth.jwt.secret=secret_key
+
+alphaVantageAPIToken=OF6BVKZOCXWHD9NS
+exchangeRateAPIToken=40f2aa4e59165c6aab10cd02
+
+alphaVantageExchangeRateApiUrl=https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE
+exchangeRateApiUrl= https://v6.exchangerate-api.com/v6/

@@ -2,24 +2,37 @@ package rs.edu.raf.banka1.bootstrap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.tinylog.Logger;
+import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
+import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
+import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
+import rs.edu.raf.banka1.services.CapitalService;
+import rs.edu.raf.banka1.services.EmployeeService;
+import rs.edu.raf.banka1.services.MarketService;
+import rs.edu.raf.banka1.services.TransferService;
 import rs.edu.raf.banka1.utils.Constants;
 
+import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Currency;
 import java.util.HashSet;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
+@Profile("!test")
 public class BootstrapData implements CommandLineRunner {
 //    private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
@@ -31,8 +44,18 @@ public class BootstrapData implements CommandLineRunner {
     private final CurrencyRepository currencyRepository;
     private final LoanRequestRepository loanRequestRepository;
     private final LoanRepository loanRepository;
-
     private final CardRepository cardRepository;
+    private final CapitalRepository capitalRepository;
+    private final CapitalService capitalService;
+
+    private final MarketService marketService;
+    private final TransferService transferService;
+
+    private final EmployeeService employeeService;
+
+    private final OrderRepository orderRepository;
+
+    private final ScheduledExecutorService resetLimitExecutor = Executors.newScheduledThreadPool(1);
 
     @Autowired
     public BootstrapData(
@@ -45,8 +68,14 @@ public class BootstrapData implements CommandLineRunner {
         final CustomerRepository customerRepository,
         final LoanRequestRepository loanRequestRepository,
         final LoanRepository loanRepository,
-        final CardRepository cardRepository
-    ) {
+        final CardRepository cardRepository,
+        final MarketService marketService,
+        final CapitalService capitalService,
+        final CapitalRepository capitalRepository,
+        final EmployeeService employeeService,
+        final OrderRepository orderRepository,
+        final TransferService transferService) {
+      
         this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
@@ -57,6 +86,12 @@ public class BootstrapData implements CommandLineRunner {
         this.loanRequestRepository = loanRequestRepository;
         this.loanRepository = loanRepository;
         this.cardRepository = cardRepository;
+        this.marketService = marketService;
+        this.capitalService = capitalService;
+        this.capitalRepository = capitalRepository;
+        this.employeeService = employeeService;
+        this.orderRepository = orderRepository;
+        this.transferService = transferService;
     }
 
     @Override
@@ -73,7 +108,9 @@ public class BootstrapData implements CommandLineRunner {
         user1.setLastName("User1Prezime");
         user1.setPosition(Constants.ADMIN);
         user1.setActive(true);
+        user1.setOrderlimit(10000000.0);
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
+        user1.setRequireApproval(false);
         employeeRepository.save(user1);
 
         Employee client = new Employee();
@@ -81,10 +118,41 @@ public class BootstrapData implements CommandLineRunner {
         client.setPassword(passwordEncoder.encode("client"));
         client.setFirstName("Client");
         client.setActive(true);
+        client.setOrderlimit(1000.0);
         client.setPosition(Constants.SUPERVIZOR);
+        client.setRequireApproval(false);
         client.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
         client.setLastName("ClientPrezime");
         employeeRepository.save(client);
+
+        // Sprint5 Bootstrap
+        // - Supervizor
+        //    - ray@gmail.com
+        //    - Dalio.0
+        Employee ray = new Employee();
+        ray.setEmail("ray@gmail.com");
+        ray.setPassword(passwordEncoder.encode("Dalio.0"));
+        ray.setFirstName("Ray");
+        ray.setLastName("Dalio");
+        ray.setPosition(Constants.SUPERVIZOR);
+        ray.setActive(true);
+        ray.setPermissions(new HashSet<>(permissionRepository.findAll()));
+        employeeRepository.save(ray);
+
+        // - Agent koji ima realan limit i nema cekiran fleg za odobravanje
+        //    - donnie@gmail.com
+        //    - Azoff.1
+        Employee donnie = new Employee();
+        donnie.setEmail("donnie@gmail.com");
+        donnie.setPassword(passwordEncoder.encode("Azoff.1"));
+        donnie.setFirstName("Donnie");
+        donnie.setLastName("Azoff");
+        donnie.setPosition(Constants.AGENT);
+        donnie.setActive(true);
+        donnie.setOrderlimit(100000.0);
+        donnie.setRequireApproval(false);
+        donnie.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
+        employeeRepository.save(donnie);
 
         Company company = new Company();
         company.setCompanyName("Sony");
@@ -100,6 +168,7 @@ public class BootstrapData implements CommandLineRunner {
         customer.setFirstName("Customer1");
         customer.setEmail("customer@gmail.com");
         customer.setPassword(passwordEncoder.encode("customer"));
+        customer.setLastName("Trajkovic");
 //        customer.setPosition("customer");
         customer.setActive(true);
         customerRepository.save(customer);
@@ -123,6 +192,60 @@ public class BootstrapData implements CommandLineRunner {
         bankAccountService.saveBankAccount(bankAccount);
         // dovde
 
+        //ovo samo za test moze da se obrise
+        BankAccount bankAccount1 = new BankAccount();
+        bankAccount1.setAccountStatus(true);
+        bankAccount1.setAccountType(AccountType.FOREIGN_CURRENCY);
+        bankAccount1.setAvailableBalance(10000.0);
+        bankAccount1.setBalance(10000.0);
+        bankAccount1.setMaintenanceCost(240.0);
+        bankAccount1.setCreatedByAgentId(52L);
+        bankAccount1.setCreationDate(new Date().getTime());
+        bankAccount1.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("USD").orElse(null));
+        bankAccount1.setCustomer(customer);
+        bankAccount1.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+        bankAccount1.setAccountName("1asd");
+        bankAccount1.setAccountNumber("usd");
+        bankAccount1.setSubtypeOfAccount("LICNI");
+        bankAccountService.saveBankAccount(bankAccount1);
+        // dovde
+
+        //ovo samo za test moze da se obrise
+        BankAccount bankAccount2 = new BankAccount();
+        bankAccount2.setAccountStatus(true);
+        bankAccount2.setAccountType(AccountType.FOREIGN_CURRENCY);
+        bankAccount2.setAvailableBalance(10000.0);
+        bankAccount2.setBalance(10000.0);
+        bankAccount2.setMaintenanceCost(240.0);
+        bankAccount2.setCreatedByAgentId(52L);
+        bankAccount2.setCreationDate(new Date().getTime());
+        bankAccount2.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("EUR").orElse(null));
+        bankAccount2.setCustomer(customer);
+        bankAccount2.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+        bankAccount2.setAccountName("1asd");
+        bankAccount2.setAccountNumber("eur");
+        bankAccount2.setSubtypeOfAccount("LICNI");
+        bankAccountService.saveBankAccount(bankAccount2);
+        // dovde
+
+        //ovo samo za test moze da se obrise
+        BankAccount bankAccount3 = new BankAccount();
+        bankAccount3.setAccountStatus(true);
+        bankAccount3.setAccountType(AccountType.CURRENT);
+        bankAccount3.setAvailableBalance(10000.0);
+        bankAccount3.setBalance(10000.0);
+        bankAccount3.setMaintenanceCost(240.0);
+        bankAccount3.setCreatedByAgentId(52L);
+        bankAccount3.setCreationDate(new Date().getTime());
+        bankAccount3.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElse(null));
+        bankAccount3.setCustomer(customer);
+        bankAccount3.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+        bankAccount3.setAccountName("1asd");
+        bankAccount3.setAccountNumber("rsd");
+        bankAccount3.setSubtypeOfAccount("LICNI");
+        bankAccountService.saveBankAccount(bankAccount3);
+        // dovde
+
         BankAccountRequest bankAccountRequest = new BankAccountRequest();
         bankAccountRequest.setAccountType(AccountType.FOREIGN_CURRENCY);
         bankAccountRequest.setBalance(1000.0);
@@ -143,8 +266,59 @@ public class BootstrapData implements CommandLineRunner {
         seedLoan();
         seedLoanRequest();
 
-        Logger.info("Data loaded!");
+        MarketOrder marketOrder = new MarketOrder();
+        marketOrder.setStatus(OrderStatus.DONE);
+        marketOrder.setUpdatedAt(Instant.now());
+        marketOrder.setOwner(user1);
+        marketOrder.setApprovedBy(user1);
+        marketOrder.setPrice(123.0);
+        marketOrder.setOrderType(OrderType.BUY);
+        marketOrder.setListingType(ListingType.STOCK);
+        marketOrder.setListingId(1L);
+        marketOrder.setContractSize(100L);
+        marketOrder.setProcessedNumber(100L);
+        marketOrder.setAllOrNone(false);
+        marketOrder.setFee(7.00);
+        this.orderRepository.save(marketOrder);
 
+        MarketOrder marketOrder1 = new MarketOrder();
+        marketOrder1.setStatus(OrderStatus.DONE);
+        marketOrder1.setUpdatedAt(Instant.now());
+        marketOrder1.setPrice(456.0);
+        marketOrder1.setOrderType(OrderType.SELL);
+        marketOrder1.setOwner(client);
+        marketOrder1.setApprovedBy(user1);
+        marketOrder1.setListingType(ListingType.FOREX);
+        marketOrder1.setListingId(1L);
+        marketOrder1.setContractSize(20L);
+        marketOrder1.setProcessedNumber(20L);
+        marketOrder1.setAllOrNone(false);
+        marketOrder1.setFee(7.00);
+        this.orderRepository.save(marketOrder1);
+
+        MarketOrder marketOrder2 = new MarketOrder();
+        marketOrder2.setStatus(OrderStatus.DONE);
+        marketOrder2.setUpdatedAt(Instant.now());
+        marketOrder2.setPrice(789.0);
+        marketOrder2.setOrderType(OrderType.BUY);
+        marketOrder2.setOwner(client);
+        marketOrder2.setApprovedBy(user1);
+        marketOrder2.setListingType(ListingType.FUTURE);
+        marketOrder2.setListingId(1L);
+        marketOrder2.setContractSize(160L);
+        marketOrder2.setProcessedNumber(160L);
+        marketOrder2.setAllOrNone(false);
+        marketOrder2.setFee(7.00);
+        this.orderRepository.save(marketOrder2);
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime midnight = now.toLocalDate().atStartOfDay().plusDays(1);
+        Duration initialDelay = Duration.between(now, midnight);
+        resetLimitExecutor.scheduleAtFixedRate(employeeService::resetEmployeeLimits, initialDelay.toMillis(), 24, TimeUnit.HOURS);
+
+
+        seedBankCapital();
+        transferService.seedExchangeRates();
     }
 
     private void seedLoanRequest() {
@@ -211,6 +385,69 @@ public class BootstrapData implements CommandLineRunner {
             currencyRepository.save(myCurrency);
 
         }
+    }
+
+    private void seedBankCapital(){
+        Company bank = createBankCompany();
+        companyRepository.save(bank);
+
+        List<rs.edu.raf.banka1.model.Currency> allCurrencies = currencyRepository.findAll();
+
+
+        // Make entry for each currency
+        for(rs.edu.raf.banka1.model.Currency currency : allCurrencies) {
+            BankAccount bankAccount = createBankAccountByCurrency(currency.getCurrencyCode(), bank);
+            Capital capital = capitalService.createCapitalForBankAccount(bankAccount, currency, bankAccount.getBalance(), 0.0);
+            capitalRepository.save(capital);
+        }
+
+        // Make entry for stocks, futures and forex
+        List<ListingStockDto> stocks = marketService.getAllStocks();
+        for(ListingStockDto stock : stocks) {
+            Capital capital = capitalService.createCapitalForListing(ListingType.STOCK, stock.getListingId(), 100.0, 0.0);
+            capitalRepository.save(capital);
+        }
+
+        List<ListingFutureDto> futures = marketService.getAllFutures();
+        for(ListingFutureDto future : futures) {
+            Capital capital = capitalService.createCapitalForListing(ListingType.FUTURE, future.getListingId(), 100.0, 0.0);
+            capitalRepository.save(capital);
+        }
+
+        List<ListingForexDto> forexes = marketService.getAllForex();
+        for(ListingForexDto forex : forexes) {
+            Capital capital = capitalService.createCapitalForListing(ListingType.FOREX, forex.getListingId(), 100.0, 0.0);
+            capitalRepository.save(capital);
+        }
+    }
+
+    private BankAccount createBankAccountByCurrency(String currency, Company company){
+        return bankAccountService.createBankAccount(
+                new CreateBankAccountRequest(
+                        new BankAccountRequest(
+                                AccountType.BUSINESS,
+                                "Bank's account",
+                                1000000.0,
+                                1000000.0,
+                                currency,
+                                null,
+                                0.0
+                                ),
+                        null,
+                        company.getId()
+                ));
+    }
+
+    private Company createBankCompany(){
+        Company bank = new Company();
+        bank.setCompanyName("Banka1");
+        bank.setTelephoneNumber("069 678 7889");
+        bank.setFaxNumber("555-123-4567");
+        bank.setPib("123-45-6789");
+        bank.setIdNumber("987654321");
+        bank.setJobId("1777838");
+        bank.setRegistrationNumber("7737");
+        return bank;
     }
 
     private static final Random random = new Random();

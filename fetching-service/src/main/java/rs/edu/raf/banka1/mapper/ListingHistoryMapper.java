@@ -18,18 +18,4 @@ public class ListingHistoryMapper {
 
         return history;
     }
-
-    public ListingHistoryDto toDto(ListingHistory history) {
-        ListingHistoryDto dto = new ListingHistoryDto();
-        dto.setListingHistoryId(history.getListingHistoryId());
-        dto.setTicker(history.getTicker());
-        dto.setDate(history.getDate());
-        dto.setPrice(history.getPrice());
-        dto.setHigh(history.getHigh());
-        dto.setLow(history.getLow());
-        dto.setChanged(history.getChanged());
-        dto.setVolume(history.getVolume());
-
-        return dto;
-    }
 }

@@ -13,10 +13,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.configuration.authproviders.CurrentAuth;
+import rs.edu.raf.banka1.dtos.LimitDto;
+import rs.edu.raf.banka1.dtos.NewLimitDto;
 import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.requests.*;
 import rs.edu.raf.banka1.responses.*;
 import rs.edu.raf.banka1.services.EmployeeService;
@@ -149,7 +153,7 @@ public class EmployeeController {
     }
 
     @PostMapping(value = "/reset/{email}")
-    @Operation(summary = "Reset password", description = "Send password reset email to user")
+    @Operation(summary = "Reset password", description = "Send password reset email to employee")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Email with password reset URL sent successfully",
                     content = {@Content(mediaType = "application/json",
@@ -254,5 +258,51 @@ public class EmployeeController {
         return new ResponseEntity<>(this.employeeService.findPermissions(email), HttpStatus.OK);
     }
 
+    @PutMapping(value = "/limits/reset/{employeeId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Reset current limit for employee", description = "Supervisor resets current limit for employee")
+    @PreAuthorize("hasAuthority('manageOrderRequests')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "400", description = "Invalid status provided"),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to reset limits for employees"),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> resetCurrentLimitForEmployee(
+            @PathVariable(name = "employeeId") Long employeeId
+    ) {
+        employeeService.resetLimitForEmployee(employeeId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
+    @PutMapping(value = "/limits/newLimit", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Set order limit for employee", description = "Supervisor sets order limit for employee")
+    @PreAuthorize("hasAuthority('manageOrderRequests')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "400", description = "Invalid status provided"),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to set limits for employees"),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<LimitDto> setOrderLimitForUser(@RequestBody NewLimitDto newLimitDto) {
+        return new ResponseEntity<>(employeeService.setOrderLimitForEmployee(newLimitDto), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/limits/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all limits for all employees", description = "Only supervisor gets all limits for all employees.")
+    @PreAuthorize("hasAuthority('manageOrderRequests')")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {LimitDto.class}))}),
+            @ApiResponse(responseCode = "404", description = "Employee not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<LimitDto>> getAllLimits() {
+        return new ResponseEntity<>(this.employeeService.getAllLimits(), HttpStatus.OK);
+    }
 }

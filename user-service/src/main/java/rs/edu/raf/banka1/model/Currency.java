@@ -28,4 +28,7 @@ public class Currency {
     @Column
     private Boolean active;
 
+    private Double fromRSD; // RSD -> currency
+    private Double toRSD; // currency -> RSD
+
 }

@@ -12,11 +12,11 @@ import rs.edu.raf.banka1.model.AccountType;
 @AllArgsConstructor
 public class AccountData {
     private AccountType accountType;
-    private String accountName;
+    private Boolean status;
     private String currencyCode;
-    private Double balance;
-    private Double availableBalance;
     private Double maintenanceCost;
-    private String subtypeOfAccount;
-
+//    private Double balance;
+//    private Double availableBalance;
+//    private String subtypeOfAccount;
+    private String accountName;
 }

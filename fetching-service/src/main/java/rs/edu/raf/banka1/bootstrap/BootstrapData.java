@@ -17,6 +17,8 @@ import rs.edu.raf.banka1.utils.Constants;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -107,7 +109,13 @@ public class BootstrapData implements CommandLineRunner {
         String line = "";
         String csvSplitBy = ",";
 
-        try (BufferedReader br = new BufferedReader(new FileReader(Constants.currencyFilePath))) {
+        InputStream inputStream = Constants.getInputStreamForResource(currencyFilePath);
+
+        if(inputStream == null) {
+            return new ArrayList<CurrencyDto>();
+        }
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
             br.readLine();
 
             while ((line = br.readLine()) != null) {

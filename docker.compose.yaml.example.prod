@@ -37,7 +37,9 @@ services:
         "spring.mail.properties.mail.smtp.starttls.enable":true,
         "server.port": 8080,
         "front.port": 4200,
-        "springdoc.packagesToScan": "rs.edu.raf.banka1.controller"
+        "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
+        "exchangeRateAPIToken": "a97e7d453aa0cfb0295f5bba",
+        "exchangeRateApiUrl": "https://v6.exchangerate-api.com/v6/"
       }'
 
     depends_on:
@@ -70,8 +72,42 @@ services:
         "forexExchangeRateApiUrl":"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE",
         "forexDailyApiUrl":"https://www.alphavantage.co/query?function=FX_DAILY",
         "optionsUrl":"https://query2.finance.yahoo.com/v7/finance/options/",
-        "springdoc.packagesToScan": "rs.edu.raf.banka1.controller"
+        "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
+        "dev.environment": false
       }'
     depends_on:
       mysql:
         condition: service_healthy
+
+  fetching-service:
+      image: duckkecach/fetching-service:latest
+      container_name: fetching-service-container
+      restart: always
+      ports:
+        - "8082:8082"  # Adjust the port as needed
+      environment:
+        SPRING_APPLICATION_JSON: '{
+          "spring.datasource.url": "jdbc:mysql://mysql:3306/bank_marketservice",
+          "spring.datasource.username": "myusername",
+          "spring.datasource.password": "mypassword",
+          "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL8Dialect",
+          "spring.jpa.hibernate.ddl-auto" : "update",
+          "oauth.jwt.secret": "secret_key",
+          "listingAPItoken": "pk_f87286e075c94cc484405da70691c030",
+          "alphaVantageAPIToken":"OF6BVKZOCXWHD9NS",
+          "forexAPItoken": "cnr3i41r01qs2jr5d5bgcnr3i41r01qs2jr5d5c0",
+          "listingNameApiUrl":"https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=",
+          "updateListingApiUrl":"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=",
+          "basicStockInfoApiUrl":"https://www.alphavantage.co/query?function=OVERVIEW&symbol=",
+          "HistoryListingApiUrl":"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=",
+          "forexExchangePlaceApiUrl":"https://finnhub.io/api/v1/forex/exchange?token=",
+          "forexSymbolsApiUrl":"https://finnhub.io/api/v1/forex/symbol?exchange=",
+          "forexExchangeRateApiUrl":"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE",
+          "forexDailyApiUrl":"https://www.alphavantage.co/query?function=FX_DAILY",
+          "optionsUrl":"https://query2.finance.yahoo.com/v7/finance/options/",
+          "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
+          "dev.environment": false
+        }'
+      depends_on:
+        mysql:
+          condition: service_healthy

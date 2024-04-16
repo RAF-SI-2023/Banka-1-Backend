@@ -7,6 +7,7 @@ on:
       - sprint-2
       - sprint-3
       - sprint-4
+      - sprint-5
       - main
   pull_request:
     types: [opened, synchronize, closed]
@@ -56,7 +57,10 @@ jobs:
       - name: Build Docker image for market service
         run: docker build -t ${{secrets.DOCKER_USERNAME}}/market-service:latest ./market-service
 
-      - name: Push Docker image to Docker hub
+      - name: Build Docker image for fetching service
+        run: docker build -t ${{secrets.DOCKER_USERNAME}}/fetching-service:latest ./fetching-service
+
+      - name: Log into Docker hub
         uses: docker/login-action@v2
         with:
           username: ${{secrets.DOCKER_USERNAME}}
@@ -67,6 +71,9 @@ jobs:
 
       - name: Push Docker image - market service
         run: docker push ${{secrets.DOCKER_USERNAME}}/market-service:latest
+
+      - name: Push Docker image - fetching service
+        run: docker push ${{secrets.DOCKER_USERNAME}}/fetching-service:latest
 
       - name: SCP Docker Compose and init.sql to PROD
         uses: appleboy/scp-action@master
@@ -102,4 +109,4 @@ jobs:
           DISCORD_AVATAR: ${{secrets.DISCORD_AVATAR_URL}}
         uses: Ilshidur/action-discord@master
         with:
-          args: 'Deploy je prosao na grani [${{github.ref}}](https://github.com/RAF-SI-2023/Banka-1-Backend/tree/${{github.ref}})! User service se nalazi [ovde](http://161.35.78.6:8080/user). Market service se nalazi [ovde](http://161.35.78.6:8081/).'
+          args: 'Deploy je prosao na grani [${{github.ref}}](https://github.com/RAF-SI-2023/Banka-1-Backend/tree/${{github.ref}})! User service se nalazi [ovde](http://161.35.78.6:8080/user). Market service se nalazi [ovde](http://161.35.78.6:8081/). Fetching service se nalazi [ovde](http://161.35.78.6:8082/)'

@@ -16,6 +16,8 @@ public class Constants {
     public static final String SUPERVIZOR = "supervizor";
     public static final String ADMIN = "admin";
 
+    public static final String DEFAULT_CURRENCY = "RSD";
+
     public static final List<String> allPermissions = Arrays.asList(
             "addUser", "modifyUser", "deleteUser", "readUser",
             "manageLoans", "manageLoanRequests", "modifyCustomer",
@@ -27,4 +29,7 @@ public class Constants {
         put(SUPERVIZOR, allPermissions);
         put(ADMIN, allPermissions);
     }};
+
+    // subject to change on production
+    public static final String marketServiceUrl = "http://localhost:8081";
 }
