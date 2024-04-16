@@ -4,7 +4,7 @@
 
 ### Locally
 
-1. Clone the repository
+1. Clone the repository test test
 2. Create application.properties file in the src/main/resources directory(see example/application.properties.example)
 3. Setup your database locally
 4. Run the application
