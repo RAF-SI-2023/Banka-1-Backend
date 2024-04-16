@@ -264,14 +264,20 @@ public class CapitalServiceImpl implements CapitalService {
                 .filter(capital -> capital.getListingType() != null)
                 .map(capital -> {
                     Double price = 0.0;
+                    String ticker = null;
                     if(capital.getListingType().equals(ListingType.STOCK)) {
                         price = this.marketService.getStockById(capital.getListingId()).getPrice();
+                        ticker = this.marketService.getStockById(capital.getListingId()).getTicker();
                     } else if(capital.getListingType().equals(ListingType.FUTURE)) {
                         price = this.marketService.getFutureById(capital.getListingId()).getPrice();
+                        ticker = this.marketService.getFutureById(capital.getListingId()).getTicker();
                     } else if(capital.getListingType().equals(ListingType.FOREX)) {
                         price = this.marketService.getForexById(capital.getListingId()).getPrice();
+                        ticker = this.marketService.getForexById(capital.getListingId()).getTicker();
                     }
-                    return capitalMapper.capitalToCapitalProfitDto(capital, price);
+                    var capitalProfitDto = capitalMapper.capitalToCapitalProfitDto(capital, price);
+                    capitalProfitDto.setTicker(ticker);
+                    return capitalProfitDto;
                 })
                 .toList();
     }
