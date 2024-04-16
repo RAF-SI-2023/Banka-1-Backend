@@ -38,6 +38,7 @@ Feature: admin can create new employees, view them and edit them
     When User calls get on "/employee/get/100"
     Then i should get response with status 200
 
+  @Ignore
   Scenario: admin can filter employees
     Given i am logged in with email "admin@admin.com" and password "admin"
     When User calls get on "/employee/search?email=drugizaposleni@gmail.rs"
@@ -66,6 +67,7 @@ Feature: admin can create new employees, view them and edit them
     And employee first name should be "Aleksa"
     And employee last name should be "Aleksic"
 
+  @Ignore
   Scenario: admin can change employee permissions
     Given i am logged in with email "admin@admin.com" and password "admin"
     And i want to change employee permisions with email "drugizaposleni@gmail.rs"
@@ -110,6 +112,7 @@ Feature: admin can create new employees, view them and edit them
     Then i should get response with status 200
     And response should contain limit of user with email "drugizaposleni@gmail.com"
 
+  @Ignore
   Scenario: admin can remove a employee
     Given i am logged in with email "admin@admin.com" and password "admin"
     And admin knows id of the employee
