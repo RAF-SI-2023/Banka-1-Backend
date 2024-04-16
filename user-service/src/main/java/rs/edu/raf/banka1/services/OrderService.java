@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.services;
 
 import rs.edu.raf.banka1.dtos.OrderDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
+import rs.edu.raf.banka1.model.DecideOrderResponse;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.model.MarketOrder;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
@@ -25,4 +26,6 @@ public interface OrderService {
     List<OrderDto> getAllOrders();
 
     void cancelOrder(Long orderId);
+
+    DecideOrderResponse decideOrder(Long orderId, String status, Employee currentAuth);
 }

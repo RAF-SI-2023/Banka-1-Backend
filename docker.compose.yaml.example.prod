@@ -37,7 +37,9 @@ services:
         "spring.mail.properties.mail.smtp.starttls.enable":true,
         "server.port": 8080,
         "front.port": 4200,
-        "springdoc.packagesToScan": "rs.edu.raf.banka1.controller"
+        "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
+        "exchangeRateAPIToken": "a97e7d453aa0cfb0295f5bba",
+        "exchangeRateApiUrl": "https://v6.exchangerate-api.com/v6/"
       }'
 
     depends_on:

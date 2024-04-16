@@ -17,16 +17,11 @@ import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
+import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
-import rs.edu.raf.banka1.model.Employee;
-import rs.edu.raf.banka1.model.MarketOrder;
-import rs.edu.raf.banka1.model.Capital;
-import rs.edu.raf.banka1.model.OrderType;
-import rs.edu.raf.banka1.model.ListingType;
-import rs.edu.raf.banka1.model.Currency;
-import rs.edu.raf.banka1.model.OrderStatus;
+import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.EmployeeRepository;
 import rs.edu.raf.banka1.repositories.OrderRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
@@ -42,9 +37,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -445,5 +438,78 @@ class OrderServiceImplTest {
         List<MarketOrder> result = orderService.getInactiveOrders(timeThreshold);
 
         assertEquals(1, result.size());
+    }
+
+
+    @Test
+    void decideOrder_OrderNotFound() {
+        // Arrange
+        Long orderId = 1L;
+        String status = "APPROVED";
+        Employee currentAuth = new Employee();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(OrderNotFoundByIdException.class, () -> {
+            orderService.decideOrder(orderId, status, currentAuth);
+        });
+    }
+
+    @Test
+    void decideOrder_StatusNotPossible() {
+        // Arrange
+        Long orderId = 1L;
+        String status = "INVALID_STATUS";
+        Employee currentAuth = new Employee();
+        MarketOrder marketOrder = new MarketOrder();
+        marketOrder.setStatus(OrderStatus.PROCESSING);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(marketOrder));
+
+        // Act
+        DecideOrderResponse response = orderService.decideOrder(orderId, status, currentAuth);
+
+        // Assert
+        assertEquals(DecideOrderResponse.NOT_POSSIBLE, response);
+    }
+
+    @Test
+    void decideOrder_StatusApproved() {
+        // Arrange
+        Long orderId = 1L;
+        String status = "APPROVED";
+        Employee currentAuth = new Employee();
+        MarketOrder marketOrder = new MarketOrder();
+        marketOrder.setStatus(OrderStatus.PROCESSING);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(marketOrder));
+
+        // Act
+        DecideOrderResponse response = orderService.decideOrder(orderId, status, currentAuth);
+
+        // Assert
+        assertEquals(DecideOrderResponse.APPROVED, response);
+        assertEquals(OrderStatus.APPROVED, marketOrder.getStatus());
+        assertEquals(currentAuth, marketOrder.getApprovedBy());
+    }
+
+    @Test
+    void decideOrder_StatusDenied() {
+        // Arrange
+        Long orderId = 1L;
+        String status = "DENIED";
+        Employee currentAuth = new Employee();
+        MarketOrder marketOrder = new MarketOrder();
+        marketOrder.setStatus(OrderStatus.PROCESSING);
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(marketOrder));
+
+        // Act
+        DecideOrderResponse response = orderService.decideOrder(orderId, status, currentAuth);
+
+        // Assert
+        assertEquals(DecideOrderResponse.DENIED, response);
+        assertEquals(OrderStatus.DENIED, marketOrder.getStatus());
     }
 }
