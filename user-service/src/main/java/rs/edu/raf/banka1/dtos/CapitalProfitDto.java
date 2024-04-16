@@ -7,5 +7,4 @@ import lombok.Setter;
 @Setter
 public class CapitalProfitDto extends CapitalDto{
     private Double totalPrice;
-    private String ticker;
 }
