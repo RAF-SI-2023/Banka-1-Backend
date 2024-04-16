@@ -124,8 +124,13 @@ public class OrderController {
             @ApiResponse(responseCode = "404", description = "Loan not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<DecideOrderResponse> decideOrder(@PathVariable("orderId") Long orderId,
-                                                           @RequestBody StatusRequest request) {
-        return new ResponseEntity<>(orderService.decideOrder(orderId, request.getStatus(), null), HttpStatus.OK);
+    public ResponseEntity<DecideOrderResponse> decideOrder(
+        @PathVariable("orderId") Long orderId,
+        @RequestBody StatusRequest request,
+        @AuthenticationPrincipal User userPrincipal
+    )
+    {
+        Employee currentAuth = employeeService.getEmployeeEntityByEmail(userPrincipal.getUsername());
+        return new ResponseEntity<>(orderService.decideOrder(orderId, request.getStatus(), currentAuth), HttpStatus.OK);
     }
 }
