@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 @Getter
 @Service
 public class ListingStockServiceImpl implements ListingStockService {
-    private final ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Autowired
     private StockRepository stockRepository;
@@ -60,6 +60,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     private HolidayRepository holidayRepository;
 
     private Requests requests;
+
     @Value("${listingAPItoken}")
     private String listingAPItoken;
 
@@ -77,6 +78,12 @@ public class ListingStockServiceImpl implements ListingStockService {
 
     @Value("${HistoryListingApiUrl}")
     private String historyListingApiUrl;
+
+    //treba zbog testova Clock
+    private Clock clock = Clock.systemDefaultZone();
+    public void setClock(Clock clock) {
+        this.clock = clock;
+    }
 
 
     public ListingStockServiceImpl() {
@@ -146,13 +153,13 @@ public class ListingStockServiceImpl implements ListingStockService {
 
     }
 
-    private ListingStock createListingStock(String symbol, String companyName, String primaryExchange) {
+    public ListingStock createListingStock(String symbol, String companyName, String primaryExchange) {
         try {
             String listingBaseUrl = updateListingApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;
             String listingStockUrl = basicStockInfoApiUrl+symbol+"&apikey=" + alphaVantageAPIToken;
 
-            String baseResponse = requests.sendRequest(listingBaseUrl);
-            String stockResponse = requests.sendRequest(listingStockUrl);
+            String baseResponse = Requests.sendRequest(listingBaseUrl);
+            String stockResponse = Requests.sendRequest(listingStockUrl);
 
             // Fetch JSON data from the API
             JsonNode rootNode = objectMapper.readTree(baseResponse);
@@ -246,12 +253,11 @@ public class ListingStockServiceImpl implements ListingStockService {
         }
     }
 
-
     @Override
     public List<ListingHistory> fetchSingleListingHistory(String ticker){
         try {
             String apiUrl = historyListingApiUrl + ticker + "&outputsize=compact&apikey=" + alphaVantageAPIToken;
-            String response = requests.sendRequest(apiUrl);
+            String response = Requests.sendRequest(apiUrl);
             JsonNode rootNode = objectMapper.readTree(response);
 
             List<ListingHistory> listingHistories = new ArrayList<>();
@@ -275,6 +281,7 @@ public class ListingStockServiceImpl implements ListingStockService {
             }
             return listingHistories;
         }catch (Exception e){
+
             e.printStackTrace();
             return new ArrayList<>();
         }
@@ -298,7 +305,7 @@ public class ListingStockServiceImpl implements ListingStockService {
         return listingHistoriesModels.stream().mapToInt(this::addListingToHistory).sum();
     }
 
-    private ListingHistory createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp){
+    public ListingHistory createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp){
         // Get specific fields from each data node
         double open = dataNode.get("1. open").asDouble();
         double high = dataNode.get("2. high").asDouble();
