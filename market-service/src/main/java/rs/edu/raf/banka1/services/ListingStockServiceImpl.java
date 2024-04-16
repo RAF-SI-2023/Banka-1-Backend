@@ -253,7 +253,6 @@ public class ListingStockServiceImpl implements ListingStockService {
         }
     }
 
-
     @Override
     public List<ListingHistory> fetchSingleListingHistory(String ticker){
         try {
@@ -287,7 +286,6 @@ public class ListingStockServiceImpl implements ListingStockService {
             return new ArrayList<>();
         }
     }
-
 
     @Override
     public int addListingToHistory(ListingHistory listingHistory) {

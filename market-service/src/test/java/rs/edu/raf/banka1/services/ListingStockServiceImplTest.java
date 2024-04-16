@@ -28,6 +28,7 @@ import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.entities.Country;
 import rs.edu.raf.banka1.model.entities.Exchange;
 import rs.edu.raf.banka1.model.entities.Holiday;
+import rs.edu.raf.banka1.model.exceptions.APIException;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.threads.FetchingThread;
 import rs.edu.raf.banka1.utils.Constants;
@@ -240,7 +241,6 @@ public class ListingStockServiceImplTest {
     //zasto ovo ne radi u 21h?
 //    @Test
 //    public void testGetWorkingTimeById_Opened() {
-//
 //        ListingStock stock;
 //        Country country;
 //        Exchange exchange;
@@ -558,7 +558,6 @@ public class ListingStockServiceImplTest {
         verify(listingHistoryRepository, times(1)).saveAll(anyList());
     }
 
-
     @Test
     public void testFetchSingleListingHistory() {
         // Arrange
@@ -610,21 +609,6 @@ public class ListingStockServiceImplTest {
         // Verify
         verify(stockRepository, times(1)).saveAll(listingStocks);
     }
-
-
-//    @Test
-//    public void testFetchNListingsHistoryThrowsException() {
-//        // Mock the fetchNStocks method to throw an exception
-//        doThrow(new RuntimeException("Test exception")).when(listingStockService).fetchNStocks(anyInt());
-//
-//        // Call the method under test
-//        List<ListingHistory> result = listingStockService.fetchNListingsHistory(10);
-//
-//        // Assert that the exception was thrown
-//        verify(listingStockService, times(1)).fetchNStocks(10);
-//        verify(listingStockService, never()).fetchSingleListingHistory(anyString());
-//        assertTrue(result.isEmpty());
-//    }
 
     @Test
     public void getAlphaVantageApiTokenTest(){
@@ -852,12 +836,6 @@ public class ListingStockServiceImplTest {
         stocks.add(stock2);
         int n = 2;
 
-//        ListingHistory history1 = new ListingHistory();
-//        ListingHistory history2 = new ListingHistory();
-//        List<ListingHistory> histories = new ArrayList<>();
-//        histories.add(history1);
-//        histories.add(history2);
-
         ObjectMapper objectMapper1 = new ObjectMapper();
         listingStockService.setObjectMapper(objectMapper1);
 
@@ -896,5 +874,156 @@ public class ListingStockServiceImplTest {
 
     }
 
+    @Test
+    public void fetchNListingsHistory_EmptyStockList() {
+        when(stockRepository.findAll()).thenReturn(Collections.emptyList());
+        List<ListingHistory> listingHistories = listingStockService.fetchNListingsHistory(2);
+        assertEquals(0, listingHistories.size());
+    }
 
+    @Test
+    public void testGetStockRepository() {
+        StockRepository result = listingStockService.getStockRepository();
+        assertEquals(stockRepository, result);
+    }
+    @Test
+    public void testGetExchangeRepository() {
+        ExchangeRepository result = listingStockService.getExchangeRepository();
+        assertEquals(exchangeRepository, result);
+    }
+    @Test
+    public void testGetCountryRepository() {
+        CountryRepository result = Mockito.mock(CountryRepository.class);
+        listingStockService.setCountryRepository(result);
+        assertEquals(listingStockService.getCountryRepository(), result);
+    }
+
+    @Test
+    public void testGetListingHolidayRepository(){
+        HolidayRepository result =Mockito.mock(HolidayRepository.class);
+        listingStockService.setHolidayRepository(result);
+        assertEquals(listingStockService.getHolidayRepository(),result);
+    }
+
+    @Test
+    public void testGetStockMapper(){
+        StockMapper result = Mockito.mock(StockMapper.class);
+        listingStockService.setStockMapper(result);
+        assertEquals( listingStockService.getStockMapper(),result);
+    }
+
+    @Test
+    public void testGetListingHistoryRepository(){
+        ListingHistoryRepository result =Mockito.mock(ListingHistoryRepository.class);
+        listingStockService.setListingHistoryRepository(result);
+        assertEquals(listingStockService.getListingHistoryRepository(),result);
+    }
+
+    @Test
+    public void testGetRequest(){
+        Requests result = new Requests();
+        listingStockService.setRequests(result);
+        assertEquals(listingStockService.getRequests(),result);
+    }
+
+
+    @Test
+    public void fetchNListingStocks(){
+//        Resource resource = new ClassPathResource(Constants.listingsFilePath,this.getClass().getClassLoader());
+
+        String baseResponse = "{\n" +
+                "    \"Global Quote\": {\n" +
+                "        \"01. symbol\": \"CDLX\",\n" +
+                "        \"02. open\": \"14.1800\",\n" +
+                "        \"03. high\": \"14.2300\",\n" +
+                "        \"04. low\": \"13.5500\",\n" +
+                "        \"05. price\": \"13.5700\",\n" +
+                "        \"06. volume\": \"650480\",\n" +
+                "        \"07. latest trading day\": \"2024-04-12\",\n" +
+                "        \"08. previous close\": \"14.3800\",\n" +
+                "        \"09. change\": \"-0.8100\",\n" +
+                "        \"10. change percent\": \"-5.6328%\"\n" +
+                "    }\n" +
+                "}";
+        String updateResponse = "{\n" +
+                "    \"Symbol\": \"CDLX\",\n" +
+                "    \"AssetType\": \"Common Stock\",\n" +
+                "    \"Name\": \"Cardlytics Inc\",\n" +
+                "    \"Description\": \"Cardlytics, Inc. operates an advertising platform within financial institutions' digital channels including online, mobile, email, and various real-time notifications in the United States and the United Kingdom. The company is headquartered in Atlanta, Georgia.\",\n" +
+                "    \"CIK\": \"1666071\",\n" +
+                "    \"Exchange\": \"NASDAQ\",\n" +
+                "    \"Currency\": \"USD\",\n" +
+                "    \"Country\": \"USA\",\n" +
+                "    \"Sector\": \"TECHNOLOGY\",\n" +
+                "    \"Industry\": \"SERVICES-COMPUTER PROGRAMMING, DATA PROCESSING, ETC.\",\n" +
+                "    \"Address\": \"675 PONCE DE LEON AVENUE, NE, SUITE 6000, ATLANTA, GA, US\",\n" +
+                "    \"FiscalYearEnd\": \"December\",\n" +
+                "    \"LatestQuarter\": \"2023-12-31\",\n" +
+                "    \"MarketCapitalization\": \"598560000\",\n" +
+                "    \"EBITDA\": \"-37209000\",\n" +
+                "    \"PERatio\": \"None\",\n" +
+                "    \"PEGRatio\": \"None\",\n" +
+                "    \"BookValue\": \"3.393\",\n" +
+                "    \"DividendPerShare\": \"None\",\n" +
+                "    \"DividendYield\": \"None\",\n" +
+                "    \"EPS\": \"-3.69\",\n" +
+                "    \"RevenuePerShareTTM\": \"8.47\",\n" +
+                "    \"ProfitMargin\": \"-0.436\",\n" +
+                "    \"OperatingMarginTTM\": \"-0.0867\",\n" +
+                "    \"ReturnOnAssetsTTM\": \"-0.0629\",\n" +
+                "    \"ReturnOnEquityTTM\": \"-0.778\",\n" +
+                "    \"RevenueTTM\": \"309204000\",\n" +
+                "    \"GrossProfitTTM\": \"115415000\",\n" +
+                "    \"DilutedEPSTTM\": \"-3.69\",\n" +
+                "    \"QuarterlyEarningsGrowthYOY\": \"-0.567\",\n" +
+                "    \"QuarterlyRevenueGrowthYOY\": \"0.081\",\n" +
+                "    \"AnalystTargetPrice\": \"17.67\",\n" +
+                "    \"AnalystRatingStrongBuy\": \"0\",\n" +
+                "    \"AnalystRatingBuy\": \"2\",\n" +
+                "    \"AnalystRatingHold\": \"1\",\n" +
+                "    \"AnalystRatingSell\": \"0\",\n" +
+                "    \"AnalystRatingStrongSell\": \"0\",\n" +
+                "    \"TrailingPE\": \"-\",\n" +
+                "    \"ForwardPE\": \"-\",\n" +
+                "    \"PriceToSalesRatioTTM\": \"1.936\",\n" +
+                "    \"PriceToBookRatio\": \"4.44\",\n" +
+                "    \"EVToRevenue\": \"2.499\",\n" +
+                "    \"EVToEBITDA\": \"-7.81\",\n" +
+                "    \"Beta\": \"1.466\",\n" +
+                "    \"52WeekHigh\": \"20.52\",\n" +
+                "    \"52WeekLow\": \"4.94\",\n" +
+                "    \"50DayMovingAverage\": \"10.15\",\n" +
+                "    \"200DayMovingAverage\": \"10.65\",\n" +
+                "    \"SharesOutstanding\": \"44109100\",\n" +
+                "    \"DividendDate\": \"None\",\n" +
+                "    \"ExDividendDate\": \"None\"\n" +
+                "}";
+        String baseUrl = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=CDLX&apikey=OF6BVKZOCXWHD9NS";
+        String updateUrl = "https://www.alphavantage.co/query?function=OVERVIEW&symbol=CDLX&apikey=OF6BVKZOCXWHD9NS";
+
+        ObjectMapper objectMapper1 = new ObjectMapper();
+        listingStockService.setObjectMapper(objectMapper1);
+
+        StockMapper stockMapper1 = new StockMapper();
+        listingStockService.setStockMapper(stockMapper1);
+        int n = 3;
+
+
+        try (MockedStatic<Requests> req = Mockito.mockStatic(Requests.class)) {
+            req.when(() -> Requests.sendRequest(startsWith("https://www.alphavantage.co/query?function=GLOBAL_QUOTE"))).thenReturn(baseResponse);
+            req.when(() -> Requests.sendRequest(startsWith("https://www.alphavantage.co/query?function=OVERVIEW"))).thenReturn(updateResponse);
+
+            when(exchangeRepository.findByExchangeName(any())).thenReturn(exchangeDT);
+            when(exchangeRepository.findByExchangeName(any())).thenReturn(exchangeDT);
+            when(exchangeRepository.findByExchangeName(any())).thenReturn(exchangeDT);
+
+
+            List<ListingStock> stocks = listingStockService.fetchNListingStocks(n);
+            assertEquals(3,stocks.size());
+        }
+
+
+
+
+    }
 }
