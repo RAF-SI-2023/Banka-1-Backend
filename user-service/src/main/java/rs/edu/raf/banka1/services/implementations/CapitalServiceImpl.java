@@ -60,6 +60,14 @@ public class CapitalServiceImpl implements CapitalService {
         capital.setTotal(total);
         capital.setReserved(reserved);
 
+        if(capital.getListingType().equals(ListingType.STOCK)) {
+            capital.setTicker(this.marketService.getStockById(capital.getListingId()).getTicker());
+        } else if(capital.getListingType().equals(ListingType.FUTURE)) {
+            capital.setTicker(this.marketService.getFutureById(capital.getListingId()).getTicker());
+        } else if(capital.getListingType().equals(ListingType.FOREX)) {
+            capital.setTicker(this.marketService.getForexById(capital.getListingId()).getTicker());
+        }
+
         return capital;
     }
 
