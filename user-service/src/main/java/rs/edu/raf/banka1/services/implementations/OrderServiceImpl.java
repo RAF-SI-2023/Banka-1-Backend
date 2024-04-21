@@ -82,7 +82,7 @@ public class OrderServiceImpl implements OrderService {
                 currentAuth.setLimitNow(currentAuth.getLimitNow() + order.getPrice());
             }
 
-            if (!orderRequiresApprove(currentAuth)) {
+            if (!orderRequiresApprove(currentAuth) && !order.getStatus().equals(OrderStatus.PROCESSING)) {
                 order.setStatus(OrderStatus.APPROVED);
             } else {
                 order.setStatus(OrderStatus.PROCESSING);
@@ -91,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
         } else {
             order.setStatus(OrderStatus.APPROVED);
         }
-        
+
         orderRepository.save(order);
 
         //Will automatically throw an exception if there is insufficient capital to create order
@@ -151,14 +151,18 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public DecideOrderResponse decideOrder(Long orderId, String status, Employee currentAuth) {
-        MarketOrder marketOrder = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
+        Optional<MarketOrder> marketOrderOpt = this.orderRepository.fetchById(orderId);
+        if(marketOrderOpt.isEmpty()) {
+            return DecideOrderResponse.NOT_POSSIBLE;
+        }
+        MarketOrder marketOrder = marketOrderOpt.get();
         if(!marketOrder.getStatus().equals(OrderStatus.PROCESSING)) return DecideOrderResponse.NOT_POSSIBLE;
 
         if(status.toUpperCase().equals(OrderStatus.APPROVED.name()) ||
             status.toUpperCase().equals(OrderStatus.DENIED.name())) {
             marketOrder.setStatus(OrderStatus.valueOf(status.toUpperCase()));
             marketOrder.setUpdatedAt(Instant.now());
-//            if(status.toUpperCase().equals(OrderStatus.APPROVED.name())) marketOrder.setApprovedBy(currentAuth);
+            if(status.toUpperCase().equals(OrderStatus.APPROVED.name())) marketOrder.setApprovedBy(currentAuth);
             this.orderRepository.save(marketOrder);
 
             return DecideOrderResponse.valueOf(status.toUpperCase());

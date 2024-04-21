@@ -31,14 +31,20 @@ public class FuturesServiceImpl implements FuturesService {
     private final FutureRepository futureRepository;
     private final ListingHistoryRepository listingHistoryRepository;
     private final FutureMapper futureMapper;
-    private final ChromeOptions options;
     private final ListingStockService listingStockService;
+    private final DriverService driverService;
+    private WebDriver driver;
     @Autowired
-    public FuturesServiceImpl(FutureRepository futureRepository, ListingHistoryRepository listingHistoryRepository, FutureMapper futureMapper, ListingStockService listingStockService) {
+    public FuturesServiceImpl(FutureRepository futureRepository,
+                              ListingHistoryRepository listingHistoryRepository,
+                              FutureMapper futureMapper,
+                              ListingStockService listingStockService,
+                              DriverService driverService) {
         this.futureRepository = futureRepository;
         this.listingHistoryRepository = listingHistoryRepository;
         this.futureMapper = futureMapper;
         this.listingStockService = listingStockService;
+        this.driverService = driverService;
 
         // Use WebDriverManager to setup ChromeDriver
         WebDriverManager.chromedriver().setup();
@@ -55,15 +61,13 @@ public class FuturesServiceImpl implements FuturesService {
         monthsCode.put("Oct", "V");
         monthsCode.put("Nov", "X");
         monthsCode.put("Dec", "Z");
-        options = new ChromeOptions();
-        options.addArguments("--headless");
     }
 
 
     @Override
     public List<ListingFuture> fetchNFutures(int n) {
 
-        WebDriver driver = new ChromeDriver(options);
+        driver = driverService.createNewDriver();
 
         var rows = scrapeFuturesTable(driver).subList(0, n);
         var futureUrls = extractFutureUrls(rows).subList(0, n);
@@ -245,7 +249,7 @@ public class FuturesServiceImpl implements FuturesService {
 
     @Override
     public List<ListingHistory> fetchNFutureHistories(List<ListingFuture> listingFutures, int n) {
-        WebDriver driver = new ChromeDriver(options);
+        driver = driverService.createNewDriver();
         List<ListingHistory> histories = new ArrayList<>();
         for (var future: listingFutures) {
             histories.addAll(Objects.requireNonNull(fetchNSingleFutureHistory(future, n, driver)));
@@ -307,7 +311,7 @@ public class FuturesServiceImpl implements FuturesService {
         String ticker = future.getTicker();
         listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
         if(listingHistories.isEmpty()) {
-            WebDriver driver = new ChromeDriver(options);
+            driver = driverService.createNewDriver();
             listingHistories = fetchNSingleFutureHistory(future, maxFutureHistories, driver);
             driver.quit();
             listingStockService.addAllListingsToHistory(listingHistories);
@@ -349,5 +353,10 @@ public class FuturesServiceImpl implements FuturesService {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    public void setDriver(WebDriver driver) {
+        this.driver = driver;
     }
 }

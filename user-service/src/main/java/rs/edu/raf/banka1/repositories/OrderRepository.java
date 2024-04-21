@@ -41,5 +41,8 @@ public interface OrderRepository extends JpaRepository<MarketOrder, Long> {
     @Query("update MarketOrder m set m.status = ?1 where m.id = ?2")
     int cancelOrder(OrderStatus status, Long id);
 
+    @Query("SELECT mo FROM MarketOrder mo WHERE mo.id = :id")
+    Optional<MarketOrder> fetchById(Long id);
+
     List<MarketOrder> getAllByOwner(User owner);
 }
