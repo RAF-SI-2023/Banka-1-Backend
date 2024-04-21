@@ -166,6 +166,7 @@ public class CapitalServiceImpl implements CapitalService {
                 throw new NotEnoughCapitalAvailableException();
             }
             bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() - amount);
+            bankAccountRepository.save(bankAccount);
         }
 
         capitalRepository.save(capital);
@@ -202,6 +203,7 @@ public class CapitalServiceImpl implements CapitalService {
 
         if(bankAccount != null) {
             bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() + amount);
+            bankAccountRepository.save(bankAccount);
         }
 
         capitalRepository.save(capital);
@@ -218,6 +220,7 @@ public class CapitalServiceImpl implements CapitalService {
         if(bankAccount != null) {
             bankAccount.setBalance(bankAccount.getBalance() + amount);
             bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() + amount);
+            bankAccountRepository.save(bankAccount);
         }
 
         capitalRepository.save(capital);
@@ -241,6 +244,7 @@ public class CapitalServiceImpl implements CapitalService {
             }
             bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() - amount);
             bankAccount.setBalance(bankAccount.getBalance() - amount);
+            bankAccountRepository.save(bankAccount);
         }
 
         capitalRepository.save(capital);

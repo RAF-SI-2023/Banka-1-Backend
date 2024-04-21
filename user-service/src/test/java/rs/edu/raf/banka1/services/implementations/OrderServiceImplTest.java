@@ -381,7 +381,7 @@ class OrderServiceImplTest {
         employee.setOrderlimit(1000.0);
         employee.setLimitNow(800.0);
 
-        boolean requiresApprove = orderService.orderRequiresApprove(employee);
+        boolean requiresApprove = orderService.adjustAgentLimit(employee,5d);
 
         assertTrue(requiresApprove);
     }
@@ -393,7 +393,7 @@ class OrderServiceImplTest {
         employee.setOrderlimit(1000.0);
         employee.setLimitNow(200.0);
 
-        boolean requiresApprove = orderService.orderRequiresApprove(employee);
+        boolean requiresApprove = orderService.adjustAgentLimit(employee,90d);
 
         assertFalse(requiresApprove);
     }
@@ -405,7 +405,7 @@ class OrderServiceImplTest {
         employee.setOrderlimit(null);
         employee.setLimitNow(null);
 
-        boolean requiresApprove = orderService.orderRequiresApprove(employee);
+        boolean requiresApprove = orderService.adjustAgentLimit(employee,90d);
 
         assertFalse(requiresApprove);
     }

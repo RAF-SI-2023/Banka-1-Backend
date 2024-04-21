@@ -75,20 +75,9 @@ public class OrderServiceImpl implements OrderService {
         order.setOwner(currentAuth);
         order.setProcessedNumber(0L);
 
-        if(currentAuth.getPosition().equalsIgnoreCase(Constants.AGENT)) {
-            if(currentAuth.getOrderlimit() < currentAuth.getLimitNow() + order.getPrice()) {
-                order.setStatus(OrderStatus.PROCESSING);
-            } else {
-                currentAuth.setLimitNow(currentAuth.getLimitNow() + order.getPrice());
-            }
-
-            if (!orderRequiresApprove(currentAuth) && !order.getStatus().equals(OrderStatus.PROCESSING)) {
-                order.setStatus(OrderStatus.APPROVED);
-            } else {
-                order.setStatus(OrderStatus.PROCESSING);
-            }
-
-        } else {
+        if(adjustAgentLimit(currentAuth,order.getPrice())){
+            order.setStatus(OrderStatus.PROCESSING);
+        }else {
             order.setStatus(OrderStatus.APPROVED);
         }
 
@@ -162,8 +151,14 @@ public class OrderServiceImpl implements OrderService {
             status.toUpperCase().equals(OrderStatus.DENIED.name())) {
             marketOrder.setStatus(OrderStatus.valueOf(status.toUpperCase()));
             marketOrder.setUpdatedAt(Instant.now());
-            if(status.toUpperCase().equals(OrderStatus.APPROVED.name())) marketOrder.setApprovedBy(currentAuth);
+            if(status.toUpperCase().equals(OrderStatus.APPROVED.name())){
+                marketOrder.setApprovedBy(currentAuth);
+                currentAuth.setLimitNow(currentAuth.getLimitNow() + marketOrder.getPrice());
+                reserveStockCapital(marketOrder);
+            }
             this.orderRepository.save(marketOrder);
+            this.employeeRepository.save(currentAuth);
+
 
             return DecideOrderResponse.valueOf(status.toUpperCase());
         }
@@ -219,8 +214,37 @@ public class OrderServiceImpl implements OrderService {
                 Math.min(0.14 * price, 7) : Math.min(0.24 * price, 12);
     }
 
-    boolean orderRequiresApprove(final Employee currentAuth) {
-        return currentAuth.getRequireApproval() || (currentAuth.getOrderlimit() != null && currentAuth.getLimitNow() != null && currentAuth.getLimitNow() >= currentAuth.getOrderlimit());
+    /*
+    if(currentAuth.getPosition().equalsIgnoreCase(Constants.AGENT)) {
+            if(currentAuth.getOrderlimit() < currentAuth.getLimitNow() + order.getPrice()) {
+                order.setStatus(OrderStatus.PROCESSING);
+            } else {
+                currentAuth.setLimitNow(currentAuth.getLimitNow() + order.getPrice());
+            }
+
+            if (!orderRequiresApprove(currentAuth) && !order.getStatus().equals(OrderStatus.PROCESSING)) {
+                order.setStatus(OrderStatus.APPROVED);
+            } else {
+                order.setStatus(OrderStatus.PROCESSING);
+            }
+
+        } else {
+            order.setStatus(OrderStatus.APPROVED);
+        }
+     */
+    boolean adjustAgentLimit(final Employee currentAuth, Double orderPrice) {
+        if(!currentAuth.getPosition().equalsIgnoreCase(Constants.AGENT)){
+            return false;
+        }
+        boolean exceedLimit = currentAuth.getOrderlimit() != null && currentAuth.getLimitNow() != null &&
+            currentAuth.getLimitNow() + orderPrice >= currentAuth.getOrderlimit();
+        if(!exceedLimit && currentAuth.getLimitNow() != null){
+            currentAuth.setLimitNow(currentAuth.getLimitNow() + orderPrice);
+            employeeRepository.save(currentAuth);
+        }
+        return currentAuth.getRequireApproval() ||
+            (currentAuth.getOrderlimit() != null && currentAuth.getLimitNow() != null &&
+                currentAuth.getLimitNow() + orderPrice >= currentAuth.getOrderlimit());
     }
 
     void reserveStockCapital(MarketOrder order) {
