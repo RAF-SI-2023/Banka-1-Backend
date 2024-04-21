@@ -14,8 +14,8 @@ import java.util.NoSuchElementException;
 public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
-        Logger.info("Error: email address must be unique");
-        return new ResponseEntity<>("Email address must be unique", HttpStatus.CONFLICT);
+        Logger.info("Error: Data integrity violation upon update or insert");
+        return new ResponseEntity<>("Data integrity violation upon update or insert", HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(NoSuchElementException.class)

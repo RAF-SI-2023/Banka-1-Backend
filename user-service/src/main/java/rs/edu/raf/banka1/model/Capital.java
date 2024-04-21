@@ -27,4 +27,6 @@ public class Capital {
     private Double total;
 
     private Double reserved;
+
+    private String ticker;
 }
