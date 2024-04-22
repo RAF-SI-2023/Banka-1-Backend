@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.OrderDto;
 import rs.edu.raf.banka1.dtos.TransactionDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
+import rs.edu.raf.banka1.exceptions.InvalidOrderListingAmountException;
+import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
+import rs.edu.raf.banka1.exceptions.OrderListingNotFoundByIdException;
 import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.*;
@@ -66,29 +69,22 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void createOrder(final CreateOrderRequest request, final Employee currentAuth) {
         final MarketOrder order = orderMapper.requestToMarketOrder(request, currentAuth);
+        if(order.getContractSize() <= 0) throw new InvalidOrderListingAmountException();
         ListingBaseDto listingBaseDto = getListingByOrder(order);
 
-        if(listingBaseDto == null) return;
+        if(listingBaseDto == null) throw new OrderListingNotFoundByIdException(order.getListingId());
 
         order.setPrice(calculatePrice(order,listingBaseDto,order.getContractSize()));
         order.setFee(calculateFee(request.getLimitValue(), order.getPrice()));
         order.setOwner(currentAuth);
         order.setProcessedNumber(0L);
 
-        if(currentAuth.getPosition().equalsIgnoreCase(Constants.AGENT)) {
-            if(currentAuth.getOrderlimit() < currentAuth.getLimitNow() + order.getPrice()) {
-                order.setStatus(OrderStatus.PROCESSING);
-            } else {
-                currentAuth.setLimitNow(currentAuth.getLimitNow() + order.getPrice());
-            }
+        if(!capitalService.hasEnoughCapitalForOrder(order))
+            throw new NotEnoughCapitalAvailableException();
 
-            if (!orderRequiresApprove(currentAuth) && !order.getStatus().equals(OrderStatus.PROCESSING)) {
-                order.setStatus(OrderStatus.APPROVED);
-            } else {
-                order.setStatus(OrderStatus.PROCESSING);
-            }
-
-        } else {
+        if(adjustAgentLimit(currentAuth,order.getPrice())){
+            order.setStatus(OrderStatus.PROCESSING);
+        }else {
             order.setStatus(OrderStatus.APPROVED);
         }
 
@@ -158,13 +154,21 @@ public class OrderServiceImpl implements OrderService {
         MarketOrder marketOrder = marketOrderOpt.get();
         if(!marketOrder.getStatus().equals(OrderStatus.PROCESSING)) return DecideOrderResponse.NOT_POSSIBLE;
 
+        Employee ownerEmployee = marketOrder.getOwner();
+
         if(status.toUpperCase().equals(OrderStatus.APPROVED.name()) ||
             status.toUpperCase().equals(OrderStatus.DENIED.name())) {
             marketOrder.setStatus(OrderStatus.valueOf(status.toUpperCase()));
             marketOrder.setUpdatedAt(Instant.now());
-            if(status.toUpperCase().equals(OrderStatus.APPROVED.name())) marketOrder.setApprovedBy(currentAuth);
+            if(status.toUpperCase().equals(OrderStatus.APPROVED.name())){
+                marketOrder.setApprovedBy(currentAuth);
+                if(ownerEmployee.getOrderlimit() != null && ownerEmployee.getLimitNow() != null) {
+                    ownerEmployee.setLimitNow(Math.min(ownerEmployee.getLimitNow() + marketOrder.getPrice(), ownerEmployee.getOrderlimit()));
+                    this.employeeRepository.save(marketOrder.getOwner());
+                }
+                reserveStockCapital(marketOrder);
+            }
             this.orderRepository.save(marketOrder);
-
             return DecideOrderResponse.valueOf(status.toUpperCase());
         }
 
@@ -219,12 +223,23 @@ public class OrderServiceImpl implements OrderService {
                 Math.min(0.14 * price, 7) : Math.min(0.24 * price, 12);
     }
 
-    boolean orderRequiresApprove(final Employee currentAuth) {
-        return currentAuth.getRequireApproval() || (currentAuth.getOrderlimit() != null && currentAuth.getLimitNow() != null && currentAuth.getLimitNow() >= currentAuth.getOrderlimit());
+    boolean adjustAgentLimit(final Employee currentAuth, Double orderPrice) {
+        if(!currentAuth.getPosition().equalsIgnoreCase(Constants.AGENT)){
+            return false;
+        }
+        boolean exceedLimit = currentAuth.getOrderlimit() != null && currentAuth.getLimitNow() != null &&
+            currentAuth.getLimitNow() + orderPrice >= currentAuth.getOrderlimit();
+        if(!exceedLimit && currentAuth.getLimitNow() != null){
+            currentAuth.setLimitNow(currentAuth.getLimitNow() + orderPrice);
+            employeeRepository.save(currentAuth);
+        }
+        return currentAuth.getRequireApproval() ||
+            (currentAuth.getOrderlimit() != null && currentAuth.getLimitNow() != null &&
+                currentAuth.getLimitNow() + orderPrice >= currentAuth.getOrderlimit());
     }
 
     void reserveStockCapital(MarketOrder order) {
-        Capital bankAccountCapital = capitalService.getCapitalByCurrencyCode("RSD");
+        Capital bankAccountCapital = capitalService.getCapitalByCurrencyCode(Constants.DEFAULT_CURRENCY);
         Capital securityCapital = capitalService.getCapitalByListingIdAndType(order.getListingId(), order.getListingType());
 
         if(order.getOrderType().equals(OrderType.BUY)) {

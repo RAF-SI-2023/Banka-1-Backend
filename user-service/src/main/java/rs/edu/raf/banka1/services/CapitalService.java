@@ -2,10 +2,7 @@ package rs.edu.raf.banka1.services;
 
 import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.dtos.CapitalProfitDto;
-import rs.edu.raf.banka1.model.BankAccount;
-import rs.edu.raf.banka1.model.Capital;
-import rs.edu.raf.banka1.model.Currency;
-import rs.edu.raf.banka1.model.ListingType;
+import rs.edu.raf.banka1.model.*;
 
 import java.util.List;
 
@@ -29,4 +26,5 @@ public interface CapitalService {
     Double estimateBalanceFuture(Long futureId);
     Double estimateBalanceStock(Long stockId);
     List<CapitalProfitDto> getListingCapitalsQuantity();
+    boolean hasEnoughCapitalForOrder(MarketOrder order);
 }
