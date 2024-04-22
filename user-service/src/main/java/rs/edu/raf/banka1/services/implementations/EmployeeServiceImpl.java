@@ -135,6 +135,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = optionalEmployee.get();
         employee.setActivationToken(null);
         employee.setPassword(passwordEncoder.encode(password));
+        employee.setActive(true);
         employeeRepository.save(employee);
 
         return new ActivateAccountResponse(employee.getUserId());
