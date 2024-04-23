@@ -100,7 +100,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Double getActualPriceForOrderId(Long orderId) {
-        return transactionRepository.getSumByOrderId(orderId);
+    public Double getActualBuyPriceForOrderId(Long orderId) {
+        return transactionRepository.getBuySumByOrderId(orderId);
+    }
+
+    @Override
+    public Double getActualSellPriceForOrderId(Long orderId) {
+        return transactionRepository.getSellSumByOrderId(orderId);
     }
 }

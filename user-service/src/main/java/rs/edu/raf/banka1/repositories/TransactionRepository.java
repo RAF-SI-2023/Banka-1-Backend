@@ -16,7 +16,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     List<Transaction> getTransactionsByMarketOrder_Id(Long marketOrder_id);
 
-    @Query("SELECT sum(t.buy + t.sell) from Transaction t where t.marketOrder.id = :orderId")
-    Double getSumByOrderId(Long orderId);
+    @Query("SELECT sum(t.buy) from Transaction t where t.marketOrder.id = :orderId")
+    Double getBuySumByOrderId(Long orderId);
+
+    @Query("SELECT sum(t.sell) from Transaction t where t.marketOrder.id = :orderId")
+    Double getSellSumByOrderId(Long orderId);
 
 }

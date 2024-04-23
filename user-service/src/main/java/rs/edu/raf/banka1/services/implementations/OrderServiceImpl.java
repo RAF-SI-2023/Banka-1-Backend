@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.services.implementations;
 
 
+import jakarta.transaction.Transactional;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.OrderDto;
@@ -258,16 +259,78 @@ public class OrderServiceImpl implements OrderService {
     }
 
     void updateLimit(Long orderId) {
-        List<TransactionDto> transactionsForOrder=this.transactionService.getTransactionsForOrderId(orderId);
+//        List<TransactionDto> transactionsForOrder=this.transactionService.getTransactionsForOrderId(orderId);
         MarketOrder order = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
         Employee owner = order.getOwner();
-        double spentMoney = transactionsForOrder.stream()
-                .mapToDouble(TransactionDto::getBuy)
-                .sum();
+        double spentMoney = 0;
+        if(order.getOrderType().equals(OrderType.BUY)) {
+           spentMoney = transactionService.getActualBuyPriceForOrderId(orderId);
+        } else {
+            spentMoney = transactionService.getActualSellPriceForOrderId(orderId);
+        }
 
         double difference = spentMoney - order.getPrice();
 
-        owner.setLimitNow(owner.getLimitNow() + Math.max(difference, 0) - Math.min(difference, 0));
+        double newLimit = owner.getLimitNow() + Math.max(difference, 0) - Math.min(difference, 0);
+
+        if(newLimit > owner.getOrderlimit()) {
+            //Limit je predjen, stavi order na processing
+            order.setStatus(OrderStatus.PROCESSING);
+            this.orderRepository.save(order);
+        }
+
+        owner.setLimitNow(newLimit);
         this.employeeRepository.save(owner);
     }
+
+    @Override
+    public void updateEmployeeLimit(Long orderId) {
+
+    }
+
+    private Double getSpentMoneyForOrder(Long orderId) {
+        MarketOrder order = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
+        Employee owner = order.getOwner();
+
+        double spentMoney = 0;
+        if(order.getOrderType().equals(OrderType.BUY)) {
+            spentMoney = transactionService.getActualBuyPriceForOrderId(orderId);
+        } else {
+            spentMoney = transactionService.getActualSellPriceForOrderId(orderId);
+        }
+
+        return spentMoney;
+    }
+
+    @Transactional
+    private void updateLimitOnTransaction(Long orderId) {
+        MarketOrder order = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
+        Employee owner = order.getOwner();
+
+        double spentMoney = getSpentMoneyForOrder(orderId);
+
+        if(spentMoney > order.getPrice()) {
+            double difference = spentMoney - order.getPrice();
+            double newLimit = owner.getLimitNow() + difference;
+            owner.setLimitNow(newLimit);
+            this.employeeRepository.save(owner);
+        }
+
+        if(owner.getLimitNow() > owner.getOrderlimit()) {
+            //Limit je predjen, stavi order na processing
+            order.setStatus(OrderStatus.PROCESSING);
+            this.orderRepository.save(order);
+        }
+
+        //TODO finish the algorithm for limit updates
+
+    }
+
+    private void updateLimitOnFinish(Long orderId) {
+        MarketOrder order = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
+        Employee owner = order.getOwner();
+        //TODO: Finish implementing
+
+    }
+
 }

@@ -19,5 +19,6 @@ public interface TransactionService {
 
     List<TransactionDto> getTransactionsForOrderId(Long orderId);
 
-    Double getActualPriceForOrderId(Long orderId);
+    Double getActualBuyPriceForOrderId(Long orderId);
+    Double getActualSellPriceForOrderId(Long orderId);
 }
