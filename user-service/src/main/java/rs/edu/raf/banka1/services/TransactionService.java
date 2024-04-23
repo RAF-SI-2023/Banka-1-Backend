@@ -18,4 +18,6 @@ public interface TransactionService {
     List<TransactionDto> getTransactionsForEmployee(Long userId);
 
     List<TransactionDto> getTransactionsForOrderId(Long orderId);
+
+    Double getActualPriceForOrderId(Long orderId);
 }

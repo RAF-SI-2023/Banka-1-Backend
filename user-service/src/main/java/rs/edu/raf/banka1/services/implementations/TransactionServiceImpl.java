@@ -98,4 +98,9 @@ public class TransactionServiceImpl implements TransactionService {
     public List<TransactionDto> getTransactionsForOrderId(Long orderId) {
         return this.transactionRepository.getTransactionsByMarketOrder_Id(orderId).stream().map(transactionMapper::transactionToTransactionDto).collect(Collectors.toList());
     }
+
+    @Override
+    public Double getActualPriceForOrderId(Long orderId) {
+        return transactionRepository.getSumByOrderId(orderId);
+    }
 }

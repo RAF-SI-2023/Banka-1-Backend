@@ -1,8 +1,8 @@
 package rs.edu.raf.banka1.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import rs.edu.raf.banka1.model.MarketOrder;
 import rs.edu.raf.banka1.model.Transaction;
 
 import java.util.List;
@@ -15,5 +15,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> getTransactionsByEmployee_UserId(Long id);
 
     List<Transaction> getTransactionsByMarketOrder_Id(Long marketOrder_id);
+
+    @Query("SELECT sum(t.buy + t.sell) from Transaction t where t.marketOrder.id = :orderId")
+    Double getSumByOrderId(Long orderId);
 
 }
