@@ -1,0 +1,46 @@
+presubmits:
+  - name: pull-banka-1-backend-market-service-test
+    run_if_chaned: "(market-service/|docker-compose.yaml.example|docker-compose.yaml.example.prod|pom.xml|.prow/)"
+    decorate: true
+    spec:
+      containers:
+        - image: harbor.k8s.elab.rs/base-images/base:java-21-node-18-docker
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+
+              collectJUnitCoverage() {
+                set +e
+
+                junit_source_directory="./target/surefire-reports/"
+                junit_dest_directory="/logs/artifacts/"
+
+                counter=1
+
+                for file in "$junit_source_directory"/*.xml; do
+                  cp "$file" "$junit_dest_directory/junit.$counter.xml"
+                  ((counter++))
+                done
+
+                cp -r ./target/site.jacoco /logs/artifacts
+                echo "${GCSWEB_URL}/prow-logs/pr-logs/pull/${REPO_OWNER}_${REPO_NAME}/${PULL_NUMBER}/${JOB_NAME}/${BUILD_NUMBER}/artifacts/jacoco/index.html" > /logs/artifacts/coverage.link.txt
+              }
+
+              start-docker.sh
+
+              docker compose up -d mysql
+
+              sleep 120
+
+              SERVICE_NAME="market-service"
+              cd "$SERVICE_NAME"
+
+              trap collectJUnitCoverage EXIT
+
+              mvn -B clean test verify -Dcheckstyle.skip=true
+
+          securityContext:
+            privileged: true
+          imagePullPolicy: Always

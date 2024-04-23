@@ -10,14 +10,12 @@ import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
 import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
 import rs.edu.raf.banka1.mapper.CapitalMapper;
-import rs.edu.raf.banka1.model.BankAccount;
-import rs.edu.raf.banka1.model.Capital;
-import rs.edu.raf.banka1.model.Currency;
-import rs.edu.raf.banka1.model.ListingType;
+import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.CapitalRepository;
 import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.MarketService;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.List;
 
@@ -59,6 +57,14 @@ public class CapitalServiceImpl implements CapitalService {
         capital.setListingId(listingId);
         capital.setTotal(total);
         capital.setReserved(reserved);
+
+        if(capital.getListingType().equals(ListingType.STOCK)) {
+            capital.setTicker(this.marketService.getStockById(capital.getListingId()).getTicker());
+        } else if(capital.getListingType().equals(ListingType.FUTURE)) {
+            capital.setTicker(this.marketService.getFutureById(capital.getListingId()).getTicker());
+        } else if(capital.getListingType().equals(ListingType.FOREX)) {
+            capital.setTicker(this.marketService.getForexById(capital.getListingId()).getTicker());
+        }
 
         return capital;
     }
@@ -153,14 +159,15 @@ public class CapitalServiceImpl implements CapitalService {
 
         capital.setReserved(capital.getReserved() + amount);
 
+        capitalRepository.save(capital);
+
         if(bankAccount != null) {
             if(bankAccount.getAvailableBalance() < amount) {
                 throw new NotEnoughCapitalAvailableException();
             }
             bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() - amount);
+            bankAccountRepository.save(bankAccount);
         }
-
-        capitalRepository.save(capital);
     }
     private void processReservationCommited(Capital capital, Double amount) {
         BankAccount bankAccount = capital.getBankAccount();
@@ -175,10 +182,15 @@ public class CapitalServiceImpl implements CapitalService {
         }
 
         capital.setTotal(capital.getTotal() - amount);
-        capital.setReserved(Math.min(capital.getReserved() - amount, 0)); // In case amount is higher than reserved
+        if(capital.getReserved() >= amount) {
+            capital.setReserved(capital.getReserved() - amount);
+        } else { // Amount higher than reserved
+            capital.setReserved(0d);
+        }
 
         if(bankAccount != null) {
             bankAccount.setBalance(bankAccount.getBalance() - amount);
+            bankAccountRepository.save(bankAccount);
         }
 
         capitalRepository.save(capital);
@@ -194,6 +206,7 @@ public class CapitalServiceImpl implements CapitalService {
 
         if(bankAccount != null) {
             bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() + amount);
+            bankAccountRepository.save(bankAccount);
         }
 
         capitalRepository.save(capital);
@@ -210,6 +223,7 @@ public class CapitalServiceImpl implements CapitalService {
         if(bankAccount != null) {
             bankAccount.setBalance(bankAccount.getBalance() + amount);
             bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() + amount);
+            bankAccountRepository.save(bankAccount);
         }
 
         capitalRepository.save(capital);
@@ -233,6 +247,7 @@ public class CapitalServiceImpl implements CapitalService {
             }
             bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() - amount);
             bankAccount.setBalance(bankAccount.getBalance() - amount);
+            bankAccountRepository.save(bankAccount);
         }
 
         capitalRepository.save(capital);
@@ -274,6 +289,30 @@ public class CapitalServiceImpl implements CapitalService {
                     return capitalMapper.capitalToCapitalProfitDto(capital, price);
                 })
                 .toList();
+    }
+
+    @Override
+    public boolean hasEnoughCapitalForOrder(MarketOrder order) {
+        if(order.getOrderType().equals(OrderType.BUY)) {
+            return checkCapitalForBuyOrder(order);
+        }
+        return checkCapitalForSellOrder(order);
+    }
+
+    private boolean checkCapitalForBuyOrder(MarketOrder order) {
+        Capital capital = this.capitalRepository.getCapitalByCurrency_CurrencyCode(Constants.DEFAULT_CURRENCY).orElseThrow(()-> new CapitalNotFoundByCodeException(Constants.DEFAULT_CURRENCY));
+
+        double available = capital.getTotal() - capital.getReserved();
+
+        return order.getPrice() <= available;
+    }
+
+    private boolean checkCapitalForSellOrder(MarketOrder order) {
+        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingType(order.getListingId(), order.getListingType()).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(order.getListingId(), order.getListingType()));
+
+        double available = capital.getTotal() - capital.getReserved();
+
+        return order.getContractSize() <= available;
     }
 }
 

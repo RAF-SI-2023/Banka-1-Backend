@@ -32,7 +32,7 @@ oauth.jwt.secret=secret_key
 
 
 # API TOKENS:
-exchangeRateAPIToken=a97e7d453aa0cfb0295f5bba
+exchangeRateAPIToken=4459637dd05bd06367a6fa32
 
 # API URLs:
 exchangeRateApiUrl= https://v6.exchangerate-api.com/v6/

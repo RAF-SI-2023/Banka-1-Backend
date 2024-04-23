@@ -32,4 +32,6 @@ public class Constants {
 
     // subject to change on production
     public static final String marketServiceUrl = "http://localhost:8081";
+
+
 }
