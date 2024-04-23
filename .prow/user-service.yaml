@@ -45,10 +45,7 @@ presubmits:
 
               start-docker.sh
 
-              docker compose up -d mysql-user
-
-              docker compose up -d mysql
-
+              docker compose -f docker.compose.yaml.example up -d mysql
 
               sleep 120
 
@@ -56,7 +53,6 @@ presubmits:
               cd "$SERVICE_NAME"
 
               trap collectJUnitCoverage EXIT
-
 
               mvn -B clean test verify -Dcheckstyle.skip=true
 
