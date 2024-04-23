@@ -168,6 +168,13 @@ public class OrderServiceImpl implements OrderService {
                 }
                 reserveStockCapital(marketOrder);
             }
+            if(status.toUpperCase().equals(OrderStatus.DENIED.name())){
+                if(ownerEmployee.getOrderlimit() != null && ownerEmployee.getLimitNow() != null) {
+                    ownerEmployee.setLimitNow(Math.max(ownerEmployee.getLimitNow() - marketOrder.getPrice(), 0));
+                    this.employeeRepository.save(marketOrder.getOwner());
+                }
+                reserveStockCapital(marketOrder);
+            }
             this.orderRepository.save(marketOrder);
             return DecideOrderResponse.valueOf(status.toUpperCase());
         }
