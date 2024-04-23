@@ -175,11 +175,11 @@ public class TransferServiceImpl implements TransferService {
     }
 
     @Override
-    public void processTransfer(Long id) {
+    public String processTransfer(Long id) {
         Optional<Transfer> transferOpt = transferRepository.findById(id);
         if (transferOpt.isEmpty()) {
             Logger.error("Transfer not found for processing: {}", id);
-            return;
+            return "Transfer not found for processing";
         }
         Transfer transfer = transferOpt.get();
         BankAccount senderAccount = transfer.getSenderBankAccount();
@@ -204,7 +204,7 @@ public class TransferServiceImpl implements TransferService {
             transfer.setStatus(TransactionStatus.DENIED);
             transferRepository.save(transfer);
             Logger.info("Transfer {} denied. Reason: invalid parameters or insufficient balance.", id);
-            return;
+            return "Transfer denied. Invalid parameters or insufficient balance";
         }
 
         BankAccount rsdBank = bankAccountRepository.findBankByCurrencyCode("RSD").orElse(null);
@@ -228,7 +228,7 @@ public class TransferServiceImpl implements TransferService {
             Logger.info("Transfer {} denied. Reason: bank not found for currency conversion.", id);
             transfer.setStatus(TransactionStatus.DENIED);
             transferRepository.save(transfer);
-            return;
+            return "Transfer denied. Reason: bank not found for currency conversion.";
         }
 
         double exchangeRate = senderCurrency.getToRSD() * recipientCurrency.getFromRSD();
@@ -258,6 +258,7 @@ public class TransferServiceImpl implements TransferService {
 
         transferRepository.save(transfer);
         bankAccountRepository.saveAll(List.of(fromBank, toBank, senderAccount, recipientAccount));
+        return null;
     }
 
     @Override
