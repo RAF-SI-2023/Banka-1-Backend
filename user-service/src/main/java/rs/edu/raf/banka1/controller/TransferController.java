@@ -54,12 +54,13 @@ public class TransferController {
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Void> createTransfer(@RequestBody CreateTransferRequest createTransferRequest) {
+    public ResponseEntity<String> createTransfer(@RequestBody CreateTransferRequest createTransferRequest) {
         Long id = transferService.createTransfer(createTransferRequest);
-        if (id > -1) {
-            transferService.processTransfer(id);
+        if (id == -1L) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return ResponseEntity.ok().build();
+        String msg = transferService.processTransfer(id);
+        return msg == null ? ResponseEntity.ok().body("ok") : ResponseEntity.badRequest().body(msg);
     }
 
     @GetMapping(value = "/getAll/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
