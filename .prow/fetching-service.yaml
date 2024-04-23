@@ -10,7 +10,7 @@ presubmits:
             - -c
             - |
               set -euo pipefail
-
+              
               collectJUnitCoverage() {
                 set +e
 
@@ -24,12 +24,20 @@ presubmits:
                   ((counter++))
                 done
 
+                cp -r ./target/site/jacoco /logs/artifacts/
                 cp -r ./target/site.jacoco /logs/artifacts
                 echo "${GCSWEB_URL}/prow-logs/pr-logs/pull/${REPO_OWNER}_${REPO_NAME}/${PULL_NUMBER}/${JOB_NAME}/${BUILD_NUMBER}/artifacts/jacoco/index.html" > /logs/artifacts/coverage.link.txt
               }
 
               start-docker.sh
+              docker compose up -d mysql-user
 
+              sleep 120
+
+              SERVICE_NAME="user-service"
+              cd "$SERVICE_NAME"
+
+              trap collectJUnitCoverage EXIT
               docker compose up -d mysql
 
               sleep 120
