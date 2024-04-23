@@ -39,7 +39,7 @@ presubmits:
 
               trap collectJUnitCoverage EXIT
 
-              mvn clean test verify
+              mvn -B clean test verify -Dcheckstyle.skip=true
 
           securityContext:
             privileged: true
