@@ -83,4 +83,16 @@ public class GlobalExceptionHandler {
         Logger.info("Error: " + e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(InvalidOrderListingAmountException.class)
+    public ResponseEntity<String> handleInvalidOrderListingAmountException(InvalidOrderListingAmountException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(OrderListingNotFoundByIdException.class)
+    public ResponseEntity<String> handleOrderListingNotFoundByIdException(OrderListingNotFoundByIdException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }
