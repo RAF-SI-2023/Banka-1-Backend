@@ -11,6 +11,7 @@ presubmits:
             - |
               set -euo pipefail
 
+
               # Funkcija koja upload-uje JUnit report i JaCoCo coverage report nakon
               # završetka job-a. Prow može da parsira JUnit report i pokaže koji su
               # se sve testovi izvršili, koji testovi su prošli, a koji nisu.
@@ -20,6 +21,7 @@ presubmits:
               # uploaduje pre JaCoCo coverage report-a zato što JaCoCo coverage report
               # postoji samo ako se svi testovi završe uspešno, što nije slučaj za
               # JUnit report-e.
+
               collectJUnitCoverage() {
                 set +e
 
@@ -33,7 +35,11 @@ presubmits:
                   ((counter++))
                 done
 
+
                 cp -r ./target/site/jacoco /logs/artifacts/
+
+                cp -r ./target/site.jacoco /logs/artifacts
+
                 echo "${GCSWEB_URL}/prow-logs/pr-logs/pull/${REPO_OWNER}_${REPO_NAME}/${PULL_NUMBER}/${JOB_NAME}/${BUILD_NUMBER}/artifacts/jacoco/index.html" > /logs/artifacts/coverage.link.txt
               }
 
@@ -41,12 +47,17 @@ presubmits:
 
               docker compose up -d mysql-user
 
+              docker compose up -d mysql
+
+
               sleep 120
 
               SERVICE_NAME="user-service"
               cd "$SERVICE_NAME"
 
               trap collectJUnitCoverage EXIT
+
+
               mvn -B clean test verify -Dcheckstyle.skip=true
 
           securityContext:
