@@ -21,4 +21,6 @@ public interface TransactionService {
 
     Double getActualBuyPriceForOrderId(Long orderId);
     Double getActualSellPriceForOrderId(Long orderId);
+
+    Double getLastTransactionValueForOrder(MarketOrder order);
 }

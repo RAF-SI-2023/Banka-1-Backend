@@ -285,7 +285,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void updateEmployeeLimit(Long orderId) {
-
+        
     }
 
     private Double getSpentMoneyForOrder(Long orderId) {
@@ -302,15 +302,15 @@ public class OrderServiceImpl implements OrderService {
         return spentMoney;
     }
 
-    @Transactional
     private void updateLimitOnTransaction(Long orderId) {
         MarketOrder order = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
         Employee owner = order.getOwner();
 
         double spentMoney = getSpentMoneyForOrder(orderId);
-
         if(spentMoney > order.getPrice()) {
-            double difference = spentMoney - order.getPrice();
+            double lastTransactionValue = transactionService.getLastTransactionValueForOrder(order);
+            double previousDifference = Math.max(spentMoney - lastTransactionValue - order.getPrice(), 0);
+            double difference = spentMoney - order.getPrice() - previousDifference;
             double newLimit = owner.getLimitNow() + difference;
             owner.setLimitNow(newLimit);
             this.employeeRepository.save(owner);
@@ -321,16 +321,18 @@ public class OrderServiceImpl implements OrderService {
             order.setStatus(OrderStatus.PROCESSING);
             this.orderRepository.save(order);
         }
-
-        //TODO finish the algorithm for limit updates
-
     }
 
     private void updateLimitOnFinish(Long orderId) {
         MarketOrder order = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
         Employee owner = order.getOwner();
-        //TODO: Finish implementing
-
+        double spentMoney = getSpentMoneyForOrder(orderId);
+        if(spentMoney < order.getPrice()) {
+            double difference = order.getPrice() - spentMoney;
+            double newLimit = owner.getLimitNow() - difference;
+            owner.setLimitNow(newLimit);
+            this.employeeRepository.save(owner);
+        }
     }
 
 }
