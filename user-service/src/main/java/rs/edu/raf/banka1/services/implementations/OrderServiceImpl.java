@@ -1,11 +1,9 @@
 package rs.edu.raf.banka1.services.implementations;
 
 
-import jakarta.transaction.Transactional;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.OrderDto;
-import rs.edu.raf.banka1.dtos.TransactionDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
 import rs.edu.raf.banka1.exceptions.InvalidOrderListingAmountException;
 import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
@@ -191,7 +189,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void finishOrder(Long orderId) {
         this.orderRepository.finishOrder(orderId, OrderStatus.DONE);
-        updateLimit(orderId);
+//        updateLimit(orderId);
         this.scheduledFutureMap.get(orderId).cancel(false);
     }
 
@@ -264,9 +262,9 @@ public class OrderServiceImpl implements OrderService {
         Employee owner = order.getOwner();
         double spentMoney = 0;
         if(order.getOrderType().equals(OrderType.BUY)) {
-           spentMoney = transactionService.getActualBuyPriceForOrderId(orderId);
+           spentMoney = transactionService.getActualBuyPriceForOrder(order);
         } else {
-            spentMoney = transactionService.getActualSellPriceForOrderId(orderId);
+            spentMoney = transactionService.getActualSellPriceForOrder(order);
         }
 
         double difference = spentMoney - order.getPrice();
@@ -285,28 +283,29 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void updateEmployeeLimit(Long orderId) {
-        
+        MarketOrder order = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
+
+        updateLimitOnTransaction(order);
+
+        if(order.getContractSize().equals(order.getProcessedNumber()))
+            updateLimitOnFinish(order);
     }
 
-    private Double getSpentMoneyForOrder(Long orderId) {
-        MarketOrder order = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
-        Employee owner = order.getOwner();
-
+    private Double getSpentMoneyForOrder(MarketOrder order) {
         double spentMoney = 0;
         if(order.getOrderType().equals(OrderType.BUY)) {
-            spentMoney = transactionService.getActualBuyPriceForOrderId(orderId);
+            spentMoney = transactionService.getActualBuyPriceForOrder(order);
         } else {
-            spentMoney = transactionService.getActualSellPriceForOrderId(orderId);
+            spentMoney = transactionService.getActualSellPriceForOrder(order);
         }
 
         return spentMoney;
     }
 
-    private void updateLimitOnTransaction(Long orderId) {
-        MarketOrder order = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
+    private void updateLimitOnTransaction(MarketOrder order) {
         Employee owner = order.getOwner();
 
-        double spentMoney = getSpentMoneyForOrder(orderId);
+        double spentMoney = getSpentMoneyForOrder(order);
         if(spentMoney > order.getPrice()) {
             double lastTransactionValue = transactionService.getLastTransactionValueForOrder(order);
             double previousDifference = Math.max(spentMoney - lastTransactionValue - order.getPrice(), 0);
@@ -323,10 +322,9 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private void updateLimitOnFinish(Long orderId) {
-        MarketOrder order = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
+    private void updateLimitOnFinish(MarketOrder order) {
         Employee owner = order.getOwner();
-        double spentMoney = getSpentMoneyForOrder(orderId);
+        double spentMoney = getSpentMoneyForOrder(order);
         if(spentMoney < order.getPrice()) {
             double difference = order.getPrice() - spentMoney;
             double newLimit = owner.getLimitNow() - difference;
