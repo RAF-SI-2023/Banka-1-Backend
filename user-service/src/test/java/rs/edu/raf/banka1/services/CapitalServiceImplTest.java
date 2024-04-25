@@ -84,7 +84,7 @@ class CapitalServiceImplTest {
     @Nested
     class CreateCapitalForListingTests {
         @Test
-        @Ignore
+        @Disabled
         void shouldCreateCapitalForBankAccount() {
             ListingType listingType = ListingType.STOCK;
             Long listingId = 1L;
