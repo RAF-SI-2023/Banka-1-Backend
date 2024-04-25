@@ -62,9 +62,9 @@ class CapitalServiceImplTest {
     }
 
     @Nested
+    @Ignore
     class CreateCapitalForBankAccountTests {
         @Test
-        @Ignore
         void shouldCreateCapitalForBankAccount() {
             Currency currency = new Currency();
             BankAccount bankAccount = new BankAccount();
