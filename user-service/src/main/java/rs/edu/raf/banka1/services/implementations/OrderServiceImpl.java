@@ -162,7 +162,8 @@ public class OrderServiceImpl implements OrderService {
             if(status.toUpperCase().equals(OrderStatus.APPROVED.name())){
                 marketOrder.setApprovedBy(currentAuth);
                 if(ownerEmployee.getOrderlimit() != null && ownerEmployee.getLimitNow() != null) {
-                    ownerEmployee.setLimitNow(Math.min(ownerEmployee.getLimitNow() + marketOrder.getPrice(), ownerEmployee.getOrderlimit()));
+//                    ownerEmployee.setLimitNow(Math.min(ownerEmployee.getLimitNow() + marketOrder.getPrice(), ownerEmployee.getOrderlimit()));
+                    ownerEmployee.setLimitNow(ownerEmployee.getLimitNow() + marketOrder.getPrice()); // Voditi racuna na frontu da available ne ode u minus
                     this.employeeRepository.save(marketOrder.getOwner());
                 }
                 reserveStockCapital(marketOrder);
