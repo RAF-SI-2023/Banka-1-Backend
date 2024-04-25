@@ -153,8 +153,6 @@ public class OrderServiceImpl implements OrderService {
         MarketOrder marketOrder = marketOrderOpt.get();
         if(!marketOrder.getStatus().equals(OrderStatus.PROCESSING)) return DecideOrderResponse.NOT_POSSIBLE;
 
-        Employee ownerEmployee = marketOrder.getOwner();
-
         if(status.toUpperCase().equals(OrderStatus.APPROVED.name()) ||
             status.toUpperCase().equals(OrderStatus.DENIED.name())) {
             marketOrder.setStatus(OrderStatus.valueOf(status.toUpperCase()));
