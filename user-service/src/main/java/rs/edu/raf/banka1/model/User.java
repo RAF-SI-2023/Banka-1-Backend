@@ -54,6 +54,10 @@ public class User {
     @Column
     private String resetPasswordToken;
 
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
+
 //    @ManyToMany(fetch = FetchType.EAGER)
 //    @JoinTable(
 //            name = "user_permissions",
