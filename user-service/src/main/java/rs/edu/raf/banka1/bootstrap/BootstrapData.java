@@ -101,6 +101,8 @@ public class BootstrapData implements CommandLineRunner {
         seedPermissions();
         seedCurencies();
 
+        Company bank = createBankCompany();
+
         Employee user1 = new Employee();
         user1.setEmail("admin");
         user1.setPassword(passwordEncoder.encode("user1"));
@@ -111,6 +113,7 @@ public class BootstrapData implements CommandLineRunner {
         user1.setOrderlimit(10000000.0);
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
         user1.setRequireApproval(false);
+        user1.setCompany(bank);
         employeeRepository.save(user1);
 
         Employee client = new Employee();
@@ -123,6 +126,7 @@ public class BootstrapData implements CommandLineRunner {
         client.setRequireApproval(false);
         client.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
         client.setLastName("ClientPrezime");
+        client.setCompany(bank);
         employeeRepository.save(client);
 
         // Sprint5 Bootstrap
@@ -137,6 +141,7 @@ public class BootstrapData implements CommandLineRunner {
         ray.setPosition(Constants.SUPERVIZOR);
         ray.setActive(true);
         ray.setPermissions(new HashSet<>(permissionRepository.findAll()));
+        ray.setCompany(bank);
         employeeRepository.save(ray);
 
         // - Agent koji ima realan limit i nema cekiran fleg za odobravanje
@@ -152,6 +157,7 @@ public class BootstrapData implements CommandLineRunner {
         donnie.setOrderlimit(100000.0);
         donnie.setRequireApproval(false);
         donnie.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
+        donnie.setCompany(bank);
         employeeRepository.save(donnie);
 
         Company company = new Company();
@@ -317,7 +323,7 @@ public class BootstrapData implements CommandLineRunner {
         resetLimitExecutor.scheduleAtFixedRate(employeeService::resetEmployeeLimits, initialDelay.toMillis(), 24, TimeUnit.HOURS);
 
 
-        seedBankCapital();
+        seedBankCapital(bank);
         transferService.seedExchangeRates();
     }
 
@@ -387,8 +393,7 @@ public class BootstrapData implements CommandLineRunner {
         }
     }
 
-    private void seedBankCapital(){
-        Company bank = createBankCompany();
+    private void seedBankCapital(Company bank){
         companyRepository.save(bank);
 
         List<rs.edu.raf.banka1.model.Currency> allCurrencies = currencyRepository.findAll();
