@@ -8,6 +8,7 @@ import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.requests.customer.CustomerData;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
 import rs.edu.raf.banka1.responses.CustomerResponse;
+import rs.edu.raf.banka1.services.CompanyService;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -20,10 +21,12 @@ public class CustomerMapper {
 
     private PermissionRepository permissionRepository;
     private BankAccountMapper bankAccountMapper;
+    private CompanyService companyService;
 
-    public CustomerMapper(PermissionMapper permissionMapper, BankAccountMapper bankAccountMapper) {
+    public CustomerMapper(PermissionMapper permissionMapper, BankAccountMapper bankAccountMapper, CompanyService companyService) {
         this.permissionMapper = permissionMapper;
         this.bankAccountMapper = bankAccountMapper;
+        this.companyService = companyService;
     }
 
     public static Customer customerDataToCustomer(CustomerData createCustomerRequest){
@@ -43,6 +46,7 @@ public class CustomerMapper {
     }
 
     public Customer editCustomerRequestToCustomer(Customer customer, EditCustomerRequest editCustomerRequest) {
+        customer.setCompany(this.companyService.getCompanyById(editCustomerRequest.getCompanyId()));
         if (editCustomerRequest.getPassword() != null) {
             customer.setPassword(passwordEncoder.encode(editCustomerRequest.getPassword()));
         }

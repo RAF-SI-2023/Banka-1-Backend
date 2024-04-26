@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services.implementations;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -34,6 +35,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
 
     @Value("${front.port}")
@@ -44,26 +46,8 @@ public class CustomerServiceImpl implements CustomerService {
     private final CurrencyService currencyService;
     private final EmployeeService userService;
     private final BankAccountService bankAccountService;
-
     private final CustomerMapper customerMapper;
-
-    @Autowired
-    public CustomerServiceImpl(
-                               CustomerRepository customerRepository,
-                               EmailService emailService,
-                               PasswordEncoder passwordEncoder,
-                               CurrencyService currencyService,
-                               EmployeeService userService,
-                               BankAccountService bankAccountService,
-                               CustomerMapper customerMapper) {
-        this.customerRepository = customerRepository;
-        this.emailService = emailService;
-        this.passwordEncoder = passwordEncoder;
-        this.currencyService = currencyService;
-        this.userService = userService;
-        this.bankAccountService = bankAccountService;
-        this.customerMapper = customerMapper;
-    }
+    private final CompanyService companyService;
 
     @Override
     public Long createNewCustomer(CreateCustomerRequest createCustomerRequest) {
@@ -90,6 +74,7 @@ public class CustomerServiceImpl implements CustomerService {
             Customer customer = CustomerMapper.customerDataToCustomer(createCustomerRequest.getCustomer());
             String activationToken = UUID.randomUUID().toString();
             customer.setActivationToken(activationToken);
+            customer.setCompany(companyService.getCompanyById(createCustomerRequest.getCustomer().getCompanyId()));
             customer = customerRepository.save(customer);
 
 
