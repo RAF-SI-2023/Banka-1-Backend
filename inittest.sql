@@ -83,7 +83,8 @@ CREATE TABLE `capital` (
                            `bank_account_id` bigint(20) DEFAULT NULL,
                            `currency_id` bigint(20) DEFAULT NULL,
                            `id` bigint(20) NOT NULL,
-                           `listing_id` bigint(20) DEFAULT NULL
+                           `listing_id` bigint(20) DEFAULT NULL,
+                           `ticker` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

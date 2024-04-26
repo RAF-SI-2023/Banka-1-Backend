@@ -2,7 +2,6 @@ package rs.edu.raf.banka1.services;
 
 import rs.edu.raf.banka1.dtos.TransactionDto;
 import rs.edu.raf.banka1.model.*;
-import rs.edu.raf.banka1.model.Transaction;
 import rs.edu.raf.banka1.requests.CreateTransactionRequest;
 
 import java.util.List;
@@ -18,4 +17,9 @@ public interface TransactionService {
     List<TransactionDto> getTransactionsForEmployee(Long userId);
 
     List<TransactionDto> getTransactionsForOrderId(Long orderId);
+
+    Double getActualBuyPriceForOrder(MarketOrder order);
+    Double getActualSellPriceForOrder(MarketOrder order);
+
+    Double getLastTransactionValueForOrder(MarketOrder order);
 }

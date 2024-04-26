@@ -57,6 +57,7 @@ public class StockSimulationJob implements Runnable {
         );
 
         createTransaction(order,listingBaseDto, processedNumber, Constants.DEFAULT_CURRENCY);
+        orderService.updateEmployeeLimit(order.getId()); // Ovo je ovde jer bi u transaction servisu bio circular dependency. Trebalo bi promeniti kasnije
 
         if(order.getContractSize() == order.getProcessedNumber() + processedNumber) {
             orderService.finishOrder(orderId);

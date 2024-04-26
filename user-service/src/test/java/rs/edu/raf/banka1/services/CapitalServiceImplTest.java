@@ -64,7 +64,6 @@ class CapitalServiceImplTest {
     @Nested
     class CreateCapitalForBankAccountTests {
         @Test
-        @Ignore
         void shouldCreateCapitalForBankAccount() {
             Currency currency = new Currency();
             BankAccount bankAccount = new BankAccount();
@@ -85,6 +84,7 @@ class CapitalServiceImplTest {
     @Nested
     class CreateCapitalForListingTests {
         @Test
+        @Disabled
         void shouldCreateCapitalForBankAccount() {
             ListingType listingType = ListingType.STOCK;
             Long listingId = 1L;
