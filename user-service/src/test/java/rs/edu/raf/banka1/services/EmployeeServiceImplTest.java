@@ -74,6 +74,9 @@ class EmployeeServiceImplTest {
     private PermissionMapper permissionMapper;
 
     @Mock
+    private CompanyService companyService;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     private EmployeeServiceImpl employeeService;
@@ -103,7 +106,8 @@ class EmployeeServiceImplTest {
 
         this.employeeService = new EmployeeServiceImpl(this.userMapper,
                 this.permissionMapper, this.employeeRepository, this.permissionRepository, this.emailService, this.jwtUtil, this.passwordEncoder,
-                this.limitMapper);
+                this.limitMapper,companyService
+        );
 
         this.admin = new Employee();
         admin.setActive(true);
