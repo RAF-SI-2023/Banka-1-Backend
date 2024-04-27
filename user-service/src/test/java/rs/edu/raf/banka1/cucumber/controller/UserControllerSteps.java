@@ -1396,6 +1396,11 @@ public class UserControllerSteps {
         customerData.setFirstName(arg0);
     }
 
+    @Given("customer has company id {string}")
+    public void customerHasCompanyId(String arg0) {
+        customerData.setCompanyId(Long.parseLong(arg0));
+    }
+
     @Given("customer has last name {string}")
     public void customerHasLastName(String arg0) {
         customerData.setLastName(arg0);
