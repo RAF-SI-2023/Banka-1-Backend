@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
 //import rs.edu.raf.banka1.mapper.ForeignCurrencyAccountMapper;
@@ -132,6 +133,11 @@ public class UserControllerSteps {
     @And("i want to add him permissions")
     public void iWantToAddHimPermissions() {
         modifyPermissionsRequest.setAdd(true);
+    }
+
+    @And("i want to remove him permissions")
+    public void iWantToRemoveHimPermissions() {
+        modifyPermissionsRequest.setAdd(false);
     }
 
     @Data
@@ -996,7 +1002,12 @@ public class UserControllerSteps {
         headers.setBearerAuth(jwt);
         HttpEntity<Object> request = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.GET, request, String.class);
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.exchange(path, org.springframework.http.HttpMethod.GET, request, String.class);
+        }catch (HttpClientErrorException e){
+            response = new ResponseEntity<>(e.getStatusCode());
+        }
         lastResponse = response;
         return response.getBody();
     }
@@ -1009,7 +1020,12 @@ public class UserControllerSteps {
         headers.setBearerAuth(jwt);
         HttpEntity<Object> request = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.POST, request, String.class);
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.exchange(path, org.springframework.http.HttpMethod.POST, request, String.class);
+        }catch (HttpClientErrorException e){
+            response = new ResponseEntity<>(e.getStatusCode());
+        }
         lastResponse = response;
         return response.getBody();
     }
@@ -1022,7 +1038,12 @@ public class UserControllerSteps {
         headers.setBearerAuth(jwt);
         HttpEntity<Object> request = new HttpEntity<>(objectToPost, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.POST, request, String.class);
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.exchange(path, org.springframework.http.HttpMethod.POST, request, String.class);
+        }catch (HttpClientErrorException e){
+            response = new ResponseEntity<>(e.getStatusCode());
+        }
         lastResponse = response;
         return response.getBody();
 
@@ -1053,7 +1074,12 @@ public class UserControllerSteps {
         headers.setBearerAuth(jwt);
         HttpEntity<Object> request = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.GET, request, String.class);
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.exchange(path, org.springframework.http.HttpMethod.GET, request, String.class);
+        }catch (HttpClientErrorException e){
+            response = new ResponseEntity<>(e.getStatusCode());
+        }
         lastResponse = response;
         return response.getBody();
     }
@@ -1067,7 +1093,13 @@ public class UserControllerSteps {
         headers.setBearerAuth(jwt);
         HttpEntity<Object> request = new HttpEntity<>(objectToPut, headers);
 
-        lastResponse = restTemplate.exchange(path, org.springframework.http.HttpMethod.PUT, request, String.class);
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.exchange(path, org.springframework.http.HttpMethod.PUT, request, String.class);
+        }catch (HttpClientErrorException e){
+            response = new ResponseEntity<>(e.getStatusCode());
+        }
+        lastResponse = response;
     }
 
     private void putNoBody(String path){
