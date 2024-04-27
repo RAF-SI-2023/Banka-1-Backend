@@ -98,11 +98,14 @@ public class MarketControllerSteps {
         headers.setBearerAuth(jwt);
         HttpEntity<Object> request = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(url, org.springframework.http.HttpMethod.GET, request, String.class);
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.exchange(url, org.springframework.http.HttpMethod.GET, request, String.class);
+        }catch (HttpClientErrorException e){
+            response = new ResponseEntity<>(e.getStatusCode());
+        }
         lastResponse = response;
-        if(lastResponse.getStatusCode().equals(org.springframework.http.HttpStatus.valueOf(200)))
-            return response.getBody();
-        else return "Bad";
+        return response.getBody();
     }
 
     @When("i send GET request to {string}")
@@ -150,7 +153,7 @@ public class MarketControllerSteps {
                 lastStockResponse = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<>() {
                 });
             }
-            else if(url.equalsIgnoreCase("/market/listing/get/future")){
+            else if(url.equalsIgnoreCase("/market/listing/get/futures")){
                 lastFutureResponse = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<>() {
                 });
             }
