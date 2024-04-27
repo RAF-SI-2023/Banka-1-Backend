@@ -74,7 +74,11 @@ public class CustomerServiceImpl implements CustomerService {
             Customer customer = CustomerMapper.customerDataToCustomer(createCustomerRequest.getCustomer());
             String activationToken = UUID.randomUUID().toString();
             customer.setActivationToken(activationToken);
-            customer.setCompany(companyService.getCompanyById(createCustomerRequest.getCustomer().getCompanyId()));
+            if(createCustomerRequest.getCustomer().getCompanyId() != null) {
+                customer.setCompany(companyService.getCompanyById(createCustomerRequest.getCustomer().getCompanyId()));
+            } else {
+                customer.setCompany(null);
+            }
             customer = customerRepository.save(customer);
 
 
