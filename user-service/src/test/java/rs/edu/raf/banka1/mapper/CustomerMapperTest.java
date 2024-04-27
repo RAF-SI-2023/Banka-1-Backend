@@ -6,14 +6,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import rs.edu.raf.banka1.model.Company;
 import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.requests.customer.CustomerData;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
 import rs.edu.raf.banka1.responses.CustomerResponse;
+import rs.edu.raf.banka1.services.CompanyService;
 
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
@@ -21,8 +25,11 @@ class CustomerMapperTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private CompanyService companyService;
 
-    private CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper());
+    @InjectMocks
+    private CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper(), companyService);
 
     @BeforeEach
     void setUp() {
@@ -41,6 +48,7 @@ class CustomerMapperTest {
         editCustomerRequest.setPermissions(new ArrayList<>());
 
         when(passwordEncoder.encode(editCustomerRequest.getPassword())).thenReturn("password");
+        when(companyService.getCompanyById(any())).thenReturn(new Company());
 
         Customer customer = customerMapper.editCustomerRequestToCustomer(new Customer(), editCustomerRequest);
 

@@ -452,6 +452,7 @@ public class BootstrapData implements CommandLineRunner {
         bank.setIdNumber("987654321");
         bank.setJobId("1777838");
         bank.setRegistrationNumber("7737");
+        companyRepository.save(bank);
         return bank;
     }
 
