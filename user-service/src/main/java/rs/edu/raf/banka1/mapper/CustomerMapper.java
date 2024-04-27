@@ -26,7 +26,6 @@ public class CustomerMapper {
     public CustomerMapper(PermissionMapper permissionMapper, BankAccountMapper bankAccountMapper, CompanyService companyService) {
         this.permissionMapper = permissionMapper;
         this.bankAccountMapper = bankAccountMapper;
-        this.companyService = companyService;
     }
 
     public static Customer customerDataToCustomer(CustomerData createCustomerRequest){
@@ -46,7 +45,11 @@ public class CustomerMapper {
     }
 
     public Customer editCustomerRequestToCustomer(Customer customer, EditCustomerRequest editCustomerRequest) {
-        customer.setCompany(this.companyService.getCompanyById(editCustomerRequest.getCompanyId()));
+        if(editCustomerRequest.getCompanyId() != null) {
+            customer.setCompany(this.companyService.getCompanyById(editCustomerRequest.getCompanyId()));
+        } else {
+            customer.setCompany(null);
+        }
         if (editCustomerRequest.getPassword() != null) {
             customer.setPassword(passwordEncoder.encode(editCustomerRequest.getPassword()));
         }
