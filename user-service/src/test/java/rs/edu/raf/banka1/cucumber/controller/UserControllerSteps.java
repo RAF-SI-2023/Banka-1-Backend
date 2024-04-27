@@ -39,7 +39,9 @@ import rs.edu.raf.banka1.requests.customer.CustomerData;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.responses.*;
+import rs.edu.raf.banka1.services.CompanyService;
 import rs.edu.raf.banka1.services.EmailService;
+import rs.edu.raf.banka1.services.implementations.CompanyServiceImpl;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -62,6 +64,9 @@ public class UserControllerSteps {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private CompanyService companyService;
     private String port = Integer.toString(SpringIntegrationTest.enviroment.getServicePort("user-service", 8080));
 
     private EmployeeRepository userRepository;
@@ -98,7 +103,7 @@ public class UserControllerSteps {
     private ResponseEntity<?> lastResponse;
 
     private EmployeeMapper userMapper = new EmployeeMapper(new PermissionMapper(), passwordEncoder, permissionRepository);
-    private CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper());
+    private CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper(), companyService);
     private List<EmployeeDto> userResponses = new ArrayList<>();
     private List<CustomerResponse> customerResponses = new ArrayList<>();
     //private final String url = "http://localhost:";
@@ -1470,7 +1475,7 @@ public class UserControllerSteps {
     @Then("i should get all customers")
     public void iShouldGetAllCustomers() {
         try{
-            CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper());
+            CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper(), companyService);
             List<CustomerResponse> customerResponses = objectMapper.readValue(lastResponse.getBody().toString(), new TypeReference<List<CustomerResponse>>() {
             });
             List<Customer> customers = customerRepository.findAll();
