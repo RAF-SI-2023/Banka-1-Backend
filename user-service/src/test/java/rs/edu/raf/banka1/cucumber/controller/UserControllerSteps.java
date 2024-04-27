@@ -1229,7 +1229,7 @@ public class UserControllerSteps {
             }
             else if(path.equals("/employee/permission/employeeId")){
                 path = path.replaceAll("employeeId", String.valueOf(lastid));
-                put(url + port + path, modifyPermissionsRequest);
+                post(url + port + path, modifyPermissionsRequest);
             }
 
 

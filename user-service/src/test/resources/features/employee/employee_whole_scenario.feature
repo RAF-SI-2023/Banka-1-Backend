@@ -67,7 +67,6 @@ Feature: admin can create new employees, view them and edit them
     And employee first name should be "Aleksa"
     And employee last name should be "Aleksic"
 
-  @Ignore
   Scenario: admin can change employee permissions
     Given i am logged in with email "admin@admin.com" and password "admin"
     And i want to change employee permisions with email "drugizaposleni@gmail.rs"
