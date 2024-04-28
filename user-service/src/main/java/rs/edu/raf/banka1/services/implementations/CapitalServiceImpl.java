@@ -13,6 +13,7 @@ import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.CapitalRepository;
+import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.utils.Constants;
@@ -29,34 +30,27 @@ public class CapitalServiceImpl implements CapitalService {
     private BankAccountRepository bankAccountRepository;
     private CapitalRepository capitalRepository;
     private CapitalMapper capitalMapper;
+    private BankAccountService bankAccountService;
     public CapitalServiceImpl(BankAccountRepository bankAccountRepository,
                               CapitalRepository capitalRepository,
                               CapitalMapper capitalMapper,
+                              BankAccountService bankAccountService,
                               MarketService marketService) {
         this.bankAccountRepository = bankAccountRepository;
         this.capitalRepository = capitalRepository;
         this.capitalMapper = capitalMapper;
         this.marketService = marketService;
+        this.bankAccountService = bankAccountService;
     }
 
     @Override
-    public Capital createCapitalForBankAccount(BankAccount bankAccount, Currency currency, Double total, Double reserved) {
-        Capital capital = new Capital();
-        capital.setBankAccount(bankAccount);
-        capital.setCurrency(currency);
-        capital.setTotal(total);
-        capital.setReserved(reserved);
-
-        return capital;
-    }
-
-    @Override
-    public Capital createCapitalForListing(ListingType listingType, Long listingId, Double total, Double reserved) {
+    public Capital createCapital(ListingType listingType, Long listingId, Double total, Double reserved, BankAccount bankAccount) {
         Capital capital = new Capital();
         capital.setListingType(listingType);
         capital.setListingId(listingId);
         capital.setTotal(total);
         capital.setReserved(reserved);
+        capital.setBankAccount(bankAccount);
 
         if(capital.getListingType().equals(ListingType.STOCK)) {
             capital.setTicker(this.marketService.getStockById(capital.getListingId()).getTicker());
@@ -70,43 +64,8 @@ public class CapitalServiceImpl implements CapitalService {
     }
 
     @Override
-    public Capital getCapitalByCurrencyCode(String currencyCode) {
-        return capitalRepository.getCapitalByCurrency_CurrencyCode(currencyCode).orElseThrow(() -> new CapitalNotFoundByCodeException(currencyCode));
-    }
-
-    @Override
     public Capital getCapitalByListingIdAndType(Long listingId, ListingType type) {
         return capitalRepository.getCapitalByListingIdAndListingType(listingId, type).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
-    }
-
-    @Override
-    public void reserveBalance(String currencyCode, Double amount) {
-        Capital capital = capitalRepository.getCapitalByCurrency_CurrencyCode(currencyCode).orElseThrow(() -> new CapitalNotFoundByCodeException(currencyCode));
-        processReservation(capital, amount);
-    }
-
-    @Override
-    public void commitReserved(String currencyCode, Double amount) {
-        Capital capital = capitalRepository.getCapitalByCurrency_CurrencyCode(currencyCode).orElseThrow(() -> new CapitalNotFoundByCodeException(currencyCode));
-        processReservationCommited(capital, amount);
-    }
-
-    @Override
-    public void releaseReserved(String currencyCode, Double amount) {
-        Capital capital = capitalRepository.getCapitalByCurrency_CurrencyCode(currencyCode).orElseThrow(() -> new CapitalNotFoundByCodeException(currencyCode));
-        processReservationReleased(capital, amount);
-    }
-
-    @Override
-    public void addBalance(String currencyCode, Double amount) {
-        Capital capital = capitalRepository.getCapitalByCurrency_CurrencyCode(currencyCode).orElseThrow(() -> new CapitalNotFoundByCodeException(currencyCode));
-        processAddBalance(capital, amount);
-    }
-
-    @Override
-    public void removeBalance(String currencyCode, Double amount) {
-        Capital capital = capitalRepository.getCapitalByCurrency_CurrencyCode(currencyCode).orElseThrow(() -> new CapitalNotFoundByCodeException(currencyCode));
-        processRemoveBalance(capital, amount);
     }
 
     @Override
@@ -150,8 +109,6 @@ public class CapitalServiceImpl implements CapitalService {
         if(amount <= 0)
             throw new InvalidReservationAmountException();
 
-        BankAccount bankAccount = capital.getBankAccount();
-
         double available = capital.getTotal() - capital.getReserved();
 
         if(amount > available)
@@ -160,18 +117,8 @@ public class CapitalServiceImpl implements CapitalService {
         capital.setReserved(capital.getReserved() + amount);
 
         capitalRepository.save(capital);
-
-        if(bankAccount != null) {
-            if(bankAccount.getAvailableBalance() < amount) {
-                throw new NotEnoughCapitalAvailableException();
-            }
-            bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() - amount);
-            bankAccountRepository.save(bankAccount);
-        }
     }
     private void processReservationCommited(Capital capital, Double amount) {
-        BankAccount bankAccount = capital.getBankAccount();
-
         if(amount <= 0)
             throw new InvalidReservationAmountException();
 
@@ -188,26 +135,14 @@ public class CapitalServiceImpl implements CapitalService {
             capital.setReserved(0d);
         }
 
-        if(bankAccount != null) {
-            bankAccount.setBalance(bankAccount.getBalance() - amount);
-            bankAccountRepository.save(bankAccount);
-        }
-
         capitalRepository.save(capital);
     }
     private void processReservationReleased(Capital capital, Double amount) {
-        BankAccount bankAccount = capital.getBankAccount();
-
         if(amount <= 0 || capital.getReserved() < amount)
             throw new InvalidReservationAmountException();
 
         capital.setReserved(capital.getReserved() - amount);
         capital.setTotal(capital.getTotal() + capital.getReserved());
-
-        if(bankAccount != null) {
-            bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() + amount);
-            bankAccountRepository.save(bankAccount);
-        }
 
         capitalRepository.save(capital);
     }
@@ -215,22 +150,11 @@ public class CapitalServiceImpl implements CapitalService {
         if(amount <= 0)
             throw new InvalidCapitalAmountException(amount);
 
-        BankAccount bankAccount = capital.getBankAccount();
-
-
         capital.setTotal(capital.getTotal() + amount);
-
-        if(bankAccount != null) {
-            bankAccount.setBalance(bankAccount.getBalance() + amount);
-            bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() + amount);
-            bankAccountRepository.save(bankAccount);
-        }
 
         capitalRepository.save(capital);
     }
     private void processRemoveBalance(Capital capital, Double amount) {
-        BankAccount bankAccount = capital.getBankAccount();
-
         if(amount <= 0)
             throw new InvalidCapitalAmountException(amount);
 
@@ -240,15 +164,6 @@ public class CapitalServiceImpl implements CapitalService {
             throw new NotEnoughCapitalAvailableException();
 
         capital.setTotal(capital.getTotal() - amount);
-
-        if(bankAccount != null) {
-            if(bankAccount.getAvailableBalance() < amount) {
-                throw new NotEnoughCapitalAvailableException();
-            }
-            bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() - amount);
-            bankAccount.setBalance(bankAccount.getBalance() - amount);
-            bankAccountRepository.save(bankAccount);
-        }
 
         capitalRepository.save(capital);
     }
@@ -300,9 +215,9 @@ public class CapitalServiceImpl implements CapitalService {
     }
 
     private boolean checkCapitalForBuyOrder(MarketOrder order) {
-        Capital capital = this.capitalRepository.getCapitalByCurrency_CurrencyCode(Constants.DEFAULT_CURRENCY).orElseThrow(()-> new CapitalNotFoundByCodeException(Constants.DEFAULT_CURRENCY));
-
-        double available = capital.getTotal() - capital.getReserved();
+//        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingType(order.getListingId(), order.getListingType()).orElseThrow(()-> new CapitalNotFoundByListingIdAndTypeException(order.getListingId(), order.getListingType()));
+        BankAccount defaultAccount = bankAccountService.getDefaultBankAccount();
+        double available = defaultAccount.getAvailableBalance();
 
         return order.getPrice() <= available;
     }

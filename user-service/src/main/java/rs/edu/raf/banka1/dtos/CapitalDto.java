@@ -9,9 +9,9 @@ import rs.edu.raf.banka1.model.ListingType;
 @EqualsAndHashCode
 public class CapitalDto {
     private String bankAccountNumber;
-    private String currencyName;
     private ListingType listingType;
     private Long listingId;
     private Double total;
     private Double reserved;
+    private Double publicTotal;
 }

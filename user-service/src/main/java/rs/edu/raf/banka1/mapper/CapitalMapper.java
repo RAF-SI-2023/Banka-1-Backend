@@ -13,7 +13,6 @@ public class CapitalMapper {
         capitalDto.setTotal(capital.getTotal());
         capitalDto.setReserved(capital.getReserved());
         capitalDto.setBankAccountNumber(capital.getBankAccount() == null ? null : capital.getBankAccount().getAccountNumber());
-        capitalDto.setCurrencyName(capital.getCurrency() == null ? null : capital.getCurrency().getCurrencyName());
         return capitalDto;
     }
 
@@ -24,7 +23,6 @@ public class CapitalMapper {
         capitalProfitDto.setTotal(capital.getTotal());
         capitalProfitDto.setReserved(capital.getReserved());
         capitalProfitDto.setBankAccountNumber(capital.getBankAccount() == null ? null : capital.getBankAccount().getAccountNumber());
-        capitalProfitDto.setCurrencyName(capital.getCurrency() == null ? null : capital.getCurrency().getCurrencyName());
         capitalProfitDto.setTotalPrice((capital.getTotal()-capital.getReserved())*price);
         capitalProfitDto.setTicker(capital.getTicker());
         return capitalProfitDto;

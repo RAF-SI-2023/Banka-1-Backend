@@ -402,26 +402,27 @@ public class BootstrapData implements CommandLineRunner {
         // Make entry for each currency
         for(rs.edu.raf.banka1.model.Currency currency : allCurrencies) {
             BankAccount bankAccount = createBankAccountByCurrency(currency.getCurrencyCode(), bank);
-            Capital capital = capitalService.createCapitalForBankAccount(bankAccount, currency, bankAccount.getBalance(), 0.0);
-            capitalRepository.save(capital);
+//            Capital capital = capitalService.createCapitalForBankAccount(bankAccount, currency, bankAccount.getBalance(), 0.0);
+//            capitalRepository.save(capital);
         }
 
         // Make entry for stocks, futures and forex
         List<ListingStockDto> stocks = marketService.getAllStocks();
+        BankAccount defaultBankAccount = bankAccountService.getDefaultBankAccount();
         for(ListingStockDto stock : stocks) {
-            Capital capital = capitalService.createCapitalForListing(ListingType.STOCK, stock.getListingId(), 100.0, 0.0);
+            Capital capital = capitalService.createCapital(ListingType.STOCK, stock.getListingId(), 100.0, 0.0, defaultBankAccount);
             capitalRepository.save(capital);
         }
 
         List<ListingFutureDto> futures = marketService.getAllFutures();
         for(ListingFutureDto future : futures) {
-            Capital capital = capitalService.createCapitalForListing(ListingType.FUTURE, future.getListingId(), 100.0, 0.0);
+            Capital capital = capitalService.createCapital(ListingType.FUTURE, future.getListingId(), 100.0, 0.0, defaultBankAccount);
             capitalRepository.save(capital);
         }
 
         List<ListingForexDto> forexes = marketService.getAllForex();
         for(ListingForexDto forex : forexes) {
-            Capital capital = capitalService.createCapitalForListing(ListingType.FOREX, forex.getListingId(), 100.0, 0.0);
+            Capital capital = capitalService.createCapital(ListingType.FOREX, forex.getListingId(), 100.0, 0.0, defaultBankAccount);
             capitalRepository.save(capital);
         }
     }

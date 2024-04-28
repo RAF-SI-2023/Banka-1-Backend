@@ -46,22 +46,22 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Transactional
     @Override
-    public void createTransaction(Capital bankCapital, Capital securityCapital, Double price, MarketOrder order, Long securityAmount) {
+    public void createTransaction(BankAccount bankAccount, Capital securityCapital, Double price, MarketOrder order, Long securityAmount) {
         Transaction transaction = new Transaction();
-        transaction.setCurrency(bankCapital.getBankAccount().getCurrency());
-        transaction.setBankAccount(bankCapital.getBankAccount());
+        transaction.setCurrency(bankAccount.getCurrency());
+        transaction.setBankAccount(bankAccount);
         if(order.getOrderType().equals(OrderType.BUY)) {
             transaction.setBuy(price);
             //Add stocks to capital
             capitalService.addBalance(securityCapital.getListingId(), securityCapital.getListingType(), (double) securityAmount);
             //Commit reserved
-            capitalService.commitReserved(bankCapital.getBankAccount().getCurrency().getCurrencyCode(), price);
+            bankAccountService.commitReserved(bankAccount, price);
         } else {
             transaction.setSell(price);
             //Remove stocks
             capitalService.commitReserved(securityCapital.getListingId(), securityCapital.getListingType(), (double)securityAmount);
             //Add money
-            capitalService.addBalance(bankCapital.getCurrency().getCurrencyCode(), price);
+            bankAccountService.addBalance(bankAccount, price);
         }
         transaction.setMarketOrder(order);
         transaction.setEmployee(order.getOwner());

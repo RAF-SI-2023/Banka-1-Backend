@@ -12,21 +12,18 @@ public class Capital {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // if we use BankAccount and Currency, then Listing and listingType are null
-    @OneToOne
+    @ManyToOne
     private BankAccount bankAccount;
-
-    @OneToOne
-    private Currency currency;
 
     private ListingType listingType;
 
-    // if we use Listng and listingType, then BankAccount and Currency are null
     private Long listingId;
+
+    private String ticker;
+
+    private Integer publicTotal = 0;
 
     private Double total;
 
     private Double reserved;
-
-    private String ticker;
 }

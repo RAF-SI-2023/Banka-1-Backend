@@ -34,6 +34,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final TransactionService transactionService;
     private final CapitalService capitalService;
+    private final BankAccountService bankAccountService;
 
     private final EmployeeRepository employeeRepository;
 
@@ -53,6 +54,7 @@ public class OrderServiceImpl implements OrderService {
         final TaskScheduler taskScheduler,
         final TransactionService transactionService,
         final CapitalService capitalService,
+        final BankAccountService bankAccountService,
         EmployeeRepository employeeRepository) {
         this.orderMapper = orderMapper;
         this.orderRepository = orderRepository;
@@ -61,6 +63,7 @@ public class OrderServiceImpl implements OrderService {
         this.transactionService = transactionService;
         this.capitalService = capitalService;
         this.employeeRepository = employeeRepository;
+        this.bankAccountService = bankAccountService;
 
         scheduledFutureMap = new ConcurrentHashMap<>();
     }
@@ -107,6 +110,7 @@ public class OrderServiceImpl implements OrderService {
                 marketService,
                 transactionService,
                 capitalService,
+                bankAccountService,
                 orderId
             ),
             new StockSimulationTrigger(
@@ -189,6 +193,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void finishOrder(Long orderId) {
         this.orderRepository.finishOrder(orderId, OrderStatus.DONE);
+        releaseLeftoverReservedFunds(orderId);
 //        updateLimit(orderId);
         this.scheduledFutureMap.get(orderId).cancel(false);
     }
@@ -245,12 +250,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     void reserveStockCapital(MarketOrder order) {
-        Capital bankAccountCapital = capitalService.getCapitalByCurrencyCode(Constants.DEFAULT_CURRENCY);
-        Capital securityCapital = capitalService.getCapitalByListingIdAndType(order.getListingId(), order.getListingType());
-
         if(order.getOrderType().equals(OrderType.BUY)) {
-            capitalService.reserveBalance(bankAccountCapital.getCurrency().getCurrencyCode(), order.getPrice());
+            BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
+            bankAccountService.reserveBalance(bankAccount, order.getPrice());
         } else {
+            Capital securityCapital = capitalService.getCapitalByListingIdAndType(order.getListingId(), order.getListingType());
             capitalService.reserveBalance(securityCapital.getListingId(), securityCapital.getListingType(), (double)order.getContractSize());
         }
 
@@ -271,11 +275,11 @@ public class OrderServiceImpl implements OrderService {
 
         double newLimit = owner.getLimitNow() + Math.max(difference, 0) - Math.min(difference, 0);
 
-        if(newLimit > owner.getOrderlimit()) {
-            //Limit je predjen, stavi order na processing
-            order.setStatus(OrderStatus.PROCESSING);
-            this.orderRepository.save(order);
-        }
+//        if(newLimit > owner.getOrderlimit()) {
+//            //Limit je predjen, stavi order na processing
+//            order.setStatus(OrderStatus.PROCESSING);
+//            this.orderRepository.save(order);
+//        }
 
         owner.setLimitNow(newLimit);
         this.employeeRepository.save(owner);
@@ -302,6 +306,17 @@ public class OrderServiceImpl implements OrderService {
         return spentMoney;
     }
 
+    private void releaseLeftoverReservedFunds(Long orderId) {
+        MarketOrder order = getOrderById(orderId);
+        double spentMoney = getSpentMoneyForOrder(order);
+        BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
+
+        if(order.getOrderType().equals(OrderType.BUY)) {
+            double leftOver = order.getPrice() - spentMoney;
+            bankAccountService.releaseReserved(bankAccount, leftOver);
+        }
+    }
+
     private void updateLimitOnTransaction(MarketOrder order) {
         Employee owner = order.getOwner();
 
@@ -315,11 +330,11 @@ public class OrderServiceImpl implements OrderService {
             this.employeeRepository.save(owner);
         }
 
-        if(owner.getLimitNow() > owner.getOrderlimit()) {
-            //Limit je predjen, stavi order na processing
-            order.setStatus(OrderStatus.PROCESSING);
-            this.orderRepository.save(order);
-        }
+//        if(owner.getLimitNow() > owner.getOrderlimit()) {
+//            //Limit je predjen, stavi order na processing
+//            order.setStatus(OrderStatus.PROCESSING);
+//            this.orderRepository.save(order);
+//        }
     }
 
     private void updateLimitOnFinish(MarketOrder order) {
