@@ -325,6 +325,8 @@ public class BootstrapData implements CommandLineRunner {
 
         seedBankCapital(bank);
         transferService.seedExchangeRates();
+
+        Contract contract = new Contract();
     }
 
     private void seedLoanRequest() {

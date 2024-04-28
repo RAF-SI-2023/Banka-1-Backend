@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.services.implementations;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.dtos.CapitalProfitDto;
 import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
@@ -90,6 +91,16 @@ public class CapitalServiceImpl implements CapitalService {
     public void addBalance(Long listingId, ListingType type, Double amount) {
         Capital capital = capitalRepository.getCapitalByListingIdAndListingType(listingId, type).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
         processAddBalance(capital, amount);
+    }
+
+    @Override
+    public List<CapitalDto> getAllPublicStockCapitals() {
+        return null;
+    }
+
+    @Override
+    public List<CapitalDto> getAllPublicListingCapitals() {
+        return null;
     }
 
     @Override
