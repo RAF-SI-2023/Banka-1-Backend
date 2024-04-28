@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.exceptions.ForbiddenException;
 import rs.edu.raf.banka1.mapper.CustomerMapper;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Currency;
@@ -142,6 +143,11 @@ public class CustomerServiceImpl implements CustomerService {
         return this.customerRepository.findCustomerByEmail(email)
                 .map(this.customerMapper::customerToCustomerResponse)
                 .orElse(null);
+    }
+
+    @Override
+    public Customer getByEmail(String email) {
+        return this.customerRepository.findCustomerByEmail(email).orElseThrow(ForbiddenException::new);
     }
 
     @Override
