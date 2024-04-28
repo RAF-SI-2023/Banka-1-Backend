@@ -23,4 +23,8 @@ public class Contract {
     private String comment;
     private Long creationDate;
     private Long realizationDate;
+    private String referenceNumber;
+    private String ticker;
+    private Double amount;
+    private Double price;
 }
