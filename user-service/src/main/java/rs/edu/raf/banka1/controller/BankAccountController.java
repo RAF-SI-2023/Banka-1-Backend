@@ -52,7 +52,7 @@ public class BankAccountController {
         this.bankAccountMapper = bankAccountMapper;
     }
 
-    @GetMapping(value = "/getCards/{accountfNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/getCards/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all cards by account number", description = "Get all cards by account number")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
