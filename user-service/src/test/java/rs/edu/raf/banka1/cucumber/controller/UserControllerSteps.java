@@ -117,6 +117,8 @@ public class UserControllerSteps {
     private String bankAccountNumber;
     private CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest();
     private Long paymentId;
+
+    private Long contractId;
     private CreatePaymentRecipientRequest createPaymentRecipientRequest = new CreatePaymentRecipientRequest();
     private PaymentRecipientDto paymentRecipientDto = new PaymentRecipientDto();
     private CreateTransferRequest createTransferRequest = new CreateTransferRequest();
@@ -133,10 +135,73 @@ public class UserControllerSteps {
     private EditEmployeeDto editEmployeeDto = new EditEmployeeDto();
     private ModifyPermissionsRequest modifyPermissionsRequest = new ModifyPermissionsRequest();
     private NewLimitDto newLimitDto = new NewLimitDto();
+    private AddPublicCapitalDto addPublicCapitalDto = new AddPublicCapitalDto();
+
+    private ContractCreateDto contractCreateDto = new ContractCreateDto();
+    private String denyContractComment = "";
 
     @And("i want to add him permissions")
     public void iWantToAddHimPermissions() {
         modifyPermissionsRequest.setAdd(true);
+    }
+
+    @And("i should get all public stocks of other individual customers")
+    public void iShouldGetAllPublicStocksOfOtherIndividualCustomers() {
+        // impl
+    }
+
+    @And("i want to buy {double} stocks")
+    public void iWantToBuyStocks(double arg0) {
+        contractCreateDto.setAmountToBuy(arg0);
+    }
+
+    @And("i offer him price of {double} RSD")
+    public void iOfferHimPriceOfRSD(double arg0) {
+        contractCreateDto.setOfferPrice(arg0);
+    }
+
+    @And("seller id is {long}")
+    public void sellerIdIs(long arg0) {
+        contractCreateDto.setSellerId(arg0);
+    }
+
+    @And("i should get all contracts i am contributing in")
+    public void iShouldGetAllContractsIAmContributingIn() {
+        // impl
+    }
+
+    @Given("i want to accept contract offer with id {long}")
+    public void iWantToAcceptContractOfferWithId(long arg0) {
+        this.contractId = arg0;
+    }
+
+    @And("i want to deny contract offer with id {long}")
+    public void iWantToDenyContractOfferWithId(long arg0) {
+        this.contractId = arg0;
+    }
+
+    @And("with comment why i denied {string}")
+    public void withCommentWhyIDenied(String arg0) {
+        this.denyContractComment = arg0;
+    }
+
+    @And("i should get all not finalized contracts")
+    public void iShouldGetAllNotFinalizedContracts() {
+        // impl
+    }
+
+    @And("contract with id {long} should be denied")
+    public void contractWithIdShouldBeDenied(long arg0) {
+        // impl
+    }
+
+    @And("i should get all public stocks of other business customers")
+    public void iShouldGetAllPublicStocksOfOtherBusinessCustomers() {
+        // impl
+    }
+
+    @And("i want to buy {double} forex")
+    public void iWantToBuyForex(double arg0) {
     }
 
     @Data
@@ -173,6 +238,23 @@ public class UserControllerSteps {
         this.loanRepository = loanRepository;
         this.cardRepository = cardRepository;
         this.employeeRepository = employeeRepository;
+    }
+
+    @Then("i should have {int} stocks public")
+    public void iShouldHaveStocksPublic(int arg0) {
+        // ovo posle implementacije ??
+    }
+
+    @Then("i should have {int} listings public")
+    public void iShouldHaveListingsPublic(int arg0) {
+        // ovo posle implementacije ??
+    }
+
+    @And("add to public amount {double} for capital with listingId is {long} and listingType is {string}")
+    public void addToPublicAmountForCapitalWithListingIdIsAndListingTypeIs(double arg0, long arg1, String arg2) {
+        addPublicCapitalDto.setAddToPublic(arg0);
+        addPublicCapitalDto.setListingId(arg1);
+        addPublicCapitalDto.setListingType(ListingType.valueOf(arg2));
     }
 
     @Then("response should contain transfer i made")
@@ -761,6 +843,17 @@ public class UserControllerSteps {
         jwt = responseEntity.getBody().getJwt();
     }
 
+    @Given("i am logged in as customer with email {string} and password {string}")
+    public void iAmLoggedInAsCustomer(String email, String password) {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail(email);
+        loginRequest.setPassword(password);
+
+        HttpEntity<LoginRequest> entity = new HttpEntity<>(loginRequest);
+        ResponseEntity<LoginResponse> responseEntity = new RestTemplate().postForEntity(url + port + "/auth/login/customer", entity, LoginResponse.class);
+        jwt = responseEntity.getBody().getJwt();
+    }
+
     @Given("I have a user with id {int}")
     public void iHaveAUserWithId(int id) {
         Employee user = new Employee();
@@ -1073,6 +1166,7 @@ public class UserControllerSteps {
         HttpEntity<Object> request = new HttpEntity<>(objectToPut, headers);
 
         lastResponse = restTemplate.exchange(path, org.springframework.http.HttpMethod.PUT, request, String.class);
+        int x;
     }
 
     private void putNoBody(String path){
@@ -1236,6 +1330,9 @@ public class UserControllerSteps {
                 path = path.replaceAll("employeeId", String.valueOf(lastid));
                 put(url + port + path, modifyPermissionsRequest);
             }
+            else if(path.equals("/contract/customer")) {
+                post(url + port + path, contractCreateDto);
+            }
 
 
 //            else if (path.equals("/balance/foreign_currency/create")) {
@@ -1301,6 +1398,17 @@ public class UserControllerSteps {
         else if(path.equals("/employee/limits/newLimit")){
             newLimitDto.setUserId(lastid);
             put(url + port + path, newLimitDto);
+        }
+        else if(path.equals("/capital/addPublic")) {
+            put(url + port + path, addPublicCapitalDto);
+        }
+        else if(path.equals("contract/accept/id")) {
+            path = path.replaceAll("id", String.valueOf(contractId));
+            putNoBody(url + port + path);
+        }
+        else if(path.equals("contract/deny/id")) {
+            path = path.replaceAll("id", String.valueOf(contractId));
+            put(url + port + path, denyContractComment);
         }
     }
 
