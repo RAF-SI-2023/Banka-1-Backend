@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.dtos.CapitalProfitDto;
+import rs.edu.raf.banka1.dtos.AddPublicCapitalDto;
 import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
@@ -17,7 +18,6 @@ import rs.edu.raf.banka1.repositories.CapitalRepository;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.MarketService;
-import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.List;
 
@@ -100,6 +100,11 @@ public class CapitalServiceImpl implements CapitalService {
 
     @Override
     public List<CapitalDto> getAllPublicListingCapitals() {
+        return null;
+    }
+
+    @Override
+    public Boolean addToPublicCapital(Customer userPrincipal, AddPublicCapitalDto setPublicCapitalDto) {
         return null;
     }
 

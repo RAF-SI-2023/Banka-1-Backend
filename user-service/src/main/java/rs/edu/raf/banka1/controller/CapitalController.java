@@ -9,10 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.dtos.CapitalProfitDto;
+import rs.edu.raf.banka1.dtos.AddPublicCapitalDto;
+import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.services.CapitalService;
+import rs.edu.raf.banka1.services.CustomerService;
 
 import java.util.List;
 
@@ -22,10 +27,11 @@ import java.util.List;
 public class CapitalController {
 
     private final CapitalService capitalService;
-
+    private final CustomerService customerService;
     @Autowired
-    public CapitalController(CapitalService capitalService) {
+    public CapitalController(CapitalService capitalService, CustomerService customerService) {
         this.capitalService = capitalService;
+        this.customerService = customerService;
     }
 
     @GetMapping(value = "/listings", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -56,6 +62,26 @@ public class CapitalController {
         // vraca za SVE customere iz banke
         // endpoint za fizicka lica -> svi stockovi od drugih fizickih lica
         return new ResponseEntity<>(capitalService.getAllPublicStockCapitals(), HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/addPublic", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Add given number of listings to public listings", description = "Add given number of listings to public listings")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {CapitalDto.class}))}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Boolean> setPublicCapitals(
+            @RequestBody AddPublicCapitalDto setPublicCapitalDto,
+            @AuthenticationPrincipal User userPrincipal
+    ) {
+        // postavlja dati broj capitala na public
+        // ako je customer fizicko lice (individual) onda sme samo stock
+        Customer currentAuth = customerService.getByEmail(userPrincipal.getUsername());
+        return new ResponseEntity<>(capitalService.addToPublicCapital(currentAuth, setPublicCapitalDto), HttpStatus.OK);
     }
 
     @GetMapping(value = "/public/listing/all", produces = MediaType.APPLICATION_JSON_VALUE)
