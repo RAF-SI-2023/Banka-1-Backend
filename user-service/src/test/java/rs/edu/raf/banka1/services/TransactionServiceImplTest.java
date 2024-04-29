@@ -34,6 +34,7 @@ class TransactionServiceImplTest {
     @Mock
     private CapitalService capitalService;
 
+
     @InjectMocks
     private TransactionServiceImpl transactionService;
 
@@ -137,10 +138,10 @@ class TransactionServiceImplTest {
             MarketOrder order = new MarketOrder();
             order.setOrderType(OrderType.BUY);
 
-            transactionService.createTransaction(bankCapital, securityCapital, price, order, securityAmount);
+            transactionService.createTransaction(bankAccount, securityCapital, price, order, securityAmount);
 
             verify(capitalService).addBalance(eq(listingId), eq(listingType), eq((double) securityAmount));
-            verify(capitalService).commitReserved(eq(currencyCode), eq(price));
+            verify(bankAccountService).commitReserved(eq(bankAccount), eq(price));
             verify(transactionRepository).save(any(Transaction.class));
         }
 
@@ -163,7 +164,6 @@ class TransactionServiceImplTest {
             bankCapital.setBankAccount(bankAccount);
             bankCapital.setTotal(1000.0);
             bankCapital.setReserved(500.0);
-            bankCapital.setCurrency(currency);
 
             Capital securityCapital = new Capital();
             securityCapital.setListingType(listingType);
@@ -174,10 +174,10 @@ class TransactionServiceImplTest {
             MarketOrder order = new MarketOrder();
             order.setOrderType(OrderType.SELL);
 
-            transactionService.createTransaction(bankCapital, securityCapital, price, order, securityAmount);
+            transactionService.createTransaction(bankAccount, securityCapital, price, order, securityAmount);
 
             verify(capitalService).commitReserved(eq(listingId), eq(listingType), eq((double) securityAmount));
-            verify(capitalService).addBalance(eq(currencyCode), eq(price));
+            verify(bankAccountService).addBalance(eq(bankAccount), eq(price));
             verify(transactionRepository).save(any(Transaction.class));
         }
     }

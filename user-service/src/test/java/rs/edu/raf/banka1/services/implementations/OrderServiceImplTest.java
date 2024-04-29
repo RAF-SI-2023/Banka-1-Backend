@@ -27,6 +27,7 @@ import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.EmployeeRepository;
 import rs.edu.raf.banka1.repositories.OrderRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
+import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.TransactionService;
@@ -62,11 +63,15 @@ class OrderServiceImplTest {
     private TransactionService transactionService;
     @Mock
     private CapitalService capitalService;
+
+    @Mock
+    private BankAccountService bankAccountService;
+
     @Mock
     private EmployeeRepository employeeRepository;
 
+
     @InjectMocks
-    @Autowired
     private OrderServiceImpl orderService;
     
     @BeforeEach
@@ -76,7 +81,7 @@ class OrderServiceImplTest {
                 mock(PasswordEncoder.class),
                 mock(PermissionRepository.class)
         ));
-        orderService = new OrderServiceImpl(orderMapper, orderRepository, marketService, taskScheduler, transactionService, capitalService, employeeRepository);
+        orderService = new OrderServiceImpl(orderMapper, orderRepository, marketService, taskScheduler, transactionService, capitalService, bankAccountService, employeeRepository);
     }
 
     @Test
@@ -290,20 +295,19 @@ class OrderServiceImplTest {
         Currency currency = new Currency();
         currency.setCurrencyCode("RSD");
 
-        Capital bankAccountCapital = new Capital();
-        bankAccountCapital.setCurrency(currency);
+        BankAccount bankAccount = new BankAccount();
 
         Capital securityCapital = new Capital();
         securityCapital.setListingId(1L);
         securityCapital.setListingType(ListingType.STOCK);
 
 
-        when(capitalService.getCapitalByCurrencyCode("RSD")).thenReturn(bankAccountCapital);
+        when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
         when(capitalService.getCapitalByListingIdAndType(order.getListingId(), order.getListingType())).thenReturn(securityCapital);
 
         orderService.reserveStockCapital(order);
 
-        verify(capitalService, times(1)).reserveBalance(eq("RSD"), eq(order.getPrice()));
+        verify(bankAccountService, times(1)).reserveBalance(eq(bankAccount), eq(order.getPrice()));
     }
 
     @Test
@@ -318,14 +322,13 @@ class OrderServiceImplTest {
         Currency currency = new Currency();
         currency.setCurrencyCode("RSD");
 
-        Capital bankAccountCapital = new Capital();
-        bankAccountCapital.setCurrency(currency);
+        BankAccount bankAccount = new BankAccount();
 
         Capital securityCapital = new Capital();
         securityCapital.setListingId(1L);
         securityCapital.setListingType(ListingType.STOCK);
 
-        when(capitalService.getCapitalByCurrencyCode("RSD")).thenReturn(bankAccountCapital);
+        when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
         when(capitalService.getCapitalByListingIdAndType(order.getListingId(), order.getListingType())).thenReturn(securityCapital);
 
         orderService.reserveStockCapital(order);
