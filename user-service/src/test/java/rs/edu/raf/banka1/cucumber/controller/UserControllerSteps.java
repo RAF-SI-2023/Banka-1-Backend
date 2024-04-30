@@ -39,6 +39,7 @@ import rs.edu.raf.banka1.requests.customer.CustomerData;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.responses.*;
+import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.CompanyService;
 import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.implementations.CompanyServiceImpl;
@@ -146,8 +147,14 @@ public class UserControllerSteps {
     }
 
     @And("i should get all public stocks of other individual customers")
-    public void iShouldGetAllPublicStocksOfOtherIndividualCustomers() {
-        // impl
+    public void iShouldGetAllPublicStocksOfOtherIndividualCustomers() throws JsonProcessingException {
+        List<PublicCapitalDto> listCapitalDtoPublicStocks = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<PublicCapitalDto>>() {});
+        assertThat(listCapitalDtoPublicStocks).isNotNull();
+        assertThat(listCapitalDtoPublicStocks).isNotEmpty();
+        for (PublicCapitalDto publicCapitalDto : listCapitalDtoPublicStocks) {
+            assertThat(publicCapitalDto.getIsIndividual()).isTrue();
+            assertThat(publicCapitalDto.getListingType()).isEqualTo(ListingType.STOCK);
+        }
     }
 
     @And("i want to buy {double} stocks")
@@ -165,9 +172,10 @@ public class UserControllerSteps {
         contractCreateDto.setSellerId(arg0);
     }
 
-    @And("i should get all contracts i am contributing in")
-    public void iShouldGetAllContractsIAmContributingIn() {
-        // impl
+    @And("i should get all contracts i am contributing in as a {string}")
+    public void iShouldGetAllContractsIAmContributingInAsA(String arg0) throws JsonProcessingException {
+        List<ContractDto> contractListIAmIn = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<ContractDto>>() {});
+        assertThat(contractListIAmIn).isNotNull();
     }
 
     @Given("i want to accept contract offer with id {long}")
@@ -186,22 +194,51 @@ public class UserControllerSteps {
     }
 
     @And("i should get all not finalized contracts")
-    public void iShouldGetAllNotFinalizedContracts() {
-        // impl
+    public void iShouldGetAllNotFinalizedContracts() throws JsonProcessingException {
+        List<ContractDto> notFinalizedContractList = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<ContractDto>>() {});
+        assertThat(notFinalizedContractList).isNotNull();
+        for (ContractDto contractDto : notFinalizedContractList) {
+            assertThat(contractDto.getRealizationDate()).isNull();
+        }
     }
 
     @And("contract with id {long} should be denied")
-    public void contractWithIdShouldBeDenied(long arg0) {
+    public void contractWithIdShouldBeDenied(long arg0) throws JsonProcessingException {
         // impl
+        List<ContractDto> listContractDto = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<ContractDto>>() {});
+        for (ContractDto cDto : listContractDto) {
+            if(cDto.getContractId().equals(arg0)) {
+                assertThat(cDto.getBankApproval()).isFalse();
+                assertThat(cDto.getRealizationDate()).isNotNull();
+            }
+        }
     }
 
     @And("i should get all public stocks of other business customers")
-    public void iShouldGetAllPublicStocksOfOtherBusinessCustomers() {
-        // impl
+    public void iShouldGetAllPublicStocksOfOtherBusinessCustomers() throws JsonProcessingException {
+        List<PublicCapitalDto> listCapitalDtoPublicStocks = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<PublicCapitalDto>>() {});
+        assertThat(listCapitalDtoPublicStocks).isNotNull();
+        assertThat(listCapitalDtoPublicStocks).isNotEmpty();
+        for (PublicCapitalDto publicCapitalDto : listCapitalDtoPublicStocks) {
+            assertThat(publicCapitalDto.getIsIndividual()).isFalse();
+        }
     }
 
     @And("i want to buy {double} forex")
     public void iWantToBuyForex(double arg0) {
+        // impl
+    }
+
+    @And("contract with id {long} should be finalized")
+    public void contractWithIdShouldBeFinalized(long arg0) throws JsonProcessingException {
+        List<ContractDto> listContractDto = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<ContractDto>>() {});
+        for (ContractDto cDto : listContractDto) {
+            if(cDto.getContractId().equals(arg0)) {
+                assertThat(cDto.getBankApproval()).isNotNull();
+                assertThat(cDto.getSellerApproval()).isNotNull();
+                assertThat(cDto.getRealizationDate()).isNotNull();
+            }
+        }
     }
 
     @Data
@@ -239,15 +276,18 @@ public class UserControllerSteps {
         this.cardRepository = cardRepository;
         this.employeeRepository = employeeRepository;
     }
-
-    @Then("i should have {int} stocks public")
-    public void iShouldHaveStocksPublic(int arg0) {
-        // ovo posle implementacije ??
-    }
-
-    @Then("i should have {int} listings public")
-    public void iShouldHaveListingsPublic(int arg0) {
-        // ovo posle implementacije ??
+    @Then("i should have {double} listings of type {string} public")
+    public void iShouldHaveListingsPublic(double arg0, String arg1) throws JsonProcessingException {
+        CapitalDto capitalDto = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<CapitalDto>() {});
+        assertThat(capitalDto).isNotNull();
+        assertThat(capitalDto.getPublicTotal()).isEqualTo(arg0);
+        if(arg1.equalsIgnoreCase("forex")) {
+            assertThat(capitalDto.getListingType()).isEqualTo(ListingType.FOREX);
+        } else if(arg1.equalsIgnoreCase("future")) {
+            assertThat(capitalDto.getListingType()).isEqualTo(ListingType.FUTURE);
+        } else if(arg1.equalsIgnoreCase("stock")) {
+            assertThat(capitalDto.getListingType()).isEqualTo(ListingType.STOCK);
+        }
     }
 
     @And("add to public amount {double} for capital with listingId is {long} and listingType is {string}")
@@ -1248,6 +1288,14 @@ public class UserControllerSteps {
             }
             else if(path.equals("/employee/permissions/employeeId/id")){
                 path = path.replaceAll("id", String.valueOf(lastid));
+                getBody(url + port + path);
+            }
+            else if(path.equals("/capital/stock/id")){
+                path = path.replaceAll("id", String.valueOf(addPublicCapitalDto.getListingId()));
+                getBody(url + port + path);
+            }
+            else if(path.equals("/capital/forex/id")){
+                path = path.replaceAll("id", String.valueOf(addPublicCapitalDto.getListingId()));
                 getBody(url + port + path);
             }
             else{

@@ -748,6 +748,12 @@ INSERT INTO `customer` (`user_id`, `active`, `email`, `first_name`, `jmbg`, `las
 INSERT INTO `customer` (`user_id`, `active`, `email`, `first_name`, `jmbg`, `last_name`, `password`, `phone_number`) VALUES
     (102, b'1', 'user123@test.com', 'mika', '215412512', 'mikic', '$2a$10$PBWT9wzA7OPpZPr5lVNxj.SLlHhrBrUzHH/wOG6sqfOp3wbYk8Kze', '22222324');
 
+INSERT INTO `customer` (`user_id`, `active`, `company_id`, `email`, `first_name`, `jmbg`, `last_name`, `password`, `phone_number`) VALUES
+    (103, b'1', 1, 'pravno_lice@test.com', 'petar1', '712325127', 'petrovic1', '$2a$10$PBWT9wzA7OPpZPr5lVNxj.SLlHhrBrUzHH/wOG6sqfOp3wbYk8Kze', '33333333');
+
+INSERT INTO `customer` (`user_id`, `active`, `company_id`, `email`, `first_name`, `jmbg`, `last_name`, `password`, `phone_number`) VALUES
+    (104, b'1', 2, 'pravno_lice_buyer@test.com', 'miroslav', '65656565', 'lazanski', '$2a$10$PBWT9wzA7OPpZPr5lVNxj.SLlHhrBrUzHH/wOG6sqfOp3wbYk8Kze', '63333663');
+
 INSERT INTO `user_permissions_employee` (`user_id`, `permission_id`) VALUES
     (100, 2);
 
@@ -778,6 +784,9 @@ INSERT INTO `user_permissions_employee` (`user_id`, `permission_id`) VALUES
 INSERT INTO `company` (`id`, `company_name`, `fax_number`, `id_number`, `job_id`, `pib`, `registration_number`, `telephone_number`) VALUES
     (1, 'Banka1', 'test', 'test', 'test', 'test', 'test', 'test');
 
+INSERT INTO `company` (`id`, `company_name`, `fax_number`, `id_number`, `job_id`, `pib`, `registration_number`, `telephone_number`) VALUES
+    (2, 'Banka1_test2', 'test2', 'test2', 'test2', 'test2', 'test2', 'test2');
+
 INSERT INTO `currency` (`active`, `id`, `country`, `currency_code`, `currency_desc`, `currency_name`, `currency_symbol`, `toRSD`, `fromRSD`) VALUES
     (b'1', 10000, 'TEST', 'TST', 'TEST', 'TEST', 'TST', 1.0, 1.0);
 
@@ -794,6 +803,12 @@ VALUES (b'1', 1, 10000.0, 12000.0, 100.0, NULL, 100, 1710959528, 10000, 101, 271
 INSERT INTO `bank_account` (account_status, account_type, available_balance, balance, maintenance_cost, company_id, created_by_agent_id, creation_date, currency_id, customer_id, expiration_date, id, account_name, account_number, subtype_of_account)
 VALUES (b'1', 1, 10000.0, 12000.0, 100.0, NULL, 100, 1710959558, 10001, 101, 2710959528, 101, 'test1', '0987654321', 'subtest');
 
+INSERT INTO `bank_account` (account_status, account_type, available_balance, balance, maintenance_cost, company_id, created_by_agent_id, creation_date, currency_id, customer_id, expiration_date, id, account_name, account_number, subtype_of_account)
+VALUES (b'1', 1, 12000.0, 14000.0, 100.0, 1, 100, 1710959558, 10001, NULL, 2710959528, 102, 'test1', '7151517151', 'subtest');
+
+INSERT INTO `bank_account` (account_status, account_type, available_balance, balance, maintenance_cost, company_id, created_by_agent_id, creation_date, currency_id, customer_id, expiration_date, id, account_name, account_number, subtype_of_account)
+VALUES (b'1', 1, 12000.0, 14000.0, 100.0, 2, 100, 1710959558, 10001, NULL, 2710959528, 103, 'test1', '1515151717', 'subtest');
+
 INSERT INTO `bank_account` (`account_status`, `account_type`, `available_balance`, `balance`, `maintenance_cost`, `company_id`, `created_by_agent_id`, `creation_date`, `currency_id`, `customer_id`, `expiration_date`, `id`, `account_name`, `account_number`, `subtype_of_account`)
 VALUES (b'0', 2, 1000000, 1000000, NULL, 1, NULL, 1714003200, 10000, NULL, 1871769600, 9, 'Banks account', '131242095807818250', NULL);
 
@@ -807,7 +822,16 @@ INSERT INTO `loan` (account_number, currency, effective_interest_rate, installme
     VALUES ('1234567890', 'TST', 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0, 0, 100, 0, 0);
 
 INSERT INTO `capital` (listing_type, reserved, total, bank_account_id, currency_id, id, listing_id, ticker, public_total)
-    VALUES (0, 0.0, 30.0, 100, NULL, 1001, 100003, 'testticker', 0.0)
+    VALUES (0, 0.0, 30.0, 100, NULL, 1001, 100003, 'testticker', 0.0);
+
+INSERT INTO `capital` (listing_type, reserved, total, bank_account_id, currency_id, id, listing_id, ticker, public_total)
+    VALUES (2, 0.0, 36.0, 100, NULL, 1002, 100001, 'testticker', 5.0);
+
+INSERT INTO `capital` (listing_type, reserved, total, bank_account_id, currency_id, id, listing_id, ticker, public_total)
+    VALUES (1, 0.0, 35.0, 102, NULL, 1003, 100002, 'testticker', 3.0);
+
+INSERT INTO `capital` (listing_type, reserved, total, bank_account_id, currency_id, id, listing_id, ticker, public_total)
+    VALUES (2, 0.0, 35.0, 102, NULL, 1004, 100001, 'testticker', 0.0);
 -- INSERT INTO `foreign_currency_accounts` (`id`, `account_maintenance`, `account_number`, `account_status`, `available_balance`, `balance`, `created_by_agent_id`, `creation_date`, `currency`, `default_currency`, `expiration_date`, `owner_id`, `subtype_of_account`, `type_of_account`) VALUES
 --  (100, 100.0, '123456789', 'active', 1000.0, 1200.0, 100, 1710959528, 'CD1', 'CD1', 2710959528, 102, 'subtest', 'test');
 
