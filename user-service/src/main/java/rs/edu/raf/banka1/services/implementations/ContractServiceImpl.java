@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.ContractCreateDto;
+import rs.edu.raf.banka1.dtos.ContractDto;
 import rs.edu.raf.banka1.mapper.ContractMapper;
 import rs.edu.raf.banka1.model.Contract;
 import rs.edu.raf.banka1.model.Customer;
@@ -21,7 +22,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public Contract createContract(ContractCreateDto contractCreateDto, User buyer) {
+    public ContractDto createContract(ContractCreateDto contractCreateDto, User buyer) {
         // mora provera za amount !
         this.contractMapper.contractCreateDtoToContract(contractCreateDto, buyer);
         return null;
@@ -38,12 +39,12 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public List<Contract> getAllContractsSupervisor(Employee currentAuth) {
+    public List<ContractDto> getAllContractsSupervisor(Employee currentAuth) {
         return null;
     }
 
     @Override
-    public List<Contract> getAllContractsCustomer(Customer currentAuth) {
+    public List<ContractDto> getAllContractsCustomer(Customer currentAuth) {
         return null;
     }
 }

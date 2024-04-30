@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.dtos.ContractCreateDto;
-import rs.edu.raf.banka1.model.Contract;
+import rs.edu.raf.banka1.dtos.ContractDto;
 import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.services.ContractService;
@@ -105,12 +106,13 @@ public class ContractController {
     @Operation(summary = "Deny contract offer.", description = "Seller denies contract offer.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = {@Content(mediaType = "application/json")}),
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class,
+                    subTypes = {ContractDto.class}))}),
             @ApiResponse(responseCode = "403", description = "You aren't authorized to create order request"),
             @ApiResponse(responseCode = "404", description = "Bad Request"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<Contract>> getAllContracts(
+    public ResponseEntity<List<ContractDto>> getAllContracts(
             @AuthenticationPrincipal User userPrincipal
     ) {
         // customer fizicko lice ili pravno lice, svakako se na isti nacin dobavljaju contracts
@@ -129,7 +131,7 @@ public class ContractController {
             @ApiResponse(responseCode = "404", description = "Bad Request"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<Contract>> getAllContractsSupervisor(
+    public ResponseEntity<List<ContractDto>> getAllContractsSupervisor(
             @AuthenticationPrincipal User userPrincipal
     ) {
         // za employee, supervisor:

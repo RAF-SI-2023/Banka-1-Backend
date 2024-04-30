@@ -1,8 +1,7 @@
 package rs.edu.raf.banka1.services;
 
-import rs.edu.raf.banka1.dtos.CapitalDto;
-import rs.edu.raf.banka1.dtos.CapitalProfitDto;
-import rs.edu.raf.banka1.dtos.AddPublicCapitalDto;
+import rs.edu.raf.banka1.dtos.*;
+import rs.edu.raf.banka1.dtos.PublicCapitalDto;
 import rs.edu.raf.banka1.model.*;
 
 import java.util.List;
@@ -21,7 +20,9 @@ public interface CapitalService {
     Double estimateBalanceStock(Long stockId);
     List<CapitalProfitDto> getListingCapitalsQuantity();
     boolean hasEnoughCapitalForOrder(MarketOrder order);
-    List<CapitalDto> getAllPublicStockCapitals();
-    List<CapitalDto> getAllPublicListingCapitals();
+    List<PublicCapitalDto> getAllPublicStockCapitals();
+    List<PublicCapitalDto> getAllPublicListingCapitals();
     Boolean addToPublicCapital(Customer userPrincipal, AddPublicCapitalDto setPublicCapitalDto);
+    CapitalDto getCapitalForStockId(Long stockId);
+    CapitalDto getCapitalForForexId(Long forexId);
 }

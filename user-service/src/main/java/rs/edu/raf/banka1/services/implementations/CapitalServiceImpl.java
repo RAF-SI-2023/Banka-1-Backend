@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.dtos.CapitalProfitDto;
 import rs.edu.raf.banka1.dtos.AddPublicCapitalDto;
+import rs.edu.raf.banka1.dtos.PublicCapitalDto;
 import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
@@ -94,17 +95,27 @@ public class CapitalServiceImpl implements CapitalService {
     }
 
     @Override
-    public List<CapitalDto> getAllPublicStockCapitals() {
+    public List<PublicCapitalDto> getAllPublicStockCapitals() {
         return null;
     }
 
     @Override
-    public List<CapitalDto> getAllPublicListingCapitals() {
+    public List<PublicCapitalDto> getAllPublicListingCapitals() {
         return null;
     }
 
     @Override
     public Boolean addToPublicCapital(Customer userPrincipal, AddPublicCapitalDto setPublicCapitalDto) {
+        return null;
+    }
+
+    @Override
+    public CapitalDto getCapitalForStockId(Long stockId) {
+        return null;
+    }
+
+    @Override
+    public CapitalDto getCapitalForForexId(Long forexId) {
         return null;
     }
 
