@@ -28,8 +28,7 @@ import java.util.List;
 public class PermissionController {
     private PermissionService permissionService;
 
-    @Autowired
-    public PermissionController(PermissionService permissionService) {
+    public PermissionController(final PermissionService permissionService) {
         this.permissionService = permissionService;
     }
 

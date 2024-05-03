@@ -24,8 +24,10 @@ public class PaymentController {
     private final PaymentService paymentService;
     private final CustomerService customerService;
 
-    @Autowired
-    public PaymentController(PaymentService paymentService, CustomerService customerService) {
+    public PaymentController(
+        final PaymentService paymentService,
+        final CustomerService customerService
+    ) {
         this.paymentService = paymentService;
         this.customerService = customerService;
     }

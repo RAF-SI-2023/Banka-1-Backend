@@ -34,10 +34,12 @@ public class AuthenticationController {
     private final EmployeeRepository employeeRepository;
     private final CustomerRepository customerRepository;
 
-    public AuthenticationController(AuthenticationService authenticationService,
-                                    AuthenticationManager authenticationManager,
-                                    EmployeeRepository employeeRepository,
-                                    CustomerRepository customerRepository) {
+    public AuthenticationController(
+        final AuthenticationService authenticationService,
+        final AuthenticationManager authenticationManager,
+        final EmployeeRepository employeeRepository,
+        final CustomerRepository customerRepository
+    ) {
         this.authenticationService = authenticationService;
         this.authenticationManager = authenticationManager;
         this.employeeRepository = employeeRepository;

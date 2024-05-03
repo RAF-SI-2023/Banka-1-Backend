@@ -25,10 +25,7 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
-
-    public TransactionController(
-        final TransactionService transactionService
-    ) {
+    public TransactionController(final TransactionService transactionService) {
         this.transactionService = transactionService;
     }
 

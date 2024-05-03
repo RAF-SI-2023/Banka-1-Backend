@@ -42,9 +42,13 @@ public class BankAccountController {
     private final CardMapper cardMapper;
     private final BankAccountMapper bankAccountMapper;
 
-    @Autowired
-    public BankAccountController(BankAccountService bankAccountService, CapitalService capitalService, CardService cardService, CardMapper cardMapper,
-                                 BankAccountMapper bankAccountMapper) {
+    public BankAccountController(
+        final BankAccountService bankAccountService,
+        final CapitalService capitalService,
+        final CardService cardService,
+        final CardMapper cardMapper,
+        final BankAccountMapper bankAccountMapper
+    ) {
         this.bankAccountService = bankAccountService;
         this.capitalService = capitalService;
         this.cardService = cardService;
@@ -106,7 +110,6 @@ public class BankAccountController {
                         subTypes = {BankAccountDto.class}))}),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
-
     public ResponseEntity<List<BankAccountDto>> getBankAccountsByCustomerId(@PathVariable(name = "customerId") Long customerId) {
             List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCustomer(customerId);
             return new ResponseEntity<>(bankAccounts.stream().map(bankAccountMapper::toDto).toList(), HttpStatus.OK);
@@ -120,7 +123,6 @@ public class BankAccountController {
                             subTypes = {BankAccountDto.class}))}),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
-
     public ResponseEntity<List<BankAccountDto>> getBankAccountsByCompanyId(@PathVariable(name = "companyId") Long companyId) {
         List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCompany(companyId);
         return ResponseEntity.ok(bankAccounts.stream().map(bankAccountMapper::toDto).toList());
@@ -134,7 +136,6 @@ public class BankAccountController {
                             subTypes = {BankAccountDto.class}))}),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
-
     public ResponseEntity<List<BankAccountDto>> getBankAccountsByCreatorId(@PathVariable(name = "userId") Long userId) {
         List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByAgent(userId);
         return ResponseEntity.ok(bankAccounts.stream().map(bankAccountMapper::toDto).toList());

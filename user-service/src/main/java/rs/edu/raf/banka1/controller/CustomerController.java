@@ -27,7 +27,7 @@ import java.util.List;
 public class CustomerController {
     private final CustomerService customerService;
 
-    public CustomerController(CustomerService customerService) {
+    public CustomerController(final CustomerService customerService) {
         this.customerService = customerService;
     }
 
@@ -81,7 +81,7 @@ public class CustomerController {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<CustomerResponse>(customerResponse, HttpStatus.OK);
+        return new ResponseEntity<>(customerResponse, HttpStatus.OK);
     }
 
     @PutMapping()

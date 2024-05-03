@@ -35,12 +35,9 @@ import java.util.List;
 public class EmployeeController {
 
     private final EmployeeService employeeService;
-    private final PasswordEncoder passwordEncoder;
 
-    public EmployeeController(EmployeeService employeeService,
-                              PasswordEncoder passwordEncoder) {
+    public EmployeeController(final EmployeeService employeeService) {
         this.employeeService = employeeService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -100,7 +97,7 @@ public class EmployeeController {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<EmployeeDto>(employeeDto, HttpStatus.OK);
+        return new ResponseEntity<>(employeeDto, HttpStatus.OK);
     }
 
     @GetMapping(value = "/search")
@@ -132,7 +129,7 @@ public class EmployeeController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<CreateUserResponse> createEmployee(@RequestBody CreateEmployeeDto createEmployeeDto) {
-        return new ResponseEntity<CreateUserResponse>(employeeService.createEmployee(createEmployeeDto), HttpStatus.OK);
+        return new ResponseEntity<>(employeeService.createEmployee(createEmployeeDto), HttpStatus.OK);
     }
 
     @PostMapping(value = "/activate/{token}")

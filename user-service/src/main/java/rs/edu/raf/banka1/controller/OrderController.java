@@ -32,12 +32,13 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
-    private final JwtUtil jwtUtil;
     private final EmployeeService employeeService;
 
-    public OrderController(OrderService orderService, JwtUtil jwtUtil, EmployeeService employeeService) {
+    public OrderController(
+        final OrderService orderService,
+        final EmployeeService employeeService
+    ) {
         this.orderService = orderService;
-        this.jwtUtil = jwtUtil;
         this.employeeService = employeeService;
     }
 

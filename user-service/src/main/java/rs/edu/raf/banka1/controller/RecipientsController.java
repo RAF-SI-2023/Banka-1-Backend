@@ -25,7 +25,10 @@ public class RecipientsController {
     private final CustomerService customerService;
 
     @Autowired
-    public RecipientsController(RecipientsService recipientsService, CustomerService customerService) {
+    public RecipientsController(
+        final RecipientsService recipientsService,
+        final CustomerService customerService
+    ) {
         this.recipientsService = recipientsService;
         this.customerService = customerService;
     }
