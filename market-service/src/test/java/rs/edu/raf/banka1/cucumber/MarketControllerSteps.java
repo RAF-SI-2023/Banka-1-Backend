@@ -9,11 +9,14 @@ import io.cucumber.java.en.When;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.mapper.CurrencyMapper;
 import rs.edu.raf.banka1.mapper.ExchangeMapper;
 import rs.edu.raf.banka1.model.ListingBase;
+import rs.edu.raf.banka1.model.ListingFuture;
 import rs.edu.raf.banka1.model.dtos.*;
 import rs.edu.raf.banka1.model.entities.Currency;
 import rs.edu.raf.banka1.model.entities.Exchange;
@@ -23,8 +26,7 @@ import rs.edu.raf.banka1.repositories.ExchangeRepository;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class MarketControllerSteps {
@@ -46,6 +48,8 @@ public class MarketControllerSteps {
     private Object lastObject;
     private List<OptionsDto> lastOptionsResponse;
     private List<ListingForexDto> lastForexResponse;
+    private List<ListingFutureDto> lastFutureResponse;
+    private List<ListingStockDto> lastStockResponse;
     private List<ListingBaseDto> lastListingResponse;
 
     private List<Inflation> lastInflationResponse;
@@ -94,7 +98,12 @@ public class MarketControllerSteps {
         headers.setBearerAuth(jwt);
         HttpEntity<Object> request = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(url, org.springframework.http.HttpMethod.GET, request, String.class);
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.exchange(url, org.springframework.http.HttpMethod.GET, request, String.class);
+        }catch (HttpClientErrorException e){
+            response = new ResponseEntity<>(e.getStatusCode());
+        }
         lastResponse = response;
         return response.getBody();
     }
@@ -140,8 +149,20 @@ public class MarketControllerSteps {
             else if(url.equalsIgnoreCase("/market/listing/get/forex")){
                 lastForexResponse = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<List<ListingForexDto>>() {});
             }
+            else if(url.equalsIgnoreCase("/market/listing/get/stock")){
+                lastStockResponse = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<>() {
+                });
+            }
+            else if(url.equalsIgnoreCase("/market/listing/get/futures")){
+                lastFutureResponse = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<>() {
+                });
+            }
             else if(url.equals("/market/listing")){
-                lastListingResponse = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<List<ListingBaseDto>>() {});
+                lastListingResponse = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<>() {
+                });
+            }
+            else{
+                get(marketurl + marketport + url);
             }
         }
         catch (Exception e){
@@ -153,6 +174,23 @@ public class MarketControllerSteps {
     @Then("i should get response with status {int}")
     public void iShouldGetResponseWithStatus(int status) {
         assertThat(lastResponse.getStatusCode()).isEqualTo(org.springframework.http.HttpStatus.valueOf(status));
+    }
+
+    @And("{string} is not empty")
+    public void responseBodyIsNotEmptyList(String listingType) {
+        switch (listingType.toLowerCase()){
+            case "forex":
+                assertThat(lastForexResponse).isNotNull();
+                assertThat(lastForexResponse).isNotEmpty();
+                break;
+            case "stock" :
+                assertThat(lastStockResponse).isNotNull();
+                assertThat(lastStockResponse).isNotEmpty();
+                break;
+            case "future" :
+                assertThat(lastFutureResponse).isNotNull();
+                assertThat(lastFutureResponse).isNotEmpty();
+        }
     }
 
     @Then("Response body is the correct exchange JSON")
