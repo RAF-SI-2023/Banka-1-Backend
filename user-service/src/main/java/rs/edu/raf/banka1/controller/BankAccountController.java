@@ -81,9 +81,7 @@ public class BankAccountController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Boolean> editCustomer(@RequestBody EditBankAccountNameRequest editBankAccountNameRequest) {
-        int edited = bankAccountService.editBankAccount(editBankAccountNameRequest.getBankAccountNumber(), editBankAccountNameRequest.getNewName());
-        if (edited == 0) return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
-        else if (edited == -1) return new ResponseEntity<>(false, HttpStatus.UNAUTHORIZED);
+        bankAccountService.editBankAccount(editBankAccountNameRequest.getBankAccountNumber(), editBankAccountNameRequest.getNewName());
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 

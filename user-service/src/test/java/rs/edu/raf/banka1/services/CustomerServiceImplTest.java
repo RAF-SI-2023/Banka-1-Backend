@@ -19,6 +19,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import rs.edu.raf.banka1.dtos.customer.CustomerDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.exceptions.EmailNotFoundException;
+import rs.edu.raf.banka1.exceptions.InvalidTokenException;
+import rs.edu.raf.banka1.exceptions.SignUpException;
 import rs.edu.raf.banka1.mapper.CustomerMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
@@ -284,6 +287,7 @@ public class CustomerServiceImplTest {
         customer.setEmail("test@gmail.com");
         customer.setPhoneNumber("123456789");
         customer.setActivationToken("testactivationtoken");
+        customer.setActive(false);
         BankAccount bankAccount = new BankAccount();
         bankAccount.setCustomer(customer);
         when(bankAccountService.findBankAccountByAccountNumber("123456789")).thenReturn(bankAccount);
@@ -298,9 +302,7 @@ public class CustomerServiceImplTest {
     public void initialActivationBankAccountDoesntExist(){
         when(bankAccountService.findBankAccountByAccountNumber("123456789")).thenReturn(null);
 
-        boolean result = customerService.initialActivation(initialActivationRequest);
-
-        assertFalse(result);
+        assertThrows(SignUpException.class, ()->customerService.initialActivation(initialActivationRequest));
         verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
     }
 
@@ -310,13 +312,12 @@ public class CustomerServiceImplTest {
         customer.setEmail("test123@gmail.com");
         customer.setPhoneNumber("123456789");
         customer.setActivationToken("testactivationtoken");
+        customer.setActive(false);
         BankAccount bankAccount = new BankAccount();
         bankAccount.setCustomer(customer);
         when(bankAccountService.findBankAccountByAccountNumber("123456789")).thenReturn(bankAccount);
 
-        boolean result = customerService.initialActivation(initialActivationRequest);
-
-        assertFalse(result);
+        assertThrows(SignUpException.class, () -> customerService.initialActivation(initialActivationRequest));
         verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
     }
 
@@ -326,13 +327,12 @@ public class CustomerServiceImplTest {
         customer.setEmail("test@gmail.com");
         customer.setPhoneNumber("123456780");
         customer.setActivationToken("testactivationtoken");
+        customer.setActive(false);
         BankAccount bankAccount = new BankAccount();
         bankAccount.setCustomer(customer);
         when(bankAccountService.findBankAccountByAccountNumber("123456789")).thenReturn(bankAccount);
 
-        boolean result = customerService.initialActivation(initialActivationRequest);
-
-        assertFalse(result);
+        assertThrows(SignUpException.class, ()->customerService.initialActivation(initialActivationRequest));
         verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
     }
 
@@ -364,9 +364,7 @@ public class CustomerServiceImplTest {
     public void activateNewCustomerTokenDoesntExist(){
         when(customerRepository.findCustomerByActivationToken("testactivationtoken")).thenReturn(Optional.empty());
 
-        Long result = customerService.activateNewCustomer("testactivationtoken", "password");
-
-        assertNull(result);
+        assertThrows(InvalidTokenException.class, ()->customerService.activateNewCustomer("testactivationtoken", "password"));
         verify(customerRepository, never()).save(any());
         verify(bankAccountService, never()).activateBankAccount(any());
     }
@@ -391,7 +389,7 @@ public class CustomerServiceImplTest {
         when(emailService.sendEmail(eq(email), any(), any()))
                 .thenReturn(true);
 
-        assertEquals(customerService.sendResetPasswordEmail(email), false);
+        assertThrows(EmailNotFoundException.class, ()->customerService.sendResetPasswordEmail(email));
         verify(emailService, times(0)).sendEmail(eq(email), any(), any());
     }
 
@@ -545,9 +543,7 @@ public class CustomerServiceImplTest {
             when(mycontext.getAuthentication()).thenReturn(null);
             security.when(SecurityContextHolder::getContext).thenReturn(mycontext);
 
-            var result = customerService.findByJwt();
-
-            AssertionsForClassTypes.assertThat(result).isNull();
+            assertThrows(InvalidTokenException.class, ()->customerService.findByJwt());
         }
     }
 }

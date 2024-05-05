@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services.implementations;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.mapper.CustomerMapper;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Currency;
@@ -65,26 +67,18 @@ public class CustomerServiceImpl implements CustomerService {
         this.customerMapper = customerMapper;
     }
 
+    @Transactional
     @Override
     public Long createNewCustomer(CreateCustomerRequest createCustomerRequest) {
-        Currency currency;
-        try{
-            currency = currencyService.findCurrencyByCode(createCustomerRequest.getAccount().getCurrencyCode());
-        }
-        catch (RuntimeException runtimeException){
-            return null;
-        }
-        EmployeeDto employee;
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         // Check if the user is authenticated
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
             // Assuming your UserDetails implementation has the email field
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String email = userDetails.getUsername();
-            employee = userService.findByEmail(email);
+            EmployeeDto employee = userService.findByEmail(email);
             if (employee == null) {
-                return null;
+                throw new ForbiddenException("You are not authorized to create new customer");
             }
 
             Customer customer = CustomerMapper.customerDataToCustomer(createCustomerRequest.getCustomer());
@@ -92,17 +86,16 @@ public class CustomerServiceImpl implements CustomerService {
             customer.setActivationToken(activationToken);
             customer = customerRepository.save(customer);
 
-
             CreateBankAccountRequest createBankAccountRequest = new CreateBankAccountRequest();
             BankAccountRequest bankAccountRequest = new BankAccountRequest();
             createBankAccountRequest.setAccount(bankAccountRequest);
 
             createBankAccountRequest.setCustomerId(customer.getUserId());
 
-            createBankAccountRequest.getAccount().setCurrencyCode(currency.getCurrencyCode());
+            createBankAccountRequest.getAccount().setCurrencyCode(createCustomerRequest.getAccount().getCurrencyCode());
             createBankAccountRequest.getAccount().setAccountType(createCustomerRequest.getAccount().getAccountType());
             createBankAccountRequest.getAccount().setMaintenanceCost(createCustomerRequest.getAccount().getMaintenanceCost());
-            createBankAccountRequest.getAccount().setCurrencyCode(currency.getCurrencyCode());
+            createBankAccountRequest.getAccount().setCurrencyCode(createCustomerRequest.getAccount().getCurrencyCode());
             createBankAccountRequest.getAccount().setBalance(0.0);
             createBankAccountRequest.getAccount().setAvailableBalance(0.0);
             createBankAccountRequest.getAccount().setSubtypeOfAccount("");
@@ -116,15 +109,22 @@ public class CustomerServiceImpl implements CustomerService {
             emailService.sendEmail(to, subject, text);
             return customer.getUserId();
         }
-        return null;
+        throw new ForbiddenException("You are not authenticate to create new customer");
     }
     @Override
     public boolean initialActivation(InitialActivationRequest createCustomerRequest) {
         BankAccount bankAccount = bankAccountService
                 .findBankAccountByAccountNumber(createCustomerRequest.getAccountNumber());
         if (bankAccount == null) {
-            return false;
+            throw new SignUpException(SignUpException.Reason.BANK_ACCOUNT_NOT_FOUND,createCustomerRequest);
         }
+        if(bankAccount.getCustomer() == null){
+            throw new SignUpException(SignUpException.Reason.BANK_ACCOUNT_IS_NOT_LINKED_TO_CUSTOMER,createCustomerRequest);
+        }
+        if(bankAccount.getCustomer().getActive()){
+            throw new SignUpException(SignUpException.Reason.CUSTOMER_IS_ALREADY_ACTIVE,createCustomerRequest);
+        }
+
         if (bankAccount.getCustomer().getEmail().equals(createCustomerRequest.getEmail())
                 && bankAccount.getCustomer().getPhoneNumber().equals(createCustomerRequest.getPhoneNumber())) {
             String to = bankAccount.getCustomer().getEmail();
@@ -133,7 +133,7 @@ public class CustomerServiceImpl implements CustomerService {
             emailService.sendEmail(to, subject, text);
             return true;
         }
-        return false;
+        throw new SignUpException(SignUpException.Reason.BANK_ACCOUNT_IS_NOT_LINKED_TO_EMAIL_OR_PHONE,createCustomerRequest);
     }
 
     @Override
@@ -141,7 +141,7 @@ public class CustomerServiceImpl implements CustomerService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if(authentication == null)
-            return null;
+            throw new InvalidTokenException(InvalidTokenException.Reason.INVALID_JWT);
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         return findByEmail(userDetails.getUsername());
@@ -151,14 +151,15 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerResponse findByEmail(String email) {
         return this.customerRepository.findCustomerByEmail(email)
                 .map(this.customerMapper::customerToCustomerResponse)
-                .orElse(null);
+                .orElseThrow(()-> new EmailNotFoundException(email));
     }
 
     @Override
     public Long activateNewCustomer(String token, String password) {
-        Customer customer = customerRepository.findCustomerByActivationToken(token).orElse(null);
-        if (customer == null) {
-            return null;
+        Customer customer = customerRepository.findCustomerByActivationToken(token)
+            .orElseThrow(() -> new InvalidTokenException(InvalidTokenException.Reason.INVALID_TOKEN));
+        if(customer.getActive()){
+            throw new InvalidTokenException(InvalidTokenException.Reason.CUSTOMER_IS_ALREADY_ACTIVE);
         }
         customer.setActivationToken(null);
         customer.setActive(true);
@@ -175,22 +176,17 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public boolean editCustomer(EditCustomerRequest editCustomerRequest) {
-        Optional<Customer> optCustomer = customerRepository.findCustomerByEmail(editCustomerRequest.getEmail());
-        if (optCustomer.isEmpty()) return false;
-        Customer newCustomer = customerMapper.editCustomerRequestToCustomer(optCustomer.get(), editCustomerRequest);
+        Customer customer = customerRepository.findCustomerByEmail(editCustomerRequest.getEmail())
+            .orElseThrow(()->new CustomerNotFoundException(editCustomerRequest.getEmail()));
+        Customer newCustomer = customerMapper.editCustomerRequestToCustomer(customer, editCustomerRequest);
         customerRepository.save(newCustomer);
         return true;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Customer> myCustomer = this.customerRepository.findCustomerByEmail(username);
-
-        if (myCustomer.isEmpty()) {
-            throw new UsernameNotFoundException("Email " + username + " not found");
-        }
-
-        Customer customer = myCustomer.get();
+        Customer customer = this.customerRepository.findCustomerByEmail(username)
+            .orElseThrow(()-> new UsernameNotFoundException("Email " + username + " not found"));
 
         List<SimpleGrantedAuthority> authorities = customer.getPermissions()
                 .stream()
@@ -204,11 +200,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Boolean sendResetPasswordEmail(String email) {
-        Optional<Customer> optionalCustomer = this.customerRepository.findCustomerByEmail(email);
+        Customer customer = this.customerRepository.findCustomerByEmail(email).orElseThrow(()->
+            new EmailNotFoundException(email));
 
-        if (optionalCustomer.isEmpty()) return false;
-
-        Customer customer = optionalCustomer.get();
         String resetPasswordToken = UUID.randomUUID().toString();
 
         customer.setResetPasswordToken(resetPasswordToken);

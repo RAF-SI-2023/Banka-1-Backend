@@ -169,8 +169,11 @@ public class BootstrapData implements CommandLineRunner {
         customer.setEmail("customer@gmail.com");
         customer.setPassword(passwordEncoder.encode("customer"));
         customer.setLastName("Trajkovic");
+        customer.setPhoneNumber("1234567890");
 //        customer.setPosition("customer");
-        customer.setActive(true);
+        String activationToken = UUID.randomUUID().toString();
+        customer.setActivationToken(activationToken);
+        customer.setActive(false);
         customerRepository.save(customer);
 
         //ovo samo za test moze da se obrise

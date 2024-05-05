@@ -25,6 +25,7 @@ import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.exceptions.EmailNotFoundException;
 import rs.edu.raf.banka1.exceptions.EmployeeNotFoundException;
 import rs.edu.raf.banka1.exceptions.ForbiddenException;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
@@ -240,7 +241,7 @@ class EmployeeServiceImplTest {
         when(emailService.sendEmail(eq(email), any(), any()))
                 .thenReturn(true);
 
-        assertEquals(employeeService.sendResetPasswordEmail(email), false);
+        assertThrows(EmailNotFoundException.class, ()->employeeService.sendResetPasswordEmail(email));
         verify(emailService, times(0)).sendEmail(eq(email), any(), any());
     }
 

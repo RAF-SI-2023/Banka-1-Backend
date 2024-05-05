@@ -12,6 +12,8 @@ import rs.edu.raf.banka1.dtos.CapitalDto;
 import org.tinylog.Logger;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
+import rs.edu.raf.banka1.exceptions.CreateBankAccountException;
+import rs.edu.raf.banka1.exceptions.ForbiddenException;
 import rs.edu.raf.banka1.mapper.BankAccountMapper;
 import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.model.*;
@@ -61,41 +63,31 @@ public class BankAccountServiceImpl implements BankAccountService {
     public BankAccount createBankAccount(CreateBankAccountRequest createRequest) {
 
         BankAccount bankAccount = new BankAccount();
-        AccountType type = null;
         try {
-            type =createRequest.getAccount().getAccountType();
+            bankAccount.setAccountType(createRequest.getAccount().getAccountType());
         } catch (IllegalArgumentException e) {
-            Logger.error("Invalid account type provided in createBankAccount request.");
-            return null;
+            throw new CreateBankAccountException(CreateBankAccountException.Reason.INVALID_ACCOUNT_TYPE, createRequest);
         }
-        bankAccount.setAccountType(type);
 
         bankAccount.setAccountNumber(generateBankAccountNumber());
         bankAccount.setAccountName(createRequest.getAccount().getAccountName());
 
-        boolean should_exit = true;
 
-        if(type.equals(AccountType.CURRENT) || type.equals(AccountType.FOREIGN_CURRENCY)){
-            Customer customer = customerRepository.findById(createRequest.getCustomerId()).orElse(null);
-            if (customer != null) {
-            bankAccount.setCustomer(customer);
-            bankAccount.setSubtypeOfAccount(createRequest.getAccount().getSubtypeOfAccount());
-            bankAccount.setMaintenanceCost(createRequest.getAccount().getMaintenanceCost());
-            should_exit = false;
+        switch (bankAccount.getAccountType()){
+            case FOREIGN_CURRENCY, CURRENT -> {
+                Customer customer = customerRepository.findById(createRequest.getCustomerId())
+                    .orElseThrow(() -> new CreateBankAccountException(CreateBankAccountException.Reason.CUSTOMER_NOT_FOUND, createRequest));
+                bankAccount.setCustomer(customer);
+                bankAccount.setSubtypeOfAccount(createRequest.getAccount().getSubtypeOfAccount());
+                bankAccount.setMaintenanceCost(createRequest.getAccount().getMaintenanceCost());
             }
-        }
-        if(type.equals(AccountType.BUSINESS)) {
-            Company company = companyRepository.findById(createRequest.getCompanyId()).orElse(null);
-            if (company != null) {
+            case BUSINESS -> {
+                Company company = companyRepository.findById(createRequest.getCompanyId())
+                    .orElseThrow(() -> new CreateBankAccountException(CreateBankAccountException.Reason.COMPANY_NOT_FOUND, createRequest));
                 bankAccount.setCompany(company);
-                should_exit = false;
             }
         }
 
-        if(should_exit){
-            Logger.error("Failed to create bank account. Invalid account type or missing customer/company information.");
-            return null;
-        }
 //      currentDate
         long creationDate = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toEpochSecond();
 
@@ -110,7 +102,8 @@ public class BankAccountServiceImpl implements BankAccountService {
 
 
         bankAccount.setCreatedByAgentId(getEmployeeId());
-        Currency currency = currencyRepository.findCurrencyByCurrencyCode(createRequest.getAccount().getCurrencyCode()).orElse(null);
+        Currency currency = currencyRepository.findCurrencyByCurrencyCode(createRequest.getAccount().getCurrencyCode())
+            .orElseThrow(() -> new CreateBankAccountException(CreateBankAccountException.Reason.CURRENCY_NOT_FOUND, createRequest));
         bankAccount.setCurrency(currency);
 
         bankAccount.setAccountStatus(false);
@@ -191,16 +184,12 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     @Override
     public int editBankAccount(String accountNumber, String newName) {
-        BankAccount b = bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElse(null);
-        if (b == null) {
-            Logger.error("Bank account not found for editing: {}", accountNumber);
-            return 0;
-        }
+        BankAccount b = bankAccountRepository.findBankAccountByAccountNumber(accountNumber)
+            .orElseThrow(BankAccountNotFoundException::new);
 
         String loggedUserMail = SecurityContextHolder.getContext().getAuthentication().getName();
         if(!b.getCustomer().getEmail().equals(loggedUserMail)){
-            Logger.error("Unauthorized access to edit bank account: {}", accountNumber);
-            return -1;
+            throw new ForbiddenException();
         }
 
         b.setAccountName(newName);

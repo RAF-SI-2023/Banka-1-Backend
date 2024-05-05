@@ -14,6 +14,7 @@ import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.exceptions.EmailNotFoundException;
 import rs.edu.raf.banka1.exceptions.EmployeeNotFoundException;
 import rs.edu.raf.banka1.exceptions.ForbiddenException;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
@@ -208,11 +209,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Boolean sendResetPasswordEmail(String email) {
-        Optional<Employee> optionalEmployee = this.employeeRepository.findByEmail(email);
+        Employee employee = this.employeeRepository.findByEmail(email).orElseThrow(()->
+            new EmailNotFoundException(email));
 
-        if (optionalEmployee.isEmpty()) return false;
-
-        Employee employee = optionalEmployee.get();
         String resetPasswordToken = UUID.randomUUID().toString();
 
         employee.setResetPasswordToken(resetPasswordToken);
@@ -280,13 +279,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Employee> myEmployee = this.employeeRepository.findByEmail(username);
-
-        if (myEmployee.isEmpty()) {
-            throw new UsernameNotFoundException("User name " + username + " not found");
-        }
-
-        Employee employee = myEmployee.get();
+        Employee employee = this.employeeRepository.findByEmail(username)
+            .orElseThrow(()-> new UsernameNotFoundException("Username " + username + " not found"));
 
         List<SimpleGrantedAuthority> authorities = employee.getPermissions()
                 .stream()

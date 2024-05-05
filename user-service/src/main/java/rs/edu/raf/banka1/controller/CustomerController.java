@@ -43,12 +43,8 @@ public class CustomerController {
             @ApiResponse(responseCode = "400", description = "Bad request")
     })
     public ResponseEntity<Boolean> createNewCustomer(@RequestBody CreateCustomerRequest createCustomerRequest) {
-        Long id = customerService.createNewCustomer(createCustomerRequest);
-        if(id !=null){
-            return ResponseEntity.ok(true);
-        }
-     return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
-
+        customerService.createNewCustomer(createCustomerRequest);
+        return ResponseEntity.ok(true);
     }
 
     @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -129,10 +125,7 @@ public class CustomerController {
     })
     public ResponseEntity<Long> activate(@PathVariable String token, @RequestBody ActivateAccountRequest activateAccountRequest) {
         Long id = customerService.activateNewCustomer(token, activateAccountRequest.getPassword());
-        if(id != null){
             return ResponseEntity.ok(id);
-        }
-        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping(value = "/reset/{email}")
