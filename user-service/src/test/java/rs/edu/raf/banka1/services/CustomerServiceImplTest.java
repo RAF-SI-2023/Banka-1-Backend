@@ -19,9 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import rs.edu.raf.banka1.dtos.customer.CustomerDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
-import rs.edu.raf.banka1.exceptions.EmailNotFoundException;
-import rs.edu.raf.banka1.exceptions.InvalidTokenException;
-import rs.edu.raf.banka1.exceptions.SignUpException;
+import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.mapper.CustomerMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.CustomerRepository;
@@ -209,11 +207,10 @@ public class CustomerServiceImplTest {
 
             BankAccount bankAccount = new BankAccount();
             bankAccount.setAccountNumber("3921893");
-            when(bankAccountService.createBankAccount(any())).thenReturn(bankAccount);
+            when(bankAccountService.createBankAccount(any())).thenThrow(new RuntimeException("Currency not found"));
 
-            customerService.createNewCustomer(createCustomerRequest);
+            assertThrows(RuntimeException.class, ()->customerService.createNewCustomer(createCustomerRequest));
 
-            verify(customerRepository, never()).save(any());
             verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
         }
     }
@@ -273,7 +270,7 @@ public class CustomerServiceImplTest {
             bankAccount.setAccountNumber("3921893");
             when(bankAccountService.createBankAccount(any())).thenReturn(bankAccount);
 
-            customerService.createNewCustomer(createCustomerRequest);
+            assertThrows(ForbiddenException.class, ()->customerService.createNewCustomer(createCustomerRequest));
 
             verify(customerRepository, never()).save(any());
             verify(emailService, never()).sendEmail(anyString(), anyString(), anyString());
@@ -474,11 +471,8 @@ public class CustomerServiceImplTest {
         // Mocking customer not found scenario
         when(customerRepository.findCustomerByEmail("test@gmail.com")).thenReturn(Optional.empty());
 
-        // Perform the method call
-        boolean result = customerService.editCustomer(editCustomerRequest);
-
         // Assertions
-        assertFalse(result); // Expecting false because customer not found
+        assertThrows(CustomerNotFoundException.class, () -> customerService.editCustomer(editCustomerRequest));
         Mockito.verify(customerRepository).findCustomerByEmail("test@gmail.com");
         Mockito.verifyNoMoreInteractions(customerRepository); // Verify no other interactions with customerRepository
         Mockito.verifyNoInteractions(customerMapper, passwordEncoder); // Verify no interactions with other mocks
