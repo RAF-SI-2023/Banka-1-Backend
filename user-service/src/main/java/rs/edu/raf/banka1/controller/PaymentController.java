@@ -42,13 +42,9 @@ public class PaymentController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Void> createPayment(@RequestBody CreatePaymentRequest request) {
-        if (!paymentService.validatePayment(request)) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        paymentService.validatePayment(request);
         Long paymentId = paymentService.createPayment(request);
-        if (paymentId > -1) {
-            paymentService.processPayment(paymentId);
-        }
+        paymentService.processPayment(paymentId);
         return ResponseEntity.ok().build();
     }
 
@@ -91,7 +87,7 @@ public class PaymentController {
     })
     public ResponseEntity<Void> sendCode() {
         Long customerId = customerService.findByJwt().getUserId();
-        boolean sent = paymentService.sendSingleUseCode(customerId);
+        paymentService.sendSingleUseCode(customerId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

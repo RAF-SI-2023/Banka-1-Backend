@@ -4,6 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.tinylog.Logger;
 import rs.edu.raf.banka1.dtos.PaymentDto;
+import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
+import rs.edu.raf.banka1.exceptions.CreatePaymentException;
+import rs.edu.raf.banka1.exceptions.CustomerNotFoundException;
+import rs.edu.raf.banka1.exceptions.PaymentNotFoundException;
 import rs.edu.raf.banka1.mapper.PaymentMapper;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Customer;
@@ -49,12 +53,13 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Long createPayment(CreatePaymentRequest request) {
-        Payment payment = paymentMapper.createPaymentRequestToPayment(request);
-        if (payment == null) {
+        try {
+            Payment payment = paymentMapper.createPaymentRequestToPayment(request);
+            return paymentRepository.save(payment).getId();
+        }catch (BankAccountNotFoundException e){
             Logger.error("Failed to create payment from request: {}", request);
-            return -1L;
+            throw new CreatePaymentException(CreatePaymentException.Reason.BANK_ACCOUNT_NOT_FOUND, request);
         }
-        return paymentRepository.save(payment).getId();
     }
 
 
@@ -63,7 +68,7 @@ public class PaymentServiceImpl implements PaymentService {
         Optional<Payment> paymentOpt = paymentRepository.findById(paymentId);
         if (paymentOpt.isEmpty()) {
             Logger.error("Payment not found for processing: {}", paymentId);
-            return;
+            throw new PaymentNotFoundException(paymentId);
         }
         Payment payment = paymentOpt.get();
         BankAccount senderAccount = payment.getSenderBankAccount();
@@ -108,8 +113,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentDto getPaymentById(Long id) {
-        Optional<Payment> paymentOpt = paymentRepository.findById(id);
-        return paymentOpt.map(paymentMapper::paymentToPaymentDto).orElse(null);
+        Payment payment = paymentRepository.findById(id).orElseThrow(()->
+            new PaymentNotFoundException(id));
+        return paymentMapper.paymentToPaymentDto(payment);
     }
 
     @Override
@@ -117,7 +123,7 @@ public class PaymentServiceImpl implements PaymentService {
         Optional<Customer> customerOpt = customerRepository.findByUserId(customerId);
         if (customerOpt.isEmpty()) {
             Logger.error("Customer not found for sending single use code: {}", customerId);
-            return false;
+            throw new CustomerNotFoundException(customerId);
         }
         Customer customer = customerOpt.get();
         String singleUseCode = jwtUtil.generateSingleUseCode(customer.getEmail());
@@ -133,7 +139,7 @@ public class PaymentServiceImpl implements PaymentService {
         Optional<BankAccount> bankAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(request.getSenderAccountNumber());
         if (bankAccountOpt.isEmpty()) {
             Logger.error("Bank account not found for validating payment: {}", request.getSenderAccountNumber());
-            return false;
+            throw new CreatePaymentException(CreatePaymentException.Reason.BANK_ACCOUNT_NOT_FOUND, request);
         }
         Customer customer = bankAccountOpt.get().getCustomer();
         boolean valid = customer.getSingleUseCode() != null
@@ -146,6 +152,7 @@ public class PaymentServiceImpl implements PaymentService {
             Logger.info("Payment validation successful for customer: {}", customer.getUserId());
         }else{
             Logger.info("Payment validation failed for customer: {}", customer.getUserId());
+            throw new CreatePaymentException(CreatePaymentException.Reason.BAD_VALIDATION, request);
         }
         return valid;
     }

@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.dtos.PaymentDto;
+import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Payment;
 import rs.edu.raf.banka1.model.TransactionStatus;
@@ -46,9 +47,8 @@ public class PaymentMapper {
     }
 
     public Payment createPaymentRequestToPayment(CreatePaymentRequest request) {
-        Optional<BankAccount> senderAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(request.getSenderAccountNumber());
-        if (senderAccountOpt.isEmpty()) return null;
-        BankAccount senderAccount = senderAccountOpt.get();
+        BankAccount senderAccount = bankAccountRepository.findBankAccountByAccountNumber(request.getSenderAccountNumber())
+            .orElseThrow(BankAccountNotFoundException::new);
         Payment payment = new Payment();
         payment.setSenderBankAccount(senderAccount);
         payment.setRecipientName(request.getRecipientName());

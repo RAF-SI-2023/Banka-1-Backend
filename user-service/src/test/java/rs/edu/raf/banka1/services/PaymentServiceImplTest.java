@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.any;
@@ -13,13 +15,10 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.mapper.PaymentMapper;
 import rs.edu.raf.banka1.dtos.PaymentDto;
 import rs.edu.raf.banka1.model.*;
@@ -74,14 +73,14 @@ class PaymentServiceImplTest {
         createPaymentRequest.setPaymentPurpose("Test");
         createPaymentRequest.setAmount(100.0);
         createPaymentRequest.setRecipientAccountNumber("1111");
-        createPaymentRequest.setSenderAccountNumber("0000");
+        createPaymentRequest.setSenderAccountNumber(accountNumber);
         createPaymentRequest.setRecipientName("Keri");
 
         Payment payment = new Payment();
         payment.setId(1L);
 
         when(bankAccountRepository.findBankAccountByAccountNumber(accountNumber)).thenReturn(Optional.of(bankAccount));
-        when(paymentRepository.save(payment)).thenReturn(payment);
+        when(paymentRepository.save(any())).thenReturn(payment);
 
         Long paymentId = paymentService.createPayment(createPaymentRequest);
 
@@ -95,9 +94,7 @@ class PaymentServiceImplTest {
         request.setSenderAccountNumber("InvalidAccount123");
         request.setRecipientName("RecipientName");
 
-        Long paymentId = paymentService.createPayment(request);
-
-        assertEquals(-1L, paymentId);
+        assertThrows(CreatePaymentException.class, ()->paymentService.createPayment(request));
     }
 
     @Test
@@ -178,7 +175,7 @@ class PaymentServiceImplTest {
         Long nonExistentPaymentId = 100L;
         when(paymentRepository.findById(nonExistentPaymentId)).thenReturn(Optional.empty());
 
-        paymentService.processPayment(nonExistentPaymentId);
+        assertThrows(PaymentNotFoundException.class, ()->paymentService.processPayment(nonExistentPaymentId));
 
         // No changes should be made since the payment does not exist
         verify(bankAccountRepository, never()).save(any(BankAccount.class));
@@ -258,9 +255,7 @@ class PaymentServiceImplTest {
         Long nonExistentPaymentId = 100L;
         when(paymentRepository.findById(nonExistentPaymentId)).thenReturn(Optional.empty());
 
-        PaymentDto resultDto = paymentService.getPaymentById(nonExistentPaymentId);
-
-        assertNull(resultDto);
+        assertThrows(PaymentNotFoundException.class,()->paymentService.getPaymentById(nonExistentPaymentId));
     }
     @Test
     public void sendSingleUseCodeTestCustomerExists() {
@@ -289,9 +284,8 @@ class PaymentServiceImplTest {
         Long nonExistentCustomerId = 100L;
         when(customerRepository.findByUserId(nonExistentCustomerId)).thenReturn(Optional.empty());
 
-        boolean result = paymentService.sendSingleUseCode(nonExistentCustomerId);
 
-        assertFalse(result);
+        assertThrows(CustomerNotFoundException.class,()->paymentService.sendSingleUseCode(nonExistentCustomerId));
     }
 
     @Test
@@ -330,9 +324,7 @@ class PaymentServiceImplTest {
                 .thenReturn(Optional.of(bankAccount));
         when(jwtUtil.isTokenExpired(request.getSingleUseCode())).thenReturn(false);
 
-        boolean result = paymentService.validatePayment(request);
-
-        assertFalse(result);
+        assertThrows(CreatePaymentException.class,()-> paymentService.validatePayment(request));
         assertEquals("654321", bankAccount.getCustomer().getSingleUseCode()); // Single use code should not be cleared
         verify(customerRepository, never()).save(any(Customer.class)); // Customer should not be saved
     }
