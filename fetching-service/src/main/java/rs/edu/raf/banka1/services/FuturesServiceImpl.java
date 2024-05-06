@@ -30,15 +30,20 @@ public class FuturesServiceImpl implements FuturesService {
     private final FutureRepository futureRepository;
     private final ListingHistoryRepository listingHistoryRepository;
     private final FutureMapper futureMapper;
-    private final ChromeOptions options;
     private final ListingStockService listingStockService;
+    private final DriverService driverService;
     private WebDriver driver;
     @Autowired
-    public FuturesServiceImpl(FutureRepository futureRepository, ListingHistoryRepository listingHistoryRepository, FutureMapper futureMapper, ListingStockService listingStockService) {
+    public FuturesServiceImpl(FutureRepository futureRepository,
+                              ListingHistoryRepository listingHistoryRepository,
+                              FutureMapper futureMapper,
+                              ListingStockService listingStockService,
+                              DriverService driverService) {
         this.futureRepository = futureRepository;
         this.listingHistoryRepository = listingHistoryRepository;
         this.futureMapper = futureMapper;
         this.listingStockService = listingStockService;
+        this.driverService = driverService;
 
         // Use WebDriverManager to setup ChromeDriver
         WebDriverManager.chromedriver().setup();
@@ -55,15 +60,13 @@ public class FuturesServiceImpl implements FuturesService {
         monthsCode.put("Oct", "V");
         monthsCode.put("Nov", "X");
         monthsCode.put("Dec", "Z");
-        options = new ChromeOptions();
-        options.addArguments("--headless");
     }
 
 
     @Override
     public List<ListingFuture> fetchNFutures(int n) {
 
-        driver = new ChromeDriver(options);
+        driver = driverService.createNewDriver();
 
         var rows = scrapeFuturesTable(driver).subList(0, n);
         var futureUrls = extractFutureUrls(rows).subList(0, n);
@@ -245,7 +248,7 @@ public class FuturesServiceImpl implements FuturesService {
 
     @Override
     public List<ListingHistory> fetchNFutureHistories(List<ListingFuture> listingFutures, int n) {
-        driver = new ChromeDriver(options);
+        driver = driverService.createNewDriver();
         List<ListingHistory> histories = new ArrayList<>();
         for (var future: listingFutures) {
             histories.addAll(Objects.requireNonNull(fetchNSingleFutureHistory(future, n, driver)));
@@ -289,49 +292,6 @@ public class FuturesServiceImpl implements FuturesService {
             history.add(singleHistory);
         }
         return history;
-    }
-
-    @Override
-    public Optional<ListingFuture> findById(Long id) {
-        return futureRepository.findById(id);
-    }
-
-    @Override
-    public List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to) {
-        List<ListingHistory> listingHistories = new ArrayList<>();
-        ListingFuture future = futureRepository.findById(id).orElse(null);
-        if(future == null){
-            return listingHistories;
-        }
-
-        String ticker = future.getTicker();
-        listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
-        if(listingHistories.isEmpty()) {
-            driver = new ChromeDriver(options);
-            listingHistories = fetchNSingleFutureHistory(future, maxFutureHistories, driver);
-            driver.quit();
-            listingStockService.addAllListingsToHistory(listingHistories);
-        }
-
-//        return all timestamps before given timestamp
-        if(from == null && to != null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBefore(ticker, to);
-        }
-//        return all timestamps after given timestamp
-        else if(from != null && to == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateAfter(ticker, from);
-        }
-//        return all timestamps between two timestamps
-        else if(from != null && to != null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to);
-        }
-
-        return listingHistories;
-    }
-
-    @Override
-    public List<ListingFuture> getAllFutures(){
-        return futureRepository.findAll();
     }
 
     @Override
