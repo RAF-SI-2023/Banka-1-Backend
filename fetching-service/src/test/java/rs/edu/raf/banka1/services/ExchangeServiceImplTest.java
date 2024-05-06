@@ -20,8 +20,7 @@ class ExchangeServiceImplTest {
         countryRepository = mock(CountryRepository.class);
         exchangeRepository = mock(ExchangeRepository.class);
         holidayRepository = mock(HolidayRepository.class);
-        ExchangeMapper exchangeMapper = new ExchangeMapper();
 
-        exchangeService = new ExchangeServiceImpl(countryRepository, holidayRepository, exchangeRepository, exchangeMapper);
+        exchangeService = new ExchangeServiceImpl(countryRepository, holidayRepository, exchangeRepository);
     }
 }
