@@ -1,23 +1,13 @@
 package rs.edu.raf.banka1.services;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import rs.edu.raf.banka1.mapper.ExchangeMapper;
-import rs.edu.raf.banka1.model.dtos.ExchangeDto;
-import rs.edu.raf.banka1.model.entities.Country;
-import rs.edu.raf.banka1.model.entities.Exchange;
 import rs.edu.raf.banka1.repositories.CountryRepository;
 import rs.edu.raf.banka1.repositories.ExchangeRepository;
 import rs.edu.raf.banka1.repositories.HolidayRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class ExchangeServiceImplTest {
     private ExchangeServiceImpl exchangeService;
