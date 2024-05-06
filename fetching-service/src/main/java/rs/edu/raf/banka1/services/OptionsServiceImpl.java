@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.tinylog.Logger;
-import rs.edu.raf.banka1.exceptions.OptionsException;
+import rs.edu.raf.banka1.model.exceptions.OptionsException;
 import rs.edu.raf.banka1.mapper.OptionsMapper;
 import rs.edu.raf.banka1.model.OptionsModel;
 import rs.edu.raf.banka1.model.dtos.OptionsDto;
@@ -20,7 +20,6 @@ import rs.edu.raf.banka1.threads.OptionsThread;
 
 import rs.edu.raf.banka1.utils.Constants;
 
-import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
