@@ -293,12 +293,6 @@ public class FuturesServiceImpl implements FuturesService {
         }
         return history;
     }
-
-    @Override
-    public Optional<ListingFuture> findByTicker(String ticker) {
-        return futureRepository.findByTicker(ticker);
-    }
-
     @Scheduled(fixedDelay = 900000)
     public void runFetchBackground(){
         Thread thread = new Thread(new FutureThread(this, listingStockService));

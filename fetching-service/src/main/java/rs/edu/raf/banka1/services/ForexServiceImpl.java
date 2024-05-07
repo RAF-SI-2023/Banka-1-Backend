@@ -204,16 +204,6 @@ public class ForexServiceImpl implements ForexService {
         return listingForexList.stream().map(this::getForexHistory).flatMap(List::stream).toList();
     }
 
-    @Override
-    public ListingForex getForexByTicker(String ticker) {
-        return forexRepository.findByTicker(ticker).orElse(null);
-    }
-
-    @Override
-    public Optional<ListingForex> findById(Long id) {
-        return forexRepository.findById(id);
-    }
-
     public ListingHistory parseHistory(String ticker, int date, JsonNode dataNode) {
         double open = dataNode.get("1. open").asDouble();
         double high = dataNode.get("2. high").asDouble();

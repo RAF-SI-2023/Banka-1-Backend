@@ -14,6 +14,4 @@ public interface FuturesService {
     int addAllFutures(List<ListingFuture> futures);
 
     Boolean addFuture(ListingFuture future);
-
-    Optional<ListingFuture> findByTicker(String ticker);
 }
