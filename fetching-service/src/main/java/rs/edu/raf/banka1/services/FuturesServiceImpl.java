@@ -4,8 +4,6 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -21,8 +19,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
-
-import static rs.edu.raf.banka1.utils.Constants.maxFutureHistories;
 
 @Service
 public class FuturesServiceImpl implements FuturesService {
@@ -260,7 +256,7 @@ public class FuturesServiceImpl implements FuturesService {
     private List<ListingHistory> fetchNSingleFutureHistory(ListingFuture future, int n, WebDriver driver) {
         String url = "https://finance.yahoo.com/quote/" + future.getAlternativeTicker().replace("=", "%3D") + "/history";
         driver.get(url);
-        WebElement table = driver.findElement(By.cssSelector("div.table-container.svelte-ta1t6m"));
+        WebElement table = driver.findElement(By.cssSelector("div.table-container.svelte-ewueuo"));
         List<WebElement> rows = table.findElements(By.tagName("tr"));
         rows.removeFirst();
         rows = rows.subList(0, n);

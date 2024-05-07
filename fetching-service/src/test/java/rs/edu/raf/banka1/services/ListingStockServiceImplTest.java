@@ -80,35 +80,6 @@ public class ListingStockServiceImplTest {
     }
 
     @Test
-    public void addListingStockNotPresentTest(){
-        when(listingStockService.findByTicker("AAPL")).thenReturn(Optional.empty());
-        assertEquals(1, listingStockService.addListingStock(stockAAPL));
-    }
-
-    @Test
-    public void addListingStockPresentTest(){
-        ListingStock updateStock = new ListingStock();
-        updateStock.setTicker("AAPL");
-        updateStock.setPrice(101.0);
-        when(listingStockService.findByTicker("AAPL")).thenReturn(Optional.of(stockAAPL));
-        assertEquals(0, listingStockService.addListingStock(updateStock));
-    }
-
-    @Test
-    public void addAllListingStocksPresentTests(){
-        when(listingStockService.findByTicker("AAPL")).thenReturn(Optional.of(stockAAPL));
-        when(listingStockService.findByTicker("MSFT")).thenReturn(Optional.of(stockMSFT));
-        assertEquals(0, listingStockService.addAllListingStocks(stocks));
-    }
-
-    @Test
-    public void addAllListingStocksNotPresentTests(){
-        when(listingStockService.findByTicker("AAPL")).thenReturn(Optional.empty());
-        when(listingStockService.findByTicker("MSFT")).thenReturn(Optional.empty());
-        assertEquals(stocks.size(), listingStockService.addAllListingStocks(stocks));
-    }
-
-    @Test
     public void addListingToHistoryNotPresentTest(){
         when(listingHistoryRepository.findByTickerAndDate("AAPL", model1.getDate())).thenReturn(Optional.empty());
         assertEquals(1, listingStockService.addListingToHistory(model1));

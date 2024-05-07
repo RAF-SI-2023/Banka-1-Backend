@@ -15,9 +15,7 @@ import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.repositories.ForexRepository;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
-import rs.edu.raf.banka1.utils.Requests;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

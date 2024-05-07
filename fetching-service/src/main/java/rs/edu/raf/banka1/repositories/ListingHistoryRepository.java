@@ -10,9 +10,5 @@ import java.util.Optional;
 @Repository
 public interface ListingHistoryRepository extends JpaRepository<ListingHistory, Long> {
     Optional<ListingHistory> findByTickerAndDate(String ticker, long date);
-    List<ListingHistory> getListingHistoriesByTicker(String ticker);
-    List<ListingHistory> getListingHistoriesByTickerAndDateBefore(String ticker, Integer date);
-    List<ListingHistory> getListingHistoriesByTickerAndDateAfter(String ticker, Integer date);
-    List<ListingHistory> getListingHistoriesByTickerAndDateBetween(String ticker, Integer from, Integer to);
 
 }

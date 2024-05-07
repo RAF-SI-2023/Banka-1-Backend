@@ -21,8 +21,6 @@ public class CurrencyServiceUnitTests {
     @Mock
     private CurrencyRepository currencyRepository;
     @Mock
-    private CurrencyMapper currencyMapper;
-    @Mock
     private InflationRepository inflationRepository;
     @InjectMocks
     private CurrencyServiceImpl currencyService;

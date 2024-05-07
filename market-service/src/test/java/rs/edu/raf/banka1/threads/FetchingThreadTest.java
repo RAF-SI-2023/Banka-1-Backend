@@ -17,7 +17,6 @@ import rs.edu.raf.banka1.model.exceptions.APIException;
 import rs.edu.raf.banka1.repositories.StockRepository;
 import rs.edu.raf.banka1.services.ListingStockServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import rs.edu.raf.banka1.utils.Requests;
 
 import java.util.List;
 import java.util.ArrayList;

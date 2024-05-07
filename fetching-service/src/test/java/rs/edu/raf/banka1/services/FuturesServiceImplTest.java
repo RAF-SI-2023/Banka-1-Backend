@@ -49,33 +49,4 @@ public class FuturesServiceImplTest {
         futures.add(future1);
         futures.add(future2);
     }
-
-    @Test
-    public void addListingStockNotPresentTest(){
-        when(futuresService.findByTicker("ESM24")).thenReturn(Optional.empty());
-        assertEquals(true, futuresService.addFuture(future1));
-    }
-
-    @Test
-    public void addListingStockPresentTest(){
-        ListingFuture updateFuture = new ListingFuture();
-        updateFuture.setTicker("ESM24");
-        updateFuture.setPrice(101.0);
-        when(futuresService.findByTicker("ESM24")).thenReturn(Optional.of(future1));
-        assertEquals(false, futuresService.addFuture(updateFuture));
-    }
-
-    @Test
-    public void addAllListingStocksPresentTests(){
-        when(futuresService.findByTicker("ESM24")).thenReturn(Optional.of(future1));
-        when(futuresService.findByTicker("YMM24")).thenReturn(Optional.of(future2));
-        assertEquals(0, futuresService.addAllFutures(futures));
-    }
-
-    @Test
-    public void addAllListingStocksNotPresentTests(){
-        when(futuresService.findByTicker("ESM24")).thenReturn(Optional.empty());
-        when(futuresService.findByTicker("YMM24")).thenReturn(Optional.empty());
-        assertEquals(futures.size(), futuresService.addAllFutures(futures));
-    }
 }

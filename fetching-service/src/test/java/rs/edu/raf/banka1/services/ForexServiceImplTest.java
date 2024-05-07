@@ -118,23 +118,4 @@ public class ForexServiceImplTest {
         assertEquals(1, updatedList.size());
 
     }
-
-    @Test
-    public void fetchHistoriesIfEmptyTest() {
-        String ticker = "ticker";
-        ListingForex lfMock = mock(ListingForex.class);
-        when(lfMock.getTicker()).thenReturn("ticker");
-        when(forexRepository.findById(1L)).thenReturn(Optional.of(lfMock));
-        when(listingHistoryRepository.getListingHistoriesByTicker(ticker)).thenReturn(new ArrayList<>());
-        when(forexService.getForexHistory(lfMock)).thenReturn(List.of(
-                new ListingHistory(),
-                new ListingHistory(),
-                new ListingHistory()
-        ));
-
-        List<ListingHistory> listingHistories = forexService.getListingHistoriesByTimestamp(1L, null, null);
-
-        assertNotNull(listingHistories);
-        assertFalse(listingHistories.isEmpty());
-    }
 }
