@@ -1,44 +1,26 @@
 package rs.edu.raf.banka1.services;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import rs.edu.raf.banka1.mapper.FutureMapper;
 import rs.edu.raf.banka1.model.ListingFuture;
 import rs.edu.raf.banka1.model.ListingHistory;
-import rs.edu.raf.banka1.model.dtos.ListingFutureDto;
 import rs.edu.raf.banka1.repositories.FutureRepository;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
-import rs.edu.raf.banka1.threads.FutureThread;
-import rs.edu.raf.banka1.threads.OptionsThread;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.*;
 import java.util.*;
 
-import static rs.edu.raf.banka1.utils.Constants.maxFutureHistories;
 
 @Service
 public class FuturesServiceImpl implements FuturesService {
-    private final Map<String, String> monthsCode = new HashMap<>();
     private final FutureRepository futureRepository;
     private final ListingHistoryRepository listingHistoryRepository;
-    private final ListingStockService listingStockService;
     private WebDriver driver;
     @Autowired
     public FuturesServiceImpl(FutureRepository futureRepository,
-                              ListingHistoryRepository listingHistoryRepository,
-                              ListingStockService listingStockService) {
+                              ListingHistoryRepository listingHistoryRepository) {
         this.futureRepository = futureRepository;
         this.listingHistoryRepository = listingHistoryRepository;
-        this.listingStockService = listingStockService;
     }
 
     @Override
