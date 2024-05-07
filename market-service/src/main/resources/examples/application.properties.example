@@ -39,3 +39,10 @@ forexDailyApiUrl=https://www.alphavantage.co/query?function=FX_DAILY
 
 # OPTIONS URL:
 optionsUrl=https://query2.finance.yahoo.com/v7/finance/options/
+
+# REDIS:
+spring.cache.type=redis
+spring.data.redis.host=localhost
+spring.data.redis.port=6379
+# 15min
+spring.cache.redis.time-to-live=900000
