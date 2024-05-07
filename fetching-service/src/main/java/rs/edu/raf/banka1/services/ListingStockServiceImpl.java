@@ -37,7 +37,8 @@ import java.util.stream.Collectors;
 @Getter
 @Service
 public class ListingStockServiceImpl implements ListingStockService {
-    private final ObjectMapper objectMapper;
+    @Setter
+    private ObjectMapper objectMapper;
 
     @Autowired
     private StockRepository stockRepository;
@@ -89,7 +90,7 @@ public class ListingStockServiceImpl implements ListingStockService {
 
                 String urlStr = listingNameApiUrl + sectorsEncoded + "&token=" + listingAPItoken;
 
-                String response = requests.sendRequest(urlStr);
+                String response = Requests.sendRequest(urlStr);
                 responses.append(response);
 
             }
@@ -247,7 +248,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     public List<ListingHistory> fetchSingleListingHistory(String ticker){
         try {
             String apiUrl = historyListingApiUrl + ticker + "&outputsize=compact&apikey=" + alphaVantageAPIToken;
-            String response = Requests.sendRequest(apiUrl);
+            String response = requests.sendRequest(apiUrl);
             JsonNode rootNode = objectMapper.readTree(response);
 
             List<ListingHistory> listingHistories = new ArrayList<>();
@@ -343,5 +344,11 @@ public class ListingStockServiceImpl implements ListingStockService {
             newArray.add(newObj);
         }
         return newArray;
+    }
+
+
+    @Override
+    public Optional<ListingStock> findByTicker(String ticker) {
+        return stockRepository.findByTicker(ticker);
     }
 }

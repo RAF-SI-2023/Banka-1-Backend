@@ -29,4 +29,6 @@ public interface ListingStockService {
 
     //    returns how many new listings were added
     int addAllListingsToHistory(List<ListingHistory> listingHistories);
+
+    Optional<ListingStock> findByTicker(String ticker);
 }

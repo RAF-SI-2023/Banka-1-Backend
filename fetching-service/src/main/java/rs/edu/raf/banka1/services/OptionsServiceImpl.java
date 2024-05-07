@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class OptionsServiceImpl implements OptionsService{
+    @Setter
     private ObjectMapper objectMapper = new ObjectMapper();
     @Setter
     private HttpClient httpClient = HttpClient.newHttpClient();

@@ -300,4 +300,9 @@ public class FuturesServiceImpl implements FuturesService {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public Optional<ListingFuture> findByTicker(String ticker) {
+        return futureRepository.findByTicker(ticker);
+    }
 }
