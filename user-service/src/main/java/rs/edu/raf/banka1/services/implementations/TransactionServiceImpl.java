@@ -16,6 +16,7 @@ import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.TransactionService;
 import rs.edu.raf.banka1.utils.Constants;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -97,5 +98,25 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<TransactionDto> getTransactionsForOrderId(Long orderId) {
         return this.transactionRepository.getTransactionsByMarketOrder_Id(orderId).stream().map(transactionMapper::transactionToTransactionDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public Double getActualBuyPriceForOrder(MarketOrder order) {
+        return transactionRepository.getBuySumByOrderId(order.getId());
+    }
+
+    @Override
+    public Double getActualSellPriceForOrder(MarketOrder order) {
+        return transactionRepository.getSellSumByOrderId(order.getId());
+    }
+
+    @Override
+    public Double getLastTransactionValueForOrder(MarketOrder order) {
+        if(order.getOrderType().equals(OrderType.BUY)) {
+            return transactionRepository.getLastTransactionForOrderId(order.getId()).map(Transaction::getBuy).orElse(0d);
+        } else {
+            return transactionRepository.getLastTransactionForOrderId(order.getId()).map(Transaction::getSell).orElse(0d);
+        }
+
     }
 }
