@@ -142,7 +142,7 @@ public class ListingStockServiceImpl implements ListingStockService {
         }
 
     }
-
+    @Override
     public ListingStock createListingStock(String symbol, String companyName, String primaryExchange) {
         try {
             String listingBaseUrl = updateListingApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;

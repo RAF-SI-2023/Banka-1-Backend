@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface ListingStockService {
     void generateJSONSymbols();
     List<ListingStock> fetchNListingStocks(int n);
+    ListingStock createListingStock(String symbol, String companyName, String primaryExchange);
     List<ListingStock> getAllStocks();
 
     List<ListingHistory> fetchNListingsHistory(int n);
