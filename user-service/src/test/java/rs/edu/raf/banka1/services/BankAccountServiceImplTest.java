@@ -10,6 +10,10 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
+import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
+import rs.edu.raf.banka1.exceptions.CreateBankAccountException;
+import rs.edu.raf.banka1.exceptions.ForbiddenException;
+import rs.edu.raf.banka1.exceptions.SetNewPasswordException;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
@@ -49,7 +53,7 @@ public class BankAccountServiceImplTest {
         createRequest.getAccount().setAccountType(AccountType.BUSINESS);
         createRequest.setCompanyId(1L);
         when(bankAccountService.getCompanyRepository().findById(createRequest.getCompanyId())).thenReturn(Optional.empty());
-        assertNull(bankAccountService.createBankAccount(createRequest));
+        assertThrows(CreateBankAccountException.class, () -> bankAccountService.createBankAccount(createRequest));
 
     }
 
@@ -60,7 +64,7 @@ public class BankAccountServiceImplTest {
         createRequest.getAccount().setAccountType(AccountType.CURRENT);
         createRequest.setCustomerId(1L);
         when(bankAccountService.getCustomerRepository().findById(createRequest.getCustomerId())).thenReturn(Optional.empty());
-        assertNull(bankAccountService.createBankAccount(createRequest));
+        assertThrows(CreateBankAccountException.class, () -> bankAccountService.createBankAccount(createRequest));
 
     }
 
@@ -206,7 +210,7 @@ public class BankAccountServiceImplTest {
         CreateBankAccountRequest createRequest = new CreateBankAccountRequest();
         createRequest.setAccount(new BankAccountRequest());
         createRequest.getAccount().setAccountType(AccountType.INVALID);
-        assertNull(bankAccountService.createBankAccount(createRequest));
+        assertThrows(CreateBankAccountException.class, () -> bankAccountService.createBankAccount(createRequest));
     }
 
     @Test
@@ -273,9 +277,9 @@ public class BankAccountServiceImplTest {
             securityContextHolderMockedStatic.when(SecurityContextHolder::getContext).thenReturn(securityContext);
 
             when(bankAccountRepository.findBankAccountByAccountNumber(accountNumber)).thenReturn(Optional.of(bankAccount));
-            int result = bankAccountService.editBankAccount(accountNumber, newName);
 
-            assertEquals(-1, result);
+            assertThrows(ForbiddenException.class, () -> bankAccountService.editBankAccount(accountNumber, newName));
+
             assertEquals("Old Account Name", bankAccount.getAccountName());
             verify(bankAccountRepository, times(0)).save(bankAccount);
         }
@@ -291,10 +295,8 @@ public class BankAccountServiceImplTest {
         when(bankAccountRepository.findBankAccountByAccountNumber(accountNumber)).thenReturn(Optional.empty());
 
         // Call the method
-        int result = bankAccountService.editBankAccount(accountNumber, newName);
+        assertThrows(BankAccountNotFoundException.class, () -> bankAccountService.editBankAccount(accountNumber, newName));
 
-        // Verify the method behavior
-        assertEquals(0, result);
         verify(bankAccountRepository, never()).save(any());
     }
 
