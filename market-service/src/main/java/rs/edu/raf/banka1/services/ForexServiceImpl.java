@@ -19,9 +19,6 @@ public class ForexServiceImpl implements ForexService {
     private ListingHistoryRepository listingHistoryRepository;
     private ForexRepository forexRepository;
 
-    public ForexServiceImpl() {
-    }
-
     @Override
     public List<ListingForex> getAllForexes() {
         return forexRepository.findAll();
