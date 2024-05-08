@@ -3,6 +3,8 @@ package rs.edu.raf.banka1.services.implementations;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -214,13 +216,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public NewPasswordResponse setNewPassword(String token, String password) {
-        Optional<Customer> optionalCustomer = this.customerRepository.findByResetPasswordToken(token);
-
-        if (optionalCustomer.isEmpty()) {
-            return new NewPasswordResponse();
+        if (password.length() < 4) {
+            throw new SetNewPasswordException(SetNewPasswordException.Reason.SHORT_PASSWORD);
         }
 
-        Customer customer = optionalCustomer.get();
+        Customer customer = this.customerRepository.findByResetPasswordToken(token)
+            .orElseThrow(()->new SetNewPasswordException(SetNewPasswordException.Reason.INVALID_TOKEN));
 
         customer.setResetPasswordToken(null);
         customer.setPassword(passwordEncoder.encode(password));

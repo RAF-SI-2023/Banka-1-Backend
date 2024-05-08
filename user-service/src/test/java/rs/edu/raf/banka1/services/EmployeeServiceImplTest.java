@@ -25,9 +25,7 @@ import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
-import rs.edu.raf.banka1.exceptions.EmailNotFoundException;
-import rs.edu.raf.banka1.exceptions.EmployeeNotFoundException;
-import rs.edu.raf.banka1.exceptions.ForbiddenException;
+import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
 import rs.edu.raf.banka1.mapper.LimitMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
@@ -216,8 +214,7 @@ class EmployeeServiceImplTest {
     @Test
     public void activateAccountEmployeeNotFound(){
         when(employeeRepository.findByActivationToken("testactivationtoken")).thenReturn(Optional.empty());
-        var result = employeeService.activateAccount("testactivationtoken", "password");
-        assertNull(result.getUserId());
+        assertThrows(InvalidTokenException.class, ()->employeeService.activateAccount("testactivationtoken","neki"));
         verify(employeeRepository, never()).save(any());
     }
 
@@ -263,7 +260,8 @@ class EmployeeServiceImplTest {
 
         String token = "1234";
         String password = "1234";
-        employeeService.setNewPassword(token, password);
+
+        assertThrows(SetNewPasswordException.class, () -> employeeService.setNewPassword(token, password));
         verify(employeeRepository, times(1)).findByResetPasswordToken(token);
         verify(employeeRepository, times(0)).save(any());
     }
@@ -555,8 +553,8 @@ class EmployeeServiceImplTest {
     @Test
     public void deleteEmployeeNotFound(){
         when(employeeRepository.findById(1L)).thenReturn(Optional.empty());
-        var result = employeeService.deleteEmployee(1L);
-        assertThat(result).isFalse();
+
+        assertThrows(EmployeeNotFoundException.class, () -> employeeService.deleteEmployee(1L));
 
         verify(employeeRepository, never()).deactivateUser(any());
     }

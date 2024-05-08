@@ -1,10 +1,12 @@
 package rs.edu.raf.banka1.services;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import rs.edu.raf.banka1.exceptions.ForbiddenException;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Card;
 import rs.edu.raf.banka1.model.Customer;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -60,9 +63,7 @@ public class CardServiceImplTest {
         Long customerId = 100L;
         when(cardService.getCustomerRepository().findById(customerId)).thenReturn(Optional.empty());
 
-        List<Card> cards = cardService.getAllCardsByCustomerId(customerId);
-
-        assertEquals(cards.size(), 0);
+        Assertions.assertThrows(ForbiddenException.class, ()->cardService.getAllCardsByCustomerId(customerId));
     }
 
     @Test

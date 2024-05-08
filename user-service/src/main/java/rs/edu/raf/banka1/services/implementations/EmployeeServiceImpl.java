@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,9 +16,7 @@ import rs.edu.raf.banka1.dtos.PermissionDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
-import rs.edu.raf.banka1.exceptions.EmailNotFoundException;
-import rs.edu.raf.banka1.exceptions.EmployeeNotFoundException;
-import rs.edu.raf.banka1.exceptions.ForbiddenException;
+import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.mapper.EmployeeMapper;
 import rs.edu.raf.banka1.mapper.LimitMapper;
 import rs.edu.raf.banka1.mapper.PermissionMapper;
@@ -33,8 +33,6 @@ import rs.edu.raf.banka1.services.EmployeeService;
 import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -89,7 +87,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public EmployeeDto findById(Long id) {
         return this.employeeRepository.findById(id)
                 .map(this.employeeMapper::employeeToEmployeeDto)
-                .orElse(null);
+                .orElseThrow(()->new EmployeeNotFoundException(id));
     }
 
     @Override
@@ -131,9 +129,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public ActivateAccountResponse activateAccount(String token, String password) {
-        Optional<Employee> optionalEmployee = employeeRepository.findByActivationToken(token);
-        if (optionalEmployee.isEmpty()) return new ActivateAccountResponse(null);
-        Employee employee = optionalEmployee.get();
+        Employee employee = employeeRepository.findByActivationToken(token).orElseThrow(()-> new InvalidTokenException(InvalidTokenException.Reason.INVALID_TOKEN));
         employee.setActivationToken(null);
         employee.setPassword(passwordEncoder.encode(password));
         employee.setActive(true);
@@ -144,12 +140,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public boolean editEmployee(EditEmployeeDto editEmployeeDto) {
-        Optional<Employee> employee = this.employeeRepository.findByEmail(editEmployeeDto.getEmail());
+        Employee employee = this.employeeRepository.findByEmail(editEmployeeDto.getEmail())
+            .orElseThrow(()->new EmployeeNotFoundException(editEmployeeDto.getEmail()));
 
-        if (employee.isEmpty())
-            return false;
-
-        Employee newEmployee = this.employeeMapper.editEmployeeDtoToEmployee(employee.get(), editEmployeeDto);
+        Employee newEmployee = this.employeeMapper.editEmployeeDtoToEmployee(employee, editEmployeeDto);
         this.employeeRepository.save(newEmployee);
 
         return true;
@@ -157,24 +151,22 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Boolean deleteEmployee(Long id) {
-        Optional<Employee> employee = this.employeeRepository.findById(id);
+        Employee employee = this.employeeRepository.findById(id)
+            .orElseThrow(()-> new EmployeeNotFoundException(id));
 
-        if(employee.isEmpty())
-            return false;
-
-        if(employee.get().getActive()){
-            this.employeeRepository.deactivateUser(employee.get().getUserId());
+        if(employee.getActive()){
+            this.employeeRepository.deactivateUser(employee.getUserId());
             return true;
         }
 
-        return false;
+        throw new DeleteEmployeeException(id);
     }
 
     @Override
     public List<PermissionDto> findPermissions(Long userId) {
         Employee employee = this.employeeRepository.findById(userId).orElse(null);
 
-        return employee == null ? new ArrayList<PermissionDto>() : extractPermissionsFromEmployee(employee);
+        return employee == null ? new ArrayList<>() : extractPermissionsFromEmployee(employee);
     }
 
     @Override
@@ -186,19 +178,18 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Boolean modifyEmployeePermissions(ModifyPermissionsRequest request, Long userId) {
-        Employee employee = this.employeeRepository.findById(userId).orElse(null);
-
-        if(employee == null)
-            return false;
+        Employee employee = this.employeeRepository.findById(userId)
+            .orElseThrow(()->new EmployeeNotFoundException(userId));
 
         Set<Permission> permissions = employee.getPermissions();
 
         for(String permissionName : request.getPermissions()){
-            Optional<Permission> permission = this.permissionRepository.findByName(permissionName);
+            Permission permission = this.permissionRepository.findByName(permissionName)
+                .orElseThrow(()->new ModifyPermissionException(permissionName));
             if(request.getAdd()){
-                permissions.add(permission.orElse(null));
+                permissions.add(permission);
             }else{
-                permissions.remove(permission.orElse(null));
+                permissions.remove(permission);
             }
         }
 
@@ -223,13 +214,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public NewPasswordResponse setNewPassword(String token, String password) {
-        Optional<Employee> optionalEmployee = this.employeeRepository.findByResetPasswordToken(token);
-
-        if (optionalEmployee.isEmpty()) {
-            return new NewPasswordResponse();
+        if (password.length() < 4) {
+            throw new SetNewPasswordException(SetNewPasswordException.Reason.SHORT_PASSWORD);
         }
 
-        Employee employee = optionalEmployee.get();
+        Employee employee = this.employeeRepository.findByResetPasswordToken(token)
+            .orElseThrow(()->new SetNewPasswordException(SetNewPasswordException.Reason.INVALID_TOKEN));
 
         employee.setResetPasswordToken(null);
         employee.setPassword(passwordEncoder.encode(password));

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.tinylog.Logger;
 import rs.edu.raf.banka1.dtos.ExchangeRateDto;
 import rs.edu.raf.banka1.dtos.TransferDto;
+import rs.edu.raf.banka1.exceptions.CreateTransferException;
+import rs.edu.raf.banka1.exceptions.NotFoundException;
 import rs.edu.raf.banka1.mapper.TransferMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
@@ -30,6 +32,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static rs.edu.raf.banka1.exceptions.CreateTransferException.Reason.*;
+
 @Service
 public class TransferServiceImpl implements TransferService {
     private final TransferRepository transferRepository;
@@ -48,9 +52,14 @@ public class TransferServiceImpl implements TransferService {
 
     private final List<String> supportedCurrencies = List.of("USD", "AUD", "EUR", "CHF", "GBP", "JPY", "CAD");
 
-    public TransferServiceImpl(TransferRepository transferRepository, BankAccountRepository bankAccountRepository, CurrencyRepository currencyRepository, TransferMapper transferMapper) {
+    public TransferServiceImpl(
+        final TransferRepository transferRepository,
+        final BankAccountRepository bankAccountRepository,
+        final CurrencyRepository currencyRepository,
+        final TransferMapper transferMapper
+    ) {
         this.transferMapper = transferMapper;
-        objectMapper = new ObjectMapper();
+        this.objectMapper = new ObjectMapper();
         this.currencyRepository = currencyRepository;
         this.transferRepository = transferRepository;
         this.bankAccountRepository = bankAccountRepository;
@@ -146,15 +155,10 @@ public class TransferServiceImpl implements TransferService {
 
     @Override
     public Long createTransfer(CreateTransferRequest request) {
-        Optional<BankAccount> senderAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(request.getSenderAccountNumber());
-        Optional<BankAccount> recipientAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(request.getRecipientAccountNumber());
-
-        if (senderAccountOpt.isEmpty() || recipientAccountOpt.isEmpty()) {
-            Logger.error("Sender or recipient account not found for transfer creation");
-            return -1L;
-        }
-        BankAccount senderAccount = senderAccountOpt.get();
-        BankAccount recipientAccount = recipientAccountOpt.get();
+        BankAccount senderAccount = bankAccountRepository.findBankAccountByAccountNumber(request.getSenderAccountNumber())
+            .orElseThrow(()->new CreateTransferException(SENDER_NOT_FOUND, request));
+        BankAccount recipientAccount = bankAccountRepository.findBankAccountByAccountNumber(request.getRecipientAccountNumber())
+            .orElseThrow(()->new CreateTransferException(RECIPIENT_NOT_FOUND, request));
 
         Transfer transfer = new Transfer();
         transfer.setSenderBankAccount(senderAccount);
@@ -170,18 +174,15 @@ public class TransferServiceImpl implements TransferService {
         transfer.setExchangeRate(null);
         transfer.setCommission(null);
 
-        transferRepository.save(transfer);
+        transfer = transferRepository.save(transfer);
+        processTransfer(transfer.getId());
        return transfer.getId();
     }
 
     @Override
-    public String processTransfer(Long id) {
-        Optional<Transfer> transferOpt = transferRepository.findById(id);
-        if (transferOpt.isEmpty()) {
-            Logger.error("Transfer not found for processing: {}", id);
-            return "Transfer not found for processing";
-        }
-        Transfer transfer = transferOpt.get();
+    public void processTransfer(Long id) {
+        Transfer transfer = transferRepository.findById(id).orElseThrow(()->new NotFoundException("Transfer " + id + " not found"));
+
         BankAccount senderAccount = transfer.getSenderBankAccount();
         BankAccount recipientAccount = transfer.getRecipientBankAccount();
         Currency senderCurrency = senderAccount.getCurrency();
@@ -204,7 +205,8 @@ public class TransferServiceImpl implements TransferService {
             transfer.setStatus(TransactionStatus.DENIED);
             transferRepository.save(transfer);
             Logger.info("Transfer {} denied. Reason: invalid parameters or insufficient balance.", id);
-            return "Transfer denied. Invalid parameters or insufficient balance";
+
+            throw new CreateTransferException(INVALID_PARAMETERS);
         }
 
         BankAccount rsdBank = bankAccountRepository.findBankByCurrencyCode("RSD").orElse(null);
@@ -228,7 +230,7 @@ public class TransferServiceImpl implements TransferService {
             Logger.info("Transfer {} denied. Reason: bank not found for currency conversion.", id);
             transfer.setStatus(TransactionStatus.DENIED);
             transferRepository.save(transfer);
-            return "Transfer denied. Reason: bank not found for currency conversion.";
+            throw new CreateTransferException(BANK_NOT_FOUND_FOR_CONVERSION);
         }
 
         double exchangeRate = senderCurrency.getToRSD() * recipientCurrency.getFromRSD();
@@ -258,13 +260,13 @@ public class TransferServiceImpl implements TransferService {
 
         transferRepository.save(transfer);
         bankAccountRepository.saveAll(List.of(fromBank, toBank, senderAccount, recipientAccount));
-        return null;
     }
 
     @Override
     public TransferDto getTransferById(Long id) {
-        Optional<Transfer> paymentOpt = transferRepository.findById(id);
-        return paymentOpt.map(transferMapper::transferToTransferDto).orElse(null);
+        Transfer payment = transferRepository.findById(id)
+            .orElseThrow(()->new NotFoundException("Transfer " + id + " not found."));
+        return transferMapper.transferToTransferDto(payment);
     }
 
     @Override

@@ -86,7 +86,7 @@ public class RecipientsController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Void> removeRecipient(@PathVariable Long id) {
-        boolean deleted = recipientsService.removeRecipient(id);
-        return new ResponseEntity<>(deleted ? HttpStatus.OK : HttpStatus.NOT_FOUND);
+        recipientsService.removeRecipient(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

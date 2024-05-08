@@ -8,14 +8,14 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import org.mockito.quality.Strictness;
 import rs.edu.raf.banka1.dtos.PaymentRecipientDto;
+import rs.edu.raf.banka1.exceptions.EmployeeNotFoundException;
+import rs.edu.raf.banka1.exceptions.ModifyRecipientException;
 import rs.edu.raf.banka1.mapper.RecipientMapper;
 import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.model.PaymentRecipient;
@@ -100,9 +100,10 @@ class RecipientsServiceImplTest {
 
         when(paymentRecipientRepository.findById(request.getId())).thenReturn(Optional.empty());
 
-        boolean result = recipientsService.editRecipient(request);
+        assertThrows(ModifyRecipientException.class, () -> {
+            recipientsService.editRecipient(request);
+        });
 
-        assertFalse(result);
         verify(paymentRecipientRepository, never()).save(any(PaymentRecipient.class));
     }
 

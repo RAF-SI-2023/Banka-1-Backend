@@ -1,7 +1,5 @@
 package rs.edu.raf.banka1.services;
 
-import com.mysql.cj.protocol.Message;
-import com.mysql.cj.protocol.MessageSender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,9 +7,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.testcontainers.shaded.org.checkerframework.checker.units.qual.C;
 import rs.edu.raf.banka1.dtos.ExchangeRateDto;
 import rs.edu.raf.banka1.dtos.TransferDto;
+import rs.edu.raf.banka1.exceptions.CreateTransferException;
+import rs.edu.raf.banka1.exceptions.NotFoundException;
 import rs.edu.raf.banka1.mapper.TransferMapper;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.CurrencyRepository;
@@ -23,14 +22,12 @@ import rs.edu.raf.banka1.model.*;
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,10 +57,60 @@ class TransferServiceImplTest {
         request.setRecipientAccountNumber("456");
         request.setAmount(100.00);
 
-        Long result = transferService.createTransfer(request);
+        Customer customer = new Customer();
+        customer.setUserId(1L);
 
-        assertNotEquals(-1L, result);
-        verify(transferRepository, times(1)).save(any(Transfer.class));
+        Currency currency1 = new Currency();
+        currency1.setId(1L);
+        currency1.setActive(true);
+        currency1.setCurrencyCode("rsd");
+        currency1.setFromRSD(1.0);
+        currency1.setToRSD(1.0);
+        String accountNumber = "1";
+        BankAccount senderBankAccount = new BankAccount();
+        senderBankAccount.setCustomer(customer);
+        senderBankAccount.setAccountNumber(accountNumber);
+        senderBankAccount.setCurrency(currency1);
+        senderBankAccount.setAvailableBalance(1000.0);
+        senderBankAccount.setBalance(1000.0);
+        senderBankAccount.setAccountType(AccountType.CURRENT);
+
+        Currency currency2 = new Currency();
+        currency2.setId(2L);
+        currency2.setActive(true);
+        currency2.setCurrencyCode("usd");
+        currency2.setFromRSD(1.0);
+        currency2.setToRSD(1.0);
+        String accountNumber2 = "2";
+        BankAccount recipientBankAccount = new BankAccount();
+        recipientBankAccount.setCustomer(customer);
+        recipientBankAccount.setCurrency(currency2);
+        recipientBankAccount.setAccountNumber(accountNumber2);
+        recipientBankAccount.setAvailableBalance(1000.0);
+        recipientBankAccount.setBalance(1000.0);
+        recipientBankAccount.setAccountType(AccountType.FOREIGN_CURRENCY);
+
+        BankAccount bank = new BankAccount();
+        bank.setAvailableBalance(1000.0);
+        bank.setBalance(1000.0);
+        when(bankAccountRepository.findBankByCurrencyCode(anyString()))
+            .thenReturn(Optional.of(bank));
+
+
+        Transfer transfer = new Transfer();
+        transfer.setStatus(TransactionStatus.PROCESSING);
+        transfer.setId(1l);
+        transfer.setAmount(5.0);
+        transfer.setSenderBankAccount(senderBankAccount);
+        transfer.setRecipientBankAccount(recipientBankAccount);
+        when(transferRepository.findById(5L)).thenReturn(Optional.of(transfer));
+        Transfer tr1 = new Transfer();
+        tr1.setId(5L);
+        when(transferRepository.save(any())).thenReturn(tr1);
+
+        transferService.createTransfer(request);
+
+        verify(transferRepository, times(2)).save(any(Transfer.class));
     }
 
     @Test
@@ -76,9 +123,10 @@ class TransferServiceImplTest {
         request.setRecipientAccountNumber("0987654321");
         request.setAmount(100.00);
 
-        Long transferId = transferService.createTransfer(request);
+        assertThrows(CreateTransferException.class, () -> {
+            transferService.createTransfer(request);
+        });
 
-        assertEquals(-1L, transferId.longValue());
         verify(transferRepository, never()).save(any(Transfer.class));
     }
 
@@ -104,9 +152,9 @@ class TransferServiceImplTest {
         Long invalidPaymentId = 100L;
         when(transferRepository.findById(invalidPaymentId)).thenReturn(Optional.empty());
 
-        TransferDto resultDto  = transferService.getTransferById(invalidPaymentId);
-
-        assertNull(resultDto);
+        assertThrows(NotFoundException.class, () -> {
+            transferService.getTransferById(invalidPaymentId);
+        });
     }
 
     @Test
@@ -267,7 +315,9 @@ class TransferServiceImplTest {
         transfer.setRecipientBankAccount(recipientBankAccount);
         when(transferRepository.findById(5L)).thenReturn(Optional.of(transfer));
 
-        transferService.processTransfer(5L);
+        assertThrows(CreateTransferException.class, () -> {
+            transferService.processTransfer(5L);
+        });
 
         assertEquals(transfer.getStatus(), TransactionStatus.DENIED);
     }
@@ -316,7 +366,9 @@ class TransferServiceImplTest {
         transfer.setRecipientBankAccount(recipientBankAccount);
         when(transferRepository.findById(5L)).thenReturn(Optional.of(transfer));
 
-        transferService.processTransfer(5L);
+        assertThrows(CreateTransferException.class, () -> {
+            transferService.processTransfer(5L);
+        });
 
         assertEquals(transfer.getStatus(), TransactionStatus.DENIED);
     }
@@ -371,7 +423,9 @@ class TransferServiceImplTest {
         transfer.setRecipientBankAccount(recipientBankAccount);
         when(transferRepository.findById(5L)).thenReturn(Optional.of(transfer));
 
-        transferService.processTransfer(5L);
+        assertThrows(CreateTransferException.class, () -> {
+            transferService.processTransfer(5L);
+        });
 
         assertEquals(transfer.getStatus(), TransactionStatus.DENIED);
     }
@@ -429,7 +483,9 @@ class TransferServiceImplTest {
         transfer.setRecipientBankAccount(recipientBankAccount);
         when(transferRepository.findById(5L)).thenReturn(Optional.of(transfer));
 
-        transferService.processTransfer(5L);
+        assertThrows(CreateTransferException.class, () -> {
+            transferService.processTransfer(5L);
+        });
 
         assertEquals(transfer.getStatus(), TransactionStatus.DENIED);
     }

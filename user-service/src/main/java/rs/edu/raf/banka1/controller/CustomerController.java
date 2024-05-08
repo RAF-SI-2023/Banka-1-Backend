@@ -151,11 +151,7 @@ public class CustomerController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<NewPasswordResponse> setNewPassword(@PathVariable String token, @RequestBody NewPasswordRequest newPasswordRequest) {
-        String password = newPasswordRequest.getPassword();
-        if (password.length() < 4) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        NewPasswordResponse newPasswordResponse = customerService.setNewPassword(token, password);
-        return new ResponseEntity<>(newPasswordResponse, newPasswordResponse.getUserId() != null ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
+        NewPasswordResponse newPasswordResponse = customerService.setNewPassword(token, newPasswordRequest.getPassword());
+        return new ResponseEntity<>(newPasswordResponse, HttpStatus.OK);
     }
 }

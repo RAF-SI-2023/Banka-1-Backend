@@ -408,7 +408,8 @@ public class CustomerServiceImplTest {
 
         String token = "1234";
         String password = "1234";
-        customerService.setNewPassword(token, password);
+
+        assertThrows(SetNewPasswordException.class, () -> customerService.setNewPassword(token, password));
         verify(customerRepository, times(1)).findByResetPasswordToken(token);
         verify(customerRepository, times(0)).save(any());
     }

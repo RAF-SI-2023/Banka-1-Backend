@@ -7,11 +7,7 @@ import lombok.Setter;
 @Setter
 public class NewPasswordResponse {
     private Long userId;
-
     public NewPasswordResponse(Long userId) {
         this.userId = userId;
-    }
-
-    public NewPasswordResponse() {
     }
 }

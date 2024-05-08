@@ -3,6 +3,8 @@ package rs.edu.raf.banka1.services.implementations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.tinylog.Logger;
+import rs.edu.raf.banka1.exceptions.ModifyRecipientException;
+import rs.edu.raf.banka1.exceptions.RecipientNotFoundException;
 import rs.edu.raf.banka1.mapper.RecipientMapper;
 import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.model.PaymentRecipient;
@@ -38,12 +40,10 @@ public class RecipientsServiceImpl implements RecipientsService {
 
     @Override
     public boolean editRecipient(PaymentRecipientDto request) {
-        Optional<PaymentRecipient> recipient = paymentRecipientRepository.findById(request.getId());
-        if (recipient.isEmpty()) {
-            Logger.error("Recipient not found for editing: {}", request.getId());
-            return false;
-        }
-        PaymentRecipient newRecipient = recipientMapper.PaymentRecipientDtoToRecipient(recipient.get(), request);
+        PaymentRecipient recipient = paymentRecipientRepository.findById(request.getId())
+            .orElseThrow(()->new ModifyRecipientException(request.getId()));
+
+        PaymentRecipient newRecipient = recipientMapper.PaymentRecipientDtoToRecipient(recipient, request);
         paymentRecipientRepository.save(newRecipient);
         Logger.info("Recipient edited successfully: {}", newRecipient.getId());
         return true;
@@ -60,12 +60,10 @@ public class RecipientsServiceImpl implements RecipientsService {
 
     @Override
     public boolean removeRecipient(Long id) {
-        Optional<PaymentRecipient> recipient = paymentRecipientRepository.findById(id);
-        if (recipient.isEmpty()) {
-            Logger.error("Recipient not found for removal: {}", id);
-            return false;
-        }
-        paymentRecipientRepository.delete(recipient.get());
+        PaymentRecipient recipient = paymentRecipientRepository.findById(id)
+            .orElseThrow(()->new RecipientNotFoundException(id));
+
+        paymentRecipientRepository.delete(recipient);
         Logger.info("Recipient removed successfully: {}", id);
         return true;
     }

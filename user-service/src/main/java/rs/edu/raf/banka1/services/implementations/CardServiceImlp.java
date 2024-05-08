@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.exceptions.ForbiddenException;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Card;
 import rs.edu.raf.banka1.model.Customer;
@@ -58,12 +59,9 @@ public class CardServiceImlp implements CardService {
 
     @Override
     public List<Card> getAllCardsByCustomerId(Long customerId) {
-        Customer customer = customerRepository.findById(customerId).orElse(null);
+        Customer customer = customerRepository.findById(customerId).orElseThrow(
+            ()->new ForbiddenException("You aren't authorized to get all cards by customerId: " + customerId));
         List<Card> cards = new ArrayList<>();
-
-        if (customer == null) {
-            return cards;
-        }
 
         for(BankAccount bankAccount : customer.getAccountIds()){
             cards.addAll(cardRepository.findByAccountNumber(bankAccount.getAccountNumber()));

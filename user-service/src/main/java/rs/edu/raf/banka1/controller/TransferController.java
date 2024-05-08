@@ -55,12 +55,8 @@ public class TransferController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<String> createTransfer(@RequestBody CreateTransferRequest createTransferRequest) {
-        Long id = transferService.createTransfer(createTransferRequest);
-        if (id == -1L) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        String msg = transferService.processTransfer(id);
-        return msg == null ? ResponseEntity.ok().body("ok") : ResponseEntity.badRequest().body(msg);
+        transferService.createTransfer(createTransferRequest);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping(value = "/getAll/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -89,7 +85,7 @@ public class TransferController {
     })
     public ResponseEntity<TransferDto> getById(@PathVariable(name = "id") Long id) {
         TransferDto resp = transferService.getTransferById(id);
-        return new ResponseEntity<>(resp, resp != null ? HttpStatus.OK : HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(resp, HttpStatus.OK) ;
     }
 
 }

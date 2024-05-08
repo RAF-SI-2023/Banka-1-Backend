@@ -15,7 +15,7 @@ public interface TransferService {
 
     Long createTransfer(CreateTransferRequest createTransferRequest);
 
-    String processTransfer(Long id);
+    void processTransfer(Long id);
 
     TransferDto getTransferById(Long id);
 

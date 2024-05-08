@@ -50,7 +50,7 @@ Feature: customers and employees can interact with bank accounts
 
   Scenario: employee can grab all cards using bank account
     Given i am logged in with email "admin@admin.com" and password "admin"
-    When User calls get on "/account/getAllCards/0123456789"
+    When User calls get on "/account/getCards/0123456789"
     Then i should get response with status 200
 
   Scenario: customer can edis his account name
