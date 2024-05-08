@@ -1,8 +1,7 @@
 package rs.edu.raf.banka1.services;
 
-import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingHistory;
@@ -15,12 +14,9 @@ import java.util.Optional;
 
 @Service
 @Setter
-@NoArgsConstructor
+@AllArgsConstructor
 public class ForexServiceImpl implements ForexService {
-
-    @Autowired
     private ListingHistoryRepository listingHistoryRepository;
-    @Autowired
     private ForexRepository forexRepository;
 
     @Override
