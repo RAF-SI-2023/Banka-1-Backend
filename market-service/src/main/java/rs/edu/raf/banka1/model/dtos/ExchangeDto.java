@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExchangeDto {
+public class ExchangeDto implements Serializable {
     private Long exchangeId;
     private String exchangeName;
     private String exchangeAcronym;
