@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.junit.jupiter.api.Disabled;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
 import  org.springframework.core.io.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
+import org.springframework.test.context.junit4.SpringRunner;
 import rs.edu.raf.banka1.mapper.StockMapper;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
@@ -33,6 +36,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
+
 @ExtendWith(MockitoExtension.class)
 public class ListingStockServiceImplTest {
 
@@ -46,6 +50,12 @@ public class ListingStockServiceImplTest {
 
     private ObjectMapper objectMapper;
 
+    private String updateListingApiUrl;
+    private String listingAPItoken;
+    private String alphaVantageAPIToken;
+    private String listingNameApiUrl;
+    private String basicStockInfoApiUrl;
+    private String HistoryListingApiUrl;
     @Mock
     private Resource resource;
 
@@ -152,6 +162,21 @@ public class ListingStockServiceImplTest {
         lst.add(model2);
 
         date = Date.valueOf("2021-01-01").toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
+
+        listingNameApiUrl="https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=";
+        updateListingApiUrl="https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=";
+        basicStockInfoApiUrl="https://www.alphavantage.co/query?function=OVERVIEW&symbol=";
+        HistoryListingApiUrl="https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=";
+
+        listingAPItoken="pk_f87286e075c94cc484405da70691c030";
+        alphaVantageAPIToken="OF6BVKZOCXWHD9NS";
+
+        listingStockService.setAlphaVantageAPIToken(alphaVantageAPIToken);
+        listingStockService.setListingAPItoken(listingAPItoken);
+        listingStockService.setListingNameApiUrl(listingNameApiUrl);
+        listingStockService.setUpdateListingApiUrl(updateListingApiUrl);
+        listingStockService.setBasicStockInfoApiUrl(basicStockInfoApiUrl);
+        listingStockService.setHistoryListingApiUrl(HistoryListingApiUrl);
     }
 
     @Test
@@ -257,12 +282,8 @@ public class ListingStockServiceImplTest {
         assertEquals(1, listingStockService.addAllListingStocks(stocks));
     }
 
-    // puca test
     @Test
-    @Disabled
     public void fetchNListingStocks() {
-//        Resource resource = new ClassPathResource(Constants.listingsFilePath,this.getClass().getClassLoader());
-
         String baseResponse = "{\n" +
                 "    \"Global Quote\": {\n" +
                 "        \"01. symbol\": \"CDLX\",\n" +
@@ -368,9 +389,7 @@ public class ListingStockServiceImplTest {
         assertEquals(n, fetchedStocks.size());
     }
 
-    // puca test
     @Test
-    @Disabled
     public void testCreateListingStock() {
         // Arrange
         String baseResponse = "{\n" +

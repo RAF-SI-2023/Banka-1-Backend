@@ -8,7 +8,7 @@ Feature: Fetching Service Integration Tests For Listing Stocks
     Given the fetching service is running
     When I fetch N listing histories
     Then the fetched listing histories should be stored in the database
-#
+
 #  Scenario: Fetch Single Listing History By Ticker
 #    Given the fetching service is running
 #    When I fetch single listing history by ticker "DT" from an external API
