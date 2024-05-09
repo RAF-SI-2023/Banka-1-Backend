@@ -147,7 +147,9 @@ public class BankAccountController {
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class,
                             subTypes = {BankAccountDto.class}))}),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
-            @ApiResponse(responseCode = "400", description = "Bad request")
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = String.class))})
     })
     public ResponseEntity<Boolean> createBankAccount(@RequestBody CreateBankAccountRequest createBankAccountRequest) {
         BankAccount bankAccount = bankAccountService.createBankAccount(createBankAccountRequest);

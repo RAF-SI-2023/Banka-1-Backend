@@ -40,7 +40,9 @@ public class CustomerController {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Boolean.class))}),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
-            @ApiResponse(responseCode = "400", description = "Bad request")
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = String.class))})
     })
     public ResponseEntity<Boolean> createNewCustomer(@RequestBody CreateCustomerRequest createCustomerRequest) {
         customerService.createNewCustomer(createCustomerRequest);
@@ -87,8 +89,13 @@ public class CustomerController {
             @ApiResponse(responseCode = "200", description = "Customer edited successfully",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = EditUserResponse.class))}),
-            @ApiResponse(responseCode = "404", description = "User not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "404", description = "User not found",
+                content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = String.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = String.class))})
     })
     public ResponseEntity<Boolean> editCustomer(@RequestBody EditCustomerRequest editCustomerRequest) {
         boolean edited = customerService.editCustomer(editCustomerRequest);
@@ -103,7 +110,9 @@ public class CustomerController {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Boolean.class))}),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
-            @ApiResponse(responseCode = "400", description = "Bad request")
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = String.class))})
     })
     public ResponseEntity<Boolean> initialActivate(@RequestBody InitialActivationRequest initialActivationRequest) {
         boolean ok = customerService.initialActivation(initialActivationRequest);
@@ -121,7 +130,9 @@ public class CustomerController {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Boolean.class))}),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
-            @ApiResponse(responseCode = "400", description = "Bad request")
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = String.class))})
     })
     public ResponseEntity<Long> activate(@PathVariable String token, @RequestBody ActivateAccountRequest activateAccountRequest) {
         Long id = customerService.activateNewCustomer(token, activateAccountRequest.getPassword());
@@ -134,7 +145,10 @@ public class CustomerController {
             @ApiResponse(responseCode = "200", description = "Email with password reset URL sent successfully",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ActivateAccountResponse.class))}),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = String.class))})
     })
     public ResponseEntity<Void> sendResetPasswordEmail(@PathVariable String email) {
         customerService.sendResetPasswordEmail(email);
@@ -147,7 +161,9 @@ public class CustomerController {
             @ApiResponse(responseCode = "200", description = "Account activated successfully",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ActivateAccountResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Invalid token or password"),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<NewPasswordResponse> setNewPassword(@PathVariable String token, @RequestBody NewPasswordRequest newPasswordRequest) {

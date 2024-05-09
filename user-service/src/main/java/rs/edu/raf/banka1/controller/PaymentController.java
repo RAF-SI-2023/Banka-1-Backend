@@ -37,7 +37,9 @@ public class PaymentController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json")}),
-            @ApiResponse(responseCode = "400", description = "Bad request"),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                content = {@Content(mediaType = "application/json",
+                    schema = @Schema(implementation = String.class))}),
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
