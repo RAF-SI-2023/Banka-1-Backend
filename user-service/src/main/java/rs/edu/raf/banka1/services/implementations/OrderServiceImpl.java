@@ -250,12 +250,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     void reserveStockCapital(MarketOrder order) {
+        BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
         if(order.getOrderType().equals(OrderType.BUY)) {
-            BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
             bankAccountService.reserveBalance(bankAccount, order.getPrice());
         } else {
-            Capital securityCapital = capitalService.getCapitalByListingIdAndType(order.getListingId(), order.getListingType());
-            capitalService.reserveBalance(securityCapital.getListingId(), securityCapital.getListingType(), (double)order.getContractSize());
+            Capital securityCapital = capitalService.getCapitalByListingIdAndTypeAndBankAccount(order.getListingId(), order.getListingType(), bankAccount);
+            capitalService.reserveBalance(securityCapital.getListingId(), securityCapital.getListingType(), bankAccount, (double)order.getContractSize());
         }
 
     }

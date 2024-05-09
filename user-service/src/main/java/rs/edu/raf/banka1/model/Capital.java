@@ -21,7 +21,7 @@ public class Capital {
 
     private String ticker;
 
-    private Integer publicTotal = 0;
+    private Double publicTotal = 0d;
 
     private Double total;
 

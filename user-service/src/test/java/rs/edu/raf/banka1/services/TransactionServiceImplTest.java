@@ -140,7 +140,7 @@ class TransactionServiceImplTest {
 
             transactionService.createTransaction(bankAccount, securityCapital, price, order, securityAmount);
 
-            verify(capitalService).addBalance(eq(listingId), eq(listingType), eq((double) securityAmount));
+            verify(capitalService).addBalance(eq(listingId), eq(listingType), bankAccount, eq((double) securityAmount));
             verify(bankAccountService).commitReserved(eq(bankAccount), eq(price));
             verify(transactionRepository).save(any(Transaction.class));
         }
@@ -176,7 +176,7 @@ class TransactionServiceImplTest {
 
             transactionService.createTransaction(bankAccount, securityCapital, price, order, securityAmount);
 
-            verify(capitalService).commitReserved(eq(listingId), eq(listingType), eq((double) securityAmount));
+            verify(capitalService).commitReserved(eq(listingId), eq(listingType), bankAccount, eq((double) securityAmount));
             verify(bankAccountService).addBalance(eq(bankAccount), eq(price));
             verify(transactionRepository).save(any(Transaction.class));
         }

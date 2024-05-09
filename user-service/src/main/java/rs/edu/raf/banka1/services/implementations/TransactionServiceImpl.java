@@ -53,13 +53,13 @@ public class TransactionServiceImpl implements TransactionService {
         if(order.getOrderType().equals(OrderType.BUY)) {
             transaction.setBuy(price);
             //Add stocks to capital
-            capitalService.addBalance(securityCapital.getListingId(), securityCapital.getListingType(), (double) securityAmount);
+            capitalService.addBalance(securityCapital.getListingId(), securityCapital.getListingType(), bankAccount, (double) securityAmount);
             //Commit reserved
             bankAccountService.commitReserved(bankAccount, price);
         } else {
             transaction.setSell(price);
             //Remove stocks
-            capitalService.commitReserved(securityCapital.getListingId(), securityCapital.getListingType(), (double)securityAmount);
+            capitalService.commitReserved(securityCapital.getListingId(), securityCapital.getListingType(), bankAccount, (double)securityAmount);
             //Add money
             bankAccountService.addBalance(bankAccount, price);
         }

@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.mapper;
 import org.springframework.stereotype.Component;
 import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.dtos.CapitalProfitDto;
+import rs.edu.raf.banka1.dtos.PublicCapitalDto;
 import rs.edu.raf.banka1.model.Capital;
 @Component
 public class CapitalMapper {
@@ -26,5 +27,16 @@ public class CapitalMapper {
         capitalProfitDto.setTotalPrice((capital.getTotal()-capital.getReserved())*price);
         capitalProfitDto.setTicker(capital.getTicker());
         return capitalProfitDto;
+    }
+
+    public PublicCapitalDto capitalToPublicCapitalDto(Capital capital) {
+        PublicCapitalDto publicCapitalDto = new PublicCapitalDto();
+        publicCapitalDto.setListingId(capital.getListingId());
+        publicCapitalDto.setPublicTotal(capital.getPublicTotal());
+        publicCapitalDto.setListingType(capital.getListingType());
+        publicCapitalDto.setBankAccountNumber(capital.getBankAccount().getAccountNumber());
+        publicCapitalDto.setIsIndividual(capital.getBankAccount().getCompany() == null);
+
+        return publicCapitalDto;
     }
 }

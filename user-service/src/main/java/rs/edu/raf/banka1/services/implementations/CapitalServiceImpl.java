@@ -20,6 +20,7 @@ import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.MarketService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -66,46 +67,69 @@ public class CapitalServiceImpl implements CapitalService {
     }
 
     @Override
-    public Capital getCapitalByListingIdAndType(Long listingId, ListingType type) {
-        return capitalRepository.getCapitalByListingIdAndListingType(listingId, type).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
+    public Capital getCapitalByListingIdAndTypeAndBankAccount(Long listingId, ListingType type, BankAccount bankAccount) {
+        return capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
     }
 
     @Override
-    public void reserveBalance(Long listingId, ListingType type, Double amount) {
-        Capital capital = capitalRepository.getCapitalByListingIdAndListingType(listingId, type).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
+    public void reserveBalance(Long listingId, ListingType type, BankAccount bankAccount, Double amount) {
+        Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
         processReservation(capital, amount);
     }
 
     @Override
-    public void commitReserved(Long listingId, ListingType type, Double amount) {
-        Capital capital = capitalRepository.getCapitalByListingIdAndListingType(listingId, type).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
+    public void commitReserved(Long listingId, ListingType type, BankAccount bankAccount, Double amount) {
+        Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
         processReservationCommited(capital, amount);
     }
 
     @Override
-    public void releaseReserved(Long listingId, ListingType type, Double amount) {
-        Capital capital = capitalRepository.getCapitalByListingIdAndListingType(listingId, type).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
+    public void releaseReserved(Long listingId, ListingType type, BankAccount bankAccount, Double amount) {
+        Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
         processReservationReleased(capital, amount);
     }
 
     @Override
-    public void addBalance(Long listingId, ListingType type, Double amount) {
-        Capital capital = capitalRepository.getCapitalByListingIdAndListingType(listingId, type).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
+    public void addBalance(Long listingId, ListingType type, BankAccount bankAccount, Double amount) {
+        Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
         processAddBalance(capital, amount);
     }
 
     @Override
+    /*
+    Samo za fizicka lica!
+     */
     public List<PublicCapitalDto> getAllPublicStockCapitals() {
-        return null;
+        List<Capital> publicCapitals = this.capitalRepository.findByBankAccount_CompanyNullAndListingTypeAndPublicTotalGreaterThan(ListingType.STOCK, 0d);
+        List<PublicCapitalDto> publicCapitalDtos = new ArrayList<>();
+
+        publicCapitals.forEach((Capital capital) -> {
+            publicCapitalDtos.add(capitalMapper.capitalToPublicCapitalDto(capital));
+        });
+
+        return publicCapitalDtos;
     }
 
     @Override
+    /*
+    Samo za pravna lica!
+     */
     public List<PublicCapitalDto> getAllPublicListingCapitals() {
-        return null;
+        List<Capital> capitals = this.capitalRepository.getAllPublicCapitals();
+        List<PublicCapitalDto> publicCapitalDtos = new ArrayList<>();
+
+        capitals.forEach((Capital capital) -> {
+            publicCapitalDtos.add(capitalMapper.capitalToPublicCapitalDto(capital));
+        });
+
+        return publicCapitalDtos;
     }
 
     @Override
     public Boolean addToPublicCapital(Customer userPrincipal, AddPublicCapitalDto setPublicCapitalDto) {
+
+
+
         return null;
     }
 
@@ -120,17 +144,17 @@ public class CapitalServiceImpl implements CapitalService {
     }
 
     @Override
-    public void removeBalance(Long listingId, ListingType type, Double amount) {
-        Capital capital = capitalRepository.getCapitalByListingIdAndListingType(listingId, type).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
+    public void removeBalance(Long listingId, ListingType type, BankAccount bankAccount, Double amount) {
+        Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
         processRemoveBalance(capital, amount);
     }
 
-    @Override
-    public Double getCapital(String accountNumber) { // currencyID ?
-        BankAccount bankAccount = this.bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
-        Capital capital = this.capitalRepository.getCapitalByBankAccount(bankAccount).orElseThrow(() -> new CapitalNotFoundByBankAccountException(accountNumber));
-        return capital.getTotal()-capital.getReserved();
-    }
+//    @Override
+//    public Double getCapital(String accountNumber) { // currencyID ?
+//        BankAccount bankAccount = this.bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
+//        Capital capital = this.capitalRepository.getCapitalByBankAccount(bankAccount).orElseThrow(() -> new CapitalNotFoundByBankAccountException(accountNumber));
+//        return capital.getTotal()-capital.getReserved();
+//    }
 
     private void processReservation(Capital capital, Double amount) {
         if(amount <= 0)
@@ -196,22 +220,26 @@ public class CapitalServiceImpl implements CapitalService {
     }
     @Override
     public Double estimateBalanceForex(Long forexId) {
+        BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
         ListingForexDto listingForexDto = this.marketService.getForexById(forexId);
-        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingType(forexId, ListingType.FOREX).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(forexId, ListingType.FOREX));
+        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(forexId, ListingType.FOREX, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(forexId, ListingType.FOREX));
         return (capital.getTotal()-capital.getReserved())*listingForexDto.getPrice();
     }
 
     @Override
     public Double estimateBalanceFuture(Long futureId) {
+        BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
         ListingFutureDto listingFutureDto = this.marketService.getFutureById(futureId);
-        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingType(futureId, ListingType.FUTURE).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(futureId, ListingType.FUTURE));
+        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(futureId, ListingType.FOREX, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(futureId, ListingType.FOREX));
         return (capital.getTotal()-capital.getReserved())*listingFutureDto.getPrice();
     }
 
     @Override
     public Double estimateBalanceStock(Long stockId) {
+        BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
+
         ListingStockDto listingStockDto = this.marketService.getStockById(stockId);
-        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingType(stockId, ListingType.STOCK).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(stockId, ListingType.STOCK));
+        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(stockId, ListingType.FOREX, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(stockId, ListingType.FOREX));
         return (capital.getTotal()-capital.getReserved())*listingStockDto.getPrice();
     }
 
@@ -250,11 +278,17 @@ public class CapitalServiceImpl implements CapitalService {
     }
 
     private boolean checkCapitalForSellOrder(MarketOrder order) {
-        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingType(order.getListingId(), order.getListingType()).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(order.getListingId(), order.getListingType()));
+        BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
+        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(order.getListingId(), order.getListingType(), bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(order.getListingId(), order.getListingType()));
 
         double available = capital.getTotal() - capital.getReserved();
 
         return order.getContractSize() <= available;
+    }
+
+    private void addToPublic(BankAccount bankAccount, ListingType listingType, Long listingId) {
+
+
     }
 }
 

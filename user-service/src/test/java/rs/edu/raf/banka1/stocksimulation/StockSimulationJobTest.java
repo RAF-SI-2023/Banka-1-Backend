@@ -228,7 +228,7 @@ class StockSimulationJobTest {
         when(marketService.getWorkingHoursForStock(anyLong())).thenReturn(WorkingHoursStatus.OPENED);
         when(orderService.getListingByOrder(any(MarketOrder.class))).thenReturn(listingBaseDto);
         when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
-        when(capitalService.getCapitalByListingIdAndType(anyLong(), any(ListingType.class))).thenReturn(securityCapital);
+        when(capitalService.getCapitalByListingIdAndTypeAndBankAccount(anyLong(), any(ListingType.class), any(BankAccount.class))).thenReturn(securityCapital);
         when(orderService.calculatePrice(any(MarketOrder.class), any(ListingBaseDto.class), anyLong())).thenReturn(price);
 
 
@@ -238,7 +238,7 @@ class StockSimulationJobTest {
         verify(marketService).getWorkingHoursForStock(eq(order.getListingId()));
         verify(orderService).getListingByOrder(eq(order));
         verify(bankAccountService).getDefaultBankAccount();
-        verify(capitalService).getCapitalByListingIdAndType(eq(order.getListingId()), eq(ListingType.valueOf(listingBaseDto.getListingType().toUpperCase())));
+        verify(capitalService).getCapitalByListingIdAndTypeAndBankAccount(eq(order.getListingId()), eq(ListingType.valueOf(listingBaseDto.getListingType().toUpperCase())), eq(bankAccount));
         verify(orderService).calculatePrice(eq(order), eq(listingBaseDto), eq(order.getContractSize()));
         verify(transactionService).createTransaction(eq(bankAccount), eq(securityCapital), eq(price), eq(order), eq(order.getContractSize()));
         verify(orderService).finishOrder(eq(orderId));
@@ -282,7 +282,7 @@ class StockSimulationJobTest {
         when(marketService.getWorkingHoursForStock(anyLong())).thenReturn(WorkingHoursStatus.OPENED);
         when(orderService.getListingByOrder(any(MarketOrder.class))).thenReturn(listingBaseDto);
         when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
-        when(capitalService.getCapitalByListingIdAndType(anyLong(), any(ListingType.class))).thenReturn(securityCapital);
+        when(capitalService.getCapitalByListingIdAndTypeAndBankAccount(anyLong(), any(ListingType.class), any(BankAccount.class))).thenReturn(securityCapital);
         when(orderService.calculatePrice(any(MarketOrder.class), any(ListingBaseDto.class), anyLong())).thenReturn(price);
 
 
@@ -292,7 +292,7 @@ class StockSimulationJobTest {
         verify(marketService).getWorkingHoursForStock(eq(order.getListingId()));
         verify(orderService).getListingByOrder(eq(order));
         verify(bankAccountService).getDefaultBankAccount();
-        verify(capitalService).getCapitalByListingIdAndType(eq(order.getListingId()), eq(ListingType.valueOf(listingBaseDto.getListingType().toUpperCase())));
+        verify(capitalService).getCapitalByListingIdAndTypeAndBankAccount(eq(order.getListingId()), eq(ListingType.valueOf(listingBaseDto.getListingType().toUpperCase())), eq(bankAccount));
         verify(orderService).calculatePrice(eq(order), eq(listingBaseDto), anyLong());
         verify(transactionService).createTransaction(eq(bankAccount), eq(securityCapital), eq(price), eq(order), anyLong());
         verify(orderService).setProcessedNumber(eq(orderId), anyLong());

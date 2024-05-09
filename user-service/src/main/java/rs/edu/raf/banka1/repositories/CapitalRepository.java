@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Capital;
@@ -13,7 +14,12 @@ import java.util.Optional;
 @Repository
 public interface CapitalRepository extends JpaRepository<Capital, Long> {
 
-    Optional<Capital> getCapitalByListingIdAndListingType(Long listingId, ListingType listingType);
+    Optional<Capital> getCapitalByListingIdAndListingTypeAndBankAccount(Long listingId, ListingType listingType, BankAccount bankAccount);
     List<Capital> getCapitalsByBankAccountAndListingType(BankAccount bankAccount, ListingType listingType);
-    Optional<Capital> getCapitalByBankAccount(BankAccount bankAccount);
+//    Optional<Capital> getCapitalByBankAccount(BankAccount bankAccount);
+
+    List<Capital> findByBankAccount_CompanyNullAndListingTypeAndPublicTotalGreaterThan(ListingType listingType, Double publicTotal);
+
+    @Query("SELECT c FROM Capital c WHERE c.bankAccount.company IS NOT NULL AND c.publicTotal > 0")
+    List<Capital> getAllPublicCapitals();
 }

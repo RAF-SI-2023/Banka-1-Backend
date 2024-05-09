@@ -8,13 +8,13 @@ import java.util.List;
 
 public interface CapitalService {
     Capital createCapital(ListingType listingType, Long listingId, Double total, Double reserved, BankAccount bankAccount);
-    Capital getCapitalByListingIdAndType(Long listingId, ListingType type);
-    void reserveBalance(Long listingId, ListingType type, Double amount);
-    void commitReserved(Long listingId, ListingType type, Double amount);
-    void releaseReserved(Long listingId, ListingType type, Double amount);
-    void addBalance(Long listingId, ListingType type, Double amount);
-    void removeBalance(Long listingId, ListingType type, Double amount);
-    Double getCapital(String accountNumber);
+    Capital getCapitalByListingIdAndTypeAndBankAccount(Long listingId, ListingType type, BankAccount bankAccount);
+    void reserveBalance(Long listingId, ListingType type, BankAccount bankAccount, Double amount);
+    void commitReserved(Long listingId, ListingType type, BankAccount bankAccount, Double amount);
+    void releaseReserved(Long listingId, ListingType type, BankAccount bankAccount, Double amount);
+    void addBalance(Long listingId, ListingType type, BankAccount bankAccount, Double amount);
+    void removeBalance(Long listingId, ListingType type, BankAccount bankAccount, Double amount);
+//    Double getCapital(String accountNumber);
     Double estimateBalanceForex(Long forexId);
     Double estimateBalanceFuture(Long futureId);
     Double estimateBalanceStock(Long stockId);
