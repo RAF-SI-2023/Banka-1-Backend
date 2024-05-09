@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.services;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -654,14 +655,12 @@ public class ListingStockServiceImplTest {
 
     @Test
     public void testFetchNListingsHistory_Exception() {
-        // Mock fetchNStocks to throw an exception
-        when(listingStockService.fetchNStocks(anyInt())).thenThrow(new RuntimeException("Error fetching stocks"));
+       when(listingStockService.fetchNStocks(5)).thenThrow(new RuntimeException("Error fetching stocks"));
 
-        // Call the method under test and catch the exception
         List<ListingHistory> listingHistories = listingStockService.fetchNListingsHistory(5);
+        //     assertTrue(listingHistories.isEmpty());
 
-        // Verify that the method returned an empty list due to the exception
-        assertNotNull(listingHistories);
-        assertTrue(listingHistories.isEmpty());
+        assertEquals(0,listingHistories.size());
     }
+
 }

@@ -274,7 +274,7 @@ public class ListingStockServiceImplTest {
         when(holidayRepository.findByCountryId(anyLong())).thenReturn(Optional.of(Collections.emptyList()));
 
         // Mock the current time to be outside the working hours
-        Clock fixedClock = Clock.fixed(Instant.parse("2022-01-01T20:00:00Z"), ZoneId.of("UTC"));
+        Clock fixedClock = Clock.fixed(Instant.parse("2024-01-01T22:00:00Z"), ZoneId.of("UTC"));
         listingStockService.setClock(fixedClock);
 
         String result = listingStockService.getWorkingTimeById(10L);
