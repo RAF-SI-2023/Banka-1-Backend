@@ -7,6 +7,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.FutureMapper;
@@ -339,6 +340,7 @@ public class FuturesServiceImpl implements FuturesService {
     }
 
     @Override
+    @Cacheable(value = "futures", key = "#ticker")
     public Optional<ListingFuture> findByTicker(String ticker) {
         return futureRepository.findByTicker(ticker);
     }
