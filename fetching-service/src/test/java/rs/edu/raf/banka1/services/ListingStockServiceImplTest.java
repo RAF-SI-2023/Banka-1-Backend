@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
 
+import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -587,5 +588,80 @@ public class ListingStockServiceImplTest {
         Requests result = new Requests();
         listingStockService.setRequests(result);
         assertEquals(listingStockService.getRequests(),result);
+    }
+
+    @Test
+    public void testCreateListingStock_APIException() throws Exception {
+        String symbol = "INVALID";
+        String companyName = "Invalid Company";
+        String primaryExchange = "INVALID_EXCHANGE";
+
+        ListingStock actualListingStock = listingStockService.createListingStock(symbol, companyName, primaryExchange);
+
+        assertNull(actualListingStock);
+    }
+
+
+    @Test
+    public void testSaveAllListingStocks() {
+        List<ListingStock> listingStocks = new ArrayList<>();
+        ListingStock stock1 = new ListingStock();
+        stock1.setTicker("AAPL");
+        stock1.setPrice(150.00);
+
+        listingStockService.saveAllListingStocks(listingStocks);
+
+        verify(stockRepository).saveAll(listingStocks);
+    }
+
+    @Test
+    public void testGetStockRepository() {
+        StockRepository result = listingStockService.getStockRepository();
+        assertEquals(stockRepository, result);
+    }
+    @Test
+    public void testGetExchangeRepository() {
+        ExchangeRepository result = listingStockService.getExchangeRepository();
+        assertEquals(exchangeRepository, result);
+    }
+    @Test
+    public void testGetCountryRepository() {
+        CountryRepository result = Mockito.mock(CountryRepository.class);
+        listingStockService.setCountryRepository(result);
+        assertEquals(listingStockService.getCountryRepository(), result);
+    }
+
+    @Test
+    public void testGetListingHolidayRepository(){
+        HolidayRepository result =Mockito.mock(HolidayRepository.class);
+        listingStockService.setHolidayRepository(result);
+        assertEquals(listingStockService.getHolidayRepository(),result);
+    }
+
+    @Test
+    public void testGetStockMapper(){
+        StockMapper result = Mockito.mock(StockMapper.class);
+        listingStockService.setStockMapper(result);
+        assertEquals( listingStockService.getStockMapper(),result);
+    }
+
+    @Test
+    public void testGetListingHistoryRepository(){
+        ListingHistoryRepository result =Mockito.mock(ListingHistoryRepository.class);
+        listingStockService.setListingHistoryRepository(result);
+        assertEquals(listingStockService.getListingHistoryRepository(),result);
+    }
+
+    @Test
+    public void testFetchNListingsHistory_Exception() {
+        // Mock fetchNStocks to throw an exception
+        when(listingStockService.fetchNStocks(anyInt())).thenThrow(new RuntimeException("Error fetching stocks"));
+
+        // Call the method under test and catch the exception
+        List<ListingHistory> listingHistories = listingStockService.fetchNListingsHistory(5);
+
+        // Verify that the method returned an empty list due to the exception
+        assertNotNull(listingHistories);
+        assertTrue(listingHistories.isEmpty());
     }
 }
