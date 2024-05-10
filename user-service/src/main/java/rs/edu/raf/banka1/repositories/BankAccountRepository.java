@@ -21,4 +21,7 @@ public interface BankAccountRepository extends JpaRepository<BankAccount, Long> 
     @Query("SELECT ba FROM BankAccount ba WHERE ba.currency.currencyCode = :currencyCode AND ba.company.companyName = 'Banka1'")
     Optional<BankAccount> findBankByCurrencyCode(@Param("currencyCode") String currencyCode);
 
+    Optional<BankAccount> findByCompany_IdAndCurrency_CurrencyCode(Long id, String currencyCode);
+
+    Optional<BankAccount> findByCustomer_UserIdAndCurrency_CurrencyCode(Long userId, String currencyCode);
 }

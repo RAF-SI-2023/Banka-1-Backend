@@ -22,7 +22,7 @@ public interface CapitalService {
     boolean hasEnoughCapitalForOrder(MarketOrder order);
     List<PublicCapitalDto> getAllPublicStockCapitals();
     List<PublicCapitalDto> getAllPublicListingCapitals();
-    Boolean addToPublicCapital(Customer userPrincipal, AddPublicCapitalDto setPublicCapitalDto);
+    Boolean addToPublicCapital(User userPrincipal, AddPublicCapitalDto setPublicCapitalDto);
     CapitalDto getCapitalForStockId(Long stockId);
     CapitalDto getCapitalForForexId(Long forexId);
 }

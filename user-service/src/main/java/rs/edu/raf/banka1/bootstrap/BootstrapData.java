@@ -198,6 +198,8 @@ public class BootstrapData implements CommandLineRunner {
         bankAccountService.saveBankAccount(bankAccount);
         // dovde
 
+
+
         //ovo samo za test moze da se obrise
         BankAccount bankAccount1 = new BankAccount();
         bankAccount1.setAccountStatus(true);
@@ -251,6 +253,16 @@ public class BootstrapData implements CommandLineRunner {
         bankAccount3.setSubtypeOfAccount("LICNI");
         bankAccountService.saveBankAccount(bankAccount3);
         // dovde
+
+        Capital capital = new Capital();
+        capital.setPublicTotal(0D);
+        capital.setListingType(ListingType.STOCK);
+        capital.setReserved(0D);
+        capital.setListingId(1L);
+        capital.setTicker("DT");
+        capital.setBankAccount(bankAccount3);
+        capital.setTotal(50D);
+        capitalRepository.save(capital);
 
         BankAccountRequest bankAccountRequest = new BankAccountRequest();
         bankAccountRequest.setAccountType(AccountType.FOREIGN_CURRENCY);

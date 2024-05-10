@@ -95,4 +95,16 @@ public class GlobalExceptionHandler {
         Logger.info("Error: " + e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(OTCListingTypeException.class)
+    public ResponseEntity<String> handleOTCListingTypeException(OTCListingTypeException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(OTCInvalidBankAccountCurrencyException.class)
+    public ResponseEntity<String> handleOTCInvalidBankAccountCurrencyException(OTCInvalidBankAccountCurrencyException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }

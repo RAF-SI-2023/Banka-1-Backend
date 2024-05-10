@@ -5,6 +5,7 @@ import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.ListingType;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 
+import java.util.Currency;
 import java.util.List;
 
 public interface BankAccountService {
@@ -15,6 +16,8 @@ public interface BankAccountService {
     List<BankAccount> getBankAccountsByCompany(Long companyId);
     List<BankAccount> getBankAccountsByAgent(Long agentId);
     BankAccount findBankAccountByAccountNumber(String accountNumber);
+    BankAccount getBankAccountByCompanyAndCurrencyCode(Long companyId, String currencyCode);
+    BankAccount getBankAccountByCustomerAndCurrencyCode(Long customerId, String currencyCode);
     BankAccount getDefaultBankAccount();
     void activateBankAccount(BankAccount bankAccount);
 
@@ -25,4 +28,6 @@ public interface BankAccountService {
     void releaseReserved(BankAccount bankAccount, Double amount);
     void addBalance(BankAccount bankAccount, Double amount);
     void removeBalance(BankAccount bankAccount, Double amount);
+
+
 }

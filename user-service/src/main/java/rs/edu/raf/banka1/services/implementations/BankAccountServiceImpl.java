@@ -188,6 +188,16 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
+    public BankAccount getBankAccountByCompanyAndCurrencyCode(Long companyId, String currencyCode) {
+        return bankAccountRepository.findByCompany_IdAndCurrency_CurrencyCode(companyId, currencyCode).orElseThrow(BankAccountNotFoundException::new);
+    }
+
+    @Override
+    public BankAccount getBankAccountByCustomerAndCurrencyCode(Long customerId, String currencyCode) {
+        return bankAccountRepository.findByCustomer_UserIdAndCurrency_CurrencyCode(customerId, currencyCode).orElseThrow(BankAccountNotFoundException::new);
+    }
+
+    @Override
     public BankAccount getDefaultBankAccount() {
         return bankAccountRepository.findBankByCurrencyCode(Constants.DEFAULT_CURRENCY).orElseThrow(BankAccountNotFoundException::new);
     }

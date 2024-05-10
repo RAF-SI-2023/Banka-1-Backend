@@ -19,6 +19,7 @@ import rs.edu.raf.banka1.repositories.CapitalRepository;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.MarketService;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -126,11 +127,16 @@ public class CapitalServiceImpl implements CapitalService {
     }
 
     @Override
-    public Boolean addToPublicCapital(Customer userPrincipal, AddPublicCapitalDto setPublicCapitalDto) {
-
-
-
-        return null;
+    public Boolean addToPublicCapital(User userPrincipal, AddPublicCapitalDto setPublicCapitalDto) {
+        if(userPrincipal.getCompany() != null) {
+            //Add to company
+            BankAccount companyBankAccount = bankAccountService.getBankAccountByCompanyAndCurrencyCode(userPrincipal.getCompany().getId(), Constants.DEFAULT_CURRENCY);
+            addPublic(companyBankAccount, setPublicCapitalDto.getListingType(), setPublicCapitalDto.getListingId(), setPublicCapitalDto.getAddToPublic());
+        } else {
+            BankAccount individualBankAccount = bankAccountService.getBankAccountByCustomerAndCurrencyCode(userPrincipal.getUserId(), Constants.DEFAULT_CURRENCY);
+            addPublicToIndividual(individualBankAccount, setPublicCapitalDto.getListingType(), setPublicCapitalDto.getListingId(), setPublicCapitalDto.getAddToPublic());
+        }
+        return true;
     }
 
     @Override
@@ -286,9 +292,22 @@ public class CapitalServiceImpl implements CapitalService {
         return order.getContractSize() <= available;
     }
 
-    private void addToPublic(BankAccount bankAccount, ListingType listingType, Long listingId) {
+    private void addPublicToIndividual(BankAccount bankAccount, ListingType listingType, Long listingId, Double amount) {
+        if(!listingType.equals(ListingType.STOCK)) throw new OTCListingTypeException();
+        addPublic(bankAccount, listingType, listingId, amount);
+    }
+    private void addPublic(BankAccount bankAccount, ListingType listingType, Long listingId, Double amount) {
+        if(!bankAccount.getCurrency().getCurrencyCode().equals(Constants.DEFAULT_CURRENCY)) throw new OTCInvalidBankAccountCurrencyException();
+        if(amount <= 0) throw new InvalidCapitalAmountException(amount);
 
+        Capital capital = getCapitalByListingIdAndTypeAndBankAccount(listingId, listingType, bankAccount);
 
+        double available = capital.getTotal() - capital.getReserved();
+
+        if(capital.getPublicTotal() + amount > available) throw new NotEnoughCapitalAvailableException();
+
+        capital.setPublicTotal(capital.getPublicTotal() + amount);
+        capitalRepository.save(capital);
     }
 }
 
