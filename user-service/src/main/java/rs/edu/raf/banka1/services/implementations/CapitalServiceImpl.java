@@ -140,6 +140,18 @@ public class CapitalServiceImpl implements CapitalService {
     }
 
     @Override
+    public void removeFromPublicCapital(Long listingId, ListingType listingType, BankAccount bankAccount, Double amount) {
+        Capital capital = getCapitalByListingIdAndTypeAndBankAccount(listingId, listingType, bankAccount);
+
+        if(capital.getTotal() - capital.getReserved() < amount) throw new NotEnoughCapitalAvailableException();
+
+        if(amount > capital.getPublicTotal()) throw new InvalidCapitalAmountException(amount);
+
+        capital.setPublicTotal(capital.getPublicTotal() - amount);
+        capitalRepository.save(capital);
+    }
+
+    @Override
     public CapitalDto getCapitalForStockId(Long stockId) {
         return null;
     }

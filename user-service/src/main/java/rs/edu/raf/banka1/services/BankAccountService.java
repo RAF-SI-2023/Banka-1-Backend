@@ -19,6 +19,7 @@ public interface BankAccountService {
     BankAccount getBankAccountByCompanyAndCurrencyCode(Long companyId, String currencyCode);
     BankAccount getBankAccountByCustomerAndCurrencyCode(Long customerId, String currencyCode);
     BankAccount getDefaultBankAccount();
+    BankAccount getBankAccountByNumber(String accountNumber);
     void activateBankAccount(BankAccount bankAccount);
 
     int editBankAccount(String accountNumber, String newName);

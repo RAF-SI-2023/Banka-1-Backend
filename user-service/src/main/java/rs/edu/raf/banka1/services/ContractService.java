@@ -10,10 +10,10 @@ import rs.edu.raf.banka1.model.User;
 import java.util.List;
 
 public interface ContractService {
-
     ContractDto createContract(ContractCreateDto contractCreateDto, User buyerId);
     Boolean denyContract(Long contractId, String comment);
     Boolean acceptContract(Long contractId);
+    Boolean approveContract(Long contractId);
 
     List<ContractDto> getAllContractsSupervisor(Employee currentAuth);
 

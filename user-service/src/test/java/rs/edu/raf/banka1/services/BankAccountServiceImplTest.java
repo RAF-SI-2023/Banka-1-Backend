@@ -382,4 +382,29 @@ public class BankAccountServiceImplTest {
 
         verify(bankAccountRepository).findByCustomer_UserIdAndCurrency_CurrencyCode(eq(companyId), eq(currencyCode));
     }
+
+    @Test
+    public void getBankAccountByNumber() {
+        BankAccount bankAccount = new BankAccount();
+        String accountNumber = "123456789";
+
+        when(bankAccountRepository.findBankAccountByAccountNumber(anyString())).thenReturn(Optional.of(bankAccount));
+
+        BankAccount res = bankAccountService.getBankAccountByNumber(accountNumber);
+
+        assertEquals(bankAccount, res);
+
+        verify(bankAccountRepository).findBankAccountByAccountNumber(eq(accountNumber));
+    }
+
+    @Test
+    public void getBankAccountByNumberException() {
+        String accountNumber = "123456789";
+
+        when(bankAccountRepository.findBankAccountByAccountNumber(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(BankAccountNotFoundException.class, () -> bankAccountService.getBankAccountByNumber(accountNumber));
+
+        verify(bankAccountRepository).findBankAccountByAccountNumber(eq(accountNumber));
+    }
 }

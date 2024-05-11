@@ -203,6 +203,11 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
+    public BankAccount getBankAccountByNumber(String accountNumber) {
+        return bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
+    }
+
+    @Override
     public void activateBankAccount(BankAccount bankAccount) {
         bankAccount.setAccountStatus(true);
         bankAccountRepository.save(bankAccount);

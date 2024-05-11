@@ -7,8 +7,8 @@ import lombok.Setter;
 @Setter
 public class ContractDto {
     private Long contractId;
-    private Long buyerId;
-    private Long sellerId;
+    private String buyerAccountNumber;
+    private String sellerAccountNumber;
     private Boolean bankApproval;
     private Boolean sellerApproval;
     private String comment;

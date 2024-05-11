@@ -168,8 +168,8 @@ public class UserControllerSteps {
     }
 
     @And("seller id is {long}")
-    public void sellerIdIs(long arg0) {
-        contractCreateDto.setSellerId(arg0);
+    public void sellerIdIs(String arg0) {
+        contractCreateDto.setBankAccountNumber(arg0);
     }
 
     @And("i should get all contracts i am contributing in as a {string}")

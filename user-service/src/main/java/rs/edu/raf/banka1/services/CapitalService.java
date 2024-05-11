@@ -23,6 +23,7 @@ public interface CapitalService {
     List<PublicCapitalDto> getAllPublicStockCapitals();
     List<PublicCapitalDto> getAllPublicListingCapitals();
     Boolean addToPublicCapital(User userPrincipal, AddPublicCapitalDto setPublicCapitalDto);
+    void removeFromPublicCapital(Long listingId, ListingType listingType, BankAccount bankAccount, Double amount);
     CapitalDto getCapitalForStockId(Long stockId);
     CapitalDto getCapitalForForexId(Long forexId);
 }

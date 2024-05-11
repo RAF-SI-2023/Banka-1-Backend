@@ -27,4 +27,7 @@ public class Contract {
     private String ticker;
     private Double amount;
     private Double price;
+    private Long listingId;
+    @Enumerated(EnumType.STRING)
+    private ListingType listingType;
 }
