@@ -12,6 +12,7 @@ spring.jpa.generate-ddl=true
 spring.jpa.hibernate.ddl-auto=update
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.jpa.show-sql=true
+spring.devtools.restart.additional-exclude=logs/**
 logging.level.org.hibernate.SQL=DEBUG
 logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
 server.port=8081
