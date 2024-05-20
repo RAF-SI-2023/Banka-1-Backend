@@ -15,10 +15,5 @@ public interface FuturesService {
 
     Boolean addFuture(ListingFuture future);
 
-    List<ListingFuture> getAllFutures();
-    Optional<ListingFuture> findById(Long id);
-
-    List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to);
-
     Optional<ListingFuture> findByTicker(String ticker);
 }

@@ -2,7 +2,6 @@ package rs.edu.raf.banka1.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import rs.edu.raf.banka1.mapper.CurrencyMapper;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
 import rs.edu.raf.banka1.model.entities.Currency;
 import rs.edu.raf.banka1.model.entities.Inflation;
@@ -16,13 +15,11 @@ public class CurrencyServiceImpl implements CurrencyService {
 
     private final CurrencyRepository currencyRepository;
     private final InflationRepository inflationRepository;
-    private final CurrencyMapper currencyMapper;
 
     @Autowired
-    public CurrencyServiceImpl(CurrencyRepository currencyRepository, InflationRepository inflationRepository, CurrencyMapper currencyMapper) {
+    public CurrencyServiceImpl(CurrencyRepository currencyRepository, InflationRepository inflationRepository) {
         this.currencyRepository = currencyRepository;
         this.inflationRepository = inflationRepository;
-        this.currencyMapper = currencyMapper;
     }
 
     public void addCurrencies(List<CurrencyDto> currencyList) {
