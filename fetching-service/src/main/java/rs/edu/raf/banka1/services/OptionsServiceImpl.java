@@ -1,46 +1,45 @@
 package rs.edu.raf.banka1.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.tinylog.Logger;
-import rs.edu.raf.banka1.exceptions.OptionsException;
 import rs.edu.raf.banka1.mapper.OptionsMapper;
 import rs.edu.raf.banka1.model.OptionsModel;
 import rs.edu.raf.banka1.model.dtos.OptionsDto;
 import rs.edu.raf.banka1.model.enums.OptionType;
+import rs.edu.raf.banka1.model.exceptions.OptionsException;
 import rs.edu.raf.banka1.repositories.OptionsRepository;
-
 import rs.edu.raf.banka1.threads.OptionsThread;
-
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Iterator;
-import java.util.Collections;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Service
 public class OptionsServiceImpl implements OptionsService{
+    @Setter
     private ObjectMapper objectMapper = new ObjectMapper();
+    @Setter
     private HttpClient httpClient = HttpClient.newHttpClient();
+    @Setter
     private HttpClient crumbHttpClient = HttpClient.newHttpClient();
+    @Setter
     private HttpRequest httpRequest;
+    @Setter
     private String cookie = null;
+    @Setter
     private String crumb = null;
     @Value("${optionsUrl}")
     private String optionsUrl;
@@ -85,16 +84,10 @@ public class OptionsServiceImpl implements OptionsService{
 
     List<String> fetchTickers() {
         try {
-            InputStream inputStream = Constants.getInputStreamForResource(Constants.listingsFilePath);
-
-            if (inputStream == null) {
-                return new ArrayList<>();
-            }
-
-//            File file = new File(Constants.listingsFilePath);
+            File file = new File(Constants.listingsFilePath);
 
             // Read JSON data from the file
-            JsonNode rootNode = objectMapper.readTree(inputStream);
+            JsonNode rootNode = objectMapper.readTree(file);
             List<String> tickers = new ArrayList<>();
             // Iterate over each element in the JSON array
             for (JsonNode node : rootNode) {
@@ -170,10 +163,10 @@ public class OptionsServiceImpl implements OptionsService{
     @Override
     public List<OptionsDto> getOptionsByTicker(String ticker) {
         List<OptionsDto> options = this.optionsRepository.findByTicker(ticker).map(optionsModels ->
-                        optionsModels.stream()
-                                .map(optionsMapper::optionsModelToOptionsDto)
-                                .collect(Collectors.toList()))
-                .orElse(Collections.emptyList());
+            optionsModels.stream()
+                .map(optionsMapper::optionsModelToOptionsDto)
+                .collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
         if(options.isEmpty()) {
             if(crumb != null) {
                 options = fetchOptionsForTicker(ticker, optionsUrl + ticker + "?crumb=" + crumb);
@@ -251,25 +244,6 @@ public class OptionsServiceImpl implements OptionsService{
         return false;
     }
 
-    public void setHttpClient(HttpClient httpClient) {
-        this.httpClient = httpClient;
-    }
-
-    public void setHttpRequest(HttpRequest httpRequest) {
-        this.httpRequest = httpRequest;
-    }
-
-    public void setCookie(String cookie) {
-        this.cookie = cookie;
-    }
-
-    public void setCrumb(String crumb) {
-        this.crumb = crumb;
-    }
-
-    public void setCrumbHttpClient(HttpClient httpClient) {
-        this.crumbHttpClient = httpClient;
-    }
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void truncateAndFetch(){
