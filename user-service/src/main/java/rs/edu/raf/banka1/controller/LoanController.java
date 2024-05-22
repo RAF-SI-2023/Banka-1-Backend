@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,7 +32,10 @@ public class LoanController {
 
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all loans", description = "Get all loans for all users")
+    @Operation(summary = "Get all loans", description = "Get all loans for all users",parameters = {
+            @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+    }
+    )
     @PreAuthorize("hasAuthority('manageLoans')")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -49,7 +54,10 @@ public class LoanController {
 
 
     @GetMapping(value = "/{loanId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get detailed loan", description = "Get detailed loan  based on its id")
+    @Operation(summary = "Get detailed loan", description = "Get detailed loan  based on its id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('manageLoans')")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -66,7 +74,10 @@ public class LoanController {
     }
 
     @GetMapping(value = "/user/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get loans for user", description = "Get loans for user")
+    @Operation(summary = "Get loans for user", description = "Get loans for user",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('manageLoans')")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -83,7 +94,10 @@ public class LoanController {
     }
 
     @GetMapping(value = "/account/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get loans for accountNumber", description = "Get loans for accountNumber")
+    @Operation(summary = "Get loans for accountNumber", description = "Get loans for accountNumber",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('manageLoans')")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
