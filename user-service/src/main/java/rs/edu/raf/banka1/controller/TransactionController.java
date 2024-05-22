@@ -47,6 +47,21 @@ public class TransactionController {
     ) {
         return ResponseEntity.ok(transactionService.getTransactionsForEmployee(userId));
     }
+    @GetMapping(value = "/company/{companyId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get transactions for company", description = "Get transactions for company")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class))}),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to get transactions for company"),
+            @ApiResponse(responseCode = "404", description = "Transactions for company not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<TransactionDto>> getTransactionsForCompany(
+            @PathVariable(name = "companyId") Long companyId
+    ) {
+        return ResponseEntity.ok(transactionService.getAllTransactionsForCompanyBankAccounts(companyId));
+    }
 
     @GetMapping(value = "/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get transactions for accountNumber", description = "Get transactions for accountNumber")
