@@ -36,3 +36,5 @@ exchangeRateAPIToken=4459637dd05bd06367a6fa32
 
 # API URLs:
 exchangeRateApiUrl= https://v6.exchangerate-api.com/v6/
+
+marketServiceUrl =http://localhost:8081

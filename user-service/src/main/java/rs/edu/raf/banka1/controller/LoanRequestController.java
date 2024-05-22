@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,7 +32,10 @@ public class LoanRequestController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all loan requests", description = "Get all loan requests")
+    @Operation(summary = "Get all loan requests", description = "Get all loan requests",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('manageLoanRequests')")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -49,7 +54,10 @@ public class LoanRequestController {
 
 
     @PutMapping(value = "/{loanRequestId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "change loan request status", description = "change loan request status")
+    @Operation(summary = "change loan request status", description = "change loan request status",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('manageLoanRequests')")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -71,7 +79,10 @@ public class LoanRequestController {
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Create loan request", description = "Create loan request")
+    @Operation(summary = "Create loan request", description = "Create loan request",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('manageLoanRequests')")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",

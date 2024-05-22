@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -36,7 +38,10 @@ public class CurrencyController {
     }
 
     @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all Currencies", description = "Get all currencies")
+    @Operation(summary = "Get all Currencies", description = "Get all currencies",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
 //    @PreAuthorize("hasAuthority('can_read_users')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -51,7 +56,10 @@ public class CurrencyController {
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get a specific Currency", description = "Get a currency by id")
+    @Operation(summary = "Get a specific Currency", description = "Get a currency by id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
 //    @PreAuthorize("hasAuthority('can_read_users')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -70,7 +78,10 @@ public class CurrencyController {
     }
 
     @GetMapping(value = "/code/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all Currencies by currency code", description = "Get all currencies by currency code")
+    @Operation(summary = "Get all Currencies by currency code", description = "Get all currencies by currency code",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
 //    @PreAuthorize("hasAuthority('can_read_users')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -89,7 +100,10 @@ public class CurrencyController {
     }
 
     @GetMapping(value = "/{id}/inflation", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all Inflations by currency id", description = "Get all inflations by currency id")
+    @Operation(summary = "Get all Inflations by currency id", description = "Get all inflations by currency id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
 //    @PreAuthorize("hasAuthority('can_read_users')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -104,7 +118,10 @@ public class CurrencyController {
     }
 
     @GetMapping(value = "/{id}/inflation/{year}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all Inflations by year for a specific currency", description = "Get all inflations by year for a specific currency")
+    @Operation(summary = "Get all Inflations by year for a specific currency", description = "Get all inflations by year for a specific currency",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
 //    @PreAuthorize("hasAuthority('can_read_users')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
