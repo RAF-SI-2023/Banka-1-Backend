@@ -317,5 +317,58 @@ class TransactionServiceImplTest {
             verify(capitalService).addBalance(eq(currencyCode), eq(96.0));
             verify(transactionRepository).save(any(Transaction.class));
         }
+        @Test
+        void shouldCreateSellTransactionNoProfitNoTax() {
+            ListingType listingType = ListingType.STOCK;
+            long listingId = 1;
+            double price = 100;
+            long securityAmount = 1;
+            String currencyCode = "RSD";
+
+            Currency currency = new Currency();
+            currency.setCurrencyCode(currencyCode);
+
+            Capital bankCapital = new Capital();
+            BankAccount bankAccount = new BankAccount();
+            bankAccount.setBalance(1000.0);
+            bankAccount.setAvailableBalance(500.0);
+            bankAccount.setCurrency(currency);
+            bankCapital.setBankAccount(bankAccount);
+            bankCapital.setTotal(1000.0);
+            bankCapital.setReserved(500.0);
+            bankCapital.setCurrency(currency);
+
+            Capital securityCapital = new Capital();
+            securityCapital.setListingType(listingType);
+            securityCapital.setListingId(listingId);
+            securityCapital.setTotal(1000.0);
+            securityCapital.setReserved(100.0);
+
+            Employee employee = new Employee();
+            MarketOrder order = new MarketOrder();
+            order.setOrderType(OrderType.SELL);
+            order.setListingId(1L);
+            order.setListingType(ListingType.STOCK);
+            order.setOwner(employee);
+            order.setContractSize(1L);
+            order.setPrice(100.0);
+
+            MarketOrder marketOrder1 = new MarketOrder();
+            marketOrder1.setContractSize(1L);
+            marketOrder1.setCurrentAmount(0L);
+            //create datetime object that is 1 year before now
+
+            marketOrder1.setTimeStamp(Instant.now().toEpochMilli()/1000 - 3L);
+            marketOrder1.setPrice(200.0);
+
+            when(orderRepository.getAllBuyOrders(eq(listingId), eq(listingType), eq(employee), eq(OrderType.BUY), eq(OrderStatus.DONE))).thenReturn(Optional.of(Arrays.asList(marketOrder1)));
+
+            transactionService.createTransaction(bankCapital, securityCapital, price, order, securityAmount);
+
+            verify(capitalService).commitReserved(eq(listingId), eq(listingType), eq((double) securityAmount));
+            verify(capitalService).addBalance(eq(currencyCode), eq(100.0));
+            verify(transactionRepository).save(any(Transaction.class));
+        }
+
     }
 }
