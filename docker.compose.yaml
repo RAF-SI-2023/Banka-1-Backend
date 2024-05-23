@@ -74,7 +74,7 @@ services:
       - "8081:8081"  # Adjust the port as needed
     environment:
       SPRING_APPLICATION_JSON: '{
-        "spring.datasource.url": "jdbc:postgresql://postgres:5432/bank_userservice",
+        "spring.datasource.url": "jdbc:postgresql://postgres:5432/bank_marketservice",
         "spring.datasource.username": "myusername",
         "spring.datasource.password": "mypassword",
         "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.PostgreSQLDialect",
@@ -110,7 +110,7 @@ services:
         - "8082:8082"  # Adjust the port as needed
       environment:
         SPRING_APPLICATION_JSON: '{
-          "spring.datasource.url": "jdbc:postgresql://postgres:5432/bank_userservice",
+          "spring.datasource.url": "jdbc:postgresql://postgres:5432/bank_marketservice",
           "spring.datasource.username": "myusername",
           "spring.datasource.password": "mypassword",
           "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.PostgreSQLDialect",
