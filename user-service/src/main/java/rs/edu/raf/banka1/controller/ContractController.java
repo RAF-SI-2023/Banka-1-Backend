@@ -90,7 +90,7 @@ public class ContractController {
     }
 
     @PutMapping(value = "/accept/{contractId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Deny contract offer.", description = "Seller denies contract offer.")
+    @Operation(summary = "Deny contract offer.", description = "Seller accepts contract offer.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json")}),
@@ -101,7 +101,18 @@ public class ContractController {
     public ResponseEntity<Boolean> acceptContractOffer(@PathVariable Long contractId) {
         return new ResponseEntity<>(contractService.acceptContract(contractId), HttpStatus.OK);
     }
-
+    @PutMapping(value = "/approve/{contractId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Deny contract offer.", description = "Bank approves contract offer.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to create order request"),
+            @ApiResponse(responseCode = "404", description = "Bad Request"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Boolean> approveContractOffer(@PathVariable Long contractId) {
+        return new ResponseEntity<>(contractService.approveContract(contractId), HttpStatus.OK);
+    }
     @GetMapping(value = "/customer/getAllContracts", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Deny contract offer.", description = "Seller denies contract offer.")
     @ApiResponses({

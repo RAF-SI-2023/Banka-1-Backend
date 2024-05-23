@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.ContractCreateDto;
 import rs.edu.raf.banka1.dtos.ContractDto;
+import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
 import rs.edu.raf.banka1.exceptions.InvalidCapitalAmountException;
 import rs.edu.raf.banka1.mapper.ContractMapper;
 import rs.edu.raf.banka1.model.*;
@@ -13,6 +14,7 @@ import rs.edu.raf.banka1.repositories.ContractRepository;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.ContractService;
+import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.time.Instant;
@@ -30,6 +32,7 @@ public class ContractServiceImpl implements ContractService {
     private final BankAccountService bankAccountService;
     private final ContractRepository contractRepository;
     private final CapitalService capitalService;
+    private final MarketService marketService;
 
     @Override
     public ContractDto createContract(ContractCreateDto contractCreateDto, User buyer) {
@@ -66,7 +69,7 @@ public class ContractServiceImpl implements ContractService {
 
         contractRepository.save(contract);
 
-        return contractMapper.contractToContractDto(contract);
+        return contractMapper.contractToContractDto(contract, getListingInfo(contract));
     }
 
     @Override
@@ -98,7 +101,7 @@ public class ContractServiceImpl implements ContractService {
         List<ContractDto> contractDtos = new ArrayList<>();
 
         contracts.forEach((Contract contract) -> {
-            ContractDto contractDto = contractMapper.contractToContractDto(contract);
+            ContractDto contractDto = contractMapper.contractToContractDto(contract, getListingInfo(contract));
             contractDtos.add(contractDto);
         });
 
@@ -118,7 +121,7 @@ public class ContractServiceImpl implements ContractService {
         List<ContractDto> contractDtos = new ArrayList<>();
 
         contracts.forEach((Contract contract) -> {
-            ContractDto contractDto = contractMapper.contractToContractDto(contract);
+            ContractDto contractDto = contractMapper.contractToContractDto(contract, getListingInfo(contract));
             contractDtos.add(contractDto);
         });
 
@@ -139,4 +142,18 @@ public class ContractServiceImpl implements ContractService {
         bankAccountService.removeBalance(contract.getBuyer(), contract.getPrice());
         bankAccountService.addBalance(contract.getSeller(), contract.getPrice());
     }
+
+    private ListingBaseDto getListingInfo(Contract contract) {
+        if(contract.getListingType().equals(ListingType.STOCK)) {
+            return marketService.getStockById(contract.getListingId());
+        }
+        if(contract.getListingType().equals(ListingType.FOREX)) {
+            return marketService.getForexById(contract.getListingId());
+        }
+        if(contract.getListingType().equals(ListingType.FUTURE)) {
+            return marketService.getFutureById(contract.getListingId());
+        }
+        return null;
+    }
+
 }
