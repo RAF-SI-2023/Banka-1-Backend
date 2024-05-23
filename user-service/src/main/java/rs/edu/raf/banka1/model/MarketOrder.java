@@ -39,4 +39,7 @@ public class MarketOrder {
 
     @ManyToOne()
     private Employee approvedBy;
+
+    private Long timeStamp;
+    private Long currentAmount;
 }
