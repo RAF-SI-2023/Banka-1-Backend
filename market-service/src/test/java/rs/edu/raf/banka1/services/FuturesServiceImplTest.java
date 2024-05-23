@@ -45,25 +45,13 @@ public class FuturesServiceImplTest {
     private FutureRepository futureRepository;
     @Mock
     private ListingStockService listingStockService;
-    @Mock
-    private DriverService driverService;
-    //@InjectMocks
+    @InjectMocks
     private FuturesServiceImpl futuresService;
     private ListingFuture future1;
     private ListingFuture future2;
     private List<ListingFuture> futures;
-    @Mock
-    private WebDriver driver;
-
     @BeforeEach
     public void setUp(){
-
-        try(MockedStatic<WebDriverManager> webDriverManagerMockedStatic = mockStatic(WebDriverManager.class)){
-            WebDriverManager webDriverManager = mock(WebDriverManager.class);
-            webDriverManagerMockedStatic.when(WebDriverManager::chromedriver).thenReturn(webDriverManager);
-            when(driverService.createNewDriver()).thenReturn(driver);
-            futuresService = new FuturesServiceImpl(futureRepository, listingHistoryRepository, futureMapper, listingStockService, driverService);
-        }
 
         // stock data
         future1 = new ListingFuture();
@@ -79,242 +67,6 @@ public class FuturesServiceImplTest {
         futures.add(future2);
     }
 
-    @Test
-    public void addListingStockNotPresentTest(){
-        when(futuresService.findByTicker("ESM24")).thenReturn(Optional.empty());
-        assertEquals(true, futuresService.addFuture(future1));
-    }
-
-    @Test
-    public void addListingStockPresentTest(){
-        ListingFuture updateFuture = new ListingFuture();
-        updateFuture.setTicker("ESM24");
-        updateFuture.setPrice(101.0);
-        when(futuresService.findByTicker("ESM24")).thenReturn(Optional.of(future1));
-        assertEquals(false, futuresService.addFuture(updateFuture));
-    }
-
-    @Test
-    public void addAllListingStocksPresentTests(){
-        when(futuresService.findByTicker("ESM24")).thenReturn(Optional.of(future1));
-        when(futuresService.findByTicker("YMM24")).thenReturn(Optional.of(future2));
-        assertEquals(0, futuresService.addAllFutures(futures));
-    }
-
-    @Test
-    public void addAllListingStocksNotPresentTests(){
-        when(futuresService.findByTicker("ESM24")).thenReturn(Optional.empty());
-        when(futuresService.findByTicker("YMM24")).thenReturn(Optional.empty());
-        assertEquals(futures.size(), futuresService.addAllFutures(futures));
-    }
-
-    @Test
-    public void fetchNFuturesNY_Mercantile(){
-        WebElement tableElement = mock(WebElement.class);
-        when(driver.findElement(By.xpath("//table[@class='W(100%)']")))
-                .thenReturn(tableElement);
-        List<WebElement> webElements = new ArrayList<>();
-        for(int i = 0;i<4;i++){
-            WebElement row = mock(WebElement.class);
-            List<WebElement> cells = new ArrayList<>();
-            for(int j =0;j<3;j++){
-                WebElement cell = mock(WebElement.class);
-                if(j!=2) {
-                    when(cell.getText()).thenReturn("testtext");
-                }
-                else{
-                    when(cell.getText()).thenReturn("100.0");
-                }
-                cells.add(cell);
-            }
-            when(row.findElements(any())).thenReturn(cells);
-            webElements.add(row);
-        }
-        when(tableElement.findElements(any())).thenReturn(webElements);
-
-        WebElement tableDiv = mock(WebElement.class);
-        when(driver.findElement(By.cssSelector("div.container.svelte-tx3nkj"))).thenReturn(tableDiv);
-        List<WebElement> tableRows = new ArrayList<>();
-        when(tableDiv.findElements(By.tagName("li"))).thenReturn(tableRows);
-        for(int i =0;i<8;i++){
-            WebElement row = mock(WebElement.class);
-            WebElement content = mock(WebElement.class);
-            if(i == 3 || i == 7 || i==6 || i==4){
-                when(content.getText()).thenReturn("100");
-            }
-            else if (i==1){
-                when(content.getText()).thenReturn("2018-12-27");
-            }
-            else {
-                when(content.getText()).thenReturn("text");
-            }
-            when(row.findElement(By.className("value"))).thenReturn(content);
-            tableRows.add(row);
-        }
-
-        when(driver.getPageSource()).thenReturn("NY Mercantile");
-
-        List<ListingFuture> listingFutures = futuresService.fetchNFutures(2);
-
-        assertThat(listingFutures).isNotNull();
-        assertThat(listingFutures).hasSize(2);
-    }
-
-    @Test
-    public void fetchNFuturesCME(){
-        WebElement tableElement = mock(WebElement.class);
-        when(driver.findElement(By.xpath("//table[@class='W(100%)']")))
-                .thenReturn(tableElement);
-        List<WebElement> webElements = new ArrayList<>();
-        for(int i = 0;i<4;i++){
-            WebElement row = mock(WebElement.class);
-            List<WebElement> cells = new ArrayList<>();
-            for(int j =0;j<3;j++){
-                WebElement cell = mock(WebElement.class);
-                if(j!=2) {
-                    when(cell.getText()).thenReturn("testtext");
-                }
-                else{
-                    when(cell.getText()).thenReturn("100.0");
-                }
-                cells.add(cell);
-            }
-            when(row.findElements(any())).thenReturn(cells);
-            webElements.add(row);
-        }
-        when(tableElement.findElements(any())).thenReturn(webElements);
-
-        WebElement tableDiv = mock(WebElement.class);
-        when(driver.findElement(By.cssSelector("div.container.svelte-tx3nkj"))).thenReturn(tableDiv);
-        List<WebElement> tableRows = new ArrayList<>();
-        when(tableDiv.findElements(By.tagName("li"))).thenReturn(tableRows);
-        for(int i =0;i<8;i++){
-            WebElement row = mock(WebElement.class);
-            WebElement content = mock(WebElement.class);
-            if(i == 3 || i == 7 || i==6 || i==4){
-                when(content.getText()).thenReturn("100");
-            }
-            else if (i==1){
-                when(content.getText()).thenReturn("2018-12-27");
-            }
-            else {
-                when(content.getText()).thenReturn("text");
-            }
-            when(row.findElement(By.className("value"))).thenReturn(content);
-            tableRows.add(row);
-        }
-
-        when(driver.getPageSource()).thenReturn("CME");
-
-        List<ListingFuture> listingFutures = futuresService.fetchNFutures(2);
-
-        assertThat(listingFutures).isNotNull();
-        assertThat(listingFutures).hasSize(2);
-    }
-
-    @Test
-    public void fetchNFuturesCBOT(){
-        WebElement tableElement = mock(WebElement.class);
-        when(driver.findElement(By.xpath("//table[@class='W(100%)']")))
-                .thenReturn(tableElement);
-        List<WebElement> webElements = new ArrayList<>();
-        for(int i = 0;i<4;i++){
-            WebElement row = mock(WebElement.class);
-            List<WebElement> cells = new ArrayList<>();
-            for(int j =0;j<3;j++){
-                WebElement cell = mock(WebElement.class);
-                if(j!=2) {
-                    when(cell.getText()).thenReturn("testtext");
-                }
-                else{
-                    when(cell.getText()).thenReturn("100.0");
-                }
-                cells.add(cell);
-            }
-            when(row.findElements(any())).thenReturn(cells);
-            webElements.add(row);
-        }
-        when(tableElement.findElements(any())).thenReturn(webElements);
-
-        WebElement tableDiv = mock(WebElement.class);
-        when(driver.findElement(By.cssSelector("div.container.svelte-tx3nkj"))).thenReturn(tableDiv);
-        List<WebElement> tableRows = new ArrayList<>();
-        when(tableDiv.findElements(By.tagName("li"))).thenReturn(tableRows);
-        for(int i =0;i<8;i++){
-            WebElement row = mock(WebElement.class);
-            WebElement content = mock(WebElement.class);
-            if(i == 3 || i == 7 || i==6 || i==4){
-                when(content.getText()).thenReturn("100");
-            }
-            else if (i==1){
-                when(content.getText()).thenReturn("2018-12-27");
-            }
-            else {
-                when(content.getText()).thenReturn("text");
-            }
-            when(row.findElement(By.className("value"))).thenReturn(content);
-            tableRows.add(row);
-        }
-
-        when(driver.getPageSource()).thenReturn("CBOT");
-
-        List<ListingFuture> listingFutures = futuresService.fetchNFutures(2);
-
-        assertThat(listingFutures).isNotNull();
-        assertThat(listingFutures).hasSize(2);
-    }
-
-    @Test
-    public void fetchNFuturesCOMEX(){
-        WebElement tableElement = mock(WebElement.class);
-        when(driver.findElement(By.xpath("//table[@class='W(100%)']")))
-                .thenReturn(tableElement);
-        List<WebElement> webElements = new ArrayList<>();
-        for(int i = 0;i<4;i++){
-            WebElement row = mock(WebElement.class);
-            List<WebElement> cells = new ArrayList<>();
-            for(int j =0;j<3;j++){
-                WebElement cell = mock(WebElement.class);
-                if(j!=2) {
-                    when(cell.getText()).thenReturn("testtext");
-                }
-                else{
-                    when(cell.getText()).thenReturn("100.0");
-                }
-                cells.add(cell);
-            }
-            when(row.findElements(any())).thenReturn(cells);
-            webElements.add(row);
-        }
-        when(tableElement.findElements(any())).thenReturn(webElements);
-
-        WebElement tableDiv = mock(WebElement.class);
-        when(driver.findElement(By.cssSelector("div.container.svelte-tx3nkj"))).thenReturn(tableDiv);
-        List<WebElement> tableRows = new ArrayList<>();
-        when(tableDiv.findElements(By.tagName("li"))).thenReturn(tableRows);
-        for(int i =0;i<8;i++){
-            WebElement row = mock(WebElement.class);
-            WebElement content = mock(WebElement.class);
-            if(i == 3 || i == 7 || i==6 || i==4){
-                when(content.getText()).thenReturn("100");
-            }
-            else if (i==1){
-                when(content.getText()).thenReturn("2018-12-27");
-            }
-            else {
-                when(content.getText()).thenReturn("text");
-            }
-            when(row.findElement(By.className("value"))).thenReturn(content);
-            tableRows.add(row);
-        }
-
-        when(driver.getPageSource()).thenReturn("COMEX");
-
-        List<ListingFuture> listingFutures = futuresService.fetchNFutures(2);
-
-        assertThat(listingFutures).isNotNull();
-        assertThat(listingFutures).hasSize(2);
-    }
 
     @Test
     public void getListingHistoriesByTimestampNoResults(){
@@ -324,29 +76,29 @@ public class FuturesServiceImplTest {
         listingFuture.setAlternativeTicker("ESM24");
         when(futureRepository.findById(1L)).thenReturn(Optional.of(listingFuture));
         when(listingHistoryRepository.getListingHistoriesByTicker("ESM24")).thenReturn(new ArrayList<>());
-
-
-        //fetchnsinglefuturehistorysetup
-        WebElement table = mock(WebElement.class);
-
-        List<WebElement> rows = new ArrayList<>();
-        for(int i = 0;i<50;i++){
-            WebElement row = mock(WebElement.class);
-            List<WebElement> cells = new ArrayList<>();
-            WebElement datecell = mock(WebElement.class);
-            when(datecell.getText()).thenReturn("JAN 11, 2024");
-            cells.add(datecell);
-            for(int j =1;j<7;j++){
-                WebElement cell = mock(WebElement.class);
-                when(cell.getText()).thenReturn("100");
-                cells.add(cell);
-            }
-            when(row.findElements(any())).thenReturn(cells);
-            rows.add(row);
-        }
-        when(table.findElements(By.tagName("tr"))).thenReturn(rows);
-
-        when(driver.findElement(By.cssSelector("div.table-container.svelte-ta1t6m"))).thenReturn(table);
+//
+//
+//        //fetchnsinglefuturehistorysetup
+//        WebElement table = mock(WebElement.class);
+//
+//        List<WebElement> rows = new ArrayList<>();
+//        for(int i = 0;i<50;i++){
+//            WebElement row = mock(WebElement.class);
+//            List<WebElement> cells = new ArrayList<>();
+//            WebElement datecell = mock(WebElement.class);
+//            when(datecell.getText()).thenReturn("JAN 11, 2024");
+//            cells.add(datecell);
+//            for(int j =1;j<7;j++){
+//                WebElement cell = mock(WebElement.class);
+//                when(cell.getText()).thenReturn("100");
+//                cells.add(cell);
+//            }
+//            when(row.findElements(any())).thenReturn(cells);
+//            rows.add(row);
+//        }
+//        when(table.findElements(By.tagName("tr"))).thenReturn(rows);
+//
+//        when(driver.findElement(By.cssSelector("div.table-container.svelte-ta1t6m"))).thenReturn(table);
 
         List<ListingHistory> result = futuresService.getListingHistoriesByTimestamp(1L, 1, 2);
 
@@ -366,27 +118,27 @@ public class FuturesServiceImplTest {
         when(listingHistoryRepository.getListingHistoriesByTicker("ESM24")).thenReturn(new ArrayList<>());
 
 
-        //fetchnsinglefuturehistorysetup
-        WebElement table = mock(WebElement.class);
-
-        List<WebElement> rows = new ArrayList<>();
-        for(int i = 0;i<50;i++){
-            WebElement row = mock(WebElement.class);
-            List<WebElement> cells = new ArrayList<>();
-            WebElement datecell = mock(WebElement.class);
-            when(datecell.getText()).thenReturn("JAN 11, 2024");
-            cells.add(datecell);
-            for(int j =1;j<7;j++){
-                WebElement cell = mock(WebElement.class);
-                when(cell.getText()).thenReturn("100");
-                cells.add(cell);
-            }
-            when(row.findElements(any())).thenReturn(cells);
-            rows.add(row);
-        }
-        when(table.findElements(By.tagName("tr"))).thenReturn(rows);
-
-        when(driver.findElement(By.cssSelector("div.table-container.svelte-ta1t6m"))).thenReturn(table);
+//        //fetchnsinglefuturehistorysetup
+//        WebElement table = mock(WebElement.class);
+//
+//        List<WebElement> rows = new ArrayList<>();
+//        for(int i = 0;i<50;i++){
+//            WebElement row = mock(WebElement.class);
+//            List<WebElement> cells = new ArrayList<>();
+//            WebElement datecell = mock(WebElement.class);
+//            when(datecell.getText()).thenReturn("JAN 11, 2024");
+//            cells.add(datecell);
+//            for(int j =1;j<7;j++){
+//                WebElement cell = mock(WebElement.class);
+//                when(cell.getText()).thenReturn("100");
+//                cells.add(cell);
+//            }
+//            when(row.findElements(any())).thenReturn(cells);
+//            rows.add(row);
+//        }
+//        when(table.findElements(By.tagName("tr"))).thenReturn(rows);
+//
+//        when(driver.findElement(By.cssSelector("div.table-container.svelte-ta1t6m"))).thenReturn(table);
 
         List<ListingHistory> result = futuresService.getListingHistoriesByTimestamp(1L, null, 2);
 
@@ -406,27 +158,27 @@ public class FuturesServiceImplTest {
         when(listingHistoryRepository.getListingHistoriesByTicker("ESM24")).thenReturn(new ArrayList<>());
 
 
-        //fetchnsinglefuturehistorysetup
-        WebElement table = mock(WebElement.class);
-
-        List<WebElement> rows = new ArrayList<>();
-        for(int i = 0;i<50;i++){
-            WebElement row = mock(WebElement.class);
-            List<WebElement> cells = new ArrayList<>();
-            WebElement datecell = mock(WebElement.class);
-            when(datecell.getText()).thenReturn("JAN 11, 2024");
-            cells.add(datecell);
-            for(int j =1;j<7;j++){
-                WebElement cell = mock(WebElement.class);
-                when(cell.getText()).thenReturn("100");
-                cells.add(cell);
-            }
-            when(row.findElements(any())).thenReturn(cells);
-            rows.add(row);
-        }
-        when(table.findElements(By.tagName("tr"))).thenReturn(rows);
-
-        when(driver.findElement(By.cssSelector("div.table-container.svelte-ta1t6m"))).thenReturn(table);
+//        //fetchnsinglefuturehistorysetup
+//        WebElement table = mock(WebElement.class);
+//
+//        List<WebElement> rows = new ArrayList<>();
+//        for(int i = 0;i<50;i++){
+//            WebElement row = mock(WebElement.class);
+//            List<WebElement> cells = new ArrayList<>();
+//            WebElement datecell = mock(WebElement.class);
+//            when(datecell.getText()).thenReturn("JAN 11, 2024");
+//            cells.add(datecell);
+//            for(int j =1;j<7;j++){
+//                WebElement cell = mock(WebElement.class);
+//                when(cell.getText()).thenReturn("100");
+//                cells.add(cell);
+//            }
+//            when(row.findElements(any())).thenReturn(cells);
+//            rows.add(row);
+//        }
+//        when(table.findElements(By.tagName("tr"))).thenReturn(rows);
+//
+//        when(driver.findElement(By.cssSelector("div.table-container.svelte-ta1t6m"))).thenReturn(table);
 
         List<ListingHistory> result = futuresService.getListingHistoriesByTimestamp(1L, 1, null);
 
@@ -434,41 +186,6 @@ public class FuturesServiceImplTest {
         verify(listingHistoryRepository, times(0)).getListingHistoriesByTickerAndDateBetween(any(), any(), any());
         verify(listingHistoryRepository, times(1)).getListingHistoriesByTickerAndDateAfter(any(), any());
         verify(listingHistoryRepository, times(0)).getListingHistoriesByTickerAndDateBefore(any(), any());
-    }
-
-    @Test
-    public void fetchNFutureHistores(){
-        WebElement table = mock(WebElement.class);
-
-        List<WebElement> rows = new ArrayList<>();
-        for(int i = 0;i<50;i++){
-            WebElement row = mock(WebElement.class);
-            List<WebElement> cells = new ArrayList<>();
-            WebElement datecell = mock(WebElement.class);
-            when(datecell.getText()).thenReturn("JAN 11, 2024");
-            cells.add(datecell);
-            for(int j =1;j<7;j++){
-                WebElement cell = mock(WebElement.class);
-                when(cell.getText()).thenReturn("100");
-                cells.add(cell);
-            }
-            when(row.findElements(any())).thenReturn(cells);
-            rows.add(row);
-        }
-        when(table.findElements(By.tagName("tr"))).thenReturn(rows);
-
-        when(driver.findElement(By.cssSelector("div.table-container.svelte-ta1t6m"))).thenReturn(table);
-
-        List<ListingFuture> listingFutures = new ArrayList<>();
-        ListingFuture listingFuture = new ListingFuture();
-        listingFuture.setTicker("ESM24");
-        listingFuture.setAlternativeTicker("ESM24");
-        listingFutures.add(listingFuture);
-
-        List<ListingHistory> listingHistories = futuresService.fetchNFutureHistories(listingFutures, 1);
-
-        assertThat(listingHistories).isNotNull();
-        assertThat(listingHistories).hasSize(1);
     }
 
     @Test

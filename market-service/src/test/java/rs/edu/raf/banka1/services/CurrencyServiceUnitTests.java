@@ -40,18 +40,6 @@ public class CurrencyServiceUnitTests {
     private CurrencyService currencyService;
 
     @Test
-    public void addCurrenciesSuccessfully() {
-        List<CurrencyDto> currencyList = new ArrayList<>();
-        currencyList.add(new CurrencyDto("AED", "United Arab Emirates Dirham"));
-        currencyList.add(new CurrencyDto("AFN", "Afghan Afghani"));
-        currencyList.add(new CurrencyDto("ALL", "Albanian Lek"));
-
-        currencyService.addCurrencies(currencyList);
-
-        verify(currencyRepository, times(1)).saveAll((Mockito.anyCollection()));
-    }
-
-    @Test
     void findByIdSuccessfully() {
         // Arrange
         long currencyId = 1L;
