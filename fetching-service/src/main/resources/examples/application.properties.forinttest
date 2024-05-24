@@ -1,0 +1,40 @@
+spring.application.name=fetching_service
+spring.mvc.pathmatch.matching-strategy = ANT_PATH_MATCHER
+
+spring.datasource.url=jdbc:mysql://mysql:3306/bank_marketservice
+# For running in docker use the below url
+#spring.datasource.url=jdbc:mysql://mysql:3306/bank_marketservice
+
+spring.datasource.username=root
+spring.datasource.password=root
+spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
+spring.jpa.generate-ddl=true
+spring.jpa.hibernate.ddl-auto=update
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.show-sql=true
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
+server.port=8082
+server.servlet.context-path=/
+oauth.jwt.secret=secret_key
+
+# API TOKENS:
+# after free trial ends, replace with your own token (won't be necessary if you use the json file)
+listingAPItoken=pk_f87286e075c94cc484405da70691c030
+# professor will provide the token later
+alphaVantageAPIToken=OF6BVKZOCXWHD9NS
+# finnhub.io token
+forexAPItoken=cnr3i41r01qs2jr5d5bgcnr3i41r01qs2jr5d5c0
+
+# API URLs:
+listingNameApiUrl=https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=
+updateListingApiUrl=https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=
+basicStockInfoApiUrl=https://www.alphavantage.co/query?function=OVERVIEW&symbol=
+HistoryListingApiUrl=https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=
+forexExchangePlaceApiUrl=https://finnhub.io/api/v1/forex/exchange?token=
+forexSymbolsApiUrl=https://finnhub.io/api/v1/forex/symbol?exchange=
+forexExchangeRateApiUrl=https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE
+forexDailyApiUrl=https://www.alphavantage.co/query?function=FX_DAILY
+
+# OPTIONS URL:
+optionsUrl=https://query2.finance.yahoo.com/v7/finance/options/

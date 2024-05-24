@@ -1,9 +1,12 @@
 package rs.edu.raf.banka1.bootstrap;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.tinylog.Logger;
 import rs.edu.raf.banka1.model.ListingForex;
@@ -109,13 +112,19 @@ public class BootstrapData implements CommandLineRunner {
         String line = "";
         String csvSplitBy = ",";
 
-        InputStream inputStream = Constants.getInputStreamForResource(currencyFilePath);
+//        try (BufferedReader br = new BufferedReader(new FileReader(Constants.currencyFilePath))) {
+        BufferedReader br = null;
 
-        if(inputStream == null) {
-            return new ArrayList<CurrencyDto>();
-        }
+        try {
+            Resource resource = new ClassPathResource(currencyFilePath, this.getClass().getClassLoader());
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+            InputStream in = resource.getInputStream();
+            InputStreamReader inputStreamReader = new InputStreamReader(in);
+
+            br = new BufferedReader(inputStreamReader);
+
+            System.out.println("OKEJ");
+
             br.readLine();
 
             while ((line = br.readLine()) != null) {
@@ -128,6 +137,15 @@ public class BootstrapData implements CommandLineRunner {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            Logger.error("[BootstrapData] Caught exception " + e.getMessage());
+        } finally {
+            try {
+                if(br != null) {
+                    br.close();
+                }
+            } catch (IOException e) {
+                Logger.error("[-] Error occured when trying to close buffered reader " + e.getMessage());
+            }
         }
 
         return currencyList;

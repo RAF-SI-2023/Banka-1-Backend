@@ -160,11 +160,6 @@ public class ForexServiceImpl implements ForexService {
     }
 
     @Override
-    public List<ListingForex> getAllForexes() {
-        return forexRepository.findAll();
-    }
-
-    @Override
     public List<ListingHistory> getForexHistory(ListingForex listingForex) {
         String response = "";
         try {
@@ -207,48 +202,6 @@ public class ForexServiceImpl implements ForexService {
     @Override
     public List<ListingHistory> getAllForexHistories(List<ListingForex> listingForexList) {
         return listingForexList.stream().map(this::getForexHistory).flatMap(List::stream).toList();
-    }
-
-    @Override
-    public ListingForex getForexByTicker(String ticker) {
-        return forexRepository.findByTicker(ticker).orElse(null);
-    }
-
-    @Override
-    public List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to) {
-        List<ListingHistory> listingHistories = new ArrayList<>();
-//        Find forex in database
-        ListingForex forex = forexRepository.findById(id).orElse(null);
-        if(forex == null){
-            return listingHistories;
-        }
-
-        String ticker = forex.getTicker();
-        listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
-        if(listingHistories.isEmpty()) {
-            listingHistories = getForexHistory(forex);
-            listingStockService.addAllListingsToHistory(listingHistories);
-        }
-
-//        return all timestamps before given timestamp
-        if(from == null && to != null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBefore(ticker, to);
-        }
-//        return all timestamps after given timestamp
-        else if(from != null && to == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateAfter(ticker, from);
-        }
-//        return all timestamps between two timestamps
-        else if(from != null && to != null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to);
-        }
-
-        return listingHistories;
-    }
-
-    @Override
-    public Optional<ListingForex> findById(Long id) {
-        return forexRepository.findById(id);
     }
 
     public ListingHistory parseHistory(String ticker, int date, JsonNode dataNode) {

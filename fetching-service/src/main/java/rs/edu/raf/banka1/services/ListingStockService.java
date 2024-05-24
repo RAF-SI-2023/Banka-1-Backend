@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface ListingStockService {
     void generateJSONSymbols();
     List<ListingStock> fetchNListingStocks(int n);
+    ListingStock createListingStock(String symbol, String companyName, String primaryExchange);
     List<ListingStock> getAllStocks();
 
     List<ListingHistory> fetchNListingsHistory(int n);
@@ -31,9 +32,4 @@ public interface ListingStockService {
     int addAllListingsToHistory(List<ListingHistory> listingHistories);
 
     Optional<ListingStock> findByTicker(String ticker);
-    Optional<ListingStock> findById(Long id);
-
-    List<ListingHistory> getListingHistoriesByTimestamp(String ticker, Integer from, Integer to);
-
-    List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to);
 }
