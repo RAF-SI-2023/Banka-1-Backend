@@ -90,11 +90,11 @@ public class TransactionServiceImpl implements TransactionService {
         for(MarketOrder buyOrder : orders){
             long amount = Math.min(counter, buyOrder.getContractSize() - buyOrder.getCurrentAmount());
             buyOrder.setCurrentAmount(amount - counter);
-            LocalDate dop = Instant.ofEpochSecond(buyOrder.getTimeStamp()).atZone(ZoneId.systemDefault()).toLocalDate();
-            LocalDate now = LocalDate.now();
-            Period period = Period.between(dop, now);
+            long timestampNow = System.currentTimeMillis()/1000;
             //if order is older than 10 years, we don't need to return tax
-            if(period.getYears() <10){
+            long period = timestampNow - buyOrder.getTimestamp();
+            period = period - 10*365*24*60*60;
+            if(period < 0){
                 //we dont return tax if no money was made
                 if(order.getPrice() > buyOrder.getPrice()){
                     returnAmount += amount * (order.getPrice() - buyOrder.getPrice()) * 0.2;

@@ -29,7 +29,7 @@ public class OrderMapper {
         marketOrder.setAllOrNone(request.getAllOrNone());
         marketOrder.setOwner(owner);
         marketOrder.setCurrentAmount(0L);
-        marketOrder.setTimeStamp(System.currentTimeMillis()/1000);
+        marketOrder.setTimestamp(System.currentTimeMillis()/1000);
         return marketOrder;
     }
 

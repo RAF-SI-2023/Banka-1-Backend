@@ -191,7 +191,7 @@ class TransactionServiceImplTest {
             marketOrder1.setCurrentAmount(0L);
             //create datetime object that is 1 year before now
 
-            marketOrder1.setTimeStamp(Instant.now().toEpochMilli()/1000 - 3L);
+            marketOrder1.setTimestamp(Instant.now().toEpochMilli()/1000 - 3L);
             marketOrder1.setPrice(50.0);
 
             when(orderRepository.getAllBuyOrders(eq(listingId), eq(listingType), eq(employee), eq(OrderType.BUY), eq(OrderStatus.DONE))).thenReturn(Optional.of(Arrays.asList(marketOrder1)));
@@ -245,7 +245,7 @@ class TransactionServiceImplTest {
 
             Instant now = Instant.now();
             Instant elevenYearsAgo = now.minusSeconds(11L * 365 * 24 * 60 * 60);
-            marketOrder1.setTimeStamp(elevenYearsAgo.getEpochSecond());
+            marketOrder1.setTimestamp(elevenYearsAgo.getEpochSecond());
             marketOrder1.setPrice(50.0);
 
             when(orderRepository.getAllBuyOrders(eq(listingId), eq(listingType), eq(employee), eq(OrderType.BUY), eq(OrderStatus.DONE))).thenReturn(Optional.of(Arrays.asList(marketOrder1)));
@@ -298,7 +298,7 @@ class TransactionServiceImplTest {
             marketOrder1.setCurrentAmount(0L);
             //create datetime object that is 1 year before now
 
-            marketOrder1.setTimeStamp(Instant.now().toEpochMilli()/1000 - 3L);
+            marketOrder1.setTimestamp(Instant.now().toEpochMilli()/1000 - 3L);
             marketOrder1.setPrice(50.0);
 
             MarketOrder marketOrder2 = new MarketOrder();
@@ -306,7 +306,7 @@ class TransactionServiceImplTest {
             marketOrder2.setCurrentAmount(0L);
             //create datetime object that is 1 year before now
 
-            marketOrder1.setTimeStamp(Instant.now().toEpochMilli()/1000 - 1L);
+            marketOrder1.setTimestamp(Instant.now().toEpochMilli()/1000 - 1L);
             marketOrder1.setPrice(80.0);
 
             when(orderRepository.getAllBuyOrders(eq(listingId), eq(listingType), eq(employee), eq(OrderType.BUY), eq(OrderStatus.DONE))).thenReturn(Optional.of(Arrays.asList(marketOrder1)));
@@ -358,7 +358,7 @@ class TransactionServiceImplTest {
             marketOrder1.setCurrentAmount(0L);
             //create datetime object that is 1 year before now
 
-            marketOrder1.setTimeStamp(Instant.now().toEpochMilli()/1000 - 3L);
+            marketOrder1.setTimestamp(Instant.now().toEpochMilli()/1000 - 3L);
             marketOrder1.setPrice(200.0);
 
             when(orderRepository.getAllBuyOrders(eq(listingId), eq(listingType), eq(employee), eq(OrderType.BUY), eq(OrderStatus.DONE))).thenReturn(Optional.of(Arrays.asList(marketOrder1)));
