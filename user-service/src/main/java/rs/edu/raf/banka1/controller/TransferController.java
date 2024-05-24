@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -94,7 +96,17 @@ public class TransferController {
     }
 
     @GetMapping(value = "/transferReport", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get transfers report", description = "Get transfers report")
+    @Operation(
+            summary = "Get transfers report",
+            description = "Get transfers report",
+            parameters = {
+            @Parameter(
+                    name = "Authorization",
+                    description = "JWT token",
+                    required = true,
+                    in = ParameterIn.HEADER
+            )
+    })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
