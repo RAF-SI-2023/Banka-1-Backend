@@ -49,7 +49,8 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public Company createCompany(CreateCompanyDto createCompanyDto) {
         Company company = companyMapper.createCompany(createCompanyDto);
-        return companyRepository.save(company);
+        companyRepository.save(company);
+        return company;
     }
 
     @Override
