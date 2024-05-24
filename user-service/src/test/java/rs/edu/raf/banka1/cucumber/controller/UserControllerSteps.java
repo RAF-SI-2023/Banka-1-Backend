@@ -17,13 +17,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.cucumber.SpringIntegrationTest;
 //import rs.edu.raf.banka1.mapper.ForeignCurrencyAccountMapper;
 import rs.edu.raf.banka1.dtos.*;
-import rs.edu.raf.banka1.dtos.customer.CustomerDto;
 import rs.edu.raf.banka1.dtos.employee.CreateEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EditEmployeeDto;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
@@ -49,7 +48,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -219,7 +217,7 @@ public class UserControllerSteps {
         List<PublicCapitalDto> listCapitalDtoPublicStocks = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<PublicCapitalDto>>() {});
         assertThat(listCapitalDtoPublicStocks).isNotNull();
         assertThat(listCapitalDtoPublicStocks).isNotEmpty();
-        for (PublicCapitalDto publicCapitalDto : listCapitalDtoPublicStocks) {
+        for (PublicCapitalDto publicCapitalDto : listCapitalDtoPublicStocks
             assertThat(publicCapitalDto.getIsIndividual()).isFalse();
         }
     }
@@ -239,6 +237,9 @@ public class UserControllerSteps {
                 assertThat(cDto.getRealizationDate()).isNotNull();
             }
         }
+    @And("i want to remove him permissions")
+    public void iWantToRemoveHimPermissions() {
+        modifyPermissionsRequest.setAdd(false);
     }
 
     @Data
@@ -296,6 +297,348 @@ public class UserControllerSteps {
         addPublicCapitalDto.setListingId(arg1);
         addPublicCapitalDto.setListingType(ListingType.valueOf(arg2));
     }
+
+
+    @Transactional
+    @When("User calls get on {string}")
+    public void iSendAGETRequestTo(String path) {
+        userResponses.clear();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            if (path.equals("/employee/getAll")) {
+                lastReadAllUsersResponse = objectMapper.readValue(getBody(path), new TypeReference<List<EmployeeDto>>() {
+                });
+                userRepository.findAll().forEach(user -> userResponses.add(userMapper.employeeToEmployeeDto(user)));
+            }
+            else if (path.equals("/customer/getAll")) {
+                lastReadAllCustomersResponse = objectMapper.readValue(getBody(path), new TypeReference<List<CustomerResponse>>() {
+                });
+                customerRepository.findAll().forEach(user -> customerResponses.add(customerMapper.customerToCustomerResponse(user)));
+            }
+            else if (path.equals("/employee/search")) {
+                lastReadAllUsersResponse = objectMapper.readValue(getFiltered(path), new TypeReference<List<EmployeeDto>>() {
+                });
+                userRepository.findAll().forEach(user -> {
+                    if (user.getActive() == null || !user.getActive()) return;
+                    if (searchFilter.getEmail() != null && !user.getEmail().equals(searchFilter.getEmail())) return;
+                    if (searchFilter.getFirstName() != null && !user.getFirstName().equalsIgnoreCase(searchFilter.getFirstName()))
+                        return;
+                    if (searchFilter.getLastName() != null && !user.getLastName().equalsIgnoreCase(searchFilter.getLastName()))
+                        return;
+                    if (searchFilter.getPosition() != null
+//                            &&
+//                            !user.getPosition().equalsIgnoreCase(searchFilter.getPosition())
+                    )
+                        return;
+                    userResponses.add(userMapper.employeeToEmployeeDto(user));
+                });
+            }
+//            else if (path.startsWith("/employee/get/")) {
+//                lastReadUserResponse = objectMapper.readValue(getBody(path), EmployeeDto.class);
+//                String[] split = path.split("/");
+//                email = split[split.length - 1];
+//            }
+//            else if (path.equals("/balance/foreign_currency")) {
+//                lastReadAllForeignCurrencyAccountsResponse = objectMapper.readValue(getBody(path), new TypeReference<List<ForeignCurrencyAccountResponse>>() {
+//                });
+//            }
+//            else if (path.startsWith("/employee/")) {
+//                lastReadUserResponse = objectMapper.readValue(getBody(path), EmployeeDto.class);
+//                String[] split = path.split("/");
+//                lastid = Long.parseLong(split[split.length - 1]);
+//            }
+            else if(path.equals("/payment/get")){
+                getBody(path + "/" + paymentId);
+            }
+            else if(path.equals("/transfer/")){
+                getBody(path + lastid);
+            }
+            else if(path.equals("/employee/permissions/employeeId/id")){
+                path = path.replaceAll("id", String.valueOf(lastid));
+                getBody(path);
+            }
+            else{
+                getBody(path);
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @When("i send DELETE request to {string}")
+    public void iSendDELETERequestTo(String path) {
+        if(path.equals("/employee/remove/id")){
+            path = path.replaceAll("id", String.valueOf(lastid));
+            delete(path);
+        }else if(path.equals("/recipients/remove/")){
+            PaymentRecipient paymentRecipient = paymentRecipientRepository.findAll().stream().filter(
+                recipient -> recipient.getFirstName().equals("mika")
+            ).findFirst().orElse(null);
+
+            if(paymentRecipient == null){
+                fail("Recipient not found");
+            }
+
+            delete(path + paymentRecipient.getId());
+        }else if(path.equals("/employee/remove/")){
+            delete(path + userToRemove);
+        }
+    }
+
+    @When("i send PUT request to {string}")
+    public void whenISendPUTRequestTo(String path) {
+        if(path.equals( "/customer")) {
+            put(path, editCustomerRequest);
+        }
+        else if(path.equals("/recipients/edit")){
+            put(path, paymentRecipientDto);
+        }
+        else if(path.equals("/loan/requests/")){
+            put(path + lastid, statusRequest);
+        }
+        else if(path.equals("/account")){
+            put(path, editBankAccountNameRequest);
+        }
+        else if(path.equals("/employee/")){
+            put(path, editEmployeeDto);
+        }
+        else if(path.equals("/employee/limits/reset/id")){
+            path = path.replaceAll("id", String.valueOf(lastid));
+            putNoBody(path);
+        }
+        else if(path.equals("/employee/limits/newLimit")){
+            newLimitDto.setUserId(lastid);
+            put(path, newLimitDto);
+        }
+    }
+
+    @When("user calls POST on {string}")
+    public void userCallsPostOn(String path) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            if (path.equals("/employee/createUser")) {
+                String tmp = post(path, createUserRequest);
+                lastCreateUserResponse = objectMapper.readValue(tmp, CreateUserResponse.class);
+            }
+            else if(path.equals("/customer/createNewCustomer")){
+                CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest();
+                createCustomerRequest.setCustomer(customerData);
+                createCustomerRequest.setAccount(accountData);
+                post(path, createCustomerRequest);
+            }
+            else if(path.equals("/customer/initialActivation")){
+                InitialActivationRequest initialActivationRequest = new InitialActivationRequest();
+                initialActivationRequest.setEmail(customerData.getEmail());
+                initialActivationRequest.setPhoneNumber(customerData.getPhoneNumber());
+                initialActivationRequest.setAccountNumber(bankAccountNumber);
+                post(path, initialActivationRequest);
+            }
+            else if(path.equals("/customer/activate/{token}")){
+                path = path.replace("{token}", token);
+                ActivateAccountRequest activateAccountRequest = new ActivateAccountRequest();
+                activateAccountRequest.setPassword(password);
+                post(path, activateAccountRequest);
+            }
+            else if(path.equals("/payment/sendCode")){
+                postNoBody(path);
+            }
+            else if(path.equals("/payment")){
+                post(path, createPaymentRequest);
+            }
+            else if(path.equals("/recipients/add")){
+                post(path, createPaymentRecipientRequest);
+            }
+            else if(path.equals("/transfer")){
+                post(path, createTransferRequest);
+            }
+            else if(path.equals("/loan/requests")){
+                post(path, createLoanRequest);
+            }
+            else if(path.equals("/orders")){
+                post(path, createOrderRequest);
+            }
+            else if(path.equals("/account/create")){
+                createBankAccountRequest.setAccount(bankAccountRequest);
+                post(path, createBankAccountRequest);
+            }
+            else if(path.equals("/employee/activate/token")){
+                path = path.replaceAll("token", token);
+                post(path, activateAccountRequest);
+            }
+            else if(path.equals("/employee/resetPassword")){
+                postNoBody(path);
+            }
+            else if(path.equals("/employee/newpassword/token")){
+                path = path.replaceAll("token", token);
+                post(path, newPasswordRequest);
+            }
+            else if(path.equals("/employee/createEmployee")){
+                post(path, createEmployeeDto);
+            }
+            else if(path.equals("/employee/reset/drugizaposleni@gmail.rs")){
+                postNoBody(path);
+            }
+            else if(path.equals("/employee/permission/employeeId")){
+                path = path.replaceAll("employeeId", String.valueOf(lastid));
+                post(path, modifyPermissionsRequest);
+            }
+
+
+//            else if (path.equals("/balance/foreign_currency/create")) {
+//                lastCreateForeignCurrencyAccountResponse = objectMapper.readValue(post(path, foreignCurrencyAccountRequest), CreateForeignCurrencyAccountResponse.class);
+//            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            fail("Failed to parse response body");
+        }
+    }
+
+    private HttpEntity<Object> makeRequest(Object objectToPost){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
+        if(objectToPost == null)
+            return new HttpEntity<>(headers);
+        return new HttpEntity<>(objectToPost, headers);
+    }
+
+    private String makeUrl(String path){
+        return url.concat(port).concat(path);
+    }
+
+    private String getBody(String path){
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.GET, makeRequest(null), String.class);
+        }catch (HttpClientErrorException e){
+            response = new ResponseEntity<>(e.getStatusCode());
+        }
+        lastResponse = response;
+        return response.getBody();
+    }
+
+    private String postNoBody(String path){
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.POST, makeRequest(null), String.class);
+        }catch (HttpClientErrorException e){
+            response = new ResponseEntity<>(e.getStatusCode());
+        }
+        lastResponse = response;
+        return response.getBody();
+    }
+
+    private String post(String path, Object objectToPost){
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.POST, makeRequest(objectToPost), String.class);
+        }catch (HttpClientErrorException e){
+            response = new ResponseEntity<>(e.getStatusCode());
+        }
+        lastResponse = response;
+        return response.getBody();
+
+    }
+
+    private String getFiltered(String path){
+        char combiner = '?';
+        if(searchFilter.getEmail() != null) {
+            path = path.concat(combiner + "email=" + searchFilter.getEmail());
+            combiner = '&';
+        }
+        if(searchFilter.getFirstName() != null) {
+            path = path.concat(combiner + "firstName=" + searchFilter.getFirstName());
+            combiner = '&';
+        }
+        if(searchFilter.getLastName() != null) {
+            path = path.concat(combiner + "lastName=" + searchFilter.getLastName());
+            combiner = '&';
+        }
+        if(searchFilter.getPosition() != null) {
+            path = path.concat(combiner + "position=" + searchFilter.getPosition());
+        }
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.GET, makeRequest(null), String.class);
+        }catch (HttpClientErrorException e){
+            response = new ResponseEntity<>(e.getStatusCode());
+        }
+        lastResponse = response;
+        return response.getBody();
+    }
+
+
+    private void put(String path, Object objectToPut){
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.PUT, makeRequest(objectToPut), String.class);
+        }catch (HttpClientErrorException e){
+            response = new ResponseEntity<>(e.getStatusCode());
+        }
+        lastResponse = response;
+    }
+
+    private void putNoBody(String path){
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.PUT, makeRequest(null), String.class);
+        }catch (HttpClientErrorException e){
+            response = new ResponseEntity<>(e.getStatusCode());
+        }
+        lastResponse = response;
+    }
+
+    private void delete(String path) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<Boolean> response;
+        try {
+            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.DELETE, makeRequest(null), Boolean.class);
+        }catch (HttpClientErrorException e){
+            response = new ResponseEntity<>(e.getStatusCode());
+        }
+        lastResponse = response;
+    }
+
+    @Given("i am logged in with email {string} and password {string}")
+    public void iAmLoggedIn(String email, String password) {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail(email);
+        loginRequest.setPassword(password);
+
+        HttpEntity<LoginRequest> entity = new HttpEntity<>(loginRequest);
+        ResponseEntity<LoginResponse> responseEntity = new RestTemplate().postForEntity(url + port + "/auth/login/employee", entity, LoginResponse.class);
+        jwt = responseEntity.getBody().getJwt();
+    }
+
+    @Given("customer is logged in with email {string} and password {string}")
+    public void customerIsLoggedInWithEmailAndPassword(String email, String password) {
+        this.email = email;
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail(email);
+        loginRequest.setPassword(password);
+
+        HttpEntity<LoginRequest> entity = new HttpEntity<>(loginRequest);
+        ResponseEntity<LoginResponse> responseEntity = new RestTemplate().postForEntity(url + port + "/auth/login/customer", entity, LoginResponse.class);
+        jwt = responseEntity.getBody().getJwt();
+    }
+
 
     @Then("response should contain transfer i made")
     public void responseShouldContainTransferIMade() {
@@ -858,29 +1201,10 @@ public class UserControllerSteps {
         }
     }
 
-    @When("i send DELETE request to {string}")
-    public void iSendDELETERequestTo(String path) {
-        if(path.equalsIgnoreCase("/employee/remove/id")){
-            path = path.replaceAll("id", String.valueOf(lastid));
-            delete(url + port + path);
-        }
-    }
-
     @And("user with email {string} should not exist anymore")
     public void userWithEmailShouldNotExistAnymore(String arg0) {
         Employee employee = employeeRepository.findByEmail(arg0).orElse(null);
         assertThat(employee.getActive()).isFalse();
-    }
-
-    @Given("i am logged in with email {string} and password {string}")
-    public void iAmLoggedIn(String email, String password) {
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setEmail(email);
-        loginRequest.setPassword(password);
-
-        HttpEntity<LoginRequest> entity = new HttpEntity<>(loginRequest);
-        ResponseEntity<LoginResponse> responseEntity = new RestTemplate().postForEntity(url + port + "/auth/login/employee", entity, LoginResponse.class);
-        jwt = responseEntity.getBody().getJwt();
     }
 
     @Given("i am logged in as customer with email {string} and password {string}")
@@ -1007,18 +1331,6 @@ public class UserControllerSteps {
         customerRepository.save(user);
     }
 
-    @Given("customer is logged in with email {string} and password {string}")
-    public void customerIsLoggedInWithEmailAndPassword(String email, String password) {
-        this.email = email;
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setEmail(email);
-        loginRequest.setPassword(password);
-
-        HttpEntity<LoginRequest> entity = new HttpEntity<>(loginRequest);
-        ResponseEntity<LoginResponse> responseEntity = new RestTemplate().postForEntity(url + port + "/auth/login/customer", entity, LoginResponse.class);
-        jwt = responseEntity.getBody().getJwt();
-    }
-
     @Given("customer got his OTP code")
     public void customerGotHisOTPCode() {
         Customer customer = customerRepository.findCustomerByEmail("user@test.com").orElse(null);
@@ -1088,7 +1400,7 @@ public class UserControllerSteps {
 
     @Given("customer wants to change recipient first name to {string}")
     public void customerWantsToChangeRecipientFirstNameTo(String arg0) {
-        post(url + port + "/recipients/add", createPaymentRecipientRequest);
+        post("/recipients/add", createPaymentRecipientRequest);
 
         paymentRecipientDto.setFirstName(arg0);
         paymentRecipientDto.setLastName(createPaymentRecipientRequest.getLastName());
@@ -1405,7 +1717,7 @@ public class UserControllerSteps {
        activateAccountRequest.setPassword(password);
        ObjectMapper objectMapper = new ObjectMapper();
        try {
-           lastActivateAccountResponse = objectMapper.readValue(post(url + port + path, activateAccountRequest), ActivateAccountResponse.class);
+           lastActivateAccountResponse = objectMapper.readValue(post(path, activateAccountRequest), ActivateAccountResponse.class);
        } catch (Exception e) {
            e.printStackTrace();
            fail("Failed to parse response body");

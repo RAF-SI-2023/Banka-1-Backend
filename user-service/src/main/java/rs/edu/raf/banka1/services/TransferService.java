@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.services;
 
 import rs.edu.raf.banka1.dtos.ExchangeRateDto;
 import rs.edu.raf.banka1.dtos.TransferDto;
+import rs.edu.raf.banka1.dtos.TransfersReportDto;
 import rs.edu.raf.banka1.model.Transfer;
 import rs.edu.raf.banka1.requests.CreateTransferRequest;
 
@@ -22,4 +23,6 @@ public interface TransferService {
     List<TransferDto> getAllTransfersForAccountNumber(String accountNumber);
 
     List<ExchangeRateDto> getExchangeRates();
+
+    TransfersReportDto getTransfersReport();
 }
