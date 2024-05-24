@@ -48,7 +48,7 @@ public interface OrderRepository extends JpaRepository<MarketOrder, Long> {
 
     List<MarketOrder> getAllByOwner(User owner);
 
-    @Query("SELECT mo FROM MarketOrder mo WHERE mo.listingId = :listingId AND mo.listingType = :listingType AND mo.owner = :owner AND mo.orderType = :orderType AND mo.status = :status AND mo.currentAmount < mo.contractSize ORDER BY mo.timeStamp")
+    @Query("SELECT mo FROM MarketOrder mo WHERE mo.listingId = :listingId AND mo.listingType = :listingType AND mo.owner = :owner AND mo.orderType = :orderType AND mo.status = :status AND mo.currentAmount < mo.contractSize ORDER BY mo.timestamp")
     Optional<List<MarketOrder>> getAllBuyOrders(
             Long listingId,
             ListingType listingType,
