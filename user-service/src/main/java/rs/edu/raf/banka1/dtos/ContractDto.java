@@ -1,10 +1,14 @@
 package rs.edu.raf.banka1.dtos;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@EqualsAndHashCode
+@ToString
 public class ContractDto {
     private Long contractId;
     private String buyerAccountNumber;
@@ -12,7 +16,9 @@ public class ContractDto {
     private Boolean bankApproval;
     private Boolean sellerApproval;
     private String comment;
+    @EqualsAndHashCode.Exclude
     private Long creationDate;
+    @EqualsAndHashCode.Exclude
     private Long realizationDate;
     private String referenceNumber;
     private String ticker;

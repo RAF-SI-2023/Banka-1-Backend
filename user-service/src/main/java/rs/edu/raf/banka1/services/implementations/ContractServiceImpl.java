@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.ContractCreateDto;
 import rs.edu.raf.banka1.dtos.ContractDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
+import rs.edu.raf.banka1.exceptions.ContractNotFoundByIdException;
 import rs.edu.raf.banka1.exceptions.InvalidCapitalAmountException;
 import rs.edu.raf.banka1.mapper.ContractMapper;
 import rs.edu.raf.banka1.model.*;
@@ -111,7 +112,7 @@ public class ContractServiceImpl implements ContractService {
     public List<ContractDto> getAllContractsCustomer(Customer currentAuth) {
         BankAccount bankAccount = null;
         if(currentAuth.getCompany() == null) {
-            bankAccount = bankAccountService.getBankAccountByCompanyAndCurrencyCode(currentAuth.getUserId(), Constants.DEFAULT_CURRENCY);
+            bankAccount = bankAccountService.getBankAccountByCustomerAndCurrencyCode(currentAuth.getUserId(), Constants.DEFAULT_CURRENCY);
         } else {
             bankAccount = bankAccountService.getBankAccountByCompanyAndCurrencyCode(currentAuth.getCompany().getId(), Constants.DEFAULT_CURRENCY);
         }
@@ -129,7 +130,7 @@ public class ContractServiceImpl implements ContractService {
 
 
     private void finalizeContract(Long contractId) {
-        Contract contract = contractRepository.findById(contractId).orElseThrow();
+        Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new ContractNotFoundByIdException(contractId));
         if(!contract.getBankApproval() || !contract.getSellerApproval()) return;
 
         //Transfer capital

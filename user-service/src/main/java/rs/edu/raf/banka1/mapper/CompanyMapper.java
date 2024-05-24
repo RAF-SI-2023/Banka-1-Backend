@@ -16,7 +16,7 @@ public class CompanyMapper {
         companyDto.setIdNumber(company.getIdNumber());
         companyDto.setJobId(company.getJobId());
         companyDto.setRegistrationNumber(company.getRegistrationNumber());
-
+        companyDto.setAddress(company.getAdress());
         return companyDto;
     }
 }

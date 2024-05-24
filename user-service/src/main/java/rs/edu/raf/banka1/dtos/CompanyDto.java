@@ -18,4 +18,5 @@ public class CompanyDto {
     private String jobId;
     //  Registarski broj
     private String registrationNumber;
+    private String address;
 }
