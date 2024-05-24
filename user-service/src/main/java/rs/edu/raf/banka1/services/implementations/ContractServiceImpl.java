@@ -32,7 +32,6 @@ public class ContractServiceImpl implements ContractService {
     private final BankAccountService bankAccountService;
     private final ContractRepository contractRepository;
     private final CapitalService capitalService;
-    private final MarketService marketService;
 
     @Override
     public ContractDto createContract(ContractCreateDto contractCreateDto, User buyer) {
@@ -69,7 +68,7 @@ public class ContractServiceImpl implements ContractService {
 
         contractRepository.save(contract);
 
-        return contractMapper.contractToContractDto(contract, getListingInfo(contract));
+        return contractMapper.contractToContractDto(contract);
     }
 
     @Override
@@ -101,7 +100,7 @@ public class ContractServiceImpl implements ContractService {
         List<ContractDto> contractDtos = new ArrayList<>();
 
         contracts.forEach((Contract contract) -> {
-            ContractDto contractDto = contractMapper.contractToContractDto(contract, getListingInfo(contract));
+            ContractDto contractDto = contractMapper.contractToContractDto(contract);
             contractDtos.add(contractDto);
         });
 
@@ -121,7 +120,7 @@ public class ContractServiceImpl implements ContractService {
         List<ContractDto> contractDtos = new ArrayList<>();
 
         contracts.forEach((Contract contract) -> {
-            ContractDto contractDto = contractMapper.contractToContractDto(contract, getListingInfo(contract));
+            ContractDto contractDto = contractMapper.contractToContractDto(contract);
             contractDtos.add(contractDto);
         });
 
@@ -141,19 +140,6 @@ public class ContractServiceImpl implements ContractService {
         //Transfer funds
         bankAccountService.removeBalance(contract.getBuyer(), contract.getPrice());
         bankAccountService.addBalance(contract.getSeller(), contract.getPrice());
-    }
-
-    private ListingBaseDto getListingInfo(Contract contract) {
-        if(contract.getListingType().equals(ListingType.STOCK)) {
-            return marketService.getStockById(contract.getListingId());
-        }
-        if(contract.getListingType().equals(ListingType.FOREX)) {
-            return marketService.getForexById(contract.getListingId());
-        }
-        if(contract.getListingType().equals(ListingType.FUTURE)) {
-            return marketService.getFutureById(contract.getListingId());
-        }
-        return null;
     }
 
 }

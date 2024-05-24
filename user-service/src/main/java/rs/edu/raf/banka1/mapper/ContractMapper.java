@@ -19,7 +19,7 @@ public class ContractMapper {
         return contract;
     }
 
-    public ContractDto contractToContractDto(Contract contract, ListingBaseDto listingBaseDto) {
+    public ContractDto contractToContractDto(Contract contract) {
         ContractDto contractDto = new ContractDto();
 
         contractDto.setContractId(contract.getId());
@@ -35,13 +35,6 @@ public class ContractMapper {
         contractDto.setListingId(contract.getListingId());
         contractDto.setAmount(contract.getAmount());
         contractDto.setPrice(contract.getPrice());
-        if(contract.getListingType().equals(ListingType.STOCK)) {
-            contractDto.setListingStockDto((ListingStockDto) listingBaseDto);
-        } else if(contract.getListingType().equals(ListingType.FOREX)) {
-            contractDto.setListingForexDto((ListingForexDto) listingBaseDto);
-        } else if(contract.getListingType().equals(ListingType.FUTURE)) {
-            contractDto.setListingFutureDto((ListingFutureDto) listingBaseDto);
-        }
 
         return contractDto;
     }
