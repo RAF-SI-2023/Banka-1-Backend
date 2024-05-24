@@ -37,6 +37,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<String> handleCustomerNotFoundException(CustomerNotFoundException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(BankAccountNotFoundException.class)
     public ResponseEntity<String> handleBankAccountNotFoundException(BankAccountNotFoundException e) {
         Logger.info("Error: " + e.getMessage());
@@ -111,6 +117,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ContractNotFoundByIdException.class)
     public ResponseEntity<String> handleContractNotFoundByIdException(ContractNotFoundByIdException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(CompanyNotFoundException.class)
+    public ResponseEntity<String> handleCompanyNotFoundException(CompanyNotFoundException e) {
         Logger.info("Error: " + e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }

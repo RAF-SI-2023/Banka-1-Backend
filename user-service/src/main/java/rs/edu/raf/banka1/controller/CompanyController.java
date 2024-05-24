@@ -10,12 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import rs.edu.raf.banka1.dtos.CapitalDto;
-import rs.edu.raf.banka1.dtos.CompanyDto;
+import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.dtos.CreateCompanyDto;
+import rs.edu.raf.banka1.dtos.JoinCompanyDto;
 import rs.edu.raf.banka1.model.Company;
 import rs.edu.raf.banka1.services.CompanyService;
 
@@ -45,5 +42,36 @@ public class CompanyController {
     public ResponseEntity<List<Company>> getPublicStockCapitals() {
         // vraca za SVE companies
         return new ResponseEntity<>(companyService.getCompanies(null, null, null), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Create company", description = "Create company")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Boolean.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+            @ApiResponse(responseCode = "400", description = "Bad request")
+    })
+    public ResponseEntity<Boolean> createCompany(
+            @RequestBody CreateCompanyDto createCompanyDto) {
+        Company company = companyService.createCompany(createCompanyDto);
+        if(company != null)
+            return ResponseEntity.ok(true);
+        return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping(value = "/join", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Add company for customer.", description = "Add company for customer.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Boolean.class))}),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+            @ApiResponse(responseCode = "400", description = "Bad request")
+    })
+    public ResponseEntity<Boolean> joinCompany(
+            @RequestBody JoinCompanyDto joinCompanyDto) {
+        if(companyService.joinCompany(joinCompanyDto))
+            return ResponseEntity.ok(true);
+        return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
     }
 }
