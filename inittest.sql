@@ -449,21 +449,16 @@ CREATE TABLE `market_order` (
                                 `price` double DEFAULT NULL,
                                 `status` tinyint DEFAULT NULL,
                                 `stop_value` double DEFAULT NULL,
-                                `version` int DEFAULT NULL,
-                                `approved_by_user_id` bigint DEFAULT NULL,
-                                `contract_size` bigint DEFAULT NULL,
-                                `id` bigint NOT NULL AUTO_INCREMENT,
-                                `listing_id` bigint DEFAULT NULL,
-                                `owner_user_id` bigint DEFAULT NULL,
-                                `processed_number` bigint DEFAULT NULL,
-                                `updated_at` datetime(6) DEFAULT NULL,
-                                PRIMARY KEY (`id`),
-                                KEY `FKsdr43k6rsa6xpwvqx08qnv4d6` (`approved_by_user_id`),
-                                KEY `FKiov4aqi2dlbwuy2abajdyhng` (`owner_user_id`),
-                                CONSTRAINT `FKiov4aqi2dlbwuy2abajdyhng` FOREIGN KEY (`owner_user_id`) REFERENCES `employee` (`user_id`),
-                                CONSTRAINT `FKsdr43k6rsa6xpwvqx08qnv4d6` FOREIGN KEY (`approved_by_user_id`) REFERENCES `employee` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+                                `approved_by_user_id` bigint(20) DEFAULT NULL,
+                                `contract_size` bigint(20) DEFAULT NULL,
+                                `id` bigint(20) NOT NULL,
+                                `last_modified_date` bigint(20) DEFAULT NULL,
+                                `owner_user_id` bigint(20) DEFAULT NULL,
+                                `processed_number` bigint(20) DEFAULT NULL,
+                                `stock_id` bigint(20) DEFAULT NULL,
+                                `timestamp` bigint(20) DEFAULT NULL,
+                                `currentAmount` bigint(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `market_order`

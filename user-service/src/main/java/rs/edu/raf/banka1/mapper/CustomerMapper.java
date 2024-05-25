@@ -21,9 +21,11 @@ public class CustomerMapper {
 
     private PermissionRepository permissionRepository;
     private BankAccountMapper bankAccountMapper;
+
+    @Autowired
     private CompanyService companyService;
 
-    public CustomerMapper(PermissionMapper permissionMapper, BankAccountMapper bankAccountMapper, CompanyService companyService) {
+    public CustomerMapper(PermissionMapper permissionMapper, BankAccountMapper bankAccountMapper) {
         this.permissionMapper = permissionMapper;
         this.bankAccountMapper = bankAccountMapper;
     }

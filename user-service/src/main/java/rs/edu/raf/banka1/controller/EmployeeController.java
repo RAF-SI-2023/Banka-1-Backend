@@ -34,6 +34,7 @@ import java.util.List;
 @Tag(name = "Employee", description = "Employee Controller")
 @SecurityRequirement(name = "basicScheme")
 @CrossOrigin
+@SecurityRequirement(name = "Authorization")
 public class EmployeeController {
 
     private final EmployeeService employeeService;

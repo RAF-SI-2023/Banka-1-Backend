@@ -29,7 +29,7 @@ class CustomerMapperTest {
     private CompanyService companyService;
 
     @InjectMocks
-    private CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper(), companyService);
+    private CustomerMapper customerMapper = new CustomerMapper(new PermissionMapper(), new BankAccountMapper());
 
     @BeforeEach
     void setUp() {
