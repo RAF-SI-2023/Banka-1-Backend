@@ -25,6 +25,7 @@ import java.util.List;
 //@SecurityRequirement() TODO
 @CrossOrigin
 @SecurityRequirement(name = "basicScheme")
+@SecurityRequirement(name = "Authorization")
 public class OptionsController {
     private final OptionsService optionsService;
 

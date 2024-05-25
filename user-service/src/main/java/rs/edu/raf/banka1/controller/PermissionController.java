@@ -27,6 +27,7 @@ import java.util.List;
 //@SecurityRequirement() TODO
 @SecurityRequirement(name = "basicScheme")
 @CrossOrigin
+@SecurityRequirement(name = "Authorization")
 public class PermissionController {
     private PermissionService permissionService;
 

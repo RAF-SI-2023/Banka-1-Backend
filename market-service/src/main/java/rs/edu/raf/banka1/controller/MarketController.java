@@ -46,6 +46,7 @@ import java.util.List;
 //@SecurityRequirement() TODO
 @CrossOrigin
 @SecurityRequirement(name = "basicScheme")
+@SecurityRequirement(name = "Authorization")
 public class MarketController {
 
     private final ExchangeService exchangeService;
