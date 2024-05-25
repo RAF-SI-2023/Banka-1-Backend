@@ -16,6 +16,7 @@ import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.TransactionService;
 import rs.edu.raf.banka1.utils.Constants;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -93,6 +94,16 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.getTransactionsByEmployee_UserId(userId)
             .stream()
             .map(transactionMapper::transactionToTransactionDto).toList();
+    }
+
+    public List<TransactionDto> getAllTransactionsForCompanyBankAccounts(Long companyId) {
+        List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCompany(companyId);
+        List<String> bankAccountNums = bankAccounts.stream().map(BankAccount::getAccountNumber).collect(Collectors.toList());
+        List<Transaction> results = new ArrayList<>();
+        for(String bankAcc:bankAccountNums) {
+            results.addAll(transactionRepository.getTransactionsByBankAccount_AccountNumber(bankAcc));
+        }
+        return results.stream().map(transactionMapper::transactionToTransactionDto).collect(Collectors.toList());
     }
 
     @Override

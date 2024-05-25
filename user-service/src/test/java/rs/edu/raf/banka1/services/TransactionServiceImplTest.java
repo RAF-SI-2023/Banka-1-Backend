@@ -1,4 +1,5 @@
 package rs.edu.raf.banka1.services;
+import org.junit.Assert;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,9 +15,12 @@ import rs.edu.raf.banka1.services.implementations.TransactionServiceImpl;
 
 import java.util.Arrays;
 import rs.edu.raf.banka1.model.Currency;
+
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -104,6 +108,49 @@ class TransactionServiceImplTest {
 
         // Assert
         assertEquals(transactions.size(), result.size());
+    }
+
+    @Test
+    void testGetAllTransactionsForCompanyBankAccounts(){
+        // Mock data
+        Company company = new Company();
+        Long companyId = 1L;
+        company.setId(companyId);
+        BankAccount bankAccount1 = new BankAccount();
+        bankAccount1.setAccountNumber("123");
+        //bankAccount1.setCompany(company);
+
+        BankAccount bankAccount2 = new BankAccount();
+        bankAccount2.setAccountNumber("456");
+        //bankAccount2.setCompany(company);
+
+        List<BankAccount> bankAccounts = Arrays.asList(bankAccount1, bankAccount2);
+        when(bankAccountService.getBankAccountsByCompany(companyId)).thenReturn(bankAccounts);
+
+        List<Transaction> transactions = Arrays.asList(new Transaction(), new Transaction());
+
+        when(transactionRepository.getTransactionsByBankAccount_AccountNumber("123")).thenReturn(transactions);
+        when(transactionRepository.getTransactionsByBankAccount_AccountNumber("456")).thenReturn(transactions);
+
+        List<TransactionDto> result = transactionService.getAllTransactionsForCompanyBankAccounts(companyId);
+
+        assertEquals(4, result.size());
+    }
+
+    @Test
+    void testGetAllTransactionsForCompanyBankAccounts_emptyTransactions(){
+        Long companyId = 1L;
+        BankAccount bankAccount1 = new BankAccount();
+        bankAccount1.setAccountNumber("123");
+
+        List<BankAccount> bankAccounts = Collections.singletonList(bankAccount1);
+
+        when(bankAccountService.getBankAccountsByCompany(companyId)).thenReturn(bankAccounts);
+        when(transactionRepository.getTransactionsByBankAccount_AccountNumber("123")).thenReturn(List.of());
+
+        List<TransactionDto> result = transactionService.getAllTransactionsForCompanyBankAccounts(companyId);
+
+        assertTrue(result.isEmpty());
     }
     
     @Nested
