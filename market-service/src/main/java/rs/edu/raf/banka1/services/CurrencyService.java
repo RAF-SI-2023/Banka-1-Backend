@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.CurrencyMapper;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
@@ -24,6 +25,7 @@ public class CurrencyService {
     }
 
 
+    @Cacheable(value = "currencyServiceFindAll")
     public List<CurrencyDto> findAll() {
         return this.currencyRepository.findAll().stream().map(currencyMapper::currencyToCurrencyDto).toList();
     }

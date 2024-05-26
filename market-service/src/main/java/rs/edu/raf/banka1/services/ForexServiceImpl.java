@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.services;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingHistory;
@@ -23,16 +24,19 @@ public class ForexServiceImpl implements ForexService {
     private ForexRepository forexRepository;
 
     @Override
+    @Cacheable(value = "getAllForexes")
     public List<ListingForex> getAllForexes() {
         return forexRepository.findAll();
     }
 
     @Override
+    @Cacheable(value = "getForexByTicker", key = "#ticker")
     public ListingForex getForexByTicker(String ticker) {
         return forexRepository.findByTicker(ticker).orElse(null);
     }
 
     @Override
+    @Cacheable(value = "getListingHistoriesByTimestamp", key = "#id + '_' + #from + '_' + #to")
     public List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to) {
         List<ListingHistory> listingHistories = new ArrayList<>();
         ListingForex forex = forexRepository.findById(id).orElse(null);
@@ -63,6 +67,7 @@ public class ForexServiceImpl implements ForexService {
     }
 
     @Override
+    @Cacheable(value = "forexServiceFindById", key = "#id")
     public Optional<ListingForex> findById(Long id) {
         return forexRepository.findById(id);
     }
