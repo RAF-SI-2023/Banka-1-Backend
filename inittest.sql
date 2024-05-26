@@ -306,7 +306,9 @@ CREATE TABLE `market_order` (
                                 `last_modified_date` bigint(20) DEFAULT NULL,
                                 `owner_user_id` bigint(20) DEFAULT NULL,
                                 `processed_number` bigint(20) DEFAULT NULL,
-                                `stock_id` bigint(20) DEFAULT NULL
+                                `stock_id` bigint(20) DEFAULT NULL,
+                                `timestamp` bigint(20) DEFAULT NULL,
+                                `currentAmount` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

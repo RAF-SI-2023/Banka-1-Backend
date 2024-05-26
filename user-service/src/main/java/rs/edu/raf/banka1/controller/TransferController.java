@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.dtos.ExchangeRateDto;
 import rs.edu.raf.banka1.dtos.PaymentDto;
 import rs.edu.raf.banka1.dtos.TransferDto;
+import rs.edu.raf.banka1.dtos.TransfersReportDto;
 import rs.edu.raf.banka1.model.Transfer;
 import rs.edu.raf.banka1.requests.CreateTransferRequest;
 import rs.edu.raf.banka1.services.TransferService;
@@ -23,6 +25,7 @@ import java.util.List;
 @RestController
 @CrossOrigin
 @RequestMapping("/transfer")
+@SecurityRequirement(name = "Authorization")
 public class TransferController {
 
     private final TransferService transferService;
@@ -103,6 +106,31 @@ public class TransferController {
     })
     public ResponseEntity<TransferDto> getById(@PathVariable(name = "id") Long id) {
         TransferDto resp = transferService.getTransferById(id);
+        return new ResponseEntity<>(resp, resp != null ? HttpStatus.OK : HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping(value = "/transferReport", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Get transfers report",
+            description = "Get transfers report",
+            parameters = {
+            @Parameter(
+                    name = "Authorization",
+                    description = "JWT token",
+                    required = true,
+                    in = ParameterIn.HEADER
+            )
+    })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TransfersReportDto.class))}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<TransfersReportDto> getTransferReport() {
+        TransfersReportDto resp = transferService.getTransfersReport();
         return new ResponseEntity<>(resp, resp != null ? HttpStatus.OK : HttpStatus.NOT_FOUND);
     }
 
