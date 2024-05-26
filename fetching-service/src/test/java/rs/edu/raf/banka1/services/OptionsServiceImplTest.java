@@ -1,25 +1,25 @@
 package rs.edu.raf.banka1.services;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import rs.edu.raf.banka1.mapper.OptionsMapper;
+import rs.edu.raf.banka1.model.OptionsModel;
 import rs.edu.raf.banka1.model.dtos.OptionsDto;
 import rs.edu.raf.banka1.repositories.OptionsRepository;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -176,4 +176,89 @@ class OptionsServiceImplTest {
         // Verify that the methods were called once
         verify(optionsRepository, times(1)).truncateTable();
     }
+
+    @Test
+    public void fetchTickersTest_Success(){
+        JsonNode rootNode = mock(JsonNode.class);
+        JsonNode node1 = mock(JsonNode.class);
+        JsonNode node2 = mock(JsonNode.class);
+        JsonNode node3 = mock(JsonNode.class);
+        Iterator<JsonNode> iterator = mock(Iterator.class);
+        when(rootNode.iterator()).thenReturn(iterator);
+        // Mock the behavior of the iterator to return JSON nodes when "next" is called
+        when(iterator.hasNext()).thenReturn(true, true, true, false);
+        when(iterator.next()).thenReturn(node1, node2, node3);
+
+        // Mock the behavior of the "path" method to return ticker symbols
+        when(node1.path("symbol")).thenReturn(node1);
+        when(node1.path("symbol").asText()).thenReturn("AAPL");
+
+        when(node2.path("symbol")).thenReturn(node2);
+        when(node2.path("symbol").asText()).thenReturn("GOOG");
+
+        when(node3.path("symbol")).thenReturn(node3);
+        when(node3.path("symbol").asText()).thenReturn("MSFT");
+
+
+        // Mock the behavior of the ObjectMapper to return the JSON structure
+        ObjectMapper objectMapper = mock(ObjectMapper.class);
+        optionsService.setObjectMapper(objectMapper);
+        try {
+            when(objectMapper.readTree(any(File.class))).thenReturn(rootNode);
+
+            List<String> expectedTickers = List.of("AAPL", "GOOG", "MSFT");
+            List<String> actualTickers = optionsService.fetchTickers();
+
+            assertEquals(expectedTickers, actualTickers);
+
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void fetchTickersTest_Fail(){
+        // Mock the behavior of the ObjectMapper to return the JSON structure
+        ObjectMapper objectMapper = mock(ObjectMapper.class);
+        optionsService.setObjectMapper(objectMapper);
+        List<String> actualTickers = new ArrayList<>();
+        try {
+            when(objectMapper.readTree(any(File.class))).thenReturn(null);
+
+            List<String> expectedTickers = List.of("AAPL", "GOOG", "MSFT");
+            actualTickers = optionsService.fetchTickers();
+
+            verify(objectMapper, times(1)).readTree(any(File.class));
+
+        }catch (Exception e){
+
+            assertEquals(0, actualTickers.size());
+        }
+    }
+
+    @Test
+    public void getOptionsByTickerTest_Success(){
+        OptionsModel option1 = new OptionsModel();
+        option1.setTicker("AAPL");
+        OptionsModel option2 = new OptionsModel();
+        option2.setTicker("AAPL");
+
+
+        when(optionsRepository.findByTicker("AAPL")).thenReturn(Optional.of(List.of(option1, option2)));
+
+        List<OptionsDto> options = optionsService.getOptionsByTicker("AAPL");
+        verify(optionsRepository, times(1)).findByTicker("AAPL");
+        assertEquals(2, options.size());
+    }
+
+    @Test
+    public void getOptionsByTickerTest_EmptyDB_noCrumb(){
+        optionsService.setCrumb(null);
+        when(optionsRepository.findByTicker("AAPL")).thenReturn(Optional.of(List.of()));
+
+        List<OptionsDto> options = optionsService.getOptionsByTicker("AAPL");
+        verify(optionsRepository, times(1)).findByTicker("AAPL");
+        assertEquals(0, options.size());
+    }
+
 }

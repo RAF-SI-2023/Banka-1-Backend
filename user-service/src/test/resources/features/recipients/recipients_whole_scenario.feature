@@ -19,7 +19,7 @@ Feature: customer can create, view, edit and delete recipients
 
       Scenario: customer wants to delete his recipient
         Given customer is logged in with email "user@test.com" and password "admin"
-        When i send DELETE request to remove recipient
+        When i send DELETE request to "/recipients/remove/"
         Then i should get response with status 200
 
         Scenario: customer wants to view his recipient

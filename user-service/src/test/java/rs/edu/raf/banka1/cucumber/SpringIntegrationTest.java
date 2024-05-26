@@ -18,6 +18,7 @@ import org.testcontainers.containers.ComposeContainer;
 import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.HostPortWaitStrategy;
+import org.testcontainers.containers.wait.strategy.Wait;
 import rs.edu.raf.banka1.responses.UserResponse;
 import rs.edu.raf.banka1.services.EmailService;
 
@@ -43,10 +44,10 @@ public class SpringIntegrationTest {
     }
 
     public static ComposeContainer enviroment = new ComposeContainer(new File("../docker-compose-test.yaml"))
-            .withExposedService("user-service", 8080)
-            .withExposedService("market-service", 8081)
-            .withExposedService("fetching-service", 8082)
-            .withExposedService("mysql", 3306)
+            .withExposedService("user-service", 8080, Wait.forListeningPort())
+            .withExposedService("market-service", 8081, Wait.forListeningPort())
+            .withExposedService("fetching-service", 8082, Wait.forListeningPort())
+            .withExposedService("mysql", 3306, Wait.forHealthcheck())
             //.withLocalCompose(true)
             .withTailChildContainers(true)
             .withStartupTimeout(Duration.ofSeconds(120))

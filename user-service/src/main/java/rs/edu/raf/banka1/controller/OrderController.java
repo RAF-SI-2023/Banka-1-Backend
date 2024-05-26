@@ -1,10 +1,13 @@
 package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +32,7 @@ import java.util.List;
 @RestController
 @CrossOrigin
 @RequestMapping("/orders")
+@SecurityRequirement(name = "Authorization")
 public class OrderController {
 
     private final OrderService orderService;
@@ -42,7 +46,10 @@ public class OrderController {
     }
 
     @PutMapping(value = "/{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "change loan request status", description = "change loan request status")
+    @Operation(summary = "change loan request status", description = "change loan request status",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('manageOrderRequests')")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -64,7 +71,10 @@ public class OrderController {
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Create order request", description = "Create order request")
+    @Operation(summary = "Create order request", description = "Create order request",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
             content = {@Content(mediaType = "application/json")}),
@@ -82,7 +92,10 @@ public class OrderController {
     }
 
     @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all orders for current Employee", description = "Get all orders for current Employee")
+    @Operation(summary = "Get all orders for current Employee", description = "Get all orders for current Employee",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -98,7 +111,10 @@ public class OrderController {
     }
 
     @GetMapping(value = "/supervisor/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get orders for all employees", description = "Supervisor gets orders for all employees")
+    @Operation(summary = "Get orders for all employees", description = "Supervisor gets orders for all employees",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('manageOrderRequests')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -114,7 +130,10 @@ public class OrderController {
 
 
     @PutMapping(value = "/decideOrder/{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Supervisor approves/denies order.", description = "Supervisor approves/denies order.")
+    @Operation(summary = "Supervisor approves/denies order.", description = "Supervisor approves/denies order.",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('manageOrderRequests')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",

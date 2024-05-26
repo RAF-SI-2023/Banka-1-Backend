@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -23,6 +25,7 @@ import java.util.List;
 //@SecurityRequirement() TODO
 @CrossOrigin
 @SecurityRequirement(name = "basicScheme")
+@SecurityRequirement(name = "Authorization")
 public class OptionsController {
     private final OptionsService optionsService;
 
@@ -32,7 +35,10 @@ public class OptionsController {
     }
 
     @GetMapping(value = "/{ticker}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get options for ticker", description = "Returns options for a stock symbol.")
+    @Operation(summary = "Get options for ticker", description = "Returns options for a stock symbol.",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",

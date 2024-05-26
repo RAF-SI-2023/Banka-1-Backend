@@ -83,7 +83,8 @@ CREATE TABLE `capital` (
                            `bank_account_id` bigint(20) DEFAULT NULL,
                            `currency_id` bigint(20) DEFAULT NULL,
                            `id` bigint(20) NOT NULL,
-                           `listing_id` bigint(20) DEFAULT NULL
+                           `listing_id` bigint(20) DEFAULT NULL,
+                           `ticker` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -305,7 +306,9 @@ CREATE TABLE `market_order` (
                                 `last_modified_date` bigint(20) DEFAULT NULL,
                                 `owner_user_id` bigint(20) DEFAULT NULL,
                                 `processed_number` bigint(20) DEFAULT NULL,
-                                `stock_id` bigint(20) DEFAULT NULL
+                                `stock_id` bigint(20) DEFAULT NULL,
+                                `timestamp` bigint(20) DEFAULT NULL,
+                                `currentAmount` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -808,16 +811,32 @@ INSERT INTO `user_permissions_employee` (`user_id`, `permission_id`) VALUES
     (100, 10);
 
 INSERT INTO `company` (`id`, `company_name`, `fax_number`, `id_number`, `job_id`, `pib`, `registration_number`, `telephone_number`) VALUES
-    (1, 'test', 'test', 'test', 'test', 'test', 'test', 'test');
+    (1, 'Banka1', 'test', 'test', 'test', 'test', 'test', 'test');
 
-INSERT INTO `currency` (`active`, `id`, `country`, `currency_code`, `currency_desc`, `currency_name`, `currency_symbol`) VALUES
-    (b'1', 10000, 'TEST', 'TST', 'TEST', 'TEST', 'TST');
+INSERT INTO `currency` (`active`, `id`, `country`, `currency_code`, `currency_desc`, `currency_name`, `currency_symbol`, `toRSD`, `fromRSD`) VALUES
+    (b'1', 10000, 'TEST', 'TST', 'TEST', 'TEST', 'TST', 1.0, 1.0);
+
+INSERT INTO `currency` (`active`, `id`, `country`, `currency_code`, `currency_desc`, `currency_name`, `currency_symbol`, `toRSD`, `fromRSD`) VALUES
+    (b'1', 10001, 'TEST1', 'TSS', 'TEST1', 'TEST1', 'TST1', 1.0, 1.0);
+
+INSERT INTO `currency` (`active`, `id`, `country`, `currency_code`, `currency_desc`, `currency_name`, `currency_symbol`, `toRSD`, `fromRSD`) VALUES
+    (b'1', 10002, 'RSD', 'RSD', 'RSD', 'RSD', 'RSD', 1.0, 1.0);
+
 
 INSERT INTO `bank_account` (account_status, account_type, available_balance, balance, maintenance_cost, company_id, created_by_agent_id, creation_date, currency_id, customer_id, expiration_date, id, account_name, account_number, subtype_of_account)
-VALUES (b'1', 1, 1000.0, 1200.0, 100.0, NULL, 100, 1710959528, 10000, 101, 2710959528, 100, 'test', '1234567890', 'subtest');
+VALUES (b'1', 1, 10000.0, 12000.0, 100.0, NULL, 100, 1710959528, 10000, 101, 2710959528, 100, 'test', '1234567890', 'subtest');
 
 INSERT INTO `bank_account` (account_status, account_type, available_balance, balance, maintenance_cost, company_id, created_by_agent_id, creation_date, currency_id, customer_id, expiration_date, id, account_name, account_number, subtype_of_account)
-VALUES (b'1', 1, 1000.0, 1200.0, 100.0, NULL, 100, 1710959558, 10000, 102, 2710959528, 101, 'test1', '0987654321', 'subtest');
+VALUES (b'1', 1, 10000.0, 12000.0, 100.0, NULL, 100, 1710959558, 10001, 101, 2710959528, 101, 'test1', '0987654321', 'subtest');
+
+INSERT INTO `bank_account` (`account_status`, `account_type`, `available_balance`, `balance`, `maintenance_cost`, `company_id`, `created_by_agent_id`, `creation_date`, `currency_id`, `customer_id`, `expiration_date`, `id`, `account_name`, `account_number`, `subtype_of_account`)
+VALUES (b'0', 2, 1000000, 1000000, NULL, 1, NULL, 1714003200, 10000, NULL, 1871769600, 9, 'Banks account', '131242095807818250', NULL);
+
+INSERT INTO `bank_account` (`account_status`, `account_type`, `available_balance`, `balance`, `maintenance_cost`, `company_id`, `created_by_agent_id`, `creation_date`, `currency_id`, `customer_id`, `expiration_date`, `id`, `account_name`, `account_number`, `subtype_of_account`)
+VALUES (b'0', 2, 1000000, 1000000, NULL, 1, NULL, 1714003200, 10001, NULL, 1871769600, 10, 'Banks account', '131242095807818251', NULL);
+
+INSERT INTO `bank_account` (`account_status`, `account_type`, `available_balance`, `balance`, `maintenance_cost`, `company_id`, `created_by_agent_id`, `creation_date`, `currency_id`, `customer_id`, `expiration_date`, `id`, `account_name`, `account_number`, `subtype_of_account`)
+VALUES (b'0', 2, 1000000, 1000000, NULL, 1, NULL, 1714003200, 10002, NULL, 1871769600, 11, 'Banks account', '131242095807818251', NULL);
 
 INSERT INTO `loan` (account_number, currency, effective_interest_rate, installment_amount, loan_amount, loan_type, nominal_interest_rate, remaining_debt, repayment_period, agreement_date, id, maturity_date, next_installment_date)
     VALUES ('1234567890', 'TST', 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0, 0, 100, 0, 0);

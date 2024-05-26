@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -25,6 +27,7 @@ import java.util.List;
 //@SecurityRequirement() TODO
 @SecurityRequirement(name = "basicScheme")
 @CrossOrigin
+@SecurityRequirement(name = "Authorization")
 public class PermissionController {
     private PermissionService permissionService;
 
@@ -34,7 +37,10 @@ public class PermissionController {
     }
 
     @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all permissions", description = "Returns all permissions")
+    @Operation(summary = "Get all permissions", description = "Returns all permissions",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",

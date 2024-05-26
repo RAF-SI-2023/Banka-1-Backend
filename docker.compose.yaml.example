@@ -44,8 +44,9 @@ services:
         "server.port": 8080,
         "front.port": 4200,
         "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
-        "exchangeRateAPIToken": "a97e7d453aa0cfb0295f5bba",
-        "exchangeRateApiUrl": "https://v6.exchangerate-api.com/v6/"
+        "exchangeRateAPIToken": "5eb8b116c5d704eea74c42f1",
+        "exchangeRateApiUrl": "https://v6.exchangerate-api.com/v6/",
+        "marketServiceUrl" = "http://market-service:8081"
       }'
     depends_on:
       mysql:

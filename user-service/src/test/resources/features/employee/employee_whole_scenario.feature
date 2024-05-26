@@ -67,7 +67,52 @@ Feature: admin can create new employees, view them and edit them
     And employee first name should be "Aleksa"
     And employee last name should be "Aleksic"
 
-  @Ignore
+  Scenario: admin can change employee permissions
+    Given i am logged in with email "admin@admin.com" and password "admin"
+    And i want to change employee permisions with email "drugizaposleni@gmail.rs"
+    And i want to give him permission "addUser"
+    And i want to add him permissions
+    When user calls POST on "/employee/permission/employeeId"
+    Then i should get response with status 200
+    And employee should have permission "addUser"
+
+
+  Scenario: admin can change employee permissions1
+    Given i am logged in with email "drugizaposleni@gmail.rs" and password "lepogore"
+    And employee has first name "Petar"
+    And employee has last name "Petrovic"
+    And employee has phone number "512312321"
+    And employee has email "drugizaposleni1@gmail.rs"
+    And employee has jmbg "0254203483"
+    And employee has position "AGENT"
+    And employee is active
+    And employee order limit is "10000.0"
+    And employee requireApproval is false
+    When user calls POST on "/employee/createEmployee"
+    Then i should get response with status 200
+
+  Scenario: admin can change employee permissions
+    Given i am logged in with email "admin@admin.com" and password "admin"
+    And i want to change employee permisions with email "drugizaposleni@gmail.rs"
+    And i want to give him permission "addUser"
+    And i want to remove him permissions
+    When user calls POST on "/employee/permission/employeeId"
+    Then i should get response with status 200
+
+  Scenario: admin can change employee permissions1
+    Given i am logged in with email "drugizaposleni@gmail.rs" and password "lepogore"
+    And employee has first name "Petar"
+    And employee has last name "Petrovic"
+    And employee has phone number "512312321"
+    And employee has email "drugizaposleni1@gmail.rs"
+    And employee has jmbg "0254203483"
+    And employee has position "AGENT"
+    And employee is active
+    And employee order limit is "10000.0"
+    And employee requireApproval is false
+    When user calls POST on "/employee/createEmployee"
+    Then i should get response with status 403
+
   Scenario: admin can change employee permissions
     Given i am logged in with email "admin@admin.com" and password "admin"
     And i want to change employee permisions with email "drugizaposleni@gmail.rs"
