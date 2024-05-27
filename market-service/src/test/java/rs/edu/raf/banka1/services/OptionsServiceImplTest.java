@@ -24,6 +24,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
@@ -34,6 +35,7 @@ class OptionsServiceImplTest {
     private OptionsServiceImpl optionsService;
     private OptionsRepository optionsRepository;
     private OptionsMapper optionsMapper;
+
 
     @BeforeEach
     public void setUp() {
@@ -64,5 +66,36 @@ class OptionsServiceImplTest {
         List<OptionsDto> options = optionsService.getOptionsByTicker("AAPL");
         verify(optionsRepository, times(1)).findByTicker("AAPL");
         Assertions.assertEquals(0, options.size());
+    }
+
+    @Test
+    public void getOptionsByIdTest(){
+        OptionsModel option1 = new OptionsModel();
+        option1.setListingId(1l);
+        Optional<OptionsModel> optionsModel = Optional.of(option1);
+        when(optionsRepository.findById(1l)).thenReturn(optionsModel);
+        Optional<OptionsModel> result = optionsService.findById(1l);
+        assertEquals(optionsModel,result);
+    }
+
+    @Test
+    public void getOptionsByIdTest_IdNotFound(){
+        when(optionsRepository.findById(1l)).thenReturn(Optional.empty());
+        Optional<OptionsModel> result = optionsService.findById(1l);
+        assertEquals(Optional.empty(),result);
+
+    }
+    @Test
+    public void getAllOptionsTest(){
+        List<OptionsModel> options = new ArrayList<>();
+        OptionsModel option1 = new OptionsModel();
+        option1.setTicker("APPL");
+        OptionsModel option2 = new OptionsModel();
+        option1.setTicker("ORCL");
+        options.addAll(List.of(option1,option2));
+
+        when(optionsRepository.findAll()).thenReturn(options);
+        List<OptionsModel> optionsModels = optionsService.getAllOptions();
+        assertEquals(2,optionsModels.size());
     }
 }
