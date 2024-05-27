@@ -19,24 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import rs.edu.raf.banka1.mapper.ForexMapper;
-import rs.edu.raf.banka1.mapper.FutureMapper;
-import rs.edu.raf.banka1.mapper.ListingHistoryMapper;
-import rs.edu.raf.banka1.mapper.StockMapper;
-import rs.edu.raf.banka1.model.ListingForex;
-import rs.edu.raf.banka1.model.ListingFuture;
-import rs.edu.raf.banka1.model.ListingHistory;
-import rs.edu.raf.banka1.model.ListingStock;
-import rs.edu.raf.banka1.model.dtos.ExchangeDto;
-import rs.edu.raf.banka1.model.dtos.ListingBaseDto;
-import rs.edu.raf.banka1.model.dtos.ListingForexDto;
-import rs.edu.raf.banka1.model.dtos.ListingFutureDto;
-import rs.edu.raf.banka1.model.dtos.ListingHistoryDto;
-import rs.edu.raf.banka1.model.dtos.ListingStockDto;
-import rs.edu.raf.banka1.services.ExchangeService;
-import rs.edu.raf.banka1.services.ForexService;
-import rs.edu.raf.banka1.services.FuturesService;
-import rs.edu.raf.banka1.services.ListingStockService;
+import rs.edu.raf.banka1.mapper.*;
+import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.model.dtos.*;
+import rs.edu.raf.banka1.services.*;
 
 import java.util.List;
 
@@ -57,10 +43,12 @@ public class MarketController {
     private final ForexMapper forexMapper;
     private final StockMapper stockMapper;
     private final FutureMapper futureMapper;
+    private final OptionsService optionsService;
+    private final OptionsMapper optionsMapper;
 
     @Autowired
     public MarketController(ExchangeService exchangeService, ForexService forexService, ListingStockService listingStockService, FuturesService futuresService,
-                            ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper, StockMapper stockMapper, FutureMapper futureMapper) {
+                            ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper, StockMapper stockMapper, FutureMapper futureMapper, OptionsService optionsService, OptionsMapper optionsMapper) {
         this.exchangeService = exchangeService;
         this.forexService = forexService;
         this.listingStockService = listingStockService;
@@ -69,6 +57,8 @@ public class MarketController {
         this.forexMapper = forexMapper;
         this.stockMapper = stockMapper;
         this.futureMapper = futureMapper;
+        this.optionsService = optionsService;
+        this.optionsMapper = optionsMapper;
     }
 
     @GetMapping(value = "/exchange", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -150,6 +140,9 @@ public class MarketController {
         }
         else if(listingType.equalsIgnoreCase("futures")) {
             return new ResponseEntity<>(this.futuresService.getAllFutures().stream().map(futureMapper::toDto), HttpStatus.OK);
+        }
+        else if(listingType.equalsIgnoreCase("options")) {
+            return new ResponseEntity<>(this.optionsService.getAllOptions().stream().map(optionsMapper::optionsModelToOptionsDto), HttpStatus.OK);
         }
         else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -327,6 +320,28 @@ public class MarketController {
         return new ResponseEntity<>(listingFutureDto, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/listing/options/{optionsId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get options by id", description = "Returns options by id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = OptionsDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Options not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+
+    public ResponseEntity<OptionsDto> getOptionsById(@PathVariable Long optionsId) {
+        OptionsModel options = optionsService.findById(optionsId).orElse(null);
+        if (options == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        OptionsDto optionsDto = optionsMapper.optionsModelToOptionsDto(options);
+        return new ResponseEntity<>(optionsDto, HttpStatus.OK);
+
+    }
 
 
 }

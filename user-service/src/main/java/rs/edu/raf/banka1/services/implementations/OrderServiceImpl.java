@@ -5,6 +5,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.OrderDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
+import rs.edu.raf.banka1.dtos.market_service.OptionsDto;
 import rs.edu.raf.banka1.exceptions.InvalidOrderListingAmountException;
 import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
 import rs.edu.raf.banka1.exceptions.OrderListingNotFoundByIdException;
@@ -65,10 +66,12 @@ public class OrderServiceImpl implements OrderService {
         scheduledFutureMap = new ConcurrentHashMap<>();
     }
 
+
     @Override
     public void createOrder(final CreateOrderRequest request, final Employee currentAuth) {
         final MarketOrder order = orderMapper.requestToMarketOrder(request, currentAuth);
         if(order.getContractSize() <= 0) throw new InvalidOrderListingAmountException();
+
         ListingBaseDto listingBaseDto = getListingByOrder(order);
 
         if(listingBaseDto == null) throw new OrderListingNotFoundByIdException(order.getListingId());
@@ -122,11 +125,12 @@ public class OrderServiceImpl implements OrderService {
     public ListingBaseDto getListingByOrder(MarketOrder order) {
         if(order.getListingType().equals(ListingType.STOCK)) {
             return marketService.getStockById(order.getListingId());
-        } else if(order.getListingType().equals(ListingType.FOREX)) {
+        }else if(order.getListingType().equals(ListingType.FOREX)) {
             return marketService.getForexById(order.getListingId());
+        }else if(order.getListingType().equals(ListingType.OPTIONS)){
+            return marketService.getOptionsById(order.getListingId());
         }
         return marketService.getFutureById(order.getListingId());
-
     }
 
     @Override
@@ -205,22 +209,22 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Double calculatePrice(
-        final MarketOrder order,
-        final ListingBaseDto listingBaseDto,
-        final long proccessNum
+            final MarketOrder order,
+            final ListingBaseDto listingBaseDto,
+            final long proccessNum
     ) {
         if(order.getOrderType().equals(OrderType.BUY)) {
             // ako je market order processednumber* price
             // ako je limit order processednumber *
             return proccessNum * (order.getLimitValue() != null ?
-                Math.min(listingBaseDto.getHigh(), order.getLimitValue()) :
-                order.getStopValue() !=null ? listingBaseDto.getHigh() :
-                listingBaseDto.getPrice()) * 100;
+                    Math.min(listingBaseDto.getHigh(), order.getLimitValue()) :
+                    order.getStopValue() !=null ? listingBaseDto.getHigh() :
+                            listingBaseDto.getPrice()) * 100;
         } else {
             return proccessNum * (order.getLimitValue() != null ?
-                Math.max(listingBaseDto.getLow(), order.getLimitValue()) :
-                order.getStopValue() !=null ? listingBaseDto.getHigh() :
-                listingBaseDto.getPrice()) * 100;
+                    Math.max(listingBaseDto.getLow(), order.getLimitValue()) :
+                    order.getStopValue() !=null ? listingBaseDto.getHigh() :
+                            listingBaseDto.getPrice()) * 100;
         }
     }
 

@@ -9,6 +9,7 @@ import org.tinylog.Logger;
 import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
+import rs.edu.raf.banka1.dtos.market_service.OptionsDto;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
@@ -424,6 +425,12 @@ public class BootstrapData implements CommandLineRunner {
             Capital capital = capitalService.createCapitalForListing(ListingType.FOREX, forex.getListingId(), 100.0, 0.0);
             capitalRepository.save(capital);
         }
+
+//        List<OptionsDto> options = marketService.getAllOptions();
+//        for(OptionsDto optionsDto:options) {
+//            Capital capital = capitalService.createCapitalForListing(ListingType.OPTIONS, optionsDto.getListingId(), 100.0, 0.0);
+//            capitalRepository.save(capital);
+//        }
     }
 
     private BankAccount createBankAccountByCurrency(String currency, Company company){

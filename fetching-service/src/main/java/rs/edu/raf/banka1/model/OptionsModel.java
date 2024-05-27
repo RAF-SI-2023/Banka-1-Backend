@@ -7,12 +7,12 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-public class OptionsModel {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column
-    private String ticker;
+public class OptionsModel extends ListingBase{
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Long id;
+//    @Column
+//    private String ticker;
     @Column
     private String optionType;
     @Column

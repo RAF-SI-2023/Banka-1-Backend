@@ -186,11 +186,17 @@ public class OptionsServiceImpl implements OptionsService{
             OptionsModel option = new OptionsModel();
             option.setTicker(ticker);
             option.setOptionType(optionType.name());
+            option.setListingType("Options");
             option.setStrikePrice(row.path("strike").doubleValue());
             option.setCurrency(row.path("currency").asText());
             option.setImpliedVolatility(row.path("impliedVolatility").doubleValue());
             option.setOpenInterest(row.path("openInterest").asInt());
             option.setExpirationDate(row.path("expiration").longValue());
+            option.setLow(row.path("bid").doubleValue());
+            option.setHigh(row.path("ask").doubleValue());
+            option.setVolume(row.path("volume").asInt());
+            option.setPrice(row.path("lastPrice").asDouble());
+            option.setPriceChange(row.path("change").asDouble());
             options.add(option);
         }
         return options;
