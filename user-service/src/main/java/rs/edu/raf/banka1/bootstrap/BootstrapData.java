@@ -102,6 +102,8 @@ public class BootstrapData implements CommandLineRunner {
         seedPermissions();
         seedCurencies();
 
+        Company bank = createBankCompany();
+
         Employee user1 = new Employee();
         user1.setEmail("admin");
         user1.setPassword(passwordEncoder.encode("user1"));
@@ -112,6 +114,7 @@ public class BootstrapData implements CommandLineRunner {
         user1.setOrderlimit(10000000.0);
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
         user1.setRequireApproval(false);
+        user1.setCompany(bank);
         employeeRepository.save(user1);
 
         Employee client = new Employee();
@@ -124,6 +127,7 @@ public class BootstrapData implements CommandLineRunner {
         client.setRequireApproval(false);
         client.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
         client.setLastName("ClientPrezime");
+        client.setCompany(bank);
         employeeRepository.save(client);
 
         // Sprint5 Bootstrap
@@ -138,6 +142,7 @@ public class BootstrapData implements CommandLineRunner {
         ray.setPosition(Constants.SUPERVIZOR);
         ray.setActive(true);
         ray.setPermissions(new HashSet<>(permissionRepository.findAll()));
+        ray.setCompany(bank);
         employeeRepository.save(ray);
 
         // - Agent koji ima realan limit i nema cekiran fleg za odobravanje
@@ -153,6 +158,7 @@ public class BootstrapData implements CommandLineRunner {
         donnie.setOrderlimit(100000.0);
         donnie.setRequireApproval(false);
         donnie.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
+        donnie.setCompany(bank);
         employeeRepository.save(donnie);
 
         Company company = new Company();
@@ -192,6 +198,8 @@ public class BootstrapData implements CommandLineRunner {
         bankAccount.setSubtypeOfAccount("LICNI");
         bankAccountService.saveBankAccount(bankAccount);
         // dovde
+
+
 
         //ovo samo za test moze da se obrise
         BankAccount bankAccount1 = new BankAccount();
@@ -247,6 +255,16 @@ public class BootstrapData implements CommandLineRunner {
         bankAccountService.saveBankAccount(bankAccount3);
         // dovde
 
+        Capital capital = new Capital();
+        capital.setPublicTotal(0D);
+        capital.setListingType(ListingType.STOCK);
+        capital.setReserved(0D);
+        capital.setListingId(1L);
+        capital.setTicker("DT");
+        capital.setBankAccount(bankAccount3);
+        capital.setTotal(50D);
+        capitalRepository.save(capital);
+      
         transferService.processTransfer(transferService.createTransfer(new CreateTransferRequest(bankAccount3.getAccountNumber(), bankAccount2.getAccountNumber(), 100.0)));
         transferService.processTransfer(transferService.createTransfer(new CreateTransferRequest(bankAccount3.getAccountNumber(), bankAccount1.getAccountNumber(), 100.0)));
 
@@ -322,8 +340,10 @@ public class BootstrapData implements CommandLineRunner {
         resetLimitExecutor.scheduleAtFixedRate(employeeService::resetEmployeeLimits, initialDelay.toMillis(), 24, TimeUnit.HOURS);
 
 
-        seedBankCapital();
+        seedBankCapital(bank);
         transferService.seedExchangeRates();
+
+        Contract contract = new Contract();
     }
 
     private void seedLoanRequest() {
@@ -392,8 +412,7 @@ public class BootstrapData implements CommandLineRunner {
         }
     }
 
-    private void seedBankCapital(){
-        Company bank = createBankCompany();
+    private void seedBankCapital(Company bank){
         companyRepository.save(bank);
 
         List<rs.edu.raf.banka1.model.Currency> allCurrencies = currencyRepository.findAll();
@@ -402,26 +421,27 @@ public class BootstrapData implements CommandLineRunner {
         // Make entry for each currency
         for(rs.edu.raf.banka1.model.Currency currency : allCurrencies) {
             BankAccount bankAccount = createBankAccountByCurrency(currency.getCurrencyCode(), bank);
-            Capital capital = capitalService.createCapitalForBankAccount(bankAccount, currency, bankAccount.getBalance(), 0.0);
-            capitalRepository.save(capital);
+//            Capital capital = capitalService.createCapitalForBankAccount(bankAccount, currency, bankAccount.getBalance(), 0.0);
+//            capitalRepository.save(capital);
         }
 
         // Make entry for stocks, futures and forex
         List<ListingStockDto> stocks = marketService.getAllStocks();
+        BankAccount defaultBankAccount = bankAccountService.getDefaultBankAccount();
         for(ListingStockDto stock : stocks) {
-            Capital capital = capitalService.createCapitalForListing(ListingType.STOCK, stock.getListingId(), 100.0, 0.0);
+            Capital capital = capitalService.createCapital(ListingType.STOCK, stock.getListingId(), 100.0, 0.0, defaultBankAccount);
             capitalRepository.save(capital);
         }
 
         List<ListingFutureDto> futures = marketService.getAllFutures();
         for(ListingFutureDto future : futures) {
-            Capital capital = capitalService.createCapitalForListing(ListingType.FUTURE, future.getListingId(), 100.0, 0.0);
+            Capital capital = capitalService.createCapital(ListingType.FUTURE, future.getListingId(), 100.0, 0.0, defaultBankAccount);
             capitalRepository.save(capital);
         }
 
         List<ListingForexDto> forexes = marketService.getAllForex();
         for(ListingForexDto forex : forexes) {
-            Capital capital = capitalService.createCapitalForListing(ListingType.FOREX, forex.getListingId(), 100.0, 0.0);
+            Capital capital = capitalService.createCapital(ListingType.FOREX, forex.getListingId(), 100.0, 0.0, defaultBankAccount);
             capitalRepository.save(capital);
         }
     }
@@ -452,6 +472,7 @@ public class BootstrapData implements CommandLineRunner {
         bank.setIdNumber("987654321");
         bank.setJobId("1777838");
         bank.setRegistrationNumber("7737");
+        companyRepository.save(bank);
         return bank;
     }
 

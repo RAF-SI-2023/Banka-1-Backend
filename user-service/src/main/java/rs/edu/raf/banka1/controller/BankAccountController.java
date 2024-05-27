@@ -226,22 +226,6 @@ public class BankAccountController {
         return new ResponseEntity<>(capitalService.estimateBalanceStock(stockId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/balance/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get total for bank account", description = "Get total for bank account",
-            parameters = {
-                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
-            })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema())}),
-            @ApiResponse(responseCode = "403", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<Double> estimateBalanceBankAccount(@PathVariable(name = "accountNumber") String accountNumber) {
-        return new ResponseEntity<>(capitalService.getCapital(accountNumber), HttpStatus.OK);
-    }
-
     @GetMapping(value = "/capitals/listings", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get total for bank account", description = "Get total for bank account",
             parameters = {

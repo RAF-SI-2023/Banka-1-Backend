@@ -1,22 +1,25 @@
 package rs.edu.raf.banka1.dtos;
 
-
+import jakarta.validation.constraints.NotBlank;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
-public class CompanyDto {
-    private Long id;
+@EqualsAndHashCode
+@ToString
+public class CreateCompanyDto {
+    @NotBlank
     private String companyName;
     private String telephoneNumber;
     private String faxNumber;
+    @NotBlank
     private String pib;
-    //  Matični broj
     private String idNumber;
-    //  Šifra delatnosti
     private String jobId;
-    //  Registarski broj
     private String registrationNumber;
+    @NotBlank
     private String address;
 }

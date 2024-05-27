@@ -18,4 +18,5 @@ public class CustomerData {
     private String phoneNumber;
     private String address;
     private String jmbg;
+    private Long companyId;
 }

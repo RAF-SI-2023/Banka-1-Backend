@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
 import rs.edu.raf.banka1.exceptions.InvalidReservationAmountException;
 import rs.edu.raf.banka1.model.*;
-import rs.edu.raf.banka1.services.CapitalService;
-import rs.edu.raf.banka1.services.MarketService;
-import rs.edu.raf.banka1.services.OrderService;
-import rs.edu.raf.banka1.services.TransactionService;
+import rs.edu.raf.banka1.services.*;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.List;
@@ -20,6 +17,7 @@ public class StockSimulationJob implements Runnable {
     private final MarketService marketService;
     private final TransactionService transactionService;
     private final CapitalService capitalService;
+    private final BankAccountService bankAccountService;
     private final Long orderId;
     private final Random random = new Random();
     private final Double PERCENT = 0.1;
@@ -95,13 +93,13 @@ public class StockSimulationJob implements Runnable {
 
     //todo treba da se radi sa currency i da se doda u listingdto exchangedto koji ce da ima i currency u sebi
     private void createTransaction(MarketOrder order, ListingBaseDto listingBaseDto, Long processedNum, String currencyCode){
-        Capital bankAccountCapital = capitalService.getCapitalByCurrencyCode(currencyCode);
-        Capital securityCapital = capitalService.getCapitalByListingIdAndType(listingBaseDto.getListingId(), ListingType.valueOf(listingBaseDto.getListingType().toUpperCase()));
+        BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
+        Capital securityCapital = capitalService.getCapitalByListingIdAndTypeAndBankAccount(listingBaseDto.getListingId(), ListingType.valueOf(listingBaseDto.getListingType().toUpperCase()), bankAccount);
 
         Double price = orderService.calculatePrice(order,listingBaseDto,processedNum);
         //price = convertPrice(price,null,null);
         try {
-            transactionService.createTransaction(bankAccountCapital, securityCapital, price, order, processedNum);
+            transactionService.createTransaction(bankAccount, securityCapital, price, order, processedNum);
         } catch (InvalidReservationAmountException e) {
             orderService.cancelOrder(orderId);
         }

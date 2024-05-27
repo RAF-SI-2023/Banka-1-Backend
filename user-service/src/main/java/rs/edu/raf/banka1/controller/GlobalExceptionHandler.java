@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.tinylog.Logger;
 import rs.edu.raf.banka1.exceptions.*;
+import rs.edu.raf.banka1.model.Contract;
 
 import java.util.NoSuchElementException;
 
@@ -32,6 +33,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmployeeNotFoundException.class)
     public ResponseEntity<String> handleEmployeeNotFoundException(EmployeeNotFoundException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<String> handleCustomerNotFoundException(CustomerNotFoundException e) {
         Logger.info("Error: " + e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
@@ -94,5 +101,29 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleOrderListingNotFoundByIdException(OrderListingNotFoundByIdException e) {
         Logger.info("Error: " + e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(OTCListingTypeException.class)
+    public ResponseEntity<String> handleOTCListingTypeException(OTCListingTypeException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(OTCInvalidBankAccountCurrencyException.class)
+    public ResponseEntity<String> handleOTCInvalidBankAccountCurrencyException(OTCInvalidBankAccountCurrencyException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ContractNotFoundByIdException.class)
+    public ResponseEntity<String> handleContractNotFoundByIdException(ContractNotFoundByIdException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(CompanyNotFoundException.class)
+    public ResponseEntity<String> handleCompanyNotFoundException(CompanyNotFoundException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 }

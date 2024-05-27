@@ -15,10 +15,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
 import rs.edu.raf.banka1.model.*;
-import rs.edu.raf.banka1.services.CapitalService;
-import rs.edu.raf.banka1.services.MarketService;
-import rs.edu.raf.banka1.services.OrderService;
-import rs.edu.raf.banka1.services.TransactionService;
+import rs.edu.raf.banka1.services.*;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.Random;
@@ -35,6 +32,9 @@ class StockSimulationJobTest {
     private MarketService marketService;
     @Mock
     private TransactionService transactionService;
+
+    @Mock
+    private BankAccountService bankAccountService;
     @Mock
     private CapitalService capitalService;
 
@@ -44,7 +44,7 @@ class StockSimulationJobTest {
 
     @BeforeEach
     void setup() {
-        stockSimulationJob = new StockSimulationJob(orderService, marketService, transactionService, capitalService, orderId);
+        stockSimulationJob = new StockSimulationJob(orderService, marketService, transactionService, capitalService, bankAccountService, orderId);
     }
 
     @Test
@@ -221,14 +221,14 @@ class StockSimulationJobTest {
         listingBaseDto.setPriceChange(0.1);
         listingBaseDto.setVolume(4000000);
 
-        Capital bankAccountCapital = new Capital();
+        BankAccount bankAccount = new BankAccount();
         Capital securityCapital = new Capital();
 
         when(orderService.getOrderById(anyLong())).thenReturn(order);
         when(marketService.getWorkingHoursForStock(anyLong())).thenReturn(WorkingHoursStatus.OPENED);
         when(orderService.getListingByOrder(any(MarketOrder.class))).thenReturn(listingBaseDto);
-        when(capitalService.getCapitalByCurrencyCode(anyString())).thenReturn(bankAccountCapital);
-        when(capitalService.getCapitalByListingIdAndType(anyLong(), any(ListingType.class))).thenReturn(securityCapital);
+        when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
+        when(capitalService.getCapitalByListingIdAndTypeAndBankAccount(anyLong(), any(ListingType.class), any(BankAccount.class))).thenReturn(securityCapital);
         when(orderService.calculatePrice(any(MarketOrder.class), any(ListingBaseDto.class), anyLong())).thenReturn(price);
 
 
@@ -237,10 +237,10 @@ class StockSimulationJobTest {
         verify(orderService).getOrderById(eq(orderId));
         verify(marketService).getWorkingHoursForStock(eq(order.getListingId()));
         verify(orderService).getListingByOrder(eq(order));
-        verify(capitalService).getCapitalByCurrencyCode(eq(Constants.DEFAULT_CURRENCY));
-        verify(capitalService).getCapitalByListingIdAndType(eq(order.getListingId()), eq(ListingType.valueOf(listingBaseDto.getListingType().toUpperCase())));
+        verify(bankAccountService).getDefaultBankAccount();
+        verify(capitalService).getCapitalByListingIdAndTypeAndBankAccount(eq(order.getListingId()), eq(ListingType.valueOf(listingBaseDto.getListingType().toUpperCase())), eq(bankAccount));
         verify(orderService).calculatePrice(eq(order), eq(listingBaseDto), eq(order.getContractSize()));
-        verify(transactionService).createTransaction(eq(bankAccountCapital), eq(securityCapital), eq(price), eq(order), eq(order.getContractSize()));
+        verify(transactionService).createTransaction(eq(bankAccount), eq(securityCapital), eq(price), eq(order), eq(order.getContractSize()));
         verify(orderService).finishOrder(eq(orderId));
     }
     @Test
@@ -274,14 +274,15 @@ class StockSimulationJobTest {
         listingBaseDto.setPriceChange(0.1);
         listingBaseDto.setVolume(4000000);
 
-        Capital bankAccountCapital = new Capital();
         Capital securityCapital = new Capital();
+
+        BankAccount bankAccount = new BankAccount();
 
         when(orderService.getOrderById(anyLong())).thenReturn(order);
         when(marketService.getWorkingHoursForStock(anyLong())).thenReturn(WorkingHoursStatus.OPENED);
         when(orderService.getListingByOrder(any(MarketOrder.class))).thenReturn(listingBaseDto);
-        when(capitalService.getCapitalByCurrencyCode(anyString())).thenReturn(bankAccountCapital);
-        when(capitalService.getCapitalByListingIdAndType(anyLong(), any(ListingType.class))).thenReturn(securityCapital);
+        when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
+        when(capitalService.getCapitalByListingIdAndTypeAndBankAccount(anyLong(), any(ListingType.class), any(BankAccount.class))).thenReturn(securityCapital);
         when(orderService.calculatePrice(any(MarketOrder.class), any(ListingBaseDto.class), anyLong())).thenReturn(price);
 
 
@@ -290,10 +291,10 @@ class StockSimulationJobTest {
         verify(orderService).getOrderById(eq(orderId));
         verify(marketService).getWorkingHoursForStock(eq(order.getListingId()));
         verify(orderService).getListingByOrder(eq(order));
-        verify(capitalService).getCapitalByCurrencyCode(eq(Constants.DEFAULT_CURRENCY));
-        verify(capitalService).getCapitalByListingIdAndType(eq(order.getListingId()), eq(ListingType.valueOf(listingBaseDto.getListingType().toUpperCase())));
+        verify(bankAccountService).getDefaultBankAccount();
+        verify(capitalService).getCapitalByListingIdAndTypeAndBankAccount(eq(order.getListingId()), eq(ListingType.valueOf(listingBaseDto.getListingType().toUpperCase())), eq(bankAccount));
         verify(orderService).calculatePrice(eq(order), eq(listingBaseDto), anyLong());
-        verify(transactionService).createTransaction(eq(bankAccountCapital), eq(securityCapital), eq(price), eq(order), anyLong());
+        verify(transactionService).createTransaction(eq(bankAccount), eq(securityCapital), eq(price), eq(order), anyLong());
         verify(orderService).setProcessedNumber(eq(orderId), anyLong());
     }
 }

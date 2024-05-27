@@ -35,4 +35,7 @@ public class Company {
 //  Registarski broj
     @Column
     private String registrationNumber;
+
+    @Column
+    private String adress;
 }

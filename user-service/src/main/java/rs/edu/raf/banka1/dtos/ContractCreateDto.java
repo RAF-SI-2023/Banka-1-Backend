@@ -1,17 +1,16 @@
 package rs.edu.raf.banka1.dtos;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import rs.edu.raf.banka1.model.ListingType;
+
 @Getter
 @Setter
-@EqualsAndHashCode
-public class CapitalDto {
+public class ContractCreateDto {
+    private Double amountToBuy;
+    private Double offerPrice;
     private String bankAccountNumber;
-    private ListingType listingType;
     private Long listingId;
-    private Double total;
-    private Double reserved;
-    private Double publicTotal;
+    private ListingType listingType;
+    private String ticker;
 }

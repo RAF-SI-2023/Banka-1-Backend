@@ -158,7 +158,7 @@ class TransactionServiceImplTest {
 
         assertTrue(result.isEmpty());
     }
-    
+
     @Nested
     class CreateTransactionTests {
         @Test
@@ -190,10 +190,10 @@ class TransactionServiceImplTest {
             MarketOrder order = new MarketOrder();
             order.setOrderType(OrderType.BUY);
 
-            transactionService.createTransaction(bankCapital, securityCapital, price, order, securityAmount);
+            transactionService.createTransaction(bankAccount, securityCapital, price, order, securityAmount);
 
-            verify(capitalService).addBalance(eq(listingId), eq(listingType), eq((double) securityAmount));
-            verify(capitalService).commitReserved(eq(currencyCode), eq(price));
+            verify(capitalService).addBalance(eq(listingId), eq(listingType), eq(bankAccount), eq((double) securityAmount));
+            verify(bankAccountService).commitReserved(eq(bankAccount), eq(price));
             verify(transactionRepository).save(any(Transaction.class));
         }
 
@@ -216,7 +216,6 @@ class TransactionServiceImplTest {
             bankCapital.setBankAccount(bankAccount);
             bankCapital.setTotal(1000.0);
             bankCapital.setReserved(500.0);
-            bankCapital.setCurrency(currency);
 
             Capital securityCapital = new Capital();
             securityCapital.setListingType(listingType);
@@ -243,10 +242,10 @@ class TransactionServiceImplTest {
 
             when(orderRepository.getAllBuyOrders(eq(listingId), eq(listingType), eq(employee), eq(OrderType.BUY), eq(OrderStatus.DONE))).thenReturn(Optional.of(Arrays.asList(marketOrder1)));
 
-            transactionService.createTransaction(bankCapital, securityCapital, price, order, securityAmount);
+            transactionService.createTransaction(bankAccount, securityCapital, price, order, securityAmount);
 
-            verify(capitalService).commitReserved(eq(listingId), eq(listingType), eq((double) securityAmount));
-            verify(capitalService).addBalance(eq(currencyCode), eq(90.0));
+            verify(capitalService).commitReserved(eq(listingId), eq(listingType), eq(bankAccount),eq((double) securityAmount));
+            verify(bankAccountService).addBalance(eq(bankAccount), eq(90.0));
             verify(transactionRepository).save(any(Transaction.class));
         }
 
@@ -269,7 +268,6 @@ class TransactionServiceImplTest {
             bankCapital.setBankAccount(bankAccount);
             bankCapital.setTotal(1000.0);
             bankCapital.setReserved(500.0);
-            bankCapital.setCurrency(currency);
 
             Capital securityCapital = new Capital();
             securityCapital.setListingType(listingType);
@@ -297,10 +295,10 @@ class TransactionServiceImplTest {
 
             when(orderRepository.getAllBuyOrders(eq(listingId), eq(listingType), eq(employee), eq(OrderType.BUY), eq(OrderStatus.DONE))).thenReturn(Optional.of(Arrays.asList(marketOrder1)));
 
-            transactionService.createTransaction(bankCapital, securityCapital, price, order, securityAmount);
+            transactionService.createTransaction(bankAccount, securityCapital, price, order, securityAmount);
 
-            verify(capitalService).commitReserved(eq(listingId), eq(listingType), eq((double) securityAmount));
-            verify(capitalService).addBalance(eq(currencyCode), eq(100.0));
+            verify(capitalService).commitReserved(eq(listingId), eq(listingType), eq(bankAccount), eq((double) securityAmount));
+            verify(bankAccountService).addBalance(eq(bankAccount), eq(100.0));
             verify(transactionRepository).save(any(Transaction.class));
         }
 
@@ -323,7 +321,6 @@ class TransactionServiceImplTest {
             bankCapital.setBankAccount(bankAccount);
             bankCapital.setTotal(1000.0);
             bankCapital.setReserved(500.0);
-            bankCapital.setCurrency(currency);
 
             Capital securityCapital = new Capital();
             securityCapital.setListingType(listingType);
@@ -358,14 +355,14 @@ class TransactionServiceImplTest {
 
             when(orderRepository.getAllBuyOrders(eq(listingId), eq(listingType), eq(employee), eq(OrderType.BUY), eq(OrderStatus.DONE))).thenReturn(Optional.of(Arrays.asList(marketOrder1)));
 
-            transactionService.createTransaction(bankCapital, securityCapital, price, order, securityAmount);
+            transactionService.createTransaction(bankAccount, securityCapital, price, order, securityAmount);
 
-            verify(capitalService).commitReserved(eq(listingId), eq(listingType), eq((double) securityAmount));
-            verify(capitalService).addBalance(eq(currencyCode), eq(96.0));
+            verify(capitalService).commitReserved(eq(listingId), eq(listingType), eq(bankAccount), eq((double) securityAmount));
+            verify(bankAccountService).addBalance(eq(bankAccount), eq(96.0));
             verify(transactionRepository).save(any(Transaction.class));
         }
         @Test
-        void shouldCreateSellTransactionNoProfitNoTax() {
+        void shouldCreateSellTransaction() {
             ListingType listingType = ListingType.STOCK;
             long listingId = 1;
             double price = 100;
@@ -383,7 +380,6 @@ class TransactionServiceImplTest {
             bankCapital.setBankAccount(bankAccount);
             bankCapital.setTotal(1000.0);
             bankCapital.setReserved(500.0);
-            bankCapital.setCurrency(currency);
 
             Capital securityCapital = new Capital();
             securityCapital.setListingType(listingType);
@@ -410,12 +406,11 @@ class TransactionServiceImplTest {
 
             when(orderRepository.getAllBuyOrders(eq(listingId), eq(listingType), eq(employee), eq(OrderType.BUY), eq(OrderStatus.DONE))).thenReturn(Optional.of(Arrays.asList(marketOrder1)));
 
-            transactionService.createTransaction(bankCapital, securityCapital, price, order, securityAmount);
+            transactionService.createTransaction(bankAccount, securityCapital, price, order, securityAmount);
 
-            verify(capitalService).commitReserved(eq(listingId), eq(listingType), eq((double) securityAmount));
-            verify(capitalService).addBalance(eq(currencyCode), eq(100.0));
+            verify(capitalService).commitReserved(eq(listingId), eq(listingType), eq(bankAccount), eq((double) securityAmount));
+            verify(bankAccountService).addBalance(eq(bankAccount), eq(price));
             verify(transactionRepository).save(any(Transaction.class));
         }
-
     }
 }
