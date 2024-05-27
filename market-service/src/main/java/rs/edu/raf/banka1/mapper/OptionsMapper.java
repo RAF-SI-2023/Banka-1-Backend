@@ -14,6 +14,8 @@ public class OptionsMapper {
         optionsDto.setStrikePrice(optionsModel.getStrikePrice());
         optionsDto.setExpirationDate(optionsModel.getExpirationDate());
         optionsDto.setImpliedVolatility(optionsModel.getImpliedVolatility());
+        optionsDto.setListingId(optionsModel.getListingId());
+        optionsDto.setListingType("Options");
         optionsDto.setHigh(optionsModel.getHigh());
         optionsDto.setLow(optionsModel.getLow());
         optionsDto.setPrice(optionsModel.getPrice());

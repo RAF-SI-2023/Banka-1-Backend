@@ -446,11 +446,11 @@ public class BootstrapData implements CommandLineRunner {
             capitalRepository.save(capital);
         }
 
-//        List<OptionsDto> options = marketService.getAllOptions();
-//        for(OptionsDto optionsDto:options) {
-//            Capital capital = capitalService.createCapitalForListing(ListingType.OPTIONS, optionsDto.getListingId(), 100.0, 0.0);
-//            capitalRepository.save(capital);
-//        }
+        List<OptionsDto> options = marketService.getAllOptions();
+        for(OptionsDto optionsDto:options) {
+            Capital capital = capitalService.createCapital(ListingType.OPTIONS, optionsDto.getListingId(), 100.0, 0.0,defaultBankAccount);
+            capitalRepository.save(capital);
+        }
     }
 
     private BankAccount createBankAccountByCurrency(String currency, Company company){
