@@ -2,13 +2,16 @@ package rs.edu.raf.banka1.services;
 
 import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.model.ListingFuture;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.repositories.FutureRepository;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -64,6 +67,7 @@ public class FuturesServiceImpl implements FuturesService {
     }
 
     @Override
+    @Cacheable(value = "futures", key = "#ticker")
     public Optional<ListingFuture> findByTicker(String ticker) {
         return futureRepository.findByTicker(ticker);
     }

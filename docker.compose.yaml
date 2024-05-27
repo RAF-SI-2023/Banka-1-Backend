@@ -61,7 +61,7 @@ services:
         "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
         "exchangeRateAPIToken": "5eb8b116c5d704eea74c42f1",
         "exchangeRateApiUrl": "https://v6.exchangerate-api.com/v6/",
-        "marketServiceUrl" = "http://market-service:8081"
+        "marketServiceUrl": "http://market-service:8081"
       }'
     depends_on:
       postgres:
@@ -95,7 +95,11 @@ services:
         "forexDailyApiUrl":"https://www.alphavantage.co/query?function=FX_DAILY",
         "optionsUrl":"https://query2.finance.yahoo.com/v7/finance/options/",
         "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
-        "dev.environment": false
+        "dev.environment": false,
+        "spring.cache.type": "redis",
+        "spring.data.redis.host": "redis",
+        "spring.data.redis.port": 6379,
+        "spring.cache.redis.time-to-live": 900000
       }'
     depends_on:
       postgres:

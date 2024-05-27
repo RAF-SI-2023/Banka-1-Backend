@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.OptionsMapper;
 import rs.edu.raf.banka1.model.dtos.OptionsDto;
@@ -21,6 +22,7 @@ public class OptionsServiceImpl implements OptionsService {
     }
 
     @Override
+    @Cacheable(value = "optionsServiceOptionsByTicker", key = "#ticker")
     public List<OptionsDto> getOptionsByTicker(String ticker) {
         List<OptionsDto> options = this.optionsRepository.findByTicker(ticker).map(optionsModels ->
                         optionsModels.stream()

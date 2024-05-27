@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.ExchangeMapper;
 import rs.edu.raf.banka1.model.dtos.ExchangeDto;
@@ -22,11 +23,13 @@ public class ExchangeServiceImpl implements ExchangeService {
     }
 
     @Override
+    @Cacheable(value = "exchangeServiceAllExchanges")
     public List<ExchangeDto> getAllExchanges() {
         return exchangeRepository.findAll().stream().map(exchangeMapper::exchangeToExchangeDto).toList();
     }
 
     @Override
+    @Cacheable(value = "exchangeServiceExchangeById", key = "#id")
     public ExchangeDto getExchangeById(Long id) {
         return this.exchangeRepository.findById(id).map(exchangeMapper::exchangeToExchangeDto).orElse(null);
     }

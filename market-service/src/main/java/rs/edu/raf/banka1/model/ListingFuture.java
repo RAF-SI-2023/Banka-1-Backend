@@ -5,10 +5,12 @@ import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Entity
 @Getter
 @Setter
-public class ListingFuture extends ListingBase {
+public class ListingFuture extends ListingBase implements Serializable {
     @Column
     private Integer contractSize;
     @Column
