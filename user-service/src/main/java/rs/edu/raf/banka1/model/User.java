@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -53,6 +54,10 @@ public class User {
 
     @Column
     private String resetPasswordToken;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
 
 //    @ManyToMany(fetch = FetchType.EAGER)
 //    @JoinTable(

@@ -21,5 +21,6 @@ public class EditCustomerRequest {
     private String position; // for frontend purposes ???
     private String phoneNumber;
     private Boolean isActive;
+    private Long companyId;
     private List<String> permissions;
 }

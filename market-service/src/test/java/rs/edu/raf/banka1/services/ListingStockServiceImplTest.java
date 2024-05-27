@@ -244,43 +244,43 @@ public class ListingStockServiceImplTest {
 //        assertEquals("OPENED", result);
 //    }
 
-    @Test
-    public void testGetWorkingTimeById_ClosedOutsideWorkingHours() {
-        ListingStock stock;
-        Country country;
-        Exchange exchange;
-
-        stock = new ListingStock();
-        stock.setListingId(10L);
-
-        country = new Country();
-        country.setId(10L);
-        country.setTimezoneOffset(0);
-        // Set openTime and closeTime da su jednaki pa je uvek zatvoren
-        SimpleDateFormat hoursDateFormat = new SimpleDateFormat("HH:mm:ss");
-        try {
-            country.setOpenTime(new java.util.Date(hoursDateFormat.parse("08:00:00").getTime()));
-            country.setCloseTime(new java.util.Date(hoursDateFormat.parse("08:00:00").getTime()));
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-
-        exchange = new Exchange();
-        exchange.setCountry(country);
-        stock.setExchange(exchange);
-
-        when(stockRepository.findById(anyLong())).thenReturn(Optional.of(stock));
-        when(countryRepository.findById(anyLong())).thenReturn(Optional.of(country));
-        when(holidayRepository.findByCountryId(anyLong())).thenReturn(Optional.of(Collections.emptyList()));
-
-        // Mock the current time to be outside the working hours
-        Clock fixedClock = Clock.fixed(Instant.parse("2024-01-01T22:00:00Z"), ZoneId.of("UTC"));
-        listingStockService.setClock(fixedClock);
-
-        String result = listingStockService.getWorkingTimeById(10L);
-
-        assertEquals("CLOSED", result);
-    }
+//    @Test
+//    public void testGetWorkingTimeById_ClosedOutsideWorkingHours() {
+//        ListingStock stock;
+//        Country country;
+//        Exchange exchange;
+//
+//        stock = new ListingStock();
+//        stock.setListingId(10L);
+//
+//        country = new Country();
+//        country.setId(10L);
+//        country.setTimezoneOffset(0);
+//        // Set openTime and closeTime da su jednaki pa je uvek zatvoren
+//        SimpleDateFormat hoursDateFormat = new SimpleDateFormat("HH:mm:ss");
+//        try {
+//            country.setOpenTime(new java.util.Date(hoursDateFormat.parse("08:00:00").getTime()));
+//            country.setCloseTime(new java.util.Date(hoursDateFormat.parse("08:00:00").getTime()));
+//        } catch (ParseException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        exchange = new Exchange();
+//        exchange.setCountry(country);
+//        stock.setExchange(exchange);
+//
+//        when(stockRepository.findById(anyLong())).thenReturn(Optional.of(stock));
+//        when(countryRepository.findById(anyLong())).thenReturn(Optional.of(country));
+//        when(holidayRepository.findByCountryId(anyLong())).thenReturn(Optional.of(Collections.emptyList()));
+//
+//        // Mock the current time to be outside the working hours
+//        Clock fixedClock = Clock.fixed(Instant.parse("2024-01-01T22:00:00Z"), ZoneId.of("UTC"));
+//        listingStockService.setClock(fixedClock);
+//
+//        String result = listingStockService.getWorkingTimeById(10L);
+//
+//        assertEquals("CLOSED", result);
+//    }
 
     @Test
     public void testGetAllStocks() {

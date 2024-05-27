@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.services.implementations;
 import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,6 +28,7 @@ import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.EmployeeRepository;
 import rs.edu.raf.banka1.repositories.OrderRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
+import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.TransactionService;
@@ -62,11 +64,15 @@ class OrderServiceImplTest {
     private TransactionService transactionService;
     @Mock
     private CapitalService capitalService;
+
+    @Mock
+    private BankAccountService bankAccountService;
+
     @Mock
     private EmployeeRepository employeeRepository;
 
+
     @InjectMocks
-    @Autowired
     private OrderServiceImpl orderService;
     
     @BeforeEach
@@ -76,7 +82,7 @@ class OrderServiceImplTest {
                 mock(PasswordEncoder.class),
                 mock(PermissionRepository.class)
         ));
-        orderService = new OrderServiceImpl(orderMapper, orderRepository, marketService, taskScheduler, transactionService, capitalService, employeeRepository);
+        orderService = new OrderServiceImpl(orderMapper, orderRepository, marketService, taskScheduler, transactionService, capitalService, bankAccountService, employeeRepository);
     }
 
     @Test
@@ -255,6 +261,7 @@ class OrderServiceImplTest {
         order.setOwner(owner);
         order.setUpdatedAt(Instant.parse("2024-04-01T18:35:24.00Z"));
         order.setApprovedBy(owner);
+        order.setOrderType(OrderType.BUY);
 
 
         List<TransactionDto> transactionsForOrder = new ArrayList<>();
@@ -262,7 +269,7 @@ class OrderServiceImplTest {
         transaction1.setBuy(50.0);
         transaction1.setMarketOrder(this.orderMapper.marketOrderToOrderDto(order));
         TransactionDto transaction2 = new TransactionDto();
-        transaction2.setBuy(150.0);
+        transaction2.setBuy(100.0);
         transaction2.setMarketOrder(this.orderMapper.marketOrderToOrderDto(order));
 
         transactionsForOrder.add(transaction1);
@@ -274,7 +281,7 @@ class OrderServiceImplTest {
 
         orderService.updateLimit(orderId);
 
-        double expectedLimitNow = 550.0;
+        double expectedLimitNow = 650.0;
         assertEquals(expectedLimitNow, owner.getLimitNow());
     }
 
@@ -290,20 +297,19 @@ class OrderServiceImplTest {
         Currency currency = new Currency();
         currency.setCurrencyCode("RSD");
 
-        Capital bankAccountCapital = new Capital();
-        bankAccountCapital.setCurrency(currency);
+        BankAccount bankAccount = new BankAccount();
 
         Capital securityCapital = new Capital();
         securityCapital.setListingId(1L);
         securityCapital.setListingType(ListingType.STOCK);
 
 
-        when(capitalService.getCapitalByCurrencyCode("RSD")).thenReturn(bankAccountCapital);
-        when(capitalService.getCapitalByListingIdAndType(order.getListingId(), order.getListingType())).thenReturn(securityCapital);
+        when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
+        when(capitalService.getCapitalByListingIdAndTypeAndBankAccount(order.getListingId(), order.getListingType(), bankAccount)).thenReturn(securityCapital);
 
         orderService.reserveStockCapital(order);
 
-        verify(capitalService, times(1)).reserveBalance(eq("RSD"), eq(order.getPrice()));
+        verify(bankAccountService, times(1)).reserveBalance(eq(bankAccount), eq(order.getPrice()));
     }
 
     @Test
@@ -318,19 +324,18 @@ class OrderServiceImplTest {
         Currency currency = new Currency();
         currency.setCurrencyCode("RSD");
 
-        Capital bankAccountCapital = new Capital();
-        bankAccountCapital.setCurrency(currency);
+        BankAccount bankAccount = new BankAccount();
 
         Capital securityCapital = new Capital();
         securityCapital.setListingId(1L);
         securityCapital.setListingType(ListingType.STOCK);
 
-        when(capitalService.getCapitalByCurrencyCode("RSD")).thenReturn(bankAccountCapital);
-        when(capitalService.getCapitalByListingIdAndType(order.getListingId(), order.getListingType())).thenReturn(securityCapital);
+        when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
+        when(capitalService.getCapitalByListingIdAndTypeAndBankAccount(order.getListingId(), order.getListingType(), bankAccount)).thenReturn(securityCapital);
 
         orderService.reserveStockCapital(order);
 
-        verify(capitalService, times(1)).reserveBalance(eq(1L), eq(ListingType.STOCK), eq(10.0)); // Assuming the contract size is 10.0
+        verify(capitalService, times(1)).reserveBalance(eq(1L), eq(ListingType.STOCK), eq(bankAccount), eq(10.0)); // Assuming the contract size is 10.0
     }
 
     @Test
@@ -382,6 +387,7 @@ class OrderServiceImplTest {
     public void testOrderRequiresApprove_RequiredApproval() {
         Employee employee = new Employee();
         employee.setRequireApproval(true);
+        employee.setPosition(Constants.AGENT);
         employee.setOrderlimit(1000.0);
         employee.setLimitNow(800.0);
 
@@ -397,6 +403,7 @@ class OrderServiceImplTest {
         employee.setRequireApproval(false);
         employee.setOrderlimit(1000.0);
         employee.setLimitNow(200.0);
+        employee.setPosition(Constants.AGENT);
 
         boolean requiresApprove = orderService.adjustAgentLimit(employee,90d);
 
@@ -410,6 +417,7 @@ class OrderServiceImplTest {
         employee.setRequireApproval(false);
         employee.setOrderlimit(null);
         employee.setLimitNow(null);
+        employee.setPosition(Constants.SUPERVIZOR);
 
         boolean requiresApprove = orderService.adjustAgentLimit(employee,90d);
 
@@ -458,9 +466,7 @@ class OrderServiceImplTest {
         when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(OrderNotFoundByIdException.class, () -> {
-            orderService.decideOrder(orderId, status, currentAuth);
-        });
+        assertEquals(orderService.decideOrder(orderId, status, currentAuth), DecideOrderResponse.NOT_POSSIBLE);
     }
 
     @Test
@@ -490,8 +496,10 @@ class OrderServiceImplTest {
         Employee currentAuth = new Employee();
         MarketOrder marketOrder = new MarketOrder();
         marketOrder.setStatus(OrderStatus.PROCESSING);
+        marketOrder.setOwner(currentAuth);
+        marketOrder.setOrderType(OrderType.BUY);
 
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(marketOrder));
+        when(orderRepository.fetchById(orderId)).thenReturn(Optional.of(marketOrder));
 
         // Act
         DecideOrderResponse response = orderService.decideOrder(orderId, status, currentAuth);
@@ -512,7 +520,7 @@ class OrderServiceImplTest {
         MarketOrder marketOrder = new MarketOrder();
         marketOrder.setStatus(OrderStatus.PROCESSING);
 
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(marketOrder));
+        when(orderRepository.fetchById(orderId)).thenReturn(Optional.of(marketOrder));
 
         // Act
         DecideOrderResponse response = orderService.decideOrder(orderId, status, currentAuth);

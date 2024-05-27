@@ -10,7 +10,7 @@ public interface TransactionService {
 
     List<TransactionDto> getAllTransaction(final String accNum);
 
-    void createTransaction(Capital bankCapital, Capital securityCapital, Double price, MarketOrder order, Long securityAmount);
+    void createTransaction(BankAccount bankAccount, Capital securityCapital, Double price, MarketOrder order, Long securityAmount);
     TransactionDto createBuyTransaction(CreateTransactionRequest transaction);
     TransactionDto createSellTransaction(CreateTransactionRequest transaction);
 
