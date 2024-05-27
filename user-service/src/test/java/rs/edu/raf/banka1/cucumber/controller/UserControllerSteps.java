@@ -288,6 +288,8 @@ public class UserControllerSteps {
             assertThat(capitalDto.getListingType()).isEqualTo(ListingType.FUTURE);
         } else if(arg1.equalsIgnoreCase("stock")) {
             assertThat(capitalDto.getListingType()).isEqualTo(ListingType.STOCK);
+        } else if(arg1.equalsIgnoreCase("options")){
+            assertThat(capitalDto.getListingType()).isEqualTo(ListingType.OPTIONS);
         }
     }
 
