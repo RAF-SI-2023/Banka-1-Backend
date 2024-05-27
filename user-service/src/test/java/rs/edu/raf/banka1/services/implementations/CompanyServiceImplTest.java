@@ -26,6 +26,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
@@ -118,9 +121,10 @@ class CompanyServiceImplTest {
             joinCompanyDto.setCompanyPib("companyPibBad");
             joinCompanyDto.setCustomerEmail("customerEmail");
 
-            when(companyRepository.findCompaniesByPibContainingIgnoreCase("companyPib").getFirst()).thenReturn(null);
+            when(companyRepository.findCompaniesByPibContainingIgnoreCase(anyString())).thenReturn(List.of());
 
-            assertFalse(companyService.joinCompany(joinCompanyDto));
+            assertThrows(CompanyNotFoundException.class, () -> companyService.joinCompany(joinCompanyDto));
+            verify(companyRepository).findCompaniesByPibContainingIgnoreCase(eq("companyPibBad"));
         }
 
         @Test
