@@ -230,4 +230,9 @@ public class CustomerServiceImpl implements CustomerService {
 
         return new NewPasswordResponse(customer.getUserId());
     }
+
+    @Override
+    public Customer findCustomerByEmail(String email) {
+        return this.customerRepository.findCustomerByEmail(email).orElse(null);
+    }
 }
