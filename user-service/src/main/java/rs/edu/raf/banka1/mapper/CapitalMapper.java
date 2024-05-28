@@ -14,6 +14,7 @@ public class CapitalMapper {
         capitalDto.setTotal(capital.getTotal());
         capitalDto.setReserved(capital.getReserved());
         capitalDto.setBankAccountNumber(capital.getBankAccount() == null ? null : capital.getBankAccount().getAccountNumber());
+        capitalDto.setAverageBuyingPrice(capital.getAverageBuyingPrice());
         return capitalDto;
     }
 
