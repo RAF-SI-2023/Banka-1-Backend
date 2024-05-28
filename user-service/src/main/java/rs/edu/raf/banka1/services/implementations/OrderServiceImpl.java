@@ -3,12 +3,10 @@ package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.LegalOrderRequest;
 import rs.edu.raf.banka1.dtos.OrderDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
-import rs.edu.raf.banka1.exceptions.InvalidOrderListingAmountException;
-import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
-import rs.edu.raf.banka1.exceptions.OrderListingNotFoundByIdException;
-import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
+import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
@@ -69,8 +67,23 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void createOrder(final CreateOrderRequest request, final Employee currentAuth) {
-        final MarketOrder order = orderMapper.requestToMarketOrder(request, currentAuth);
+    public void createOrder(final CreateOrderRequest request, final User currentAuth, String bankAccountNumber) {
+        MarketOrder order = orderMapper.requestToMarketOrder(request, currentAuth);
+        if(currentAuth instanceof Customer) {
+            BankAccount bankAccount = bankAccountService.findBankAccountByAccountNumber(bankAccountNumber);
+            if(!((Customer)currentAuth).getAccountIds().contains(bankAccount)){
+                //mozda ovde treba drugaciji exception?
+                throw new ForbiddenException();
+            }
+            if(bankAccount.getCompany() == null && !order.getListingType().equals(ListingType.STOCK)){
+                throw new ForbiddenException();
+            }
+            order.setCustomer((Customer)currentAuth);
+            order.setBankAccountNumber(bankAccountNumber);
+        }
+        else if(currentAuth instanceof Employee){
+            order.setOwner((Employee)currentAuth);
+        }
         if(order.getContractSize() <= 0) throw new InvalidOrderListingAmountException();
         ListingBaseDto listingBaseDto = getListingByOrder(order);
 
@@ -78,15 +91,25 @@ public class OrderServiceImpl implements OrderService {
 
         order.setPrice(calculatePrice(order,listingBaseDto,order.getContractSize()));
         order.setFee(calculateFee(request.getLimitValue(), order.getPrice()));
-        order.setOwner(currentAuth);
+        if(currentAuth instanceof Employee) {
+            order.setOwner((Employee)currentAuth);
+        }
+        else{
+            order.setCustomer((Customer)currentAuth);
+        }
         order.setProcessedNumber(0L);
 
         if(!capitalService.hasEnoughCapitalForOrder(order))
             throw new NotEnoughCapitalAvailableException();
 
-        if(adjustAgentLimit(currentAuth,order.getPrice())){
-            order.setStatus(OrderStatus.PROCESSING);
-        }else {
+        if(currentAuth instanceof Employee) {
+            if (adjustAgentLimit((Employee)currentAuth, order.getPrice())) {
+                order.setStatus(OrderStatus.PROCESSING);
+            } else {
+                order.setStatus(OrderStatus.APPROVED);
+            }
+        }
+        else if(currentAuth instanceof Customer){
             order.setStatus(OrderStatus.APPROVED);
         }
 
@@ -97,11 +120,11 @@ public class OrderServiceImpl implements OrderService {
             reserveStockCapital(order);
         }
 
-        startOrderSimulation(order.getId());
+        startOrderSimulation(order.getId(), bankAccountNumber);
     }
 
     @Override
-    public void startOrderSimulation(Long orderId) {
+    public void startOrderSimulation(Long orderId, String bankAccountNumber) {
         orderRepository.updateUpdatedAtById(Instant.now(), orderId); // Update updatedAt to ensure multiple instances don't run the same simulation
         //Start simulation
         ScheduledFuture<?> future = taskScheduler.schedule(
@@ -111,7 +134,8 @@ public class OrderServiceImpl implements OrderService {
                 transactionService,
                 capitalService,
                 bankAccountService,
-                orderId
+                orderId,
+                    bankAccountNumber
             ),
             new StockSimulationTrigger(
                 this,
@@ -293,6 +317,11 @@ public class OrderServiceImpl implements OrderService {
 
         if(order.getContractSize().equals(order.getProcessedNumber()))
             updateLimitOnFinish(order);
+    }
+
+    @Override
+    public List<OrderDto> getAllOrdersForLegalPerson(Customer customer) {
+        return orderRepository.getAllByCustomer(customer).stream().map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
     }
 
     private Double getSpentMoneyForOrder(MarketOrder order) {

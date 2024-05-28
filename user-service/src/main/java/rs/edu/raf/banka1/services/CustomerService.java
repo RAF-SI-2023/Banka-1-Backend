@@ -26,4 +26,5 @@ public interface CustomerService extends UserDetailsService {
     boolean editCustomer(EditCustomerRequest editCustomerRequest);
     Boolean sendResetPasswordEmail(String email);
     NewPasswordResponse setNewPassword(String token, String password);
+    Customer findCustomerByEmail(String email);
 }

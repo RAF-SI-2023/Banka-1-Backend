@@ -23,7 +23,7 @@ public class StockSimulationScheduler {
     void handleInactiveOrderSimulations() {
         List<MarketOrder> orders = orderService.getInactiveOrders(Instant.now().minusSeconds(INACTIVE_ORDER_THRESHOLD));
         orders.forEach((MarketOrder order) -> {
-            orderService.startOrderSimulation(order.getId());
+            orderService.startOrderSimulation(order.getId(), order.getBankAccountNumber());
         });
     }
 }
