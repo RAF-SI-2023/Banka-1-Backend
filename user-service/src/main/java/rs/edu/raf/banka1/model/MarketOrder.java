@@ -19,8 +19,11 @@ public class MarketOrder {
     private Long listingId;
     private ListingType listingType;
 
+    //market order can be related to an employee or a customer
     @ManyToOne()
     private Employee owner;
+    @ManyToOne()
+    private Customer customer;
     private OrderType orderType;
     private OrderStatus status;
     private Long contractSize;
@@ -42,4 +45,6 @@ public class MarketOrder {
 
     private Long timestamp;
     private Long currentAmount;
+    //we only keep this in case a order is being processed when the server crashes
+    private String bankAccountNumber;
 }
