@@ -16,12 +16,16 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.configuration.authproviders.CurrentAuth;
+import rs.edu.raf.banka1.dtos.LegalOrderRequest;
 import rs.edu.raf.banka1.dtos.OrderDto;
-import rs.edu.raf.banka1.exceptions.ForbiddenException;
+import rs.edu.raf.banka1.mapper.EmployeeMapper;
+import rs.edu.raf.banka1.mapper.OrderMapper;
+import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.model.DecideOrderResponse;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.requests.StatusRequest;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
+import rs.edu.raf.banka1.services.CustomerService;
 import rs.edu.raf.banka1.services.EmployeeService;
 import rs.edu.raf.banka1.services.OrderService;
 import rs.edu.raf.banka1.utils.JwtUtil;
@@ -38,11 +42,19 @@ public class OrderController {
     private final OrderService orderService;
     private final JwtUtil jwtUtil;
     private final EmployeeService employeeService;
+    private final CustomerService customerService;
+    private final OrderMapper orderMapper;
 
-    public OrderController(OrderService orderService, JwtUtil jwtUtil, EmployeeService employeeService) {
+    public OrderController(OrderService orderService,
+                           JwtUtil jwtUtil,
+                           EmployeeService employeeService,
+                           CustomerService customerService,
+                           OrderMapper orderMapper) {
         this.orderService = orderService;
         this.jwtUtil = jwtUtil;
         this.employeeService = employeeService;
+        this.customerService = customerService;
+        this.orderMapper = orderMapper;
     }
 
     @PutMapping(value = "/{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -87,7 +99,7 @@ public class OrderController {
             @AuthenticationPrincipal User userPrincipal
             ) {
         Employee currentAuth = employeeService.getEmployeeEntityByEmail(userPrincipal.getUsername());
-        orderService.createOrder(request, currentAuth);
+        orderService.createOrder(request, currentAuth, null);
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
@@ -152,4 +164,46 @@ public class OrderController {
         Employee currentAuth = employeeService.getEmployeeEntityByEmail(userPrincipal.getUsername());
         return new ResponseEntity<>(orderService.decideOrder(orderId, request.getStatus(), currentAuth), HttpStatus.OK);
     }
+
+    @PutMapping(value = "/legal")
+    @Operation(summary = "Legal person creates a new order.", description = "Legal person creates a new order.",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to create order request"),
+            @ApiResponse(responseCode = "404", description = "Bad Request"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Boolean> createLegalPersonOrder(
+            @RequestBody final LegalOrderRequest request,
+            @AuthenticationPrincipal User userPrincipal
+    ){
+        Customer currentAuth = customerService.findCustomerByEmail(userPrincipal.getUsername());
+        String bankAccountNumber = request.getBankAccountNumber();
+        CreateOrderRequest createOrderRequest = orderMapper.legalMarketOrderToCreateOrderRequest(request);
+        orderService.createOrder(createOrderRequest, currentAuth, bankAccountNumber);
+        return new ResponseEntity<>(true, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "legal")
+    @Operation(summary = "Legal person lists his orders.", description = "Legal person lists his order.",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json")}),
+            @ApiResponse(responseCode = "403", description = "You aren't authorized to create order request"),
+            @ApiResponse(responseCode = "404", description = "Bad Request"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<OrderDto>> getAllOrdersForLegalUser(
+            @CurrentAuth Employee currentAuth
+    ) {
+        return new ResponseEntity<>(orderService.getAllOrdersForEmployee(currentAuth), HttpStatus.OK);
+    }
+
 }

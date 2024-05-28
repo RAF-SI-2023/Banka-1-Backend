@@ -19,6 +19,7 @@ public class StockSimulationJob implements Runnable {
     private final CapitalService capitalService;
     private final BankAccountService bankAccountService;
     private final Long orderId;
+    private final String bankAccountNumber;
     private final Random random = new Random();
     private final Double PERCENT = 0.1;
 
@@ -54,8 +55,10 @@ public class StockSimulationJob implements Runnable {
             order.getContractSize() - order.getProcessedNumber()
         );
 
-        createTransaction(order,listingBaseDto, processedNumber, Constants.DEFAULT_CURRENCY);
-        orderService.updateEmployeeLimit(order.getId()); // Ovo je ovde jer bi u transaction servisu bio circular dependency. Trebalo bi promeniti kasnije
+        createTransaction(order,listingBaseDto, processedNumber, bankAccountNumber);
+        if(bankAccountNumber != null) {
+            orderService.updateEmployeeLimit(order.getId());// Ovo je ovde jer bi u transaction servisu bio circular dependency. Trebalo bi promeniti kasnije
+        }
 
         if(order.getContractSize() == order.getProcessedNumber() + processedNumber) {
             orderService.finishOrder(orderId);
@@ -92,8 +95,14 @@ public class StockSimulationJob implements Runnable {
     }
 
     //todo treba da se radi sa currency i da se doda u listingdto exchangedto koji ce da ima i currency u sebi
-    private void createTransaction(MarketOrder order, ListingBaseDto listingBaseDto, Long processedNum, String currencyCode){
-        BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
+    private void createTransaction(MarketOrder order, ListingBaseDto listingBaseDto, Long processedNum, String bankAccountNumber){
+        BankAccount bankAccount;
+        if(bankAccountNumber == null) {
+            bankAccount = bankAccountService.getDefaultBankAccount();
+        }
+        else{
+            bankAccount = bankAccountService.findBankAccountByAccountNumber(bankAccountNumber);
+        }
         Capital securityCapital = capitalService.getCapitalByListingIdAndTypeAndBankAccount(listingBaseDto.getListingId(), ListingType.valueOf(listingBaseDto.getListingType().toUpperCase()), bankAccount);
 
         if (order.getOrderType() == OrderType.BUY) {
