@@ -55,6 +55,7 @@ public class CapitalServiceImpl implements CapitalService {
         capital.setTotal(total);
         capital.setReserved(reserved);
         capital.setBankAccount(bankAccount);
+        capital.setAverageBuyingPrice(0.0);
 
         if(capital.getListingType().equals(ListingType.STOCK)) {
             capital.setTicker(this.marketService.getStockById(capital.getListingId()).getTicker());
