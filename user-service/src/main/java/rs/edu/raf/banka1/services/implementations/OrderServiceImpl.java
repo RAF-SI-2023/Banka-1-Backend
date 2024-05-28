@@ -71,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
         MarketOrder order = orderMapper.requestToMarketOrder(request, currentAuth);
         if(currentAuth instanceof Customer) {
             BankAccount bankAccount = bankAccountService.findBankAccountByAccountNumber(bankAccountNumber);
-            if(!bankAccount.getCustomer().equals(currentAuth)){
+            if(!((Customer)currentAuth).getAccountIds().contains(bankAccount)){
                 //mozda ovde treba drugaciji exception?
                 throw new ForbiddenException();
             }
