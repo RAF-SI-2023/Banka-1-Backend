@@ -55,4 +55,6 @@ public interface OrderRepository extends JpaRepository<MarketOrder, Long> {
             User owner,
             OrderType orderType,
             OrderStatus status);
+
+    List<MarketOrder> getAllByCustomer(User customer);
 }
