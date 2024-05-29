@@ -3,11 +3,13 @@ package rs.edu.raf.banka1.services;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.OptionsMapper;
+import rs.edu.raf.banka1.model.OptionsModel;
 import rs.edu.raf.banka1.model.dtos.OptionsDto;
 import rs.edu.raf.banka1.repositories.OptionsRepository;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +36,18 @@ public class OptionsServiceImpl implements OptionsService {
         }
         return options;
     }
+
+    @Override
+    @Cacheable(value = "optionsServiceFindById", key = "#id")
+    public Optional<OptionsModel> findById(Long id) {
+        return optionsRepository.findById(id);
+    }
+
+    @Cacheable(value = "optionsServiceAllOptions")
+    public List<OptionsModel> getAllOptions(){
+        return optionsRepository.findAll();
+    }
+
 }
 
 

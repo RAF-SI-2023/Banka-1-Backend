@@ -14,6 +14,14 @@ public class OptionsMapper {
         optionsDto.setStrikePrice(optionsModel.getStrikePrice());
         optionsDto.setExpirationDate(optionsModel.getExpirationDate());
         optionsDto.setImpliedVolatility(optionsModel.getImpliedVolatility());
+        optionsDto.setListingId(optionsModel.getListingId());
+        optionsDto.setListingType("Options");
+        optionsDto.setHigh(optionsModel.getHigh());
+        optionsDto.setLow(optionsModel.getLow());
+        optionsDto.setPrice(optionsModel.getPrice());
+        optionsDto.setVolume(optionsModel.getVolume());
+        optionsDto.setPriceChange(optionsModel.getPriceChange());
+
 
         return optionsDto;
     }
@@ -27,6 +35,11 @@ public class OptionsMapper {
         optionsModel.setStrikePrice(optionsDto.getStrikePrice());
         optionsModel.setExpirationDate(optionsDto.getExpirationDate());
         optionsModel.setImpliedVolatility(optionsDto.getImpliedVolatility());
+        optionsModel.setHigh(optionsDto.getHigh());
+        optionsModel.setLow(optionsDto.getLow());
+        optionsModel.setPrice(optionsDto.getPrice());
+        optionsModel.setVolume(optionsDto.getVolume());
+        optionsModel.setPriceChange(optionsDto.getPriceChange());
 
         return optionsModel;
     }

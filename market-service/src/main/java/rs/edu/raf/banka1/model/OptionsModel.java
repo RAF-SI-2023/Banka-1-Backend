@@ -8,15 +8,17 @@ import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Entity
 @Getter
 @Setter
-public class OptionsModel {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    @Column
-    private String ticker;
+public class OptionsModel extends ListingBase implements Serializable{
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Long id;
+//    @Column
+//    private String ticker;
     @Column
     private String optionType;
     @Column
