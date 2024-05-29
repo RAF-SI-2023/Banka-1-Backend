@@ -18,6 +18,7 @@ public interface CapitalService {
     Double estimateBalanceForex(Long forexId);
     Double estimateBalanceFuture(Long futureId);
     Double estimateBalanceStock(Long stockId);
+    Double estimateBalanceOptions(Long optionsId);
     List<CapitalProfitDto> getListingCapitalsQuantity();
     boolean hasEnoughCapitalForOrder(MarketOrder order);
     List<PublicCapitalDto> getAllPublicStockCapitals();

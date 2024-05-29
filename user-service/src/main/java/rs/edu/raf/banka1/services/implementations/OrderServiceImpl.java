@@ -3,9 +3,13 @@ package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
-import rs.edu.raf.banka1.dtos.LegalOrderRequest;
 import rs.edu.raf.banka1.dtos.OrderDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
+import rs.edu.raf.banka1.exceptions.InvalidOrderListingAmountException;
+import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
+import rs.edu.raf.banka1.exceptions.OrderListingNotFoundByIdException;
+import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
+import rs.edu.raf.banka1.exceptions.ForbiddenException;
 import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.*;
@@ -152,6 +156,8 @@ public class OrderServiceImpl implements OrderService {
             return marketService.getStockById(order.getListingId());
         } else if(order.getListingType().equals(ListingType.FOREX)) {
             return marketService.getForexById(order.getListingId());
+        }else if(order.getListingType().equals(ListingType.OPTIONS)){
+            return marketService.getOptionsById(order.getListingId());
         }
         return marketService.getFutureById(order.getListingId());
 

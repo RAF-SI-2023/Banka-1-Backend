@@ -127,6 +127,9 @@ public class MarketControllerSteps {
             else if(url.equals("/market/listing/forex")){
                 get(marketurl + marketport + url);
             }
+            else if(url.equals("/market/listing/options")){
+                get(marketurl + marketport + url);
+            }
             else if(url.equals("/options/testticker")){
                 get(marketurl + marketport + url);
             }
@@ -155,6 +158,10 @@ public class MarketControllerSteps {
             }
             else if(url.equalsIgnoreCase("/market/listing/get/futures")){
                 lastFutureResponse = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<>() {
+                });
+            }
+            else if(url.equalsIgnoreCase("/market/listing/get/options")){
+                lastOptionsResponse = objectMapper.readValue(get(marketurl + marketport + url), new TypeReference<>() {
                 });
             }
             else if(url.equals("/market/listing")){
@@ -190,6 +197,9 @@ public class MarketControllerSteps {
             case "future" :
                 assertThat(lastFutureResponse).isNotNull();
                 assertThat(lastFutureResponse).isNotEmpty();
+            case "options" :
+                assertThat(lastOptionsResponse).isNotNull();
+                assertThat(lastOptionsResponse).isNotEmpty();
         }
     }
 

@@ -187,6 +187,19 @@ public class CapitalController {
     public ResponseEntity<Double> estimateBalanceStock(@PathVariable(name = "stockId") Long stockId) {
         return new ResponseEntity<>(capitalService.estimateBalanceStock(stockId), HttpStatus.OK);
     }
+
+    @GetMapping(value = "/balance/options/{optionsId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema())}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Double> estimateBalanceOptions(@PathVariable(name = "optionsId") Long optionsId) {
+        return new ResponseEntity<>(capitalService.estimateBalanceOptions(optionsId), HttpStatus.OK);
+    }
     /*
     TODO: Videti za ovaj enpoint jer ce pucati zbog drugacije strukture kapitala.
     Sada umesto samo bank accounta mora da se pruzi i listing type da bi se znao tacan kapital.

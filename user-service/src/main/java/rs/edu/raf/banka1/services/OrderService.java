@@ -1,9 +1,10 @@
 package rs.edu.raf.banka1.services;
 
-import rs.edu.raf.banka1.dtos.LegalOrderRequest;
 import rs.edu.raf.banka1.dtos.OrderDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
-import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.model.DecideOrderResponse;
+import rs.edu.raf.banka1.model.Employee;
+import rs.edu.raf.banka1.model.MarketOrder;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 
 import java.time.Instant;
