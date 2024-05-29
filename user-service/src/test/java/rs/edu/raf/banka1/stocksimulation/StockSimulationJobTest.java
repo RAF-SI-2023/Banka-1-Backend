@@ -44,7 +44,7 @@ class StockSimulationJobTest {
 
     @BeforeEach
     void setup() {
-        stockSimulationJob = new StockSimulationJob(orderService, marketService, transactionService, capitalService, bankAccountService, orderId);
+        stockSimulationJob = new StockSimulationJob(orderService, marketService, transactionService, capitalService, bankAccountService, orderId, null);
     }
 
     @Test
