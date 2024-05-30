@@ -77,7 +77,7 @@ public class TransactionServiceImpl implements TransactionService {
             Double taxReturn = checkTaxReturn(order);
             bankAccountService.addBalance(bankAccount, price - taxReturn);
 
-            if (transaction.getMarketOrder().getListingType().equals(ListingType.STOCK)) {
+            if (order.getListingType().equals(ListingType.STOCK)) {
                 StockProfit stockProfitRecord = new StockProfit();
                 stockProfitRecord.setTransaction(transaction);
                 stockProfitRecord.setDateTime(transaction.getDateTime());
