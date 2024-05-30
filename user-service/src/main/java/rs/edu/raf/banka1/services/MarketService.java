@@ -14,6 +14,8 @@ public interface MarketService {
     ListingFutureDto getFutureById(Long futureId);
     ListingForexDto getForexById(Long forexId);
     OptionsDto getOptionsById(Long optionsId);
+    OptionsDto getCallOptionById(Long optionsId);
+    OptionsDto getPutOptionById(Long optionsId);
     WorkingHoursStatus getWorkingHoursForStock(Long stockId);
 
 }

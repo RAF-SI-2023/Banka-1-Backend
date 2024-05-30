@@ -343,5 +343,95 @@ public class MarketController {
 
     }
 
+    @GetMapping(value = "/listing/callOptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get call options", description = "Returns call options",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,subTypes = {OptionsDto.class}))}),
+            @ApiResponse(responseCode = "404", description = "Options not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+
+    public ResponseEntity<List<OptionsDto>> getCallOptions() {
+        List<OptionsModel> options = optionsService.getAllCallOptions().orElse(null);
+        if (options == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return ResponseEntity.ok(options.stream().map(optionsMapper::optionsModelToOptionsDto).toList());
+    }
+
+    @GetMapping(value = "/listing/callOptionById/{optionsId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get call option by id", description = "Returns call option",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = OptionsDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Options not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+
+    public ResponseEntity<OptionsDto> getCallOptionById(@PathVariable Long optionsId) {
+        OptionsModel options = optionsService.getCallOptionById(optionsId).orElse(null);
+        if (options == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        OptionsDto optionsDto = optionsMapper.optionsModelToOptionsDto(options);
+        return new ResponseEntity<>(optionsDto, HttpStatus.OK);
+
+    }
+
+
+    @GetMapping(value = "/listing/putOptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get put options", description = "Returns put options",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,subTypes = {OptionsDto.class}))}),
+            @ApiResponse(responseCode = "404", description = "Options not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+
+    public ResponseEntity<List<OptionsDto>> getPutOptions() {
+        List<OptionsModel> options = optionsService.getAllPutOptions().orElse(null);
+        if (options == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(options.stream().map(optionsMapper::optionsModelToOptionsDto).toList());
+
+    }
+
+    @GetMapping(value = "/listing/putOptionById/{optionsId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get call option by id", description = "Returns call option",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = OptionsDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Options not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+
+    public ResponseEntity<OptionsDto> getPutOptionById(@PathVariable Long optionsId) {
+        OptionsModel options = optionsService.getPutOptionById(optionsId).orElse(null);
+        if (options == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        OptionsDto optionsDto = optionsMapper.optionsModelToOptionsDto(options);
+        return new ResponseEntity<>(optionsDto, HttpStatus.OK);
+
+    }
 
 }
