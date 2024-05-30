@@ -19,11 +19,28 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import rs.edu.raf.banka1.mapper.*;
-import rs.edu.raf.banka1.model.*;
-import rs.edu.raf.banka1.model.dtos.*;
-import rs.edu.raf.banka1.services.*;
-
+import rs.edu.raf.banka1.mapper.ForexMapper;
+import rs.edu.raf.banka1.mapper.FutureMapper;
+import rs.edu.raf.banka1.mapper.OptionsMapper;
+import rs.edu.raf.banka1.mapper.ListingHistoryMapper;
+import rs.edu.raf.banka1.mapper.StockMapper;
+import rs.edu.raf.banka1.model.ListingForex;
+import rs.edu.raf.banka1.model.ListingFuture;
+import rs.edu.raf.banka1.model.OptionsModel;
+import rs.edu.raf.banka1.model.ListingHistory;
+import rs.edu.raf.banka1.model.ListingStock;
+import rs.edu.raf.banka1.model.dtos.ExchangeDto;
+import rs.edu.raf.banka1.model.dtos.ListingBaseDto;
+import rs.edu.raf.banka1.model.dtos.ListingForexDto;
+import rs.edu.raf.banka1.model.dtos.ListingFutureDto;
+import rs.edu.raf.banka1.model.dtos.ListingHistoryDto;
+import rs.edu.raf.banka1.model.dtos.ListingStockDto;
+import rs.edu.raf.banka1.model.dtos.OptionsDto;
+import rs.edu.raf.banka1.services.ExchangeService;
+import rs.edu.raf.banka1.services.ForexService;
+import rs.edu.raf.banka1.services.FuturesService;
+import rs.edu.raf.banka1.services.ListingStockService;
+import rs.edu.raf.banka1.services.OptionsService;
 import java.util.List;
 
 @RestController
@@ -48,7 +65,8 @@ public class MarketController {
 
     @Autowired
     public MarketController(ExchangeService exchangeService, ForexService forexService, ListingStockService listingStockService, FuturesService futuresService,
-                            ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper, StockMapper stockMapper, FutureMapper futureMapper, OptionsService optionsService, OptionsMapper optionsMapper) {
+                            OptionsService optionsService,OptionsMapper optionsMapper,
+                            ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper, StockMapper stockMapper, FutureMapper futureMapper) {
         this.exchangeService = exchangeService;
         this.forexService = forexService;
         this.listingStockService = listingStockService;

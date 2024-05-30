@@ -43,12 +43,16 @@ public class OptionsServiceImpl implements OptionsService {
         return optionsRepository.findById(id);
     }
 
+<<<<<<< HEAD
     @Override
+=======
+>>>>>>> 4380c86e99aa5b355c1a87acb9cf2b6f4432149f
     @Cacheable(value = "optionsServiceAllOptions")
     public List<OptionsModel> getAllOptions(){
         return optionsRepository.findAll();
     }
 
+<<<<<<< HEAD
     @Override
     @Cacheable(value = "optionsServiceAllCallOptions")
     public Optional<List<OptionsModel>> getAllCallOptions(){
@@ -72,6 +76,8 @@ public class OptionsServiceImpl implements OptionsService {
     public Optional<OptionsModel> getPutOptionById(Long id) {
         return optionsRepository.getPutOptionById(id);
     }
+=======
+>>>>>>> 4380c86e99aa5b355c1a87acb9cf2b6f4432149f
 }
 
 
