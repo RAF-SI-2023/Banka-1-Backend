@@ -1,14 +1,11 @@
-package rs.edu.raf.banka1.model.dtos;
+package rs.edu.raf.banka1.dtos.market_service;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Setter
 public class OptionsDto extends ListingBaseDto{
-    private String ticker;
     private String optionType;
     private Double strikePrice;
     private String currency;

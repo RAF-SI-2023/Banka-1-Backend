@@ -9,8 +9,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OptionsDto implements Serializable {
-    private String ticker;
+public class OptionsDto extends ListingBaseDto {
     private String optionType;
     private Double strikePrice;
     private String currency;

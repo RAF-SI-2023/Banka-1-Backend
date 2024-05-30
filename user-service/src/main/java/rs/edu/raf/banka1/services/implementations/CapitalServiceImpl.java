@@ -7,6 +7,7 @@ import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.dtos.CapitalProfitDto;
 import rs.edu.raf.banka1.dtos.AddPublicCapitalDto;
 import rs.edu.raf.banka1.dtos.PublicCapitalDto;
+import rs.edu.raf.banka1.dtos.market_service.OptionsDto;
 import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
@@ -63,6 +64,8 @@ public class CapitalServiceImpl implements CapitalService {
             capital.setTicker(this.marketService.getFutureById(capital.getListingId()).getTicker());
         } else if(capital.getListingType().equals(ListingType.FOREX)) {
             capital.setTicker(this.marketService.getForexById(capital.getListingId()).getTicker());
+        } else if(capital.getListingType().equals(ListingType.OPTIONS)){
+            capital.setTicker(this.marketService.getOptionsById(capital.getListingId()).getTicker());
         }
 
         return capital;
@@ -260,6 +263,14 @@ public class CapitalServiceImpl implements CapitalService {
         ListingStockDto listingStockDto = this.marketService.getStockById(stockId);
         Capital capital = this.capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(stockId, ListingType.FOREX, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(stockId, ListingType.FOREX));
         return (capital.getTotal()-capital.getReserved())*listingStockDto.getPrice();
+    }
+
+    @Override
+    public Double estimateBalanceOptions(Long optionsId) {
+        BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
+        OptionsDto optionsDto = this.marketService.getOptionsById(optionsId);
+        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(optionsId, ListingType.OPTIONS, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(optionsId, ListingType.OPTIONS));
+        return (capital.getTotal()-capital.getReserved())*optionsDto.getPrice();
     }
 
     @Override
