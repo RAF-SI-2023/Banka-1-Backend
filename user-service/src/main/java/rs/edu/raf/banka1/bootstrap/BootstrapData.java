@@ -97,8 +97,9 @@ public class BootstrapData implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
-        Logger.info("Loading Data...");
+    public void run(String... args) {
+        try {
+//            Logger.info("Loading Data...");
 
         seedPermissions();
         seedCurencies();
@@ -265,7 +266,7 @@ public class BootstrapData implements CommandLineRunner {
         capital.setBankAccount(bankAccount3);
         capital.setTotal(50D);
         capitalRepository.save(capital);
-      
+
         transferService.processTransfer(transferService.createTransfer(new CreateTransferRequest(bankAccount3.getAccountNumber(), bankAccount2.getAccountNumber(), 100.0)));
         transferService.processTransfer(transferService.createTransfer(new CreateTransferRequest(bankAccount3.getAccountNumber(), bankAccount1.getAccountNumber(), 100.0)));
 
@@ -345,6 +346,9 @@ public class BootstrapData implements CommandLineRunner {
         transferService.seedExchangeRates();
 
         Contract contract = new Contract();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void seedLoanRequest() {
