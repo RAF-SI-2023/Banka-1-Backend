@@ -11,6 +11,7 @@ import rs.edu.raf.banka1.dtos.TransactionDto;
 import rs.edu.raf.banka1.mapper.TransactionMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.OrderRepository;
+import rs.edu.raf.banka1.repositories.StockProfitRepository;
 import rs.edu.raf.banka1.repositories.TransactionRepository;
 import rs.edu.raf.banka1.requests.CreateTransactionRequest;
 import rs.edu.raf.banka1.services.implementations.TransactionServiceImpl;
@@ -43,6 +44,8 @@ class TransactionServiceImplTest {
     private CapitalService capitalService;
     @Mock
     private OrderRepository orderRepository;
+    @Mock
+    private StockProfitRepository stockProfitRepository;
 
     @InjectMocks
     private TransactionServiceImpl transactionService;
@@ -180,12 +183,14 @@ class TransactionServiceImplTest {
             bankCapital.setBankAccount(bankAccount);
             bankCapital.setTotal(1000.0);
             bankCapital.setReserved(500.0);
+            bankCapital.setAverageBuyingPrice(0.0);
 
             Capital securityCapital = new Capital();
             securityCapital.setListingType(listingType);
             securityCapital.setListingId(listingId);
             securityCapital.setTotal(1000.0);
             securityCapital.setReserved(100.0);
+            securityCapital.setAverageBuyingPrice(0.0);
 
             MarketOrder order = new MarketOrder();
             order.setOrderType(OrderType.BUY);
@@ -222,6 +227,7 @@ class TransactionServiceImplTest {
             securityCapital.setListingId(listingId);
             securityCapital.setTotal(1000.0);
             securityCapital.setReserved(100.0);
+            securityCapital.setAverageBuyingPrice(0.0);
 
             Employee employee = new Employee();
             MarketOrder order = new MarketOrder();
@@ -268,12 +274,14 @@ class TransactionServiceImplTest {
             bankCapital.setBankAccount(bankAccount);
             bankCapital.setTotal(1000.0);
             bankCapital.setReserved(500.0);
+            bankCapital.setAverageBuyingPrice(0.0);
 
             Capital securityCapital = new Capital();
             securityCapital.setListingType(listingType);
             securityCapital.setListingId(listingId);
             securityCapital.setTotal(1000.0);
             securityCapital.setReserved(100.0);
+            securityCapital.setAverageBuyingPrice(0.0);
 
             Employee employee = new Employee();
             MarketOrder order = new MarketOrder();
@@ -321,12 +329,14 @@ class TransactionServiceImplTest {
             bankCapital.setBankAccount(bankAccount);
             bankCapital.setTotal(1000.0);
             bankCapital.setReserved(500.0);
+            bankCapital.setAverageBuyingPrice(0.0);
 
             Capital securityCapital = new Capital();
             securityCapital.setListingType(listingType);
             securityCapital.setListingId(listingId);
             securityCapital.setTotal(1000.0);
             securityCapital.setReserved(100.0);
+            securityCapital.setAverageBuyingPrice(0.0);
 
             Employee employee = new Employee();
             MarketOrder order = new MarketOrder();
@@ -380,12 +390,14 @@ class TransactionServiceImplTest {
             bankCapital.setBankAccount(bankAccount);
             bankCapital.setTotal(1000.0);
             bankCapital.setReserved(500.0);
+            bankCapital.setAverageBuyingPrice(0.0);
 
             Capital securityCapital = new Capital();
             securityCapital.setListingType(listingType);
             securityCapital.setListingId(listingId);
             securityCapital.setTotal(1000.0);
             securityCapital.setReserved(100.0);
+            securityCapital.setAverageBuyingPrice(0.0);
 
             Employee employee = new Employee();
             MarketOrder order = new MarketOrder();

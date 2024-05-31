@@ -23,7 +23,9 @@ public class Capital {
 
     private Double publicTotal = 0d;
 
-    private Double total;
+    private Double total = 0d;
 
     private Double reserved;
+
+    private Double averageBuyingPrice = 0d;
 }
