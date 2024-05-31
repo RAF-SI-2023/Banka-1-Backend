@@ -8,7 +8,7 @@
 # dovoljno da pokrenemo aplikaciju.
 #
 # Ovo je univerzalni Dockerfile koji moze da se koristi za sve Java/Spring mikroservise.
-FROM harbor.k8s.elab.rs/base-images/base:java-21-node-18-docker
+FROM harbor.k8s.elab.rs/base-images/base:java-21-node-18-docker AS builder
 
 # Ovaj deo definise HOME direktorijum koji se koristi kao radni direktorijum prilikom buildovanja.
 ENV HOME=/usr/app
