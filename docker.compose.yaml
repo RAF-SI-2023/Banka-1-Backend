@@ -1,0 +1,142 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+    ports:
+      - 5432:5432
+    healthcheck:
+      # set myusername and mypassword to desired username and password
+      test: ["CMD-SHELL", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  redis:
+    image: redis:7.2.4-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+  
+  chrome:
+    image: selenium/standalone-chrome:latest
+    hostname: chrome
+    privileged: true
+    shm_size: 2g
+
+  user-service:
+    image: harbor.k8s.elab.rs/banka-1/user-service:latest
+    container_name: user-service-container
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.datasource.url": "jdbc:postgresql://postgres:5432/bank_userservice",
+        "spring.datasource.username": "myusername",
+        "spring.datasource.password": "mypassword",
+        "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.PostgreSQLDialect",
+        "spring.datasource.driver-class-name": "org.postgresql.Driver",
+        "spring.jpa.hibernate.ddl-auto" : "update",
+        "oauth.jwt.secret": "my_secret",
+        "spring.mail.host":"smtp.gmail.com",
+        "spring.mail.port":587,
+        "spring.mail.username":"noreply.rafbanka1@gmail.com",
+        "spring.mail.password":"fony nhtw hlah vzul",
+        "spring.mail.properties.mail.smtp.auth":true,
+        "spring.mail.properties.mail.smtp.starttls.enable":true,
+        "server.port": 8080,
+        "front.port": 4200,
+        "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
+        "exchangeRateAPIToken": "5eb8b116c5d704eea74c42f1",
+        "exchangeRateApiUrl": "https://v6.exchangerate-api.com/v6/",
+        "marketServiceUrl": "http://market-service:8081"
+      }'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  market-service:
+    image: harbor.k8s.elab.rs/banka-1/market-service:latest
+    container_name: market-service-container
+    restart: always
+    ports:
+      - "8081:8081"  # Adjust the port as needed
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.datasource.url": "jdbc:postgresql://postgres:5432/bank_marketservice",
+        "spring.datasource.username": "myusername",
+        "spring.datasource.password": "mypassword",
+        "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.PostgreSQLDialect",
+        "spring.datasource.driver-class-name": "org.postgresql.Driver",
+        "spring.jpa.hibernate.ddl-auto" : "update",
+        "oauth.jwt.secret": "secret_key",
+        "listingAPItoken": "pk_f87286e075c94cc484405da70691c030",
+        "alphaVantageAPIToken":"OF6BVKZOCXWHD9NS",
+        "forexAPItoken": "cnr3i41r01qs2jr5d5bgcnr3i41r01qs2jr5d5c0",
+        "listingNameApiUrl":"https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=",
+        "updateListingApiUrl":"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=",
+        "basicStockInfoApiUrl":"https://www.alphavantage.co/query?function=OVERVIEW&symbol=",
+        "HistoryListingApiUrl":"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=",
+        "forexExchangePlaceApiUrl":"https://finnhub.io/api/v1/forex/exchange?token=",
+        "forexSymbolsApiUrl":"https://finnhub.io/api/v1/forex/symbol?exchange=",
+        "forexExchangeRateApiUrl":"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE",
+        "forexDailyApiUrl":"https://www.alphavantage.co/query?function=FX_DAILY",
+        "optionsUrl":"https://query2.finance.yahoo.com/v7/finance/options/",
+        "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
+        "dev.environment": false,
+        "spring.cache.type": "redis",
+        "spring.data.redis.host": "redis",
+        "spring.data.redis.port": 6379,
+        "spring.cache.redis.time-to-live": 900000
+      }'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  fetching-service:
+      image: harbor.k8s.elab.rs/banka-1/fetching-service:latest
+      container_name: fetching-service-container
+      restart: always
+      ports:
+        - "8082:8082"  # Adjust the port as needed
+      environment:
+        SPRING_APPLICATION_JSON: '{
+          "spring.datasource.url": "jdbc:postgresql://postgres:5432/bank_marketservice",
+          "spring.datasource.username": "myusername",
+          "spring.datasource.password": "mypassword",
+          "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.PostgreSQLDialect",
+          "spring.datasource.driver-class-name": "org.postgresql.Driver",
+          "spring.jpa.hibernate.ddl-auto" : "update",
+          "oauth.jwt.secret": "secret_key",
+          "listingAPItoken": "pk_f87286e075c94cc484405da70691c030",
+          "alphaVantageAPIToken":"OF6BVKZOCXWHD9NS",
+          "forexAPItoken": "cnr3i41r01qs2jr5d5bgcnr3i41r01qs2jr5d5c0",
+          "listingNameApiUrl":"https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=",
+          "updateListingApiUrl":"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=",
+          "basicStockInfoApiUrl":"https://www.alphavantage.co/query?function=OVERVIEW&symbol=",
+          "HistoryListingApiUrl":"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=",
+          "forexExchangePlaceApiUrl":"https://finnhub.io/api/v1/forex/exchange?token=",
+          "forexSymbolsApiUrl":"https://finnhub.io/api/v1/forex/symbol?exchange=",
+          "forexExchangeRateApiUrl":"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE",
+          "forexDailyApiUrl":"https://www.alphavantage.co/query?function=FX_DAILY",
+          "optionsUrl":"https://query2.finance.yahoo.com/v7/finance/options/",
+          "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
+          "dev.environment": false
+        }'
+      depends_on:
+        postgres:
+          condition: service_healthy

@@ -17,15 +17,11 @@ public interface OrderService {
     void setProcessedNumber(Long orderId, Long processedNumber);
     List<MarketOrder> getInactiveOrders(Instant timeThreshold);
     void startOrderSimulation(Long orderId);
-
     ListingBaseDto getListingByOrder(MarketOrder order);
-
     Double calculatePrice(final MarketOrder order, final ListingBaseDto listingBaseDto, long processNum);
-
     List<OrderDto> getAllOrdersForEmployee(Employee currentAuth);
     List<OrderDto> getAllOrders();
-
     void cancelOrder(Long orderId);
-
     DecideOrderResponse decideOrder(Long orderId, String status, Employee currentAuth);
+    void updateEmployeeLimit(Long orderId);
 }

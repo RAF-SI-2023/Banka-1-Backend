@@ -4,7 +4,6 @@ package rs.edu.raf.banka1.services.implementations;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.OrderDto;
-import rs.edu.raf.banka1.dtos.TransactionDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
 import rs.edu.raf.banka1.exceptions.InvalidOrderListingAmountException;
 import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
@@ -153,7 +152,6 @@ public class OrderServiceImpl implements OrderService {
         }
         MarketOrder marketOrder = marketOrderOpt.get();
         if(!marketOrder.getStatus().equals(OrderStatus.PROCESSING)) return DecideOrderResponse.NOT_POSSIBLE;
-
         Employee ownerEmployee = marketOrder.getOwner();
 
         if(status.toUpperCase().equals(OrderStatus.APPROVED.name()) ||
@@ -163,11 +161,19 @@ public class OrderServiceImpl implements OrderService {
             if(status.toUpperCase().equals(OrderStatus.APPROVED.name())){
                 marketOrder.setApprovedBy(currentAuth);
                 if(ownerEmployee.getOrderlimit() != null && ownerEmployee.getLimitNow() != null) {
-                    ownerEmployee.setLimitNow(Math.min(ownerEmployee.getLimitNow() + marketOrder.getPrice(), ownerEmployee.getOrderlimit()));
+//                    ownerEmployee.setLimitNow(Math.min(ownerEmployee.getLimitNow() + marketOrder.getPrice(), ownerEmployee.getOrderlimit()));
+                    ownerEmployee.setLimitNow(ownerEmployee.getLimitNow() + marketOrder.getPrice()); // Voditi racuna na frontu da available ne ode u minus
                     this.employeeRepository.save(marketOrder.getOwner());
                 }
                 reserveStockCapital(marketOrder);
             }
+//            if(status.toUpperCase().equals(OrderStatus.DENIED.name())){
+//                if(ownerEmployee.getOrderlimit() != null && ownerEmployee.getLimitNow() != null) {
+//                    ownerEmployee.setLimitNow(Math.max(ownerEmployee.getLimitNow() - marketOrder.getPrice(), 0));
+//                    this.employeeRepository.save(marketOrder.getOwner());
+//                }
+//                reserveStockCapital(marketOrder);
+//            }
             this.orderRepository.save(marketOrder);
             return DecideOrderResponse.valueOf(status.toUpperCase());
         }
@@ -183,7 +189,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void finishOrder(Long orderId) {
         this.orderRepository.finishOrder(orderId, OrderStatus.DONE);
-        updateLimit(orderId);
+//        updateLimit(orderId);
         this.scheduledFutureMap.get(orderId).cancel(false);
     }
 
@@ -251,16 +257,80 @@ public class OrderServiceImpl implements OrderService {
     }
 
     void updateLimit(Long orderId) {
-        List<TransactionDto> transactionsForOrder=this.transactionService.getTransactionsForOrderId(orderId);
+//        List<TransactionDto> transactionsForOrder=this.transactionService.getTransactionsForOrderId(orderId);
         MarketOrder order = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
         Employee owner = order.getOwner();
-        double spentMoney = transactionsForOrder.stream()
-                .mapToDouble(TransactionDto::getBuy)
-                .sum();
+        double spentMoney = 0;
+        if(order.getOrderType().equals(OrderType.BUY)) {
+           spentMoney = transactionService.getActualBuyPriceForOrder(order);
+        } else {
+            spentMoney = transactionService.getActualSellPriceForOrder(order);
+        }
 
         double difference = spentMoney - order.getPrice();
 
-        owner.setLimitNow(owner.getLimitNow() + Math.max(difference, 0) - Math.min(difference, 0));
+        double newLimit = owner.getLimitNow() + Math.max(difference, 0) - Math.min(difference, 0);
+
+        if(newLimit > owner.getOrderlimit()) {
+            //Limit je predjen, stavi order na processing
+            order.setStatus(OrderStatus.PROCESSING);
+            this.orderRepository.save(order);
+        }
+
+        owner.setLimitNow(newLimit);
         this.employeeRepository.save(owner);
     }
+
+    @Override
+    public void updateEmployeeLimit(Long orderId) {
+        MarketOrder order = this.orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundByIdException(orderId));
+
+        updateLimitOnTransaction(order);
+
+        if(order.getContractSize().equals(order.getProcessedNumber()))
+            updateLimitOnFinish(order);
+    }
+
+    private Double getSpentMoneyForOrder(MarketOrder order) {
+        double spentMoney = 0;
+        if(order.getOrderType().equals(OrderType.BUY)) {
+            spentMoney = transactionService.getActualBuyPriceForOrder(order);
+        } else {
+            spentMoney = transactionService.getActualSellPriceForOrder(order);
+        }
+
+        return spentMoney;
+    }
+
+    private void updateLimitOnTransaction(MarketOrder order) {
+        Employee owner = order.getOwner();
+
+        double spentMoney = getSpentMoneyForOrder(order);
+        if(spentMoney > order.getPrice()) {
+            double lastTransactionValue = transactionService.getLastTransactionValueForOrder(order);
+            double previousDifference = Math.max(spentMoney - lastTransactionValue - order.getPrice(), 0);
+            double difference = spentMoney - order.getPrice() - previousDifference;
+            double newLimit = owner.getLimitNow() + difference;
+            owner.setLimitNow(newLimit);
+            this.employeeRepository.save(owner);
+        }
+
+        if(owner.getLimitNow() > owner.getOrderlimit()) {
+            //Limit je predjen, stavi order na processing
+            order.setStatus(OrderStatus.PROCESSING);
+            this.orderRepository.save(order);
+        }
+    }
+
+    private void updateLimitOnFinish(MarketOrder order) {
+        Employee owner = order.getOwner();
+        double spentMoney = getSpentMoneyForOrder(order);
+        if(spentMoney < order.getPrice()) {
+            double difference = order.getPrice() - spentMoney;
+            double newLimit = owner.getLimitNow() - difference;
+            owner.setLimitNow(newLimit);
+            this.employeeRepository.save(owner);
+        }
+    }
+
 }

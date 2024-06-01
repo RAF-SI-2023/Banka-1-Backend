@@ -17,15 +17,7 @@ public interface ForexService {
 
     void saveAllForexes(List<ListingForex> listingForexList);
 
-    List<ListingForex> getAllForexes();
-
     List<ListingHistory> getForexHistory(ListingForex listingForex);
 
     List<ListingHistory> getAllForexHistories(List<ListingForex> listingForexList);
-
-    ListingForex getForexByTicker(String ticker);
-
-    List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to);
-
-    Optional<ListingForex> findById(Long id);
 }

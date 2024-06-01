@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -44,6 +46,7 @@ import java.util.List;
 //@SecurityRequirement() TODO
 @CrossOrigin
 @SecurityRequirement(name = "basicScheme")
+@SecurityRequirement(name = "Authorization")
 public class MarketController {
 
     private final ExchangeService exchangeService;
@@ -69,7 +72,10 @@ public class MarketController {
     }
 
     @GetMapping(value = "/exchange", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all exchanges", description = "Returns all exchanges")
+    @Operation(summary = "Get all exchanges", description = "Returns all exchanges",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -82,7 +88,10 @@ public class MarketController {
     }
 
     @GetMapping(value = "/exchange/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get exchange by id", description = "Returns exchange by id")
+    @Operation(summary = "Get exchange by id", description = "Returns exchange by id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -97,7 +106,10 @@ public class MarketController {
 
 
     @GetMapping(value = "/listing", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all listings", description = "Returns list of listings")
+    @Operation(summary = "Get all listings", description = "Returns list of listings",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -117,7 +129,10 @@ public class MarketController {
 
     @GetMapping(value = "/listing/get/{listingType}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get specific listing based on listingType param", description = "Returns list of specific "
-            + "listingType based on listingType param (forex, stock, futures)")
+            + "listingType based on listingType param (forex, stock, futures)",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -145,7 +160,10 @@ public class MarketController {
     @GetMapping(value = "/listing/history/stock/{stockId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get history by stock id", description = "Returns List of histories for given stock id, "
             + "timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is "
-            + "provided it's exclusive)")
+            + "provided it's exclusive)",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -170,7 +188,10 @@ public class MarketController {
     @GetMapping(value = "/listing/history/forex/{forexId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get history by forex id", description = "Returns List of histories for given forex id, "
             + "timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is "
-            + "provided it's exclusive)")
+            + "provided it's exclusive)",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -195,7 +216,10 @@ public class MarketController {
     @GetMapping(value = "/listing/history/future/{futureId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get history by future id", description = "Returns List of histories for given future id, "
             + "timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is "
-            + "provided it's exclusive)")
+            + "provided it's exclusive)",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -218,7 +242,10 @@ public class MarketController {
     }
 
     @GetMapping(value = "/listing/stock/{stockId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get stock by id", description = "Returns stock by id")
+    @Operation(summary = "Get stock by id", description = "Returns stock by id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -236,7 +263,10 @@ public class MarketController {
     }
 
     @GetMapping(value = "/exchange/stock/{stockId}/time", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get working time of exchange center", description = "Returns working time of exchange by stock id")
+    @Operation(summary = "Get working time of exchange center", description = "Returns working time of exchange by stock id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -256,7 +286,10 @@ public class MarketController {
     }
 
     @GetMapping(value = "/listing/forex/{forexId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get forex by id", description = "Returns forex by id")
+    @Operation(summary = "Get forex by id", description = "Returns forex by id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -274,7 +307,10 @@ public class MarketController {
     }
 
     @GetMapping(value = "/listing/future/{futureId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get future by id", description = "Returns future by id")
+    @Operation(summary = "Get future by id", description = "Returns future by id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",

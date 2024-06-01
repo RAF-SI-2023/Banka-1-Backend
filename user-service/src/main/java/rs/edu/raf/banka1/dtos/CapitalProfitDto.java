@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CapitalProfitDto extends CapitalDto{
+public class CapitalProfitDto extends CapitalDto {
     private Double totalPrice;
     private String ticker;
 }

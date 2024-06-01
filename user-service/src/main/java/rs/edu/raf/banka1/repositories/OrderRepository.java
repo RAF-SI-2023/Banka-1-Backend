@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import rs.edu.raf.banka1.model.MarketOrder;
 import rs.edu.raf.banka1.model.OrderStatus;
 import rs.edu.raf.banka1.model.User;
+import rs.edu.raf.banka1.model.ListingType;
+import rs.edu.raf.banka1.model.OrderType;
 
 import java.time.Instant;
 import java.util.List;
@@ -45,4 +47,12 @@ public interface OrderRepository extends JpaRepository<MarketOrder, Long> {
     Optional<MarketOrder> fetchById(Long id);
 
     List<MarketOrder> getAllByOwner(User owner);
+
+    @Query("SELECT mo FROM MarketOrder mo WHERE mo.listingId = :listingId AND mo.listingType = :listingType AND mo.owner = :owner AND mo.orderType = :orderType AND mo.status = :status AND mo.currentAmount < mo.contractSize ORDER BY mo.timestamp")
+    Optional<List<MarketOrder>> getAllBuyOrders(
+            Long listingId,
+            ListingType listingType,
+            User owner,
+            OrderType orderType,
+            OrderStatus status);
 }

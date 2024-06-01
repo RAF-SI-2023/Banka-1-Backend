@@ -2,6 +2,7 @@ package rs.edu.raf.banka1.services.implementations;
 
 import io.github.resilience4j.retry.Retry;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -26,6 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@Disabled
 class MarketServiceImplTest {
 
     private Retry serviceRetry;

@@ -1,10 +1,13 @@
 package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +27,7 @@ import java.util.List;
 @RestController
 @CrossOrigin
 @RequestMapping("/customer")
+@SecurityRequirement(name = "Authorization")
 public class CustomerController {
     private final CustomerService customerService;
 
@@ -34,7 +38,10 @@ public class CustomerController {
     @PostMapping("/createNewCustomer")
     @PreAuthorize("hasAuthority('addUser')")
     @Operation(summary = "Create new customer and bank account for customer", description = "Returns true if customer is successfully created," +
-            "false otherwise.")
+            "false otherwise.",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Customer created successfully",
                     content = {@Content(mediaType = "application/json",
@@ -52,7 +59,10 @@ public class CustomerController {
     }
 
     @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all customers", description = "Returns all customers")
+    @Operation(summary = "Get all customers", description = "Returns all customers",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
 //    @PreAuthorize("hasAuthority('readUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -66,7 +76,10 @@ public class CustomerController {
     }
 
     @GetMapping(value = "/getCustomer", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get customer by jwt", description = "Returns customer by jwt")
+    @Operation(summary = "Get customer by jwt", description = "Returns customer by jwt",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -85,7 +98,10 @@ public class CustomerController {
     }
 
     @PutMapping()
-    @Operation(summary = "Admin edit customer", description = "Admin can edit a customer's info")
+    @Operation(summary = "Admin edit customer", description = "Admin can edit a customer's info",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('modifyCustomer')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Customer edited successfully",

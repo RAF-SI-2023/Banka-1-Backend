@@ -20,6 +20,7 @@ spring.mail.username=noreply.rafbanka1@gmail.com
 spring.mail.password=fony nhtw hlah vzul
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.ssl.trust = smtp.gmail.com
 
 
 logging.level.org.hibernate.SQL=DEBUG
@@ -29,8 +30,11 @@ front.port=4200
 server.servlet.context-path=/
 oauth.jwt.secret=secret_key
 
-alphaVantageAPIToken=OF6BVKZOCXWHD9NS
-exchangeRateAPIToken=40f2aa4e59165c6aab10cd02
 
-alphaVantageExchangeRateApiUrl=https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE
+# API TOKENS:
+exchangeRateAPIToken=5eb8b116c5d704eea74c42f1
+
+# API URLs:
 exchangeRateApiUrl= https://v6.exchangerate-api.com/v6/
+
+marketServiceUrl = "http://market-service:8081"

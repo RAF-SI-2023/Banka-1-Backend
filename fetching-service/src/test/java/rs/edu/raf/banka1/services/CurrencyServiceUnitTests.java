@@ -6,17 +6,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import rs.edu.raf.banka1.mapper.CurrencyMapper;
 import rs.edu.raf.banka1.model.dtos.CurrencyDto;
-import rs.edu.raf.banka1.model.entities.Currency;
 import rs.edu.raf.banka1.repositories.CurrencyRepository;
 import rs.edu.raf.banka1.repositories.InflationRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,9 +21,8 @@ public class CurrencyServiceUnitTests {
     @Mock
     private CurrencyRepository currencyRepository;
     @Mock
-    private CurrencyMapper currencyMapper;
-    @Mock
     private InflationRepository inflationRepository;
+
     @InjectMocks
     private CurrencyServiceImpl currencyService;
 
