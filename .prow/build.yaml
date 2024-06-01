@@ -29,6 +29,10 @@ postsubmits:
                 docker push harbor.k8s.elab.rs/${TEAM_NAME}/${serviceName}:${commit_hash}
               done
 
+              helm upgrade --namespace="$TEAM_NAME-dev" --create-namespace --timeout=20m --atomic --install --set imageTag="${commit_hash}" "$TEAM_NAME-backend" "oci://harbor.k8s.elab.rs/$TEAM_NAME/$TEAM_NAME-backend/$TEAM_NAME-backend"
+              if [ "$PULL_BASE_REF" == "main" ]; then
+                helm upgrade --namespace="$TEAM_NAME-prod" --create-namespace --timeout=20m --atomic --install --set imageTag="${commit_hash}" "$TEAM_NAME-backend" "oci://harbor.k8s.elab.rs/$TEAM_NAME/$TEAM_NAME-backend/$TEAM_NAME-backend"
+              fi
           securityContext:
             privileged: true
           imagePullPolicy: Always
