@@ -140,9 +140,21 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerResponse findByEmail(String email) {
-        return this.customerRepository.findCustomerByEmail(email)
-                .map(this.customerMapper::customerToCustomerResponse)
-                .orElse(null);
+        Customer customer = customerRepository.findCustomerByEmail(email).orElse(null);
+        if(customer == null){
+            return null;
+        }
+        CustomerResponse customerResponse = customerMapper.customerToCustomerResponse(customer);
+        List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCustomer(customer.getUserId());
+        Boolean isLegalEntity = false;
+        for(BankAccount bankAccount : bankAccounts){
+            if(bankAccount.getCompany()!=null){
+                isLegalEntity = true;
+                break;
+            }
+        }
+        customerResponse.setIsLegalEntity(isLegalEntity);
+        return customerResponse;
     }
 
     @Override
