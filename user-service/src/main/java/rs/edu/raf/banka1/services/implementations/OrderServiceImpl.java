@@ -10,6 +10,7 @@ import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
 import rs.edu.raf.banka1.exceptions.OrderListingNotFoundByIdException;
 import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
 import rs.edu.raf.banka1.exceptions.ForbiddenException;
+import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
@@ -161,6 +162,7 @@ public class OrderServiceImpl implements OrderService {
             return marketService.getPutOptionById(order.getListingId());
         }
         return marketService.getFutureById(order.getListingId());
+
     }
 
     @Override
