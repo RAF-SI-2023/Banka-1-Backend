@@ -201,9 +201,9 @@ public class OrderController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<List<OrderDto>> getAllOrdersForLegalUser(
-            @CurrentAuth Employee currentAuth
+            @CurrentAuth Customer currentAuth
     ) {
-        return new ResponseEntity<>(orderService.getAllOrdersForEmployee(currentAuth), HttpStatus.OK);
+        return new ResponseEntity<>(orderService.getAllOrdersForLegalPerson(currentAuth), HttpStatus.OK);
     }
 
 }

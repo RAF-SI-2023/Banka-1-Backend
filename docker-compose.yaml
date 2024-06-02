@@ -49,7 +49,7 @@ services:
         "spring.datasource.password": "mypassword",
         "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.PostgreSQLDialect",
         "spring.datasource.driver-class-name": "org.postgresql.Driver",
-        "spring.jpa.hibernate.ddl-auto" : "update",
+        "spring.jpa.hibernate.ddl-auto" : "create",
         "oauth.jwt.secret": "my_secret",
         "spring.mail.host":"smtp.gmail.com",
         "spring.mail.port":587,
@@ -81,8 +81,8 @@ services:
         "spring.datasource.password": "mypassword",
         "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.PostgreSQLDialect",
         "spring.datasource.driver-class-name": "org.postgresql.Driver",
-        "spring.jpa.hibernate.ddl-auto" : "update",
-        "oauth.jwt.secret": "my_secret",
+        "spring.jpa.hibernate.ddl-auto" : "create",
+        "oauth.jwt.secret": "secret_key",
         "listingAPItoken": "pk_f87286e075c94cc484405da70691c030",
         "alphaVantageAPIToken":"OF6BVKZOCXWHD9NS",
         "forexAPItoken": "cnr3i41r01qs2jr5d5bgcnr3i41r01qs2jr5d5c0",
@@ -96,11 +96,7 @@ services:
         "forexDailyApiUrl":"https://www.alphavantage.co/query?function=FX_DAILY",
         "optionsUrl":"https://query2.finance.yahoo.com/v7/finance/options/",
         "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
-        "dev.environment": false,
-        "spring.cache.type": "redis",
-        "spring.data.redis.host": "redis",
-        "spring.data.redis.port": 6379,
-        "spring.cache.redis.time-to-live": 900000
+        "dev.environment": false
       }'
     depends_on:
       postgres:
@@ -121,8 +117,8 @@ services:
           "spring.datasource.password": "mypassword",
           "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.PostgreSQLDialect",
           "spring.datasource.driver-class-name": "org.postgresql.Driver",
-          "spring.jpa.hibernate.ddl-auto" : "update",
-          "oauth.jwt.secret": "my_secret",
+          "spring.jpa.hibernate.ddl-auto" : "create",
+          "oauth.jwt.secret": "secret_key",
           "listingAPItoken": "pk_f87286e075c94cc484405da70691c030",
           "alphaVantageAPIToken":"OF6BVKZOCXWHD9NS",
           "forexAPItoken": "cnr3i41r01qs2jr5d5bgcnr3i41r01qs2jr5d5c0",

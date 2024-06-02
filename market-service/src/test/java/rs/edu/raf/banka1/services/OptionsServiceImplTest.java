@@ -98,4 +98,70 @@ class OptionsServiceImplTest {
         List<OptionsModel> optionsModels = optionsService.getAllOptions();
         assertEquals(2,optionsModels.size());
     }
+
+    @Test
+    public void getAllCallOptionsTest(){
+        OptionsModel option1 = new OptionsModel();
+        option1.setTicker("APPL");
+        OptionsModel option2 = new OptionsModel();
+        option1.setTicker("ORCL");
+        List<OptionsModel> optionsList = Arrays.asList(option1, option2);
+        Optional<List<OptionsModel>> expectedOptions = Optional.of(optionsList);
+
+        when(optionsRepository.getAllCallsOptions()).thenReturn(expectedOptions);
+
+        Optional<List<OptionsModel>> actualOptions = optionsService.getAllCallOptions();
+
+        assertTrue(actualOptions.isPresent());
+        assertEquals(expectedOptions.get(), actualOptions.get());
+        verify(optionsRepository, times(1)).getAllCallsOptions();
+
+    }
+    @Test
+    public void getAllPutOptionsTest(){
+        OptionsModel option1 = new OptionsModel();
+        option1.setTicker("APPL");
+        OptionsModel option2 = new OptionsModel();
+        option1.setTicker("ORCL");
+        List<OptionsModel> optionsList = Arrays.asList(option1, option2);
+        Optional<List<OptionsModel>> expectedOptions = Optional.of(optionsList);
+
+        when(optionsRepository.getAllPutsOptions()).thenReturn(expectedOptions);
+
+        Optional<List<OptionsModel>> actualOptions = optionsService.getAllPutOptions();
+
+        assertTrue(actualOptions.isPresent());
+        assertEquals(expectedOptions.get(), actualOptions.get());
+        verify(optionsRepository, times(1)).getAllPutsOptions();
+
+    }
+
+    @Test
+    public void getCallOptionById(){
+        Long id = 1L;
+        OptionsModel expectedOption = new OptionsModel();
+        Optional<OptionsModel> expectedOptional = Optional.of(expectedOption);
+
+        when(optionsRepository.getCallOptionById(id)).thenReturn(expectedOptional);
+        Optional<OptionsModel> actualOptional = optionsService.getCallOptionById(id);
+        assertTrue(actualOptional.isPresent());
+        assertEquals(expectedOption, actualOptional.get());
+        verify(optionsRepository, times(1)).getCallOptionById(id);
+
+    }
+    @Test
+    public void getPutOptionById(){
+        Long id = 1L;
+        OptionsModel expectedOption = new OptionsModel();
+        Optional<OptionsModel> expectedOptional = Optional.of(expectedOption);
+
+        when(optionsRepository.getPutOptionById(id)).thenReturn(expectedOptional);
+        Optional<OptionsModel> actualOptional = optionsService.getPutOptionById(id);
+        assertTrue(actualOptional.isPresent());
+        assertEquals(expectedOption, actualOptional.get());
+        verify(optionsRepository, times(1)).getPutOptionById(id);
+
+    }
+
+
 }

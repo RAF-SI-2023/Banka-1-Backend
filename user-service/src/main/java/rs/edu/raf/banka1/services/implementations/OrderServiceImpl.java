@@ -10,6 +10,7 @@ import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
 import rs.edu.raf.banka1.exceptions.OrderListingNotFoundByIdException;
 import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
 import rs.edu.raf.banka1.exceptions.ForbiddenException;
+import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
@@ -155,10 +156,13 @@ public class OrderServiceImpl implements OrderService {
             return marketService.getStockById(order.getListingId());
         } else if(order.getListingType().equals(ListingType.FOREX)) {
             return marketService.getForexById(order.getListingId());
-        }else if(order.getListingType().equals(ListingType.OPTIONS)){
-            return marketService.getOptionsById(order.getListingId());
+        }else if(order.getListingType().equals(ListingType.OPTIONS) && order.getOrderType().equals(OrderType.BUY)){
+            return marketService.getCallOptionById(order.getListingId());
+        }else if(order.getListingType().equals(ListingType.OPTIONS) && order.getOrderType().equals(OrderType.SELL)){
+            return marketService.getPutOptionById(order.getListingId());
         }
         return marketService.getFutureById(order.getListingId());
+
     }
 
     @Override
