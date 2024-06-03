@@ -3,10 +3,7 @@ package rs.edu.raf.banka1.services.implementations;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
-import rs.edu.raf.banka1.dtos.CapitalDto;
-import rs.edu.raf.banka1.dtos.CapitalProfitDto;
-import rs.edu.raf.banka1.dtos.AddPublicCapitalDto;
-import rs.edu.raf.banka1.dtos.PublicCapitalDto;
+import rs.edu.raf.banka1.dtos.*;
 import rs.edu.raf.banka1.dtos.market_service.OptionsDto;
 import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
@@ -17,9 +14,7 @@ import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.CapitalRepository;
-import rs.edu.raf.banka1.services.BankAccountService;
-import rs.edu.raf.banka1.services.CapitalService;
-import rs.edu.raf.banka1.services.MarketService;
+import rs.edu.raf.banka1.services.*;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.ArrayList;
@@ -163,6 +158,27 @@ public class CapitalServiceImpl implements CapitalService {
     @Override
     public CapitalDto getCapitalForForexId(Long forexId) {
         return null;
+    }
+
+    @Override
+    public List<AllPublicCapitalsDto> getAllPublicCapitals() {
+        List<Capital> capitals = this.capitalRepository.getAllByPublicTotalGreaterThan(0d);
+
+        List<AllPublicCapitalsDto> allPublicCapitalsDtos = new ArrayList<>();
+
+        capitals.forEach((Capital capital) -> {
+            String name = "";
+            if(capital.getBankAccount().getCompany() != null) {
+                name = capital.getBankAccount().getCompany().getCompanyName();
+            } else {
+                name = capital.getBankAccount().getCustomer().getFirstName() + " " + capital.getBankAccount().getCustomer().getLastName();
+            }
+
+            allPublicCapitalsDtos.add(capitalMapper.capitalToAllPublicCapitalsDto(capital, name));
+        });
+
+
+        return allPublicCapitalsDtos;
     }
 
     @Override
