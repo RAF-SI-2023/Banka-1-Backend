@@ -23,7 +23,7 @@ public class MarginTransaction {
 
     @ManyToOne()
     @JoinColumn(name = "customer_user_id")
-    private Customer customer;
+    private MarginAccount customerAccount;
 
     private String description;
 

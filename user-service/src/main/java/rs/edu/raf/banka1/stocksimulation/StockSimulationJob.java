@@ -18,6 +18,7 @@ public class StockSimulationJob implements Runnable {
     private final TransactionService transactionService;
     private final CapitalService capitalService;
     private final BankAccountService bankAccountService;
+    private final MarginTransactionService marginTransactionService;
     private final Long orderId;
     private final String bankAccountNumber;
     private final Random random = new Random();
@@ -94,8 +95,20 @@ public class StockSimulationJob implements Runnable {
             (bid < marketOrder.getStopValue());
     }
 
+    private void createTransaction(MarketOrder order, ListingBaseDto listingBaseDto, Long processedNum, String bankAccountNumber) {
+        if(!order.getIsMargin()) {
+            createCashTransaction(order, listingBaseDto, processedNum, bankAccountNumber);
+            return;
+        }
+        createMarginTransaction();
+    }
+
+    private void createMarginTransaction() {
+
+    }
+
     //todo treba da se radi sa currency i da se doda u listingdto exchangedto koji ce da ima i currency u sebi
-    private void createTransaction(MarketOrder order, ListingBaseDto listingBaseDto, Long processedNum, String bankAccountNumber){
+    private void createCashTransaction(MarketOrder order, ListingBaseDto listingBaseDto, Long processedNum, String bankAccountNumber){
         BankAccount bankAccount;
         if(bankAccountNumber == null) {
             bankAccount = bankAccountService.getDefaultBankAccount();

@@ -19,4 +19,5 @@ public class LegalOrderRequest {
     private Double stopValue;
     private Boolean allOrNone;
     private String bankAccountNumber;
+    private Boolean isMargin;
 }

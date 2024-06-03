@@ -120,6 +120,11 @@ public class GlobalExceptionHandler {
         Logger.info("Error: " + e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(MarginAccountNotFoundException.class)
+    public ResponseEntity<String> handleMarginAccountNotFoundException(MarginAccountNotFoundException e) {
+        Logger.info("Error: " + e.getMessage());
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
 
     @ExceptionHandler(CompanyNotFoundException.class)
     public ResponseEntity<String> handleCompanyNotFoundException(CompanyNotFoundException e) {

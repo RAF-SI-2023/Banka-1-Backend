@@ -86,6 +86,10 @@ public class OrderServiceImpl implements OrderService {
             order.setBankAccountNumber(bankAccountNumber);
         }
         else if(currentAuth instanceof Employee){
+            if(request.getIsMargin()) {
+                //Employee cannot create a margin order
+                throw new ForbiddenException();
+            }
             order.setOwner((Employee)currentAuth);
         }
         if(order.getContractSize() <= 0) throw new InvalidOrderListingAmountException();
