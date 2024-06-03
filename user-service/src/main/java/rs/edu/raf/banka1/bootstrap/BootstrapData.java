@@ -97,7 +97,7 @@ public class BootstrapData implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Logger.info("Loading Data...");
+        //Logger.info("Loading Data...");
 
         seedPermissions();
         seedCurencies();
