@@ -12,7 +12,7 @@ public class MarginAccount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "userId")
     private Customer customer;
 
