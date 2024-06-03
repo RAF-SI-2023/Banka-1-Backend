@@ -13,8 +13,8 @@ public class MarginAccount {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "customer_id", referencedColumnName = "userId")
-    private Customer customer;
+    @JoinColumn(name = "bank_account_id", referencedColumnName = "id")
+    private BankAccount customer;
 
     @Enumerated(EnumType.STRING)
     private ListingType listingType;

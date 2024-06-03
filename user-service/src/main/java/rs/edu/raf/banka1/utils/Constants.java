@@ -17,6 +17,7 @@ public class Constants {
     public static final String ADMIN = "admin";
 
     public static final String DEFAULT_CURRENCY = "RSD";
+    public static final float MARGIN_RATE = 0.6f;
 
     public static final List<String> allPermissions = Arrays.asList(
             "addUser", "modifyUser", "deleteUser", "readUser",
