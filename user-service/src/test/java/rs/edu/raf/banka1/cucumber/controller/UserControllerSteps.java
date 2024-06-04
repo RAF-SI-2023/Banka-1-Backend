@@ -38,7 +38,10 @@ import rs.edu.raf.banka1.requests.customer.CustomerData;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.responses.*;
+import rs.edu.raf.banka1.services.CapitalService;
+import rs.edu.raf.banka1.services.CompanyService;
 import rs.edu.raf.banka1.services.EmailService;
+import rs.edu.raf.banka1.services.implementations.CompanyServiceImpl;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -60,6 +63,9 @@ public class UserControllerSteps {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private CompanyService companyService;
     private String port = Integer.toString(SpringIntegrationTest.enviroment.getServicePort("user-service", 8080));
 
     private EmployeeRepository userRepository;
@@ -84,7 +90,7 @@ public class UserControllerSteps {
     private List<EmployeeDto> lastReadAllUsersResponse;
     private List<CustomerResponse> lastReadAllCustomersResponse;
     private CreateUserResponse lastCreateUserResponse;
-//    private CreateForeignCurrencyAccountResponse lastCreateForeignCurrencyAccountResponse;
+    //    private CreateForeignCurrencyAccountResponse lastCreateForeignCurrencyAccountResponse;
 //    private List<ForeignCurrencyAccountResponse> lastReadAllForeignCurrencyAccountsResponse;
     private EditUserResponse lastEditUserResponse;
     private ActivateAccountResponse lastActivateAccountResponse;
@@ -110,6 +116,8 @@ public class UserControllerSteps {
     private String bankAccountNumber;
     private CreatePaymentRequest createPaymentRequest = new CreatePaymentRequest();
     private Long paymentId;
+
+    private Long contractId;
     private CreatePaymentRecipientRequest createPaymentRecipientRequest = new CreatePaymentRecipientRequest();
     private PaymentRecipientDto paymentRecipientDto = new PaymentRecipientDto();
     private CreateTransferRequest createTransferRequest = new CreateTransferRequest();
@@ -126,12 +134,109 @@ public class UserControllerSteps {
     private EditEmployeeDto editEmployeeDto = new EditEmployeeDto();
     private ModifyPermissionsRequest modifyPermissionsRequest = new ModifyPermissionsRequest();
     private NewLimitDto newLimitDto = new NewLimitDto();
+    private AddPublicCapitalDto addPublicCapitalDto = new AddPublicCapitalDto();
+
+    private ContractCreateDto contractCreateDto = new ContractCreateDto();
+    private String denyContractComment = "";
 
     @And("i want to add him permissions")
     public void iWantToAddHimPermissions() {
         modifyPermissionsRequest.setAdd(true);
     }
 
+    @And("i should get all public stocks of other individual customers")
+    public void iShouldGetAllPublicStocksOfOtherIndividualCustomers() throws JsonProcessingException {
+        List<PublicCapitalDto> listCapitalDtoPublicStocks = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<PublicCapitalDto>>() {});
+        assertThat(listCapitalDtoPublicStocks).isNotNull();
+        assertThat(listCapitalDtoPublicStocks).isNotEmpty();
+        for (PublicCapitalDto publicCapitalDto : listCapitalDtoPublicStocks) {
+            assertThat(publicCapitalDto.getIsIndividual()).isTrue();
+            assertThat(publicCapitalDto.getListingType()).isEqualTo(ListingType.STOCK);
+        }
+    }
+
+    @And("i want to buy {double} stocks")
+    public void iWantToBuyStocks(double arg0) {
+        contractCreateDto.setAmountToBuy(arg0);
+    }
+
+    @And("i offer him price of {double} RSD")
+    public void iOfferHimPriceOfRSD(double arg0) {
+        contractCreateDto.setOfferPrice(arg0);
+    }
+
+    @And("seller id is {long}")
+    public void sellerIdIs(String arg0) {
+        contractCreateDto.setBankAccountNumber(arg0);
+    }
+
+    @And("i should get all contracts i am contributing in as a {string}")
+    public void iShouldGetAllContractsIAmContributingInAsA(String arg0) throws JsonProcessingException {
+        List<ContractDto> contractListIAmIn = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<ContractDto>>() {});
+        assertThat(contractListIAmIn).isNotNull();
+    }
+
+    @Given("i want to accept contract offer with id {long}")
+    public void iWantToAcceptContractOfferWithId(long arg0) {
+        this.contractId = arg0;
+    }
+
+    @And("i want to deny contract offer with id {long}")
+    public void iWantToDenyContractOfferWithId(long arg0) {
+        this.contractId = arg0;
+    }
+
+    @And("with comment why i denied {string}")
+    public void withCommentWhyIDenied(String arg0) {
+        this.denyContractComment = arg0;
+    }
+
+    @And("i should get all not finalized contracts")
+    public void iShouldGetAllNotFinalizedContracts() throws JsonProcessingException {
+        List<ContractDto> notFinalizedContractList = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<ContractDto>>() {});
+        assertThat(notFinalizedContractList).isNotNull();
+        for (ContractDto contractDto : notFinalizedContractList) {
+            assertThat(contractDto.getRealizationDate()).isNull();
+        }
+    }
+
+    @And("contract with id {long} should be denied")
+    public void contractWithIdShouldBeDenied(long arg0) throws JsonProcessingException {
+        // impl
+        List<ContractDto> listContractDto = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<ContractDto>>() {});
+        for (ContractDto cDto : listContractDto) {
+            if(cDto.getContractId().equals(arg0)) {
+                assertThat(cDto.getBankApproval()).isFalse();
+                assertThat(cDto.getRealizationDate()).isNotNull();
+            }
+        }
+    }
+
+    @And("i should get all public stocks of other business customers")
+    public void iShouldGetAllPublicStocksOfOtherBusinessCustomers() throws JsonProcessingException {
+        List<PublicCapitalDto> listCapitalDtoPublicStocks = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<PublicCapitalDto>>() {});
+        assertThat(listCapitalDtoPublicStocks).isNotNull();
+        assertThat(listCapitalDtoPublicStocks).isNotEmpty();
+        for (PublicCapitalDto publicCapitalDto : listCapitalDtoPublicStocks)
+            assertThat(publicCapitalDto.getIsIndividual()).isFalse();
+    }
+
+    @And("i want to buy {double} forex")
+    public void iWantToBuyForex(double arg0) {
+        // impl
+    }
+
+    @And("contract with id {long} should be finalized")
+    public void contractWithIdShouldBeFinalized(long arg0) throws JsonProcessingException {
+        List<ContractDto> listContractDto = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<List<ContractDto>>() {});
+        for (ContractDto cDto : listContractDto) {
+            if(cDto.getContractId().equals(arg0)) {
+                assertThat(cDto.getBankApproval()).isNotNull();
+                assertThat(cDto.getSellerApproval()).isNotNull();
+                assertThat(cDto.getRealizationDate()).isNotNull();
+            }
+        }
+    }
     @And("i want to remove him permissions")
     public void iWantToRemoveHimPermissions() {
         modifyPermissionsRequest.setAdd(false);
@@ -148,17 +253,17 @@ public class UserControllerSteps {
     private SearchFilter searchFilter = new SearchFilter();
 
     public UserControllerSteps(EmployeeRepository userRepository,
-                               PermissionRepository permissionRepository,
-                               PasswordEncoder passwordEncoder,
-                               CustomerRepository customerRepository,
-                               BankAccountRepository bankAccountRepository,
-                               PaymentRepository paymentRepository,
-                               PaymentRecipientRepository paymentRecipientRepository,
-                               TransferRepository transferRepository,
-                               LoanRequestRepository loanRequestRepository,
-                               LoanRepository loanRepository,
-                               CardRepository cardRepository,
-                               EmployeeRepository employeeRepository) {
+            PermissionRepository permissionRepository,
+            PasswordEncoder passwordEncoder,
+            CustomerRepository customerRepository,
+            BankAccountRepository bankAccountRepository,
+            PaymentRepository paymentRepository,
+            PaymentRecipientRepository paymentRecipientRepository,
+            TransferRepository transferRepository,
+            LoanRequestRepository loanRequestRepository,
+            LoanRepository loanRepository,
+            CardRepository cardRepository,
+            EmployeeRepository employeeRepository) {
         this.userRepository = userRepository;
         this.permissionRepository = permissionRepository;
         this.passwordEncoder = passwordEncoder;
@@ -172,75 +277,97 @@ public class UserControllerSteps {
         this.cardRepository = cardRepository;
         this.employeeRepository = employeeRepository;
     }
-
-
-    @Transactional
-    @When("User calls get on {string}")
-    public void iSendAGETRequestTo(String path) {
-        userResponses.clear();
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            if (path.equals("/employee/getAll")) {
-                lastReadAllUsersResponse = objectMapper.readValue(getBody(path), new TypeReference<List<EmployeeDto>>() {
-                });
-                userRepository.findAll().forEach(user -> userResponses.add(userMapper.employeeToEmployeeDto(user)));
-            }
-            else if (path.equals("/customer/getAll")) {
-                lastReadAllCustomersResponse = objectMapper.readValue(getBody(path), new TypeReference<List<CustomerResponse>>() {
-                });
-                customerRepository.findAll().forEach(user -> customerResponses.add(customerMapper.customerToCustomerResponse(user)));
-            }
-            else if (path.equals("/employee/search")) {
-                lastReadAllUsersResponse = objectMapper.readValue(getFiltered(path), new TypeReference<List<EmployeeDto>>() {
-                });
-                userRepository.findAll().forEach(user -> {
-                    if (user.getActive() == null || !user.getActive()) return;
-                    if (searchFilter.getEmail() != null && !user.getEmail().equals(searchFilter.getEmail())) return;
-                    if (searchFilter.getFirstName() != null && !user.getFirstName().equalsIgnoreCase(searchFilter.getFirstName()))
-                        return;
-                    if (searchFilter.getLastName() != null && !user.getLastName().equalsIgnoreCase(searchFilter.getLastName()))
-                        return;
-                    if (searchFilter.getPosition() != null
-//                            &&
-//                            !user.getPosition().equalsIgnoreCase(searchFilter.getPosition())
-                    )
-                        return;
-                    userResponses.add(userMapper.employeeToEmployeeDto(user));
-                });
-            }
-//            else if (path.startsWith("/employee/get/")) {
-//                lastReadUserResponse = objectMapper.readValue(getBody(path), EmployeeDto.class);
-//                String[] split = path.split("/");
-//                email = split[split.length - 1];
-//            }
-//            else if (path.equals("/balance/foreign_currency")) {
-//                lastReadAllForeignCurrencyAccountsResponse = objectMapper.readValue(getBody(path), new TypeReference<List<ForeignCurrencyAccountResponse>>() {
-//                });
-//            }
-//            else if (path.startsWith("/employee/")) {
-//                lastReadUserResponse = objectMapper.readValue(getBody(path), EmployeeDto.class);
-//                String[] split = path.split("/");
-//                lastid = Long.parseLong(split[split.length - 1]);
-//            }
-            else if(path.equals("/payment/get")){
-                getBody(path + "/" + paymentId);
-            }
-            else if(path.equals("/transfer/")){
-                getBody(path + lastid);
-            }
-            else if(path.equals("/employee/permissions/employeeId/id")){
-                path = path.replaceAll("id", String.valueOf(lastid));
-                getBody(path);
-            }
-            else{
-                getBody(path);
-            }
-        }
-        catch (Exception e){
-            e.printStackTrace();
-            fail(e.getMessage());
+    @Then("i should have {double} listings of type {string} public")
+    public void iShouldHaveListingsPublic(double arg0, String arg1) throws JsonProcessingException {
+        CapitalDto capitalDto = objectMapper.readValue((String)lastResponse.getBody(), new TypeReference<CapitalDto>() {});
+        assertThat(capitalDto).isNotNull();
+        assertThat(capitalDto.getPublicTotal()).isEqualTo(arg0);
+        if(arg1.equalsIgnoreCase("forex")) {
+            assertThat(capitalDto.getListingType()).isEqualTo(ListingType.FOREX);
+        } else if(arg1.equalsIgnoreCase("future")) {
+            assertThat(capitalDto.getListingType()).isEqualTo(ListingType.FUTURE);
+        } else if(arg1.equalsIgnoreCase("stock")) {
+            assertThat(capitalDto.getListingType()).isEqualTo(ListingType.STOCK);
+        } else if(arg1.equalsIgnoreCase("options")){
+            assertThat(capitalDto.getListingType()).isEqualTo(ListingType.OPTIONS);
         }
     }
+
+    @And("add to public amount {double} for capital with listingId is {long} and listingType is {string}")
+    public void addToPublicAmountForCapitalWithListingIdIsAndListingTypeIs(double arg0, long arg1, String arg2) {
+        addPublicCapitalDto.setAddToPublic(arg0);
+        addPublicCapitalDto.setListingId(arg1);
+        addPublicCapitalDto.setListingType(ListingType.valueOf(arg2));
+    }
+
+
+//    @Transactional
+//    @When("User calls get on {string}")
+//    public void iSendAGETRequestTo(String path) {
+//        userResponses.clear();
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        try {
+//            if (path.equals("/employee/getAll")) {
+//                lastReadAllUsersResponse = objectMapper.readValue(getBody(path), new TypeReference<List<EmployeeDto>>() {
+//                });
+//                userRepository.findAll().forEach(user -> userResponses.add(userMapper.employeeToEmployeeDto(user)));
+//            }
+//            else if (path.equals("/customer/getAll")) {
+//                lastReadAllCustomersResponse = objectMapper.readValue(getBody(path), new TypeReference<List<CustomerResponse>>() {
+//                });
+//                customerRepository.findAll().forEach(user -> customerResponses.add(customerMapper.customerToCustomerResponse(user)));
+//            }
+//            else if (path.equals("/employee/search")) {
+//                lastReadAllUsersResponse = objectMapper.readValue(getFiltered(path), new TypeReference<List<EmployeeDto>>() {
+//                });
+//                userRepository.findAll().forEach(user -> {
+//                    if (user.getActive() == null || !user.getActive()) return;
+//                    if (searchFilter.getEmail() != null && !user.getEmail().equals(searchFilter.getEmail())) return;
+//                    if (searchFilter.getFirstName() != null && !user.getFirstName().equalsIgnoreCase(searchFilter.getFirstName()))
+//                        return;
+//                    if (searchFilter.getLastName() != null && !user.getLastName().equalsIgnoreCase(searchFilter.getLastName()))
+//                        return;
+//                    if (searchFilter.getPosition() != null
+////                            &&
+////                            !user.getPosition().equalsIgnoreCase(searchFilter.getPosition())
+//                    )
+//                        return;
+//                    userResponses.add(userMapper.employeeToEmployeeDto(user));
+//                });
+//            }
+////            else if (path.startsWith("/employee/get/")) {
+////                lastReadUserResponse = objectMapper.readValue(getBody(path), EmployeeDto.class);
+////                String[] split = path.split("/");
+////                email = split[split.length - 1];
+////            }
+////            else if (path.equals("/balance/foreign_currency")) {
+////                lastReadAllForeignCurrencyAccountsResponse = objectMapper.readValue(getBody(path), new TypeReference<List<ForeignCurrencyAccountResponse>>() {
+////                });
+////            }
+////            else if (path.startsWith("/employee/")) {
+////                lastReadUserResponse = objectMapper.readValue(getBody(path), EmployeeDto.class);
+////                String[] split = path.split("/");
+////                lastid = Long.parseLong(split[split.length - 1]);
+////            }
+//            else if(path.equals("/payment/get")){
+//                getBody(path + "/" + paymentId);
+//            }
+//            else if(path.equals("/transfer/")){
+//                getBody(path + lastid);
+//            }
+//            else if(path.equals("/employee/permissions/employeeId/id")){
+//                path = path.replaceAll("id", String.valueOf(lastid));
+//                getBody(path);
+//            }
+//            else{
+//                getBody(path);
+//            }
+//        }
+//        catch (Exception e){
+//            e.printStackTrace();
+//            fail(e.getMessage());
+//        }
+//    }
 
     @When("i send DELETE request to {string}")
     public void iSendDELETERequestTo(String path) {
@@ -249,7 +376,7 @@ public class UserControllerSteps {
             delete(path);
         }else if(path.equals("/recipients/remove/")){
             PaymentRecipient paymentRecipient = paymentRecipientRepository.findAll().stream().filter(
-                recipient -> recipient.getFirstName().equals("mika")
+                    recipient -> recipient.getFirstName().equals("mika")
             ).findFirst().orElse(null);
 
             if(paymentRecipient == null){
@@ -262,114 +389,114 @@ public class UserControllerSteps {
         }
     }
 
-    @When("i send PUT request to {string}")
-    public void whenISendPUTRequestTo(String path) {
-        if(path.equals( "/customer")) {
-            put(path, editCustomerRequest);
-        }
-        else if(path.equals("/recipients/edit")){
-            put(path, paymentRecipientDto);
-        }
-        else if(path.equals("/loan/requests/")){
-            put(path + lastid, statusRequest);
-        }
-        else if(path.equals("/account")){
-            put(path, editBankAccountNameRequest);
-        }
-        else if(path.equals("/employee/")){
-            put(path, editEmployeeDto);
-        }
-        else if(path.equals("/employee/limits/reset/id")){
-            path = path.replaceAll("id", String.valueOf(lastid));
-            putNoBody(path);
-        }
-        else if(path.equals("/employee/limits/newLimit")){
-            newLimitDto.setUserId(lastid);
-            put(path, newLimitDto);
-        }
-    }
+//    @When("i send PUT request to {string}")
+//    public void whenISendPUTRequestTo(String path) {
+//        if(path.equals( "/customer")) {
+//            put(path, editCustomerRequest);
+//        }
+//        else if(path.equals("/recipients/edit")){
+//            put(path, paymentRecipientDto);
+//        }
+//        else if(path.equals("/loan/requests/")){
+//            put(path + lastid, statusRequest);
+//        }
+//        else if(path.equals("/account")){
+//            put(path, editBankAccountNameRequest);
+//        }
+//        else if(path.equals("/employee/")){
+//            put(path, editEmployeeDto);
+//        }
+//        else if(path.equals("/employee/limits/reset/id")){
+//            path = path.replaceAll("id", String.valueOf(lastid));
+//            putNoBody(path);
+//        }
+//        else if(path.equals("/employee/limits/newLimit")){
+//            newLimitDto.setUserId(lastid);
+//            put(path, newLimitDto);
+//        }
+//    }
 
-    @When("user calls POST on {string}")
-    public void userCallsPostOn(String path) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            if (path.equals("/employee/createUser")) {
-                String tmp = post(path, createUserRequest);
-                lastCreateUserResponse = objectMapper.readValue(tmp, CreateUserResponse.class);
-            }
-            else if(path.equals("/customer/createNewCustomer")){
-                CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest();
-                createCustomerRequest.setCustomer(customerData);
-                createCustomerRequest.setAccount(accountData);
-                post(path, createCustomerRequest);
-            }
-            else if(path.equals("/customer/initialActivation")){
-                InitialActivationRequest initialActivationRequest = new InitialActivationRequest();
-                initialActivationRequest.setEmail(customerData.getEmail());
-                initialActivationRequest.setPhoneNumber(customerData.getPhoneNumber());
-                initialActivationRequest.setAccountNumber(bankAccountNumber);
-                post(path, initialActivationRequest);
-            }
-            else if(path.equals("/customer/activate/{token}")){
-                path = path.replace("{token}", token);
-                ActivateAccountRequest activateAccountRequest = new ActivateAccountRequest();
-                activateAccountRequest.setPassword(password);
-                post(path, activateAccountRequest);
-            }
-            else if(path.equals("/payment/sendCode")){
-                postNoBody(path);
-            }
-            else if(path.equals("/payment")){
-                post(path, createPaymentRequest);
-            }
-            else if(path.equals("/recipients/add")){
-                post(path, createPaymentRecipientRequest);
-            }
-            else if(path.equals("/transfer")){
-                post(path, createTransferRequest);
-            }
-            else if(path.equals("/loan/requests")){
-                post(path, createLoanRequest);
-            }
-            else if(path.equals("/orders")){
-                post(path, createOrderRequest);
-            }
-            else if(path.equals("/account/create")){
-                createBankAccountRequest.setAccount(bankAccountRequest);
-                post(path, createBankAccountRequest);
-            }
-            else if(path.equals("/employee/activate/token")){
-                path = path.replaceAll("token", token);
-                post(path, activateAccountRequest);
-            }
-            else if(path.equals("/employee/resetPassword")){
-                postNoBody(path);
-            }
-            else if(path.equals("/employee/newpassword/token")){
-                path = path.replaceAll("token", token);
-                post(path, newPasswordRequest);
-            }
-            else if(path.equals("/employee/createEmployee")){
-                post(path, createEmployeeDto);
-            }
-            else if(path.equals("/employee/reset/drugizaposleni@gmail.rs")){
-                postNoBody(path);
-            }
-            else if(path.equals("/employee/permission/employeeId")){
-                path = path.replaceAll("employeeId", String.valueOf(lastid));
-                post(path, modifyPermissionsRequest);
-            }
-
-
-//            else if (path.equals("/balance/foreign_currency/create")) {
-//                lastCreateForeignCurrencyAccountResponse = objectMapper.readValue(post(path, foreignCurrencyAccountRequest), CreateForeignCurrencyAccountResponse.class);
+//    @When("user calls POST on {string}")
+//    public void userCallsPostOn(String path) {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        try {
+//            if (path.equals("/employee/createUser")) {
+//                String tmp = post(path, createUserRequest);
+//                lastCreateUserResponse = objectMapper.readValue(tmp, CreateUserResponse.class);
 //            }
-        }
-        catch (Exception e){
-            e.printStackTrace();
-            fail("Failed to parse response body");
-        }
-    }
+//            else if(path.equals("/customer/createNewCustomer")){
+//                CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest();
+//                createCustomerRequest.setCustomer(customerData);
+//                createCustomerRequest.setAccount(accountData);
+//                post(path, createCustomerRequest);
+//            }
+//            else if(path.equals("/customer/initialActivation")){
+//                InitialActivationRequest initialActivationRequest = new InitialActivationRequest();
+//                initialActivationRequest.setEmail(customerData.getEmail());
+//                initialActivationRequest.setPhoneNumber(customerData.getPhoneNumber());
+//                initialActivationRequest.setAccountNumber(bankAccountNumber);
+//                post(path, initialActivationRequest);
+//            }
+//            else if(path.equals("/customer/activate/{token}")){
+//                path = path.replace("{token}", token);
+//                ActivateAccountRequest activateAccountRequest = new ActivateAccountRequest();
+//                activateAccountRequest.setPassword(password);
+//                post(path, activateAccountRequest);
+//            }
+//            else if(path.equals("/payment/sendCode")){
+//                postNoBody(path);
+//            }
+//            else if(path.equals("/payment")){
+//                post(path, createPaymentRequest);
+//            }
+//            else if(path.equals("/recipients/add")){
+//                post(path, createPaymentRecipientRequest);
+//            }
+//            else if(path.equals("/transfer")){
+//                post(path, createTransferRequest);
+//            }
+//            else if(path.equals("/loan/requests")){
+//                post(path, createLoanRequest);
+//            }
+//            else if(path.equals("/orders")){
+//                post(path, createOrderRequest);
+//            }
+//            else if(path.equals("/account/create")){
+//                createBankAccountRequest.setAccount(bankAccountRequest);
+//                post(path, createBankAccountRequest);
+//            }
+//            else if(path.equals("/employee/activate/token")){
+//                path = path.replaceAll("token", token);
+//                post(path, activateAccountRequest);
+//            }
+//            else if(path.equals("/employee/resetPassword")){
+//                postNoBody(path);
+//            }
+//            else if(path.equals("/employee/newpassword/token")){
+//                path = path.replaceAll("token", token);
+//                post(path, newPasswordRequest);
+//            }
+//            else if(path.equals("/employee/createEmployee")){
+//                post(path, createEmployeeDto);
+//            }
+//            else if(path.equals("/employee/reset/drugizaposleni@gmail.rs")){
+//                postNoBody(path);
+//            }
+//            else if(path.equals("/employee/permission/employeeId")){
+//                path = path.replaceAll("employeeId", String.valueOf(lastid));
+//                post(path, modifyPermissionsRequest);
+//            }
+//
+//
+////            else if (path.equals("/balance/foreign_currency/create")) {
+////                lastCreateForeignCurrencyAccountResponse = objectMapper.readValue(post(path, foreignCurrencyAccountRequest), CreateForeignCurrencyAccountResponse.class);
+////            }
+//        }
+//        catch (Exception e){
+//            e.printStackTrace();
+//            fail("Failed to parse response body");
+//        }
+//    }
 
     private HttpEntity<Object> makeRequest(Object objectToPost){
         HttpHeaders headers = new HttpHeaders();
@@ -384,112 +511,112 @@ public class UserControllerSteps {
         return url.concat(port).concat(path);
     }
 
-    private String getBody(String path){
-        RestTemplate restTemplate = new RestTemplate();
+//    private String getBody(String path){
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//        ResponseEntity<String> response;
+//        try {
+//            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.GET, makeRequest(null), String.class);
+//        }catch (HttpClientErrorException e){
+//            response = new ResponseEntity<>(e.getStatusCode());
+//        }
+//        lastResponse = response;
+//        return response.getBody();
+//    }
 
-        ResponseEntity<String> response;
-        try {
-            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.GET, makeRequest(null), String.class);
-        }catch (HttpClientErrorException e){
-            response = new ResponseEntity<>(e.getStatusCode());
-        }
-        lastResponse = response;
-        return response.getBody();
-    }
+//    private String postNoBody(String path){
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//        ResponseEntity<String> response;
+//        try {
+//            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.POST, makeRequest(null), String.class);
+//        }catch (HttpClientErrorException e){
+//            response = new ResponseEntity<>(e.getStatusCode());
+//        }
+//        lastResponse = response;
+//        return response.getBody();
+//    }
 
-    private String postNoBody(String path){
-        RestTemplate restTemplate = new RestTemplate();
+//    private String post(String path, Object objectToPost){
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//        ResponseEntity<String> response;
+//        try {
+//            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.POST, makeRequest(objectToPost), String.class);
+//        }catch (HttpClientErrorException e){
+//            response = new ResponseEntity<>(e.getStatusCode());
+//        }
+//        lastResponse = response;
+//        return response.getBody();
+//
+//    }
 
-        ResponseEntity<String> response;
-        try {
-            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.POST, makeRequest(null), String.class);
-        }catch (HttpClientErrorException e){
-            response = new ResponseEntity<>(e.getStatusCode());
-        }
-        lastResponse = response;
-        return response.getBody();
-    }
-
-    private String post(String path, Object objectToPost){
-        RestTemplate restTemplate = new RestTemplate();
-
-        ResponseEntity<String> response;
-        try {
-            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.POST, makeRequest(objectToPost), String.class);
-        }catch (HttpClientErrorException e){
-            response = new ResponseEntity<>(e.getStatusCode());
-        }
-        lastResponse = response;
-        return response.getBody();
-
-    }
-
-    private String getFiltered(String path){
-        char combiner = '?';
-        if(searchFilter.getEmail() != null) {
-            path = path.concat(combiner + "email=" + searchFilter.getEmail());
-            combiner = '&';
-        }
-        if(searchFilter.getFirstName() != null) {
-            path = path.concat(combiner + "firstName=" + searchFilter.getFirstName());
-            combiner = '&';
-        }
-        if(searchFilter.getLastName() != null) {
-            path = path.concat(combiner + "lastName=" + searchFilter.getLastName());
-            combiner = '&';
-        }
-        if(searchFilter.getPosition() != null) {
-            path = path.concat(combiner + "position=" + searchFilter.getPosition());
-        }
-
-        RestTemplate restTemplate = new RestTemplate();
-
-        ResponseEntity<String> response;
-        try {
-            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.GET, makeRequest(null), String.class);
-        }catch (HttpClientErrorException e){
-            response = new ResponseEntity<>(e.getStatusCode());
-        }
-        lastResponse = response;
-        return response.getBody();
-    }
+//    private String getFiltered(String path){
+//        char combiner = '?';
+//        if(searchFilter.getEmail() != null) {
+//            path = path.concat(combiner + "email=" + searchFilter.getEmail());
+//            combiner = '&';
+//        }
+//        if(searchFilter.getFirstName() != null) {
+//            path = path.concat(combiner + "firstName=" + searchFilter.getFirstName());
+//            combiner = '&';
+//        }
+//        if(searchFilter.getLastName() != null) {
+//            path = path.concat(combiner + "lastName=" + searchFilter.getLastName());
+//            combiner = '&';
+//        }
+//        if(searchFilter.getPosition() != null) {
+//            path = path.concat(combiner + "position=" + searchFilter.getPosition());
+//        }
+//
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//        ResponseEntity<String> response;
+//        try {
+//            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.GET, makeRequest(null), String.class);
+//        }catch (HttpClientErrorException e){
+//            response = new ResponseEntity<>(e.getStatusCode());
+//        }
+//        lastResponse = response;
+//        return response.getBody();
+//    }
 
 
-    private void put(String path, Object objectToPut){
-        RestTemplate restTemplate = new RestTemplate();
+//    private void put(String path, Object objectToPut){
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//        ResponseEntity<String> response;
+//        try {
+//            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.PUT, makeRequest(objectToPut), String.class);
+//        }catch (HttpClientErrorException e){
+//            response = new ResponseEntity<>(e.getStatusCode());
+//        }
+//        lastResponse = response;
+//    }
 
-        ResponseEntity<String> response;
-        try {
-            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.PUT, makeRequest(objectToPut), String.class);
-        }catch (HttpClientErrorException e){
-            response = new ResponseEntity<>(e.getStatusCode());
-        }
-        lastResponse = response;
-    }
+//    private void putNoBody(String path){
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//        ResponseEntity<String> response;
+//        try {
+//            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.PUT, makeRequest(null), String.class);
+//        }catch (HttpClientErrorException e){
+//            response = new ResponseEntity<>(e.getStatusCode());
+//        }
+//        lastResponse = response;
+//    }
 
-    private void putNoBody(String path){
-        RestTemplate restTemplate = new RestTemplate();
-
-        ResponseEntity<String> response;
-        try {
-            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.PUT, makeRequest(null), String.class);
-        }catch (HttpClientErrorException e){
-            response = new ResponseEntity<>(e.getStatusCode());
-        }
-        lastResponse = response;
-    }
-
-    private void delete(String path) {
-        RestTemplate restTemplate = new RestTemplate();
-
-        ResponseEntity<Boolean> response;
-        try {
-            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.DELETE, makeRequest(null), Boolean.class);
-        }catch (HttpClientErrorException e){
-            response = new ResponseEntity<>(e.getStatusCode());
-        }
-        lastResponse = response;
-    }
+//    private void delete(String path) {
+//        RestTemplate restTemplate = new RestTemplate();
+//
+//        ResponseEntity<Boolean> response;
+//        try {
+//            response = restTemplate.exchange(makeUrl(path), org.springframework.http.HttpMethod.DELETE, makeRequest(null), Boolean.class);
+//        }catch (HttpClientErrorException e){
+//            response = new ResponseEntity<>(e.getStatusCode());
+//        }
+//        lastResponse = response;
+//    }
 
     @Given("i am logged in with email {string} and password {string}")
     public void iAmLoggedIn(String email, String password) {
@@ -1082,6 +1209,17 @@ public class UserControllerSteps {
         assertThat(employee.getActive()).isFalse();
     }
 
+    @Given("i am logged in as customer with email {string} and password {string}")
+    public void iAmLoggedInAsCustomer(String email, String password) {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail(email);
+        loginRequest.setPassword(password);
+
+        HttpEntity<LoginRequest> entity = new HttpEntity<>(loginRequest);
+        ResponseEntity<LoginResponse> responseEntity = new RestTemplate().postForEntity(url + port + "/auth/login/customer", entity, LoginResponse.class);
+        jwt = responseEntity.getBody().getJwt();
+    }
+
     @Given("I have a user with id {int}")
     public void iHaveAUserWithId(int id) {
         Employee user = new Employee();
@@ -1302,31 +1440,352 @@ public class UserControllerSteps {
 //        }
 //    }
 
+    private String getBody(String path){
+        RestTemplate restTemplate = new RestTemplate();
 
-   @When("I go to {string}")
-    public void iGoTo(String path) {
-        activatedUser = userRepository.findByActivationToken("testtoken").get();
-       ActivateAccountRequest activateAccountRequest = new ActivateAccountRequest();
-       activateAccountRequest.setPassword(password);
-       ObjectMapper objectMapper = new ObjectMapper();
-       try {
-           lastActivateAccountResponse = objectMapper.readValue(post(path, activateAccountRequest), ActivateAccountResponse.class);
-       } catch (Exception e) {
-           e.printStackTrace();
-           fail("Failed to parse response body");
-       }
-   }
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
+        HttpEntity<Object> request = new HttpEntity<>(headers);
 
-   @When("i select user with email {string} to change")
-   public void whenISelectUserWithEmailToChange(String email) {
-       editUserRequest.setEmail(email);
-   }
-
-   @When("i change first name to {string}")
-    public void whenIChangeFirstNameTo(String firstName) {
-         editUserRequest.setFirstName(firstName);
+        ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.GET, request, String.class);
+        lastResponse = response;
+        return response.getBody();
     }
 
+    private String postNoBody(String path){
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
+        HttpEntity<Object> request = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.POST, request, String.class);
+        lastResponse = response;
+        return response.getBody();
+    }
+
+    private String post(String path, Object objectToPost){
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
+        HttpEntity<Object> request = new HttpEntity<>(objectToPost, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.POST, request, String.class);
+        lastResponse = response;
+        return response.getBody();
+
+    }
+
+    private String getFiltered(String path){
+        char combiner = '?';
+        if(searchFilter.getEmail() != null) {
+            path = path.concat(combiner + "email=" + searchFilter.getEmail());
+            combiner = '&';
+        }
+        if(searchFilter.getFirstName() != null) {
+            path = path.concat(combiner + "firstName=" + searchFilter.getFirstName());
+            combiner = '&';
+        }
+        if(searchFilter.getLastName() != null) {
+            path = path.concat(combiner + "lastName=" + searchFilter.getLastName());
+            combiner = '&';
+        }
+        if(searchFilter.getPosition() != null) {
+            path = path.concat(combiner + "position=" + searchFilter.getPosition());
+        }
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
+        HttpEntity<Object> request = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(path, org.springframework.http.HttpMethod.GET, request, String.class);
+        lastResponse = response;
+        return response.getBody();
+    }
+
+
+    private void put(String path, Object objectToPut){
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
+        HttpEntity<Object> request = new HttpEntity<>(objectToPut, headers);
+
+        lastResponse = restTemplate.exchange(path, org.springframework.http.HttpMethod.PUT, request, String.class);
+        int x;
+    }
+
+    private void putNoBody(String path){
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
+        HttpEntity<Object> request = new HttpEntity<>(headers);
+
+        lastResponse = restTemplate.exchange(path, org.springframework.http.HttpMethod.PUT, request, String.class);
+    }
+
+    private void delete(String path) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(jwt);
+        HttpEntity<Object> request = new HttpEntity<>(headers);
+
+        lastResponse = restTemplate.exchange(path, org.springframework.http.HttpMethod.DELETE, request, Boolean.class);
+    }
+
+
+    @Transactional
+    @When("User calls get on {string}")
+    public void iSendAGETRequestTo(String path) {
+        userResponses.clear();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            if (path.equals("/employee/getAll")) {
+                lastReadAllUsersResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<EmployeeDto>>() {
+                });
+                userRepository.findAll().forEach(user -> userResponses.add(userMapper.employeeToEmployeeDto(user)));
+            }
+            else if (path.equals("/customer/getAll")) {
+                lastReadAllCustomersResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<CustomerResponse>>() {
+                });
+                customerRepository.findAll().forEach(user -> customerResponses.add(customerMapper.customerToCustomerResponse(user)));
+            }
+            else if (path.equals("/employee/search")) {
+                lastReadAllUsersResponse = objectMapper.readValue(getFiltered(url + port + path), new TypeReference<List<EmployeeDto>>() {
+                });
+                userRepository.findAll().forEach(user -> {
+                    if (user.getActive() == null || !user.getActive()) return;
+                    if (searchFilter.getEmail() != null && !user.getEmail().equals(searchFilter.getEmail())) return;
+                    if (searchFilter.getFirstName() != null && !user.getFirstName().equalsIgnoreCase(searchFilter.getFirstName()))
+                        return;
+                    if (searchFilter.getLastName() != null && !user.getLastName().equalsIgnoreCase(searchFilter.getLastName()))
+                        return;
+                    if (searchFilter.getPosition() != null
+//                            &&
+//                            !user.getPosition().equalsIgnoreCase(searchFilter.getPosition())
+                    )
+                        return;
+                    userResponses.add(userMapper.employeeToEmployeeDto(user));
+                });
+            }
+//            else if (path.startsWith("/employee/get/")) {
+//                lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), EmployeeDto.class);
+//                String[] split = path.split("/");
+//                email = split[split.length - 1];
+//            }
+//            else if (path.equals("/balance/foreign_currency")) {
+//                lastReadAllForeignCurrencyAccountsResponse = objectMapper.readValue(getBody(url + port + path), new TypeReference<List<ForeignCurrencyAccountResponse>>() {
+//                });
+//            }
+//            else if (path.startsWith("/employee/")) {
+//                lastReadUserResponse = objectMapper.readValue(getBody(url + port + path), EmployeeDto.class);
+//                String[] split = path.split("/");
+//                lastid = Long.parseLong(split[split.length - 1]);
+//            }
+            else if(path.equals("/payment/get")){
+                getBody(url + port + path + "/" + paymentId);
+            }
+            else if(path.equals("/transfer/")){
+                getBody(url + port + path + lastid);
+            }
+            else if(path.equals("/employee/permissions/employeeId/id")){
+                path = path.replaceAll("id", String.valueOf(lastid));
+                getBody(url + port + path);
+            }
+            else if(path.equals("/capital/stock/id")){
+                path = path.replaceAll("id", String.valueOf(addPublicCapitalDto.getListingId()));
+                getBody(url + port + path);
+            }
+            else if(path.equals("/capital/forex/id")){
+                path = path.replaceAll("id", String.valueOf(addPublicCapitalDto.getListingId()));
+                getBody(url + port + path);
+            }
+            else{
+                getBody(url + port + path);
+            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @When("user calls POST on {string}")
+    public void userCallsPostOn(String path) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            if (path.equals("/employee/createUser")) {
+                String tmp = post(url + port + path, createUserRequest);
+                lastCreateUserResponse = objectMapper.readValue(tmp, CreateUserResponse.class);
+            }
+            else if(path.equals("/customer/createNewCustomer")){
+                CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest();
+                createCustomerRequest.setCustomer(customerData);
+                createCustomerRequest.setAccount(accountData);
+                post(url + port + path, createCustomerRequest);
+            }
+            else if(path.equals("/customer/initialActivation")){
+                InitialActivationRequest initialActivationRequest = new InitialActivationRequest();
+                initialActivationRequest.setEmail(customerData.getEmail());
+                initialActivationRequest.setPhoneNumber(customerData.getPhoneNumber());
+                initialActivationRequest.setAccountNumber(bankAccountNumber);
+                post(url + port + path, initialActivationRequest);
+            }
+            else if(path.equals("/customer/activate/{token}")){
+                path = path.replace("{token}", token);
+                ActivateAccountRequest activateAccountRequest = new ActivateAccountRequest();
+                activateAccountRequest.setPassword(password);
+                post(url + port + path, activateAccountRequest);
+            }
+            else if(path.equals("/payment/sendCode")){
+                postNoBody(url + port + path);
+            }
+            else if(path.equals("/payment")){
+                post(url + port + path, createPaymentRequest);
+            }
+            else if(path.equals("/recipients/add")){
+                post(url + port + path, createPaymentRecipientRequest);
+            }
+            else if(path.equals("/transfer")){
+                post(url + port + path, createTransferRequest);
+            }
+            else if(path.equals("/loan/requests")){
+                post(url + port + path, createLoanRequest);
+            }
+            else if(path.equals("/orders")){
+                post(url + port + path, createOrderRequest);
+            }
+            else if(path.equals("/account/create")){
+                createBankAccountRequest.setAccount(bankAccountRequest);
+                post(url + port + path, createBankAccountRequest);
+            }
+            else if(path.equals("/employee/activate/token")){
+                path = path.replaceAll("token", token);
+                post(url + port + path, activateAccountRequest);
+            }
+            else if(path.equals("/employee/resetPassword")){
+                postNoBody(path);
+            }
+            else if(path.equals("/employee/newpassword/token")){
+                path = path.replaceAll("token", token);
+                post(url + port + path, newPasswordRequest);
+            }
+            else if(path.equals("/employee/createEmployee")){
+                post(url + port + path, createEmployeeDto);
+            }
+            else if(path.equals("/employee/reset/drugizaposleni@gmail.rs")){
+                postNoBody(url + port + path);
+            }
+            else if(path.equals("/employee/permission/employeeId")){
+                path = path.replaceAll("employeeId", String.valueOf(lastid));
+                put(url + port + path, modifyPermissionsRequest);
+            }
+            else if(path.equals("/contract/customer")) {
+                post(url + port + path, contractCreateDto);
+            }
+
+
+//            else if (path.equals("/balance/foreign_currency/create")) {
+//                lastCreateForeignCurrencyAccountResponse = objectMapper.readValue(post(url + port + path, foreignCurrencyAccountRequest), CreateForeignCurrencyAccountResponse.class);
+//            }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            fail("Failed to parse response body");
+        }
+    }
+
+    @When("i send DELETE request to remove the user")
+    public void iSendDELETERequestTo() {
+        delete(url + port + "/employee/remove/" + userToRemove);
+    }
+
+    @When("I go to {string}")
+    public void iGoTo(String path) {
+        activatedUser = userRepository.findByActivationToken("testtoken").get();
+        ActivateAccountRequest activateAccountRequest = new ActivateAccountRequest();
+        activateAccountRequest.setPassword(password);
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            lastActivateAccountResponse = objectMapper.readValue(post(path, activateAccountRequest), ActivateAccountResponse.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("Failed to parse response body");
+        }
+    }
+
+    @When("i select user with email {string} to change")
+    public void whenISelectUserWithEmailToChange(String email) {
+        editUserRequest.setEmail(email);
+    }
+
+    @When("i change first name to {string}")
+    public void whenIChangeFirstNameTo(String firstName) {
+        editUserRequest.setFirstName(firstName);
+    }
+
+    @When("i send PUT request to {string}")
+    public void whenISendPUTRequestTo(String path) {
+        if(path.equals( "/customer")) {
+            put(url + port + path, editCustomerRequest);
+        }
+        else if(path.equals("/recipients/edit")){
+            put(url + port + path, paymentRecipientDto);
+        }
+        else if(path.equals("/loan/requests/")){
+            put(url + port + path + lastid, statusRequest);
+        }
+        else if(path.equals("/account")){
+            put(url + port + path, editBankAccountNameRequest);
+        }
+        else if(path.equals("/employee/")){
+            put(url + port + path, editEmployeeDto);
+        }
+        else if(path.equals("/employee/limits/reset/id")){
+            path = path.replaceAll("id", String.valueOf(lastid));
+            putNoBody(url + port + path);
+        }
+        else if(path.equals("/employee/limits/newLimit")){
+            newLimitDto.setUserId(lastid);
+            put(url + port + path, newLimitDto);
+        }
+        else if(path.equals("/capital/addPublic")) {
+            put(url + port + path, addPublicCapitalDto);
+        }
+        else if(path.equals("contract/accept/id")) {
+            path = path.replaceAll("id", String.valueOf(contractId));
+            putNoBody(url + port + path);
+        }
+        else if(path.equals("contract/deny/id")) {
+            path = path.replaceAll("id", String.valueOf(contractId));
+            put(url + port + path, denyContractComment);
+        }
+    }
+
+    @When("i send DELETE request to remove recipient")
+    public void iSendDELETERequestToRemoveRecipient() {
+        PaymentRecipient paymentRecipient = paymentRecipientRepository.findAll().stream().filter(
+                recipient -> recipient.getFirstName().equals("mika")
+        ).findFirst().orElse(null);
+
+        if(paymentRecipient == null){
+            fail("Recipient not found");
+        }
+
+        delete(url + port + "/recipients/remove/" + paymentRecipient.getId());
+    }
 
     @Then("i should get my id as a response")
     public void iShouldGetMyIdAsAResponse() {
@@ -1405,6 +1864,11 @@ public class UserControllerSteps {
     @Given("customer has first name {string}")
     public void customerHasFirstName(String arg0) {
         customerData.setFirstName(arg0);
+    }
+
+    @Given("customer has company id {string}")
+    public void customerHasCompanyId(String arg0) {
+        customerData.setCompanyId(Long.parseLong(arg0));
     }
 
     @Given("customer has last name {string}")

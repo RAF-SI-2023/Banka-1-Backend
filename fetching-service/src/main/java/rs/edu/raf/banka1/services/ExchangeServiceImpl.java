@@ -4,24 +4,20 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-import org.apache.tomcat.util.bcel.Const;
 import org.pmw.tinylog.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import rs.edu.raf.banka1.mapper.ExchangeMapper;
 import rs.edu.raf.banka1.model.dtos.BusinessHoursDto;
 import rs.edu.raf.banka1.model.dtos.CountryTimezoneDto;
-import rs.edu.raf.banka1.model.dtos.ExchangeDto;
 import rs.edu.raf.banka1.model.entities.Country;
 import rs.edu.raf.banka1.model.entities.Exchange;
 import rs.edu.raf.banka1.model.entities.Holiday;
 import rs.edu.raf.banka1.repositories.CountryRepository;
 import rs.edu.raf.banka1.repositories.ExchangeRepository;
 import rs.edu.raf.banka1.repositories.HolidayRepository;
-import rs.edu.raf.banka1.utils.Constants;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,23 +25,22 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static rs.edu.raf.banka1.utils.Constants.*;
+
 @Service
 public class ExchangeServiceImpl implements ExchangeService {
     private final CountryRepository countryRepository;
     private final HolidayRepository holidayRepository;
     private final ExchangeRepository exchangeRepository;
-    private final ExchangeMapper exchangeMapper;
 
     @Autowired
     public ExchangeServiceImpl(
             CountryRepository countryRepository,
             HolidayRepository holidayRepository,
-            ExchangeRepository exchangeRepository,
-            ExchangeMapper exchangeMapper) {
+            ExchangeRepository exchangeRepository) {
         this.countryRepository = countryRepository;
         this.holidayRepository = holidayRepository;
         this.exchangeRepository = exchangeRepository;
-        this.exchangeMapper = exchangeMapper;
     }
 
     @Override
@@ -60,15 +55,15 @@ public class ExchangeServiceImpl implements ExchangeService {
     }
 
     private void parseCsv(Map<String, BusinessHoursDto> countryIsoToBusinessHoursMap, Map<String, Country> countryIsoToCountryMap) {
+        CSVReader reader = null;
+        Resource resource = null;
+//        try (CSVReader reader = new CSVReader(new FileReader(Constants.micCsvFilePath))) {
+        try {
 
-        InputStream inputStream = Constants.getInputStreamForResource(Constants.micCsvFilePath);
+            resource = new ClassPathResource(micCsvFilePath, this.getClass().getClassLoader());
+            InputStream in = resource.getInputStream();
+            reader = new CSVReader(new InputStreamReader(in));
 
-        if (inputStream == null) {
-            Logger.info("[parseCsv] Input stream for " + Constants.micCsvFilePath + " is null");
-            return;
-        }
-
-        try (CSVReader reader = new CSVReader(new InputStreamReader(inputStream))) {
             // e.g. 17:00:00
             SimpleDateFormat hoursDateFormat = new SimpleDateFormat("HH:mm:ss");
             // e.g. 2024-01-01
@@ -115,6 +110,15 @@ public class ExchangeServiceImpl implements ExchangeService {
             saveAllHolidays(countryIsoToCountryMap, countryIsoToAllHolidayDatesMap);
         } catch (IOException | CsvValidationException | ParseException e) {
             e.printStackTrace();
+            Logger.error("[ExchangeSericeImpl] Caught exception during " + e.getMessage());
+        } finally {
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                Logger.error("[-] Error occured when trying to read file in exchange service impl " + e.getMessage());
+            }
         }
     }
 
@@ -154,20 +158,17 @@ public class ExchangeServiceImpl implements ExchangeService {
 
     private CountryTimezoneDto[] parseCountryTimezonesJson() {
         CountryTimezoneDto[] countryTimezones = null;
-
-        InputStream inputStream = Constants.getInputStreamForResource(Constants.countryTimezoneOffsetsFilePath);
-
-        if (inputStream == null) {
-            Logger.error("[ParseCountryTimezonesJson] Input stream for " + Constants.countryTimezoneOffsetsFilePath + " is null");
-            return null;
-        }
+        Resource resource = null;
 
         try {
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            countryTimezones = mapper.readValue(inputStream, CountryTimezoneDto[].class);
+
+            resource = new ClassPathResource(countryTimezoneOffsetsFilePath, this.getClass().getClassLoader());
+            countryTimezones = mapper.readValue(resource.getInputStream(), CountryTimezoneDto[].class);
         } catch (IOException e) {
             e.printStackTrace();
+            Logger.error("[ExchangeServiceImpl] Caught exception " + e.getMessage());
         }
 
         return countryTimezones;
@@ -175,23 +176,20 @@ public class ExchangeServiceImpl implements ExchangeService {
 
     private Map<String, BusinessHoursDto> parseBusinessHoursJson() {
         Map<String, BusinessHoursDto> resultMap = null;
-
-        InputStream inputStream = Constants.getInputStreamForResource(Constants.businessHoursFilePath);
-
-        if (inputStream == null) {
-            Logger.error("[ParseBusinessHoursJson] Input stream for " + Constants.businessHoursFilePath + " is null");
-            return null;
-        }
+        Resource resource = null;
 
         try {
+
             ObjectMapper mapper = new ObjectMapper();
-            resultMap = mapper.readValue(inputStream, HashMap.class);
+            resource = new ClassPathResource(businessHoursFilePath, this.getClass().getClassLoader());
+            resultMap = mapper.readValue(resource.getInputStream(), HashMap.class);
 
             for (Map.Entry<String, BusinessHoursDto> entry : resultMap.entrySet()) {
                 resultMap.put(entry.getKey(), mapper.convertValue(entry.getValue(), BusinessHoursDto.class));
             }
         } catch (IOException e) {
             e.printStackTrace();
+            Logger.error("[ExchangeServiceImpl] Caught exception " + e.getMessage());
         }
 
         return resultMap;

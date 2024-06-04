@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,6 +34,7 @@ import java.util.List;
 @Tag(name = "Employee", description = "Employee Controller")
 @SecurityRequirement(name = "basicScheme")
 @CrossOrigin
+@SecurityRequirement(name = "Authorization")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -41,7 +44,10 @@ public class EmployeeController {
     }
 
     @GetMapping(value = "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all employees", description = "Returns all employees")
+    @Operation(summary = "Get all employees", description = "Returns all employees",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('readUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -55,7 +61,10 @@ public class EmployeeController {
     }
 
     @GetMapping(value = "/get/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get employee by email", description = "Returns employee by email")
+    @Operation(summary = "Get employee by email", description = "Returns employee by email",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('readUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -69,7 +78,10 @@ public class EmployeeController {
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get employee by id", description = "Returns employee by id")
+    @Operation(summary = "Get employee by id", description = "Returns employee by id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('readUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -83,7 +95,10 @@ public class EmployeeController {
     }
 
     @GetMapping(value = "/getEmployee", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get user by jwt", description = "Returns employee by jwt")
+    @Operation(summary = "Get user by jwt", description = "Returns employee by jwt",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -101,7 +116,10 @@ public class EmployeeController {
     }
 
     @GetMapping(value = "/search")
-    @Operation(summary = "Search and filter employees", description = "Returns employees by e-mail, last name and/or position.")
+    @Operation(summary = "Search and filter employees", description = "Returns employees by e-mail, last name and/or position.",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('readUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -120,7 +138,10 @@ public class EmployeeController {
     }
 
     @PostMapping(value = "/createEmployee")
-    @Operation(summary = "Admin create employee", description = "Creates a new employee with the specified params, and forwards an activation mail to the user.")
+    @Operation(summary = "Admin create employee", description = "Creates a new employee with the specified params, and forwards an activation mail to the user.",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('addUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Employee created successfully",
@@ -177,7 +198,10 @@ public class EmployeeController {
     }
 
     @PutMapping("/")
-    @Operation(summary = "Admin edit employee", description = "Admin can edit a employee's info")
+    @Operation(summary = "Admin edit employee", description = "Admin can edit a employee's info",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('modifyUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Employee edited successfully",
@@ -192,7 +216,10 @@ public class EmployeeController {
     }
 
     @PostMapping(value = "/permission/{employeeId}")
-    @Operation(summary = "Change permissions to user", description = "Change permissions to user")
+    @Operation(summary = "Change permissions to user", description = "Change permissions to user",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('modifyUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Permissions changed successfully",
@@ -208,7 +235,10 @@ public class EmployeeController {
     }
 
     @DeleteMapping(value = "/remove/{id}")
-    @Operation(summary = "Admin delete employee", description = "Admin can employee a user")
+    @Operation(summary = "Admin delete employee", description = "Admin can employee a user",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('deleteUser')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Employee deleted successfully",
@@ -223,7 +253,10 @@ public class EmployeeController {
     }
 
     @GetMapping(value = "/permissions/employeeId/{employeeId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all permissions of employee", description = "Returns all permissions")
+    @Operation(summary = "Get all permissions of employee", description = "Returns all permissions",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -238,7 +271,10 @@ public class EmployeeController {
 
 
     @GetMapping(value = "/permissions/email/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all permissions of user", description = "Returns all permissions")
+    @Operation(summary = "Get all permissions of user", description = "Returns all permissions",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -252,7 +288,10 @@ public class EmployeeController {
     }
 
     @PutMapping(value = "/limits/reset/{employeeId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Reset current limit for employee", description = "Supervisor resets current limit for employee")
+    @Operation(summary = "Reset current limit for employee", description = "Supervisor resets current limit for employee",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('manageOrderRequests')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -270,7 +309,10 @@ public class EmployeeController {
     }
 
     @PutMapping(value = "/limits/newLimit", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Set order limit for employee", description = "Supervisor sets order limit for employee")
+    @Operation(summary = "Set order limit for employee", description = "Supervisor sets order limit for employee",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('manageOrderRequests')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -285,7 +327,10 @@ public class EmployeeController {
     }
 
     @GetMapping(value = "/limits/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all limits for all employees", description = "Only supervisor gets all limits for all employees.")
+    @Operation(summary = "Get all limits for all employees", description = "Only supervisor gets all limits for all employees.",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @PreAuthorize("hasAuthority('manageOrderRequests')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",

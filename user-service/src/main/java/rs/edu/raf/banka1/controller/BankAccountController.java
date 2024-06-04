@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -72,7 +74,11 @@ public class BankAccountController {
     }
 
     @PutMapping()
-    @Operation(summary = "Edit bank account name", description = "Customer can edit a bank account's name")
+    @Operation(summary = "Edit bank account name",
+            description = "Customer can edit a bank account's name",
+    parameters = {
+            @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+    })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Name edited successfully",
                     content = {@Content(mediaType = "application/json",
@@ -86,7 +92,10 @@ public class BankAccountController {
     }
 
     @GetMapping(value = "/getAllCards/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all cards by customer id", description = "Returns all cards from all bank accounts for a given customer")
+    @Operation(summary = "Get all cards by customer id", description = "Returns all cards from all bank accounts for a given customer",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class,
@@ -101,7 +110,10 @@ public class BankAccountController {
     }
 
     @GetMapping(value = "/getCustomer/{customerId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all bank accounts from one customer", description = "Get all bank accounts from one customer")
+    @Operation(summary = "Get all bank accounts from one customer", description = "Get all bank accounts from one customer",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                 content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class,
@@ -114,7 +126,10 @@ public class BankAccountController {
     }
 
     @GetMapping(value = "/getCompany/{companyId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all bank accounts from  one company", description = "Get all bank accounts from one company")
+    @Operation(summary = "Get all bank accounts from  one company", description = "Get all bank accounts from one company",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class,
@@ -127,7 +142,10 @@ public class BankAccountController {
     }
 
     @GetMapping(value = "/getCreator/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all bank accounts from  one creator", description = "Creator is the person who created the account")
+    @Operation(summary = "Get all bank accounts from  one creator", description = "Creator is the person who created the account",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class,
@@ -141,7 +159,10 @@ public class BankAccountController {
 
 
     @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Create new bank account", description = "bank employee can create new bank account")
+    @Operation(summary = "Create new bank account", description = "bank employee can create new bank account",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class,
@@ -159,7 +180,10 @@ public class BankAccountController {
     }
 
     @GetMapping(value = "/balance/forex/{forexId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
+    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -172,7 +196,10 @@ public class BankAccountController {
     }
 
     @GetMapping(value = "/balance/future/{futureId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
+    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -185,7 +212,10 @@ public class BankAccountController {
     }
 
     @GetMapping(value = "/balance/stock/{stockId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
+    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -197,8 +227,11 @@ public class BankAccountController {
         return new ResponseEntity<>(capitalService.estimateBalanceStock(stockId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/balance/{accountNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get total for bank account", description = "Get total for bank account")
+    @GetMapping(value = "/balance/options/{optionsId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -206,12 +239,15 @@ public class BankAccountController {
             @ApiResponse(responseCode = "403", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<Double> estimateBalanceBankAccount(@PathVariable(name = "accountNumber") String accountNumber) {
-        return new ResponseEntity<>(capitalService.getCapital(accountNumber), HttpStatus.OK);
+    public ResponseEntity<Double> estimateBalanceOptions(@PathVariable(name = "optionsId") Long optionsId) {
+        return new ResponseEntity<>(capitalService.estimateBalanceOptions(optionsId), HttpStatus.OK);
     }
 
     @GetMapping(value = "/capitals/listings", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get total for bank account", description = "Get total for bank account")
+    @Operation(summary = "Get total for bank account", description = "Get total for bank account",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",

@@ -9,31 +9,27 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
 import org.tinylog.Logger;
 import rs.edu.raf.banka1.mapper.StockMapper;
 import rs.edu.raf.banka1.model.ListingHistory;
-
 import rs.edu.raf.banka1.model.ListingStock;
-
-import rs.edu.raf.banka1.model.entities.Country;
 import rs.edu.raf.banka1.model.entities.Exchange;
-import rs.edu.raf.banka1.model.entities.Holiday;
 import rs.edu.raf.banka1.model.exceptions.APIException;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.threads.FetchingThread;
 import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.Requests;
 
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
-import java.io.InputStream;
-import java.time.*;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,7 +37,8 @@ import java.util.stream.Collectors;
 @Getter
 @Service
 public class ListingStockServiceImpl implements ListingStockService {
-    private final ObjectMapper objectMapper;
+    @Setter
+    private ObjectMapper objectMapper;
 
     @Autowired
     private StockRepository stockRepository;
@@ -75,6 +72,9 @@ public class ListingStockServiceImpl implements ListingStockService {
     @Value("${HistoryListingApiUrl}")
     private String historyListingApiUrl;
 
+    //treba zbog testova Clock
+    @Setter
+    private Clock clock = Clock.systemDefaultZone();
 
     public ListingStockServiceImpl() {
         objectMapper = new ObjectMapper();
@@ -90,7 +90,7 @@ public class ListingStockServiceImpl implements ListingStockService {
 
                 String urlStr = listingNameApiUrl + sectorsEncoded + "&token=" + listingAPItoken;
 
-                String response = requests.sendRequest(urlStr);
+                String response = Requests.sendRequest(urlStr);
                 responses.append(response);
 
             }
@@ -117,19 +117,9 @@ public class ListingStockServiceImpl implements ListingStockService {
     @Override
     public List<ListingStock> fetchNListingStocks(int n) {
         try {
-
-            InputStream inputStream = Constants.getInputStreamForResource(Constants.listingsFilePath);
-
-            if(inputStream == null) {
-                return new ArrayList<ListingStock>();
-            }
-
-//            File file = new File(Constants.listingsFilePath);
-
-            // Read JSON data from the file
-            JsonNode rootNode = objectMapper.readTree(inputStream);
-
-            List<ListingStock> listingStocks = new ArrayList<>();
+            var listingStocks = new ArrayList<ListingStock>();
+            Resource resource = new ClassPathResource(Constants.listingsFilePath, this.getClass().getClassLoader());
+            JsonNode rootNode = objectMapper.readTree(resource.getInputStream());
 
             int i = 1;
             // Iterate over n element in the listings JSON
@@ -138,25 +128,28 @@ public class ListingStockServiceImpl implements ListingStockService {
                 String companyName = node.path("companyName").asText();
                 String primaryExchange = node.path("primaryExchange").asText();
                 ListingStock listingStock = createListingStock(symbol, companyName, primaryExchange);
-                if (listingStock != null) listingStocks.add(listingStock);
-                if (i++ > n) break;
+                if (listingStock != null) {
+                    listingStocks.add(listingStock);
+                    i++;
+                }
+                if (i > n) break;
             }
             return listingStocks;
 
         } catch (Exception e){
-            System.err.println("[populateNListingStocks] Exception occured:"+e.getMessage());
+            Logger.error("[populateNListingStocks] Exception occured:"+e.getMessage());
             return new ArrayList<>();
         }
 
     }
-
-    private ListingStock createListingStock(String symbol, String companyName, String primaryExchange) {
+    @Override
+    public ListingStock createListingStock(String symbol, String companyName, String primaryExchange) {
         try {
             String listingBaseUrl = updateListingApiUrl + symbol + "&apikey=" + alphaVantageAPIToken;
             String listingStockUrl = basicStockInfoApiUrl+symbol+"&apikey=" + alphaVantageAPIToken;
 
-            String baseResponse = requests.sendRequest(listingBaseUrl);
-            String stockResponse = requests.sendRequest(listingStockUrl);
+            String baseResponse = Requests.sendRequest(listingBaseUrl);
+            String stockResponse = Requests.sendRequest(listingStockUrl);
 
             // Fetch JSON data from the API
             JsonNode rootNode = objectMapper.readTree(baseResponse);
@@ -215,7 +208,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     @Override
     public List<ListingHistory> fetchNListingsHistory(int n) {
         try{
-            List<ListingStock> listingStocks = fetchNStocks(n);
+             List<ListingStock> listingStocks = fetchNStocks(n);
             List<ListingHistory> listingHistories = new ArrayList<>();
             for (ListingStock stock : listingStocks) {
                 List<ListingHistory> singleStockHistory = fetchSingleListingHistory(stock.getTicker());
@@ -302,7 +295,7 @@ public class ListingStockServiceImpl implements ListingStockService {
         return listingHistoriesModels.stream().mapToInt(this::addListingToHistory).sum();
     }
 
-    private ListingHistory createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp){
+    public ListingHistory createListingHistoryModelFromJson(JsonNode dataNode, String ticker, int unixTimestamp){
         // Get specific fields from each data node
         double open = dataNode.get("1. open").asDouble();
         double high = dataNode.get("2. high").asDouble();
@@ -353,67 +346,9 @@ public class ListingStockServiceImpl implements ListingStockService {
         return newArray;
     }
 
+
     @Override
     public Optional<ListingStock> findByTicker(String ticker) {
         return stockRepository.findByTicker(ticker);
     }
-
-    @Override
-    public Optional<ListingStock> findById(Long id) {
-        return stockRepository.findById(id);
-    }
-
-    public List<ListingHistory> getListingHistoriesByTimestamp(String ticker, Integer from, Integer to) {
-        List<ListingHistory> listingHistories = new ArrayList<>();
-//        return all timestamps
-        if(from == null && to == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
-        }
-//        return all timestamps before given timestamp
-        else if(from == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBefore(ticker, to);
-        }
-//        return all timestamps after given timestamp
-        else if(to == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateAfter(ticker, from);
-        }
-//        return all timestamps between two timestamps
-        else{
-            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to);
-        }
-
-        return listingHistories;
-    }
-
-    @Override
-    public List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to) {
-        List<ListingHistory> listingHistories = new ArrayList<>();
-//        find stock in database
-        ListingStock stock = stockRepository.findById(id).orElse(null);
-        if(stock == null){
-            return listingHistories;
-        }
-        String ticker = stock.getTicker();
-        listingHistories = listingHistoryRepository.getListingHistoriesByTicker(ticker);
-        if(listingHistories.isEmpty()) {
-            listingHistories = fetchSingleListingHistory(stock.getTicker());
-            listingHistoryRepository.saveAll(listingHistories);
-        }
-
-//        return all timestamps before given timestamp
-        if(from == null && to != null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBefore(ticker, to);
-        }
-//        return all timestamps after given timestamp
-        else if(from != null && to == null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateAfter(ticker, from);
-        }
-//        return all timestamps between two timestamps
-        else if(from != null && to != null){
-            listingHistories = listingHistoryRepository.getListingHistoriesByTickerAndDateBetween(ticker, from, to);
-        }
-
-        return listingHistories;
-    }
-
 }

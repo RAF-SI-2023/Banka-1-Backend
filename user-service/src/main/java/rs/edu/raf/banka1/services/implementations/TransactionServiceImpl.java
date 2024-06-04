@@ -3,10 +3,13 @@ package rs.edu.raf.banka1.services.implementations;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.Setter;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.TransactionDto;
 import rs.edu.raf.banka1.mapper.TransactionMapper;
 import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.repositories.OrderRepository;
+import rs.edu.raf.banka1.repositories.StockProfitRepository;
 import rs.edu.raf.banka1.repositories.TransactionRepository;
 import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.model.BankAccount;
@@ -16,6 +19,7 @@ import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.TransactionService;
 import rs.edu.raf.banka1.utils.Constants;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,12 +33,21 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final CapitalService capitalService;
     private final BankAccountService bankAccountService;
+    private final OrderRepository orderRepository;
+    private final StockProfitRepository stockProfitRepository;
 
-    public TransactionServiceImpl(TransactionMapper transactionMapper, TransactionRepository transactionRepository, BankAccountService bankAccountService, CapitalService capitalService) {
+    public TransactionServiceImpl(TransactionMapper transactionMapper,
+                                  TransactionRepository transactionRepository,
+                                  BankAccountService bankAccountService,
+                                  CapitalService capitalService,
+                                  OrderRepository orderRepository,
+                                  StockProfitRepository stockProfitRepository) {
         this.transactionMapper = transactionMapper;
         this.transactionRepository = transactionRepository;
         this.bankAccountService = bankAccountService;
         this.capitalService = capitalService;
+        this.orderRepository = orderRepository;
+        this.stockProfitRepository = stockProfitRepository;
     }
 
     @Override
@@ -46,26 +59,68 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Transactional
     @Override
-    public void createTransaction(Capital bankCapital, Capital securityCapital, Double price, MarketOrder order, Long securityAmount) {
+    public void createTransaction(BankAccount bankAccount, Capital securityCapital, Double price, MarketOrder order, Long securityAmount) {
         Transaction transaction = new Transaction();
-        transaction.setCurrency(bankCapital.getBankAccount().getCurrency());
-        transaction.setBankAccount(bankCapital.getBankAccount());
+        transaction.setCurrency(bankAccount.getCurrency());
+        transaction.setBankAccount(bankAccount);
         if(order.getOrderType().equals(OrderType.BUY)) {
             transaction.setBuy(price);
             //Add stocks to capital
-            capitalService.addBalance(securityCapital.getListingId(), securityCapital.getListingType(), (double) securityAmount);
+            capitalService.addBalance(securityCapital.getListingId(), securityCapital.getListingType(), bankAccount, (double) securityAmount);
             //Commit reserved
-            capitalService.commitReserved(bankCapital.getBankAccount().getCurrency().getCurrencyCode(), price);
+            bankAccountService.commitReserved(bankAccount, price);
         } else {
             transaction.setSell(price);
             //Remove stocks
-            capitalService.commitReserved(securityCapital.getListingId(), securityCapital.getListingType(), (double)securityAmount);
+            capitalService.commitReserved(securityCapital.getListingId(), securityCapital.getListingType(), bankAccount, (double)securityAmount);
             //Add money
-            capitalService.addBalance(bankCapital.getCurrency().getCurrencyCode(), price);
+            Double taxReturn = checkTaxReturn(order);
+            bankAccountService.addBalance(bankAccount, price - taxReturn);
+
+            if (order.getListingType().equals(ListingType.STOCK)) {
+                StockProfit stockProfitRecord = new StockProfit();
+                stockProfitRecord.setTransaction(transaction);
+                stockProfitRecord.setDateTime(transaction.getDateTime());
+                stockProfitRecord.setEmployee(transaction.getEmployee());
+                Double profit = price - securityCapital.getAverageBuyingPrice() * securityCapital.getTotal();
+                stockProfitRecord.setTransactionProfit(0.85 * profit);
+                stockProfitRepository.save(stockProfitRecord);
+            }
         }
         transaction.setMarketOrder(order);
         transaction.setEmployee(order.getOwner());
         transactionRepository.save(transaction);
+    }
+
+    private Double checkTaxReturn(MarketOrder order){
+        List<MarketOrder> orders = orderRepository.getAllBuyOrders(order.getListingId(), order.getListingType(), order.getOwner(), OrderType.BUY, OrderStatus.DONE).orElse(null);
+        //this should not happen, checking just so java doesn't freak out
+        if(orders == null){
+            return 0.0;
+        }
+        Double returnAmount = 0.0;
+        Long counter = order.getContractSize();
+        for(MarketOrder buyOrder : orders){
+            long amount = Math.min(counter, buyOrder.getContractSize() - buyOrder.getCurrentAmount());
+            buyOrder.setCurrentAmount(amount - counter);
+            long timestampNow = System.currentTimeMillis()/1000;
+            //if order is older than 10 years, we don't need to return tax
+            long period = timestampNow - buyOrder.getTimestamp();
+            period = period - 10*365*24*60*60;
+            if(period < 0){
+                //we dont return tax if no money was made
+                if(order.getPrice() > buyOrder.getPrice()){
+                    returnAmount += amount * (order.getPrice() - buyOrder.getPrice()) * 0.2;
+                }
+            }
+            orderRepository.save(buyOrder);
+
+            counter-=amount;
+            if(counter == 0L){
+                break;
+            }
+        }
+        return returnAmount;
     }
 
     @Override
@@ -93,6 +148,16 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.getTransactionsByEmployee_UserId(userId)
             .stream()
             .map(transactionMapper::transactionToTransactionDto).toList();
+    }
+
+    public List<TransactionDto> getAllTransactionsForCompanyBankAccounts(Long companyId) {
+        List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCompany(companyId);
+        List<String> bankAccountNums = bankAccounts.stream().map(BankAccount::getAccountNumber).collect(Collectors.toList());
+        List<Transaction> results = new ArrayList<>();
+        for(String bankAcc:bankAccountNums) {
+            results.addAll(transactionRepository.getTransactionsByBankAccount_AccountNumber(bankAcc));
+        }
+        return results.stream().map(transactionMapper::transactionToTransactionDto).collect(Collectors.toList());
     }
 
     @Override

@@ -1,6 +1,8 @@
 package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,10 +21,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import rs.edu.raf.banka1.mapper.ForexMapper;
 import rs.edu.raf.banka1.mapper.FutureMapper;
+import rs.edu.raf.banka1.mapper.OptionsMapper;
 import rs.edu.raf.banka1.mapper.ListingHistoryMapper;
 import rs.edu.raf.banka1.mapper.StockMapper;
 import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingFuture;
+import rs.edu.raf.banka1.model.OptionsModel;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.dtos.ExchangeDto;
@@ -31,11 +35,12 @@ import rs.edu.raf.banka1.model.dtos.ListingForexDto;
 import rs.edu.raf.banka1.model.dtos.ListingFutureDto;
 import rs.edu.raf.banka1.model.dtos.ListingHistoryDto;
 import rs.edu.raf.banka1.model.dtos.ListingStockDto;
+import rs.edu.raf.banka1.model.dtos.OptionsDto;
 import rs.edu.raf.banka1.services.ExchangeService;
 import rs.edu.raf.banka1.services.ForexService;
 import rs.edu.raf.banka1.services.FuturesService;
 import rs.edu.raf.banka1.services.ListingStockService;
-
+import rs.edu.raf.banka1.services.OptionsService;
 import java.util.List;
 
 @RestController
@@ -44,6 +49,7 @@ import java.util.List;
 //@SecurityRequirement() TODO
 @CrossOrigin
 @SecurityRequirement(name = "basicScheme")
+@SecurityRequirement(name = "Authorization")
 public class MarketController {
 
     private final ExchangeService exchangeService;
@@ -54,9 +60,12 @@ public class MarketController {
     private final ForexMapper forexMapper;
     private final StockMapper stockMapper;
     private final FutureMapper futureMapper;
+    private final OptionsService optionsService;
+    private final OptionsMapper optionsMapper;
 
     @Autowired
     public MarketController(ExchangeService exchangeService, ForexService forexService, ListingStockService listingStockService, FuturesService futuresService,
+                            OptionsService optionsService,OptionsMapper optionsMapper,
                             ListingHistoryMapper listingHistoryMapper, ForexMapper forexMapper, StockMapper stockMapper, FutureMapper futureMapper) {
         this.exchangeService = exchangeService;
         this.forexService = forexService;
@@ -66,10 +75,15 @@ public class MarketController {
         this.forexMapper = forexMapper;
         this.stockMapper = stockMapper;
         this.futureMapper = futureMapper;
+        this.optionsService = optionsService;
+        this.optionsMapper = optionsMapper;
     }
 
     @GetMapping(value = "/exchange", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all exchanges", description = "Returns all exchanges")
+    @Operation(summary = "Get all exchanges", description = "Returns all exchanges",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -82,7 +96,10 @@ public class MarketController {
     }
 
     @GetMapping(value = "/exchange/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get exchange by id", description = "Returns exchange by id")
+    @Operation(summary = "Get exchange by id", description = "Returns exchange by id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -97,7 +114,10 @@ public class MarketController {
 
 
     @GetMapping(value = "/listing", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all listings", description = "Returns list of listings")
+    @Operation(summary = "Get all listings", description = "Returns list of listings",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -117,7 +137,10 @@ public class MarketController {
 
     @GetMapping(value = "/listing/get/{listingType}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get specific listing based on listingType param", description = "Returns list of specific "
-            + "listingType based on listingType param (forex, stock, futures)")
+            + "listingType based on listingType param (forex, stock, futures)",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -136,6 +159,9 @@ public class MarketController {
         else if(listingType.equalsIgnoreCase("futures")) {
             return new ResponseEntity<>(this.futuresService.getAllFutures().stream().map(futureMapper::toDto), HttpStatus.OK);
         }
+        else if(listingType.equalsIgnoreCase("options")) {
+            return new ResponseEntity<>(this.optionsService.getAllOptions().stream().map(optionsMapper::optionsModelToOptionsDto), HttpStatus.OK);
+        }
         else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -145,7 +171,10 @@ public class MarketController {
     @GetMapping(value = "/listing/history/stock/{stockId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get history by stock id", description = "Returns List of histories for given stock id, "
             + "timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is "
-            + "provided it's exclusive)")
+            + "provided it's exclusive)",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -170,7 +199,10 @@ public class MarketController {
     @GetMapping(value = "/listing/history/forex/{forexId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get history by forex id", description = "Returns List of histories for given forex id, "
             + "timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is "
-            + "provided it's exclusive)")
+            + "provided it's exclusive)",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -195,7 +227,10 @@ public class MarketController {
     @GetMapping(value = "/listing/history/future/{futureId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get history by future id", description = "Returns List of histories for given future id, "
             + "timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is "
-            + "provided it's exclusive)")
+            + "provided it's exclusive)",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -218,7 +253,10 @@ public class MarketController {
     }
 
     @GetMapping(value = "/listing/stock/{stockId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get stock by id", description = "Returns stock by id")
+    @Operation(summary = "Get stock by id", description = "Returns stock by id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -236,7 +274,10 @@ public class MarketController {
     }
 
     @GetMapping(value = "/exchange/stock/{stockId}/time", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get working time of exchange center", description = "Returns working time of exchange by stock id")
+    @Operation(summary = "Get working time of exchange center", description = "Returns working time of exchange by stock id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -256,7 +297,10 @@ public class MarketController {
     }
 
     @GetMapping(value = "/listing/forex/{forexId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get forex by id", description = "Returns forex by id")
+    @Operation(summary = "Get forex by id", description = "Returns forex by id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -274,7 +318,10 @@ public class MarketController {
     }
 
     @GetMapping(value = "/listing/future/{futureId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get future by id", description = "Returns future by id")
+    @Operation(summary = "Get future by id", description = "Returns future by id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -291,6 +338,118 @@ public class MarketController {
         return new ResponseEntity<>(listingFutureDto, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/listing/options/{optionsId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get options by id", description = "Returns options by id",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = OptionsDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Options not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
 
+    public ResponseEntity<OptionsDto> getOptionsById(@PathVariable Long optionsId) {
+        OptionsModel options = optionsService.findById(optionsId).orElse(null);
+        if (options == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        OptionsDto optionsDto = optionsMapper.optionsModelToOptionsDto(options);
+        return new ResponseEntity<>(optionsDto, HttpStatus.OK);
+
+    }
+
+    @GetMapping(value = "/listing/callOptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get call options", description = "Returns call options",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,subTypes = {OptionsDto.class}))}),
+            @ApiResponse(responseCode = "404", description = "Options not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+
+    public ResponseEntity<List<OptionsDto>> getCallOptions() {
+        List<OptionsModel> options = optionsService.getAllCallOptions().orElse(null);
+        if (options == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return ResponseEntity.ok(options.stream().map(optionsMapper::optionsModelToOptionsDto).toList());
+    }
+
+    @GetMapping(value = "/listing/callOptionById/{optionsId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get call option by id", description = "Returns call option",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = OptionsDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Options not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+
+    public ResponseEntity<OptionsDto> getCallOptionById(@PathVariable Long optionsId) {
+        OptionsModel options = optionsService.getCallOptionById(optionsId).orElse(null);
+        if (options == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        OptionsDto optionsDto = optionsMapper.optionsModelToOptionsDto(options);
+        return new ResponseEntity<>(optionsDto, HttpStatus.OK);
+
+    }
+
+
+    @GetMapping(value = "/listing/putOptions", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get put options", description = "Returns put options",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,subTypes = {OptionsDto.class}))}),
+            @ApiResponse(responseCode = "404", description = "Options not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+
+    public ResponseEntity<List<OptionsDto>> getPutOptions() {
+        List<OptionsModel> options = optionsService.getAllPutOptions().orElse(null);
+        if (options == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(options.stream().map(optionsMapper::optionsModelToOptionsDto).toList());
+
+    }
+
+    @GetMapping(value = "/listing/putOptionById/{optionsId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get call option by id", description = "Returns call option",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = OptionsDto.class))}),
+            @ApiResponse(responseCode = "404", description = "Options not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+
+    public ResponseEntity<OptionsDto> getPutOptionById(@PathVariable Long optionsId) {
+        OptionsModel options = optionsService.getPutOptionById(optionsId).orElse(null);
+        if (options == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        OptionsDto optionsDto = optionsMapper.optionsModelToOptionsDto(options);
+        return new ResponseEntity<>(optionsDto, HttpStatus.OK);
+
+    }
 
 }

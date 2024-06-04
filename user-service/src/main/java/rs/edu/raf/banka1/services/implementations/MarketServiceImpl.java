@@ -43,6 +43,11 @@ public class MarketServiceImpl implements MarketService {
     }
 
     @Override
+    public List<OptionsDto> getAllOptions() {
+        return getAllListingsFromMarket("options").stream().map(f ->(OptionsDto) f).toList();
+    }
+
+    @Override
     public ListingStockDto getStockById(Long stockId) {
         return Retry.decorateSupplier(serviceRetry, () -> getStockByIdFromMarket(stockId)).get();
     }
@@ -56,6 +61,21 @@ public class MarketServiceImpl implements MarketService {
     public ListingForexDto getForexById(Long forexId) {
         return Retry.decorateSupplier(serviceRetry, () -> getForexByIdFromMarket(forexId)).get();
     }
+    @Override
+    public OptionsDto getOptionsById(Long optionsId) {
+        return Retry.decorateSupplier(serviceRetry, () -> getOptionsByIdFromMarket(optionsId)).get();
+    }
+
+    @Override
+    public OptionsDto getCallOptionById(Long optionsId) {
+        return Retry.decorateSupplier(serviceRetry, () -> getCallOptionsByIdFromMarket(optionsId)).get();
+    }
+
+    @Override
+    public OptionsDto getPutOptionById(Long optionsId) {
+        return Retry.decorateSupplier(serviceRetry, () -> getPutOptionsByIdFromMarket(optionsId)).get();
+    }
+
 
     @Override
     public WorkingHoursStatus getWorkingHoursForStock(Long stockId) {
@@ -191,6 +211,104 @@ public class MarketServiceImpl implements MarketService {
         }
         return null;
     }
+    public OptionsDto getOptionsByIdFromMarket(Long optionsId) {
+
+        try {
+            // Create header with JWT token
+            HttpEntity<?> httpEntity = createHeader();
+
+            ResponseEntity<OptionsDto> response = marketServiceRestTemplate.exchange(
+                    "market/listing/options/" + optionsId,
+                    HttpMethod.GET,
+                    httpEntity,
+                    OptionsDto.class
+            );
+            System.out.println(response.getBody());
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return response.getBody();
+            } else {
+                // Log the unsuccessful response status code
+                System.out.println("Unsuccessful response status code: " + response.getStatusCode());
+                return null;
+            }
+        }catch(HttpClientErrorException e){
+            if(e.getStatusCode().equals(HttpStatus.NOT_FOUND)){
+                System.out.println("Options not found: getOptionsByIdFromMarket");
+            }
+            if(e.getStatusCode().equals(HttpStatus.BAD_REQUEST)){
+                System.out.println("Bad request: getOptionsByIdFromMarket");
+            }
+        }catch (Exception e){
+            System.out.println("Error: getOptionsByIdFromMarket");
+        }
+        return null;
+    }
+
+    public OptionsDto getCallOptionsByIdFromMarket(Long optionsId) {
+
+        try {
+            // Create header with JWT token
+            HttpEntity<?> httpEntity = createHeader();
+
+            ResponseEntity<OptionsDto> response = marketServiceRestTemplate.exchange(
+                    "market/listing/callOptionById/" + optionsId,
+                    HttpMethod.GET,
+                    httpEntity,
+                    OptionsDto.class
+            );
+            System.out.println(response.getBody());
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return response.getBody();
+            } else {
+                // Log the unsuccessful response status code
+                System.out.println("Unsuccessful response status code: " + response.getStatusCode());
+                return null;
+            }
+        }catch(HttpClientErrorException e){
+            if(e.getStatusCode().equals(HttpStatus.NOT_FOUND)){
+                System.out.println("Options not found: getCallOptionsByIdFromMarket");
+            }
+            if(e.getStatusCode().equals(HttpStatus.BAD_REQUEST)){
+                System.out.println("Bad request: getCallOptionsByIdFromMarket");
+            }
+        }catch (Exception e){
+            System.out.println("Error: getCallOptionsByIdFromMarket");
+        }
+        return null;
+    }
+
+    public OptionsDto getPutOptionsByIdFromMarket(Long optionsId) {
+
+        try {
+            // Create header with JWT token
+            HttpEntity<?> httpEntity = createHeader();
+
+            ResponseEntity<OptionsDto> response = marketServiceRestTemplate.exchange(
+                    "market/listing/putOptionById/" + optionsId,
+                    HttpMethod.GET,
+                    httpEntity,
+                    OptionsDto.class
+            );
+            System.out.println(response.getBody());
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return response.getBody();
+            } else {
+                // Log the unsuccessful response status code
+                System.out.println("Unsuccessful response status code: " + response.getStatusCode());
+                return null;
+            }
+        }catch(HttpClientErrorException e){
+            if(e.getStatusCode().equals(HttpStatus.NOT_FOUND)){
+                System.out.println("Options not found: getPutOptionsByIdFromMarket");
+            }
+            if(e.getStatusCode().equals(HttpStatus.BAD_REQUEST)){
+                System.out.println("Bad request: getPutOptionsByIdFromMarket");
+            }
+        }catch (Exception e){
+            System.out.println("Error: getPutOptionsByIdFromMarket");
+        }
+        return null;
+    }
 
     public List<Object> getAllListingsFromMarket(String listType) {
         // get valid response type
@@ -236,6 +354,8 @@ public class MarketServiceImpl implements MarketService {
                 return new ParameterizedTypeReference<List<ListingForexDto>>() {};
             case "futures":
                 return new ParameterizedTypeReference<List<ListingFutureDto>>() {};
+            case "options":
+                return new ParameterizedTypeReference<List<OptionsDto>>() {};
             default:
                 return new ParameterizedTypeReference<List<Object>>() {};
         }

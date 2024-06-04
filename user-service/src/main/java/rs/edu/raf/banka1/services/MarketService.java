@@ -10,9 +10,13 @@ public interface MarketService {
     List<ListingStockDto> getAllStocks();
     List<ListingFutureDto> getAllFutures();
     List<ListingForexDto> getAllForex();
+    List<OptionsDto> getAllOptions();
     ListingStockDto getStockById(Long stockId);
     ListingFutureDto getFutureById(Long futureId);
     ListingForexDto getForexById(Long forexId);
+    OptionsDto getOptionsById(Long optionsId);
+    OptionsDto getCallOptionById(Long optionsId);
+    OptionsDto getPutOptionById(Long optionsId);
     WorkingHoursStatus getWorkingHoursForStock(Long stockId);
 
 }

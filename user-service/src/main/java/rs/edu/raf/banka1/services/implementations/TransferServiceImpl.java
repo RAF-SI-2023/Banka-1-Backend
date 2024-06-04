@@ -9,6 +9,7 @@ import rs.edu.raf.banka1.dtos.ExchangeRateDto;
 import rs.edu.raf.banka1.dtos.TransferDto;
 import rs.edu.raf.banka1.exceptions.CreateTransferException;
 import rs.edu.raf.banka1.exceptions.NotFoundException;
+import rs.edu.raf.banka1.dtos.TransfersReportDto;
 import rs.edu.raf.banka1.mapper.TransferMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
@@ -301,6 +302,26 @@ public class TransferServiceImpl implements TransferService {
             }
         }
         return exchangeRateDtos;
+    }
+
+    @Override
+    public TransfersReportDto getTransfersReport() {
+        List<Transfer> allTransfers = transferRepository.findAll();
+        double totalProfit = 0;
+
+        TransfersReportDto transfersReportDto = new TransfersReportDto();
+
+        transfersReportDto.setTransfers(allTransfers.stream()
+                        .map(transferMapper::transferToTransferDto)
+                        .collect(Collectors.toList()));
+
+        for (Transfer t:allTransfers){
+            double commisison = Transfer.calculateCommission(t.getAmount());
+            totalProfit+=commisison;
+        }
+        transfersReportDto.setProfit(totalProfit);
+
+        return transfersReportDto;
     }
 
     //for testing only

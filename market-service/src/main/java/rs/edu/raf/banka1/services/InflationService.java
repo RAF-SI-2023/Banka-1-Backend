@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.InflationMapper;
 import rs.edu.raf.banka1.model.dtos.InflationDto;
@@ -20,10 +21,12 @@ public class InflationService {
         this.inflationMapper = inflationMapper;
     }
 
+    @Cacheable(value = "findAllByCurrencyId", key = "#currencyId")
     public List<InflationDto> findAllByCurrencyId(Long currencyId) {
         return inflationRepository.findAllByCurrencyId(currencyId).stream().map(inflationMapper::inflationToInflationDto).toList();
     }
 
+    @Cacheable(value = "findAllByCurrencyIdAndYear", key = "#currencyId + '_' + #year")
     public List<InflationDto> findAllByCurrencyIdAndYear(Long currencyId, Integer year) {
         return inflationRepository.findAllByCurrencyIdAndYear(currencyId, year).stream().map(inflationMapper::inflationToInflationDto).toList();
     }

@@ -1,21 +1,17 @@
 package rs.edu.raf.banka1.services;
 
+import rs.edu.raf.banka1.model.OptionsModel;
 import rs.edu.raf.banka1.model.dtos.OptionsDto;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface OptionsService {
-    /**
-     * Ovo bi trebalo da bude asinhrona funkcija koja poziva na svakih 15min
-     * (recimo) i apdejtuje u bazi
-     * @return Object promeniti u Options (Model)
-     */
-    List<OptionsDto> fetchOptions();
-    List<OptionsDto> fetchOptionsForTicker(String ticker, String url);
     List<OptionsDto> getOptionsByTicker(String ticker);
-
-    void truncateTable();
-
-    void truncateAndFetch();
-
+    Optional<OptionsModel> findById(Long id);
+    List<OptionsModel> getAllOptions();
+    Optional<List<OptionsModel>> getAllCallOptions();
+    Optional<OptionsModel> getCallOptionById(Long id);
+    Optional<List<OptionsModel>> getAllPutOptions();
+    Optional<OptionsModel> getPutOptionById(Long id);
 }

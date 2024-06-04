@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OptionsDto {
-    private String ticker;
+public class OptionsDto extends ListingBaseDto {
     private String optionType;
     private Double strikePrice;
     private String currency;

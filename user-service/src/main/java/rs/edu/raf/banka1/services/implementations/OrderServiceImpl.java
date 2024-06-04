@@ -9,6 +9,8 @@ import rs.edu.raf.banka1.exceptions.InvalidOrderListingAmountException;
 import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
 import rs.edu.raf.banka1.exceptions.OrderListingNotFoundByIdException;
 import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
+import rs.edu.raf.banka1.exceptions.ForbiddenException;
+import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
@@ -34,6 +36,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final TransactionService transactionService;
     private final CapitalService capitalService;
+    private final BankAccountService bankAccountService;
 
     private final EmployeeRepository employeeRepository;
 
@@ -53,6 +56,7 @@ public class OrderServiceImpl implements OrderService {
         final TaskScheduler taskScheduler,
         final TransactionService transactionService,
         final CapitalService capitalService,
+        final BankAccountService bankAccountService,
         EmployeeRepository employeeRepository) {
         this.orderMapper = orderMapper;
         this.orderRepository = orderRepository;
@@ -61,13 +65,29 @@ public class OrderServiceImpl implements OrderService {
         this.transactionService = transactionService;
         this.capitalService = capitalService;
         this.employeeRepository = employeeRepository;
+        this.bankAccountService = bankAccountService;
 
         scheduledFutureMap = new ConcurrentHashMap<>();
     }
 
     @Override
-    public void createOrder(final CreateOrderRequest request, final Employee currentAuth) {
-        final MarketOrder order = orderMapper.requestToMarketOrder(request, currentAuth);
+    public void createOrder(final CreateOrderRequest request, final User currentAuth, String bankAccountNumber) {
+        MarketOrder order = orderMapper.requestToMarketOrder(request, currentAuth);
+        if(currentAuth instanceof Customer) {
+            BankAccount bankAccount = bankAccountService.findBankAccountByAccountNumber(bankAccountNumber);
+            if(!((Customer)currentAuth).getAccountIds().contains(bankAccount)){
+                //mozda ovde treba drugaciji exception?
+                throw new ForbiddenException();
+            }
+            if(bankAccount.getCompany() == null && !order.getListingType().equals(ListingType.STOCK)){
+                throw new ForbiddenException();
+            }
+            order.setCustomer((Customer)currentAuth);
+            order.setBankAccountNumber(bankAccountNumber);
+        }
+        else if(currentAuth instanceof Employee){
+            order.setOwner((Employee)currentAuth);
+        }
         if(order.getContractSize() <= 0) throw new InvalidOrderListingAmountException();
         ListingBaseDto listingBaseDto = getListingByOrder(order);
 
@@ -75,15 +95,25 @@ public class OrderServiceImpl implements OrderService {
 
         order.setPrice(calculatePrice(order,listingBaseDto,order.getContractSize()));
         order.setFee(calculateFee(request.getLimitValue(), order.getPrice()));
-        order.setOwner(currentAuth);
+        if(currentAuth instanceof Employee) {
+            order.setOwner((Employee)currentAuth);
+        }
+        else{
+            order.setCustomer((Customer)currentAuth);
+        }
         order.setProcessedNumber(0L);
 
         if(!capitalService.hasEnoughCapitalForOrder(order))
             throw new NotEnoughCapitalAvailableException();
 
-        if(adjustAgentLimit(currentAuth,order.getPrice())){
-            order.setStatus(OrderStatus.PROCESSING);
-        }else {
+        if(currentAuth instanceof Employee) {
+            if (adjustAgentLimit((Employee)currentAuth, order.getPrice())) {
+                order.setStatus(OrderStatus.PROCESSING);
+            } else {
+                order.setStatus(OrderStatus.APPROVED);
+            }
+        }
+        else if(currentAuth instanceof Customer){
             order.setStatus(OrderStatus.APPROVED);
         }
 
@@ -94,11 +124,11 @@ public class OrderServiceImpl implements OrderService {
             reserveStockCapital(order);
         }
 
-        startOrderSimulation(order.getId());
+        startOrderSimulation(order.getId(), bankAccountNumber);
     }
 
     @Override
-    public void startOrderSimulation(Long orderId) {
+    public void startOrderSimulation(Long orderId, String bankAccountNumber) {
         orderRepository.updateUpdatedAtById(Instant.now(), orderId); // Update updatedAt to ensure multiple instances don't run the same simulation
         //Start simulation
         ScheduledFuture<?> future = taskScheduler.schedule(
@@ -107,7 +137,9 @@ public class OrderServiceImpl implements OrderService {
                 marketService,
                 transactionService,
                 capitalService,
-                orderId
+                bankAccountService,
+                orderId,
+                    bankAccountNumber
             ),
             new StockSimulationTrigger(
                 this,
@@ -124,6 +156,10 @@ public class OrderServiceImpl implements OrderService {
             return marketService.getStockById(order.getListingId());
         } else if(order.getListingType().equals(ListingType.FOREX)) {
             return marketService.getForexById(order.getListingId());
+        }else if(order.getListingType().equals(ListingType.OPTIONS) && order.getOrderType().equals(OrderType.BUY)){
+            return marketService.getCallOptionById(order.getListingId());
+        }else if(order.getListingType().equals(ListingType.OPTIONS) && order.getOrderType().equals(OrderType.SELL)){
+            return marketService.getPutOptionById(order.getListingId());
         }
         return marketService.getFutureById(order.getListingId());
 
@@ -189,6 +225,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void finishOrder(Long orderId) {
         this.orderRepository.finishOrder(orderId, OrderStatus.DONE);
+        releaseLeftoverReservedFunds(orderId);
 //        updateLimit(orderId);
         this.scheduledFutureMap.get(orderId).cancel(false);
     }
@@ -245,13 +282,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     void reserveStockCapital(MarketOrder order) {
-        Capital bankAccountCapital = capitalService.getCapitalByCurrencyCode(Constants.DEFAULT_CURRENCY);
-        Capital securityCapital = capitalService.getCapitalByListingIdAndType(order.getListingId(), order.getListingType());
-
+        BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
         if(order.getOrderType().equals(OrderType.BUY)) {
-            capitalService.reserveBalance(bankAccountCapital.getCurrency().getCurrencyCode(), order.getPrice());
+            bankAccountService.reserveBalance(bankAccount, order.getPrice());
         } else {
-            capitalService.reserveBalance(securityCapital.getListingId(), securityCapital.getListingType(), (double)order.getContractSize());
+            Capital securityCapital = capitalService.getCapitalByListingIdAndTypeAndBankAccount(order.getListingId(), order.getListingType(), bankAccount);
+            capitalService.reserveBalance(securityCapital.getListingId(), securityCapital.getListingType(), bankAccount, (double)order.getContractSize());
         }
 
     }
@@ -271,11 +307,11 @@ public class OrderServiceImpl implements OrderService {
 
         double newLimit = owner.getLimitNow() + Math.max(difference, 0) - Math.min(difference, 0);
 
-        if(newLimit > owner.getOrderlimit()) {
-            //Limit je predjen, stavi order na processing
-            order.setStatus(OrderStatus.PROCESSING);
-            this.orderRepository.save(order);
-        }
+//        if(newLimit > owner.getOrderlimit()) {
+//            //Limit je predjen, stavi order na processing
+//            order.setStatus(OrderStatus.PROCESSING);
+//            this.orderRepository.save(order);
+//        }
 
         owner.setLimitNow(newLimit);
         this.employeeRepository.save(owner);
@@ -291,6 +327,11 @@ public class OrderServiceImpl implements OrderService {
             updateLimitOnFinish(order);
     }
 
+    @Override
+    public List<OrderDto> getAllOrdersForLegalPerson(Customer customer) {
+        return orderRepository.getAllByCustomer(customer).stream().map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
+    }
+
     private Double getSpentMoneyForOrder(MarketOrder order) {
         double spentMoney = 0;
         if(order.getOrderType().equals(OrderType.BUY)) {
@@ -300,6 +341,17 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return spentMoney;
+    }
+
+    private void releaseLeftoverReservedFunds(Long orderId) {
+        MarketOrder order = getOrderById(orderId);
+        double spentMoney = getSpentMoneyForOrder(order);
+        BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
+
+        if(order.getOrderType().equals(OrderType.BUY)) {
+            double leftOver = order.getPrice() - spentMoney;
+            bankAccountService.releaseReserved(bankAccount, leftOver);
+        }
     }
 
     private void updateLimitOnTransaction(MarketOrder order) {
@@ -315,11 +367,11 @@ public class OrderServiceImpl implements OrderService {
             this.employeeRepository.save(owner);
         }
 
-        if(owner.getLimitNow() > owner.getOrderlimit()) {
-            //Limit je predjen, stavi order na processing
-            order.setStatus(OrderStatus.PROCESSING);
-            this.orderRepository.save(order);
-        }
+//        if(owner.getLimitNow() > owner.getOrderlimit()) {
+//            //Limit je predjen, stavi order na processing
+//            order.setStatus(OrderStatus.PROCESSING);
+//            this.orderRepository.save(order);
+//        }
     }
 
     private void updateLimitOnFinish(MarketOrder order) {

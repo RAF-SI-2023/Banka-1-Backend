@@ -1,10 +1,10 @@
 package rs.edu.raf.banka1.mapper;
 
 import org.springframework.stereotype.Component;
+import org.yaml.snakeyaml.error.Mark;
+import rs.edu.raf.banka1.dtos.LegalOrderRequest;
 import rs.edu.raf.banka1.dtos.OrderDto;
-import rs.edu.raf.banka1.model.Employee;
-import rs.edu.raf.banka1.model.MarketOrder;
-import rs.edu.raf.banka1.model.OrderStatus;
+import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 
 @Component
@@ -16,7 +16,7 @@ public class OrderMapper {
         this.employeeMapper = employeeMapper;
     }
 
-    public MarketOrder requestToMarketOrder(CreateOrderRequest request, Employee owner) {
+    public MarketOrder requestToMarketOrder(CreateOrderRequest request, User owner) {
         MarketOrder marketOrder = new MarketOrder();
         marketOrder.setListingId(request.getListingId());
         marketOrder.setListingType(request.getListingType());
@@ -27,7 +27,9 @@ public class OrderMapper {
         marketOrder.setLimitValue(request.getLimitValue() == 0.0 ? null : request.getLimitValue());
         marketOrder.setStopValue(request.getStopValue() == 0.0 ? null : request.getStopValue());
         marketOrder.setAllOrNone(request.getAllOrNone());
-        marketOrder.setOwner(owner);
+        //marketOrder.setOwner((Employee)owner);
+        marketOrder.setCurrentAmount(0L);
+        marketOrder.setTimestamp(System.currentTimeMillis()/1000);
         return marketOrder;
     }
 
@@ -52,5 +54,16 @@ public class OrderMapper {
         return orderDto;
     }
 
+    public CreateOrderRequest legalMarketOrderToCreateOrderRequest(LegalOrderRequest marketOrder) {
+        CreateOrderRequest createOrderRequest = new CreateOrderRequest();
+        createOrderRequest.setListingId(marketOrder.getListingId());
+        createOrderRequest.setListingType(marketOrder.getListingType());
+        createOrderRequest.setOrderType(marketOrder.getOrderType());
+        createOrderRequest.setContractSize(marketOrder.getContractSize());
+        createOrderRequest.setLimitValue(marketOrder.getLimitValue());
+        createOrderRequest.setStopValue(marketOrder.getStopValue());
+        createOrderRequest.setAllOrNone(marketOrder.getAllOrNone());
+        return createOrderRequest;
+    }
 
 }

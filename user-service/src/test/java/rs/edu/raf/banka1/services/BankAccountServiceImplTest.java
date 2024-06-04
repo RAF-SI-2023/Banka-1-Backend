@@ -329,4 +329,83 @@ public class BankAccountServiceImplTest {
 
         verify(bankAccountRepository, times(1)).findByCustomer(customer);
     }
+
+    @Test
+    public void getBankAccountByCompanyAndCurrencyCode() {
+        BankAccount bankAccount = new BankAccount();
+        long companyId = 1L;
+        String currencyCode = "RSD";
+
+        when(bankAccountRepository.findByCompany_IdAndCurrency_CurrencyCode(anyLong(), anyString())).thenReturn(Optional.of(bankAccount));
+
+        BankAccount res = bankAccountService.getBankAccountByCompanyAndCurrencyCode(companyId, currencyCode);
+
+        assertEquals(bankAccount, res);
+
+        verify(bankAccountRepository).findByCompany_IdAndCurrency_CurrencyCode(eq(companyId), eq(currencyCode));
+    }
+
+    @Test
+    public void getBankAccountByCompanyAndCurrencyCodeException() {
+        long companyId = 1L;
+        String currencyCode = "RSD";
+
+        when(bankAccountRepository.findByCompany_IdAndCurrency_CurrencyCode(anyLong(), anyString())).thenReturn(Optional.empty());
+
+        assertThrows(BankAccountNotFoundException.class, () -> bankAccountService.getBankAccountByCompanyAndCurrencyCode(companyId, currencyCode));
+
+        verify(bankAccountRepository).findByCompany_IdAndCurrency_CurrencyCode(eq(companyId), eq(currencyCode));
+    }
+
+    @Test
+    public void getBankAccountByCustomerAndCurrencyCode() {
+        BankAccount bankAccount = new BankAccount();
+        long companyId = 1L;
+        String currencyCode = "RSD";
+
+        when(bankAccountRepository.findByCustomer_UserIdAndCurrency_CurrencyCode(anyLong(), anyString())).thenReturn(Optional.of(bankAccount));
+
+        BankAccount res = bankAccountService.getBankAccountByCustomerAndCurrencyCode(companyId, currencyCode);
+
+        assertEquals(bankAccount, res);
+
+        verify(bankAccountRepository).findByCustomer_UserIdAndCurrency_CurrencyCode(eq(companyId), eq(currencyCode));
+    }
+
+    @Test
+    public void getBankAccountByCustomerAndCurrencyCodeException() {
+        long companyId = 1L;
+        String currencyCode = "RSD";
+
+        when(bankAccountRepository.findByCustomer_UserIdAndCurrency_CurrencyCode(anyLong(), anyString())).thenReturn(Optional.empty());
+
+        assertThrows(BankAccountNotFoundException.class, () -> bankAccountService.getBankAccountByCustomerAndCurrencyCode(companyId, currencyCode));
+
+        verify(bankAccountRepository).findByCustomer_UserIdAndCurrency_CurrencyCode(eq(companyId), eq(currencyCode));
+    }
+
+    @Test
+    public void getBankAccountByNumber() {
+        BankAccount bankAccount = new BankAccount();
+        String accountNumber = "123456789";
+
+        when(bankAccountRepository.findBankAccountByAccountNumber(anyString())).thenReturn(Optional.of(bankAccount));
+
+        BankAccount res = bankAccountService.getBankAccountByNumber(accountNumber);
+
+        assertEquals(bankAccount, res);
+
+        verify(bankAccountRepository).findBankAccountByAccountNumber(eq(accountNumber));
+    }
+
+    @Test
+    public void getBankAccountByNumberException() {
+        String accountNumber = "123456789";
+
+        when(bankAccountRepository.findBankAccountByAccountNumber(anyString())).thenReturn(Optional.empty());
+
+        assertThrows(BankAccountNotFoundException.class, () -> bankAccountService.getBankAccountByNumber(accountNumber));
+
+        verify(bankAccountRepository).findBankAccountByAccountNumber(eq(accountNumber));
+    }
 }

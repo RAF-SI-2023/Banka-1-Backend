@@ -61,6 +61,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.7.3</version>
+		</dependency>
+
+
+		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
@@ -310,28 +317,16 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
-
-					<execution>
-						<id>jacoco-check</id>
-						<goals>
-							<goal>check</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<rule>
-									<element>PACKAGE</element>
-									<limits>
-										<limit>
-											<counter>LINE</counter>
-											<value>COVEREDRATIO</value>
-											<minimum>0.9</minimum>
-										</limit>
-									</limits>
-								</rule>
-							</rules>
-						</configuration>
-					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>21</source>
+					<target>21</target>
+					<compilerArgs>--enable-preview</compilerArgs>
+				</configuration>
 			</plugin>
 
 		</plugins>

@@ -28,10 +28,12 @@ import rs.edu.raf.banka1.requests.ModifyPermissionsRequest;
 import rs.edu.raf.banka1.responses.ActivateAccountResponse;
 import rs.edu.raf.banka1.responses.CreateUserResponse;
 import rs.edu.raf.banka1.responses.NewPasswordResponse;
+import rs.edu.raf.banka1.services.CompanyService;
 import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.EmployeeService;
 import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.JwtUtil;
+
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,19 +47,23 @@ public class EmployeeServiceImpl implements EmployeeService {
     private PermissionMapper permissionMapper;
     private LimitMapper limitMapper;
     private EmployeeRepository employeeRepository;
+    private final CompanyService companyService;
     private PermissionRepository permissionRepository;
     private EmailService emailService;
     private JwtUtil jwtUtil;
     private PasswordEncoder passwordEncoder;
 
-    public EmployeeServiceImpl(EmployeeMapper employeeMapper,
-                               PermissionMapper permissionMapper,
-                               EmployeeRepository employeeRepository,
-                               PermissionRepository permissionRepository,
-                               EmailService emailService,
-                               JwtUtil jwtUtil,
-                               PasswordEncoder passwordEncoder,
-                               LimitMapper limitMapper){
+    public EmployeeServiceImpl(
+        EmployeeMapper employeeMapper,
+        PermissionMapper permissionMapper,
+        EmployeeRepository employeeRepository,
+        PermissionRepository permissionRepository,
+        EmailService emailService,
+        JwtUtil jwtUtil,
+        PasswordEncoder passwordEncoder,
+        LimitMapper limitMapper,
+        CompanyService companyService
+    ){
         this.employeeMapper = employeeMapper;
         this.permissionMapper = permissionMapper;
         this.employeeRepository = employeeRepository;
@@ -66,6 +72,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.jwtUtil = jwtUtil;
         this.passwordEncoder = passwordEncoder;
         this.limitMapper = limitMapper;
+        this.companyService = companyService;
     }
 
     @Override
@@ -116,6 +123,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             return new CreateUserResponse(null, "Employee doesn't have valid position");
 
         Employee employee = this.employeeMapper.createEmployeeDtoToEmployee(createEmployeeDto);
+        employee.setCompany(companyService.getCompanyById(1L));
 
         String activationToken = UUID.randomUUID().toString();
         employee.setActivationToken(activationToken);

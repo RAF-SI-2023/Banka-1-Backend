@@ -6,13 +6,14 @@ import lombok.Setter;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CurrencyDto {
+public class CurrencyDto implements Serializable {
 
     private String currencyName;
 

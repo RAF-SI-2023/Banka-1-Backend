@@ -26,7 +26,6 @@ class CapitalMapperTest {
         capital.setTotal(1000.0);
         capital.setReserved(200.0);
         capital.setBankAccount(bankAccount);
-        capital.setCurrency(currency);
 
         // Act
         CapitalDto capitalDto = capitalMapper.capitalToCapitalDto(capital);
@@ -37,7 +36,6 @@ class CapitalMapperTest {
         assertEquals(capital.getTotal(), capitalDto.getTotal());
         assertEquals(capital.getReserved(), capitalDto.getReserved());
         assertEquals(bankAccount.getAccountNumber(), capitalDto.getBankAccountNumber());
-        assertEquals(currency.getCurrencyName(), capitalDto.getCurrencyName());
     }
 
     @Test
@@ -52,7 +50,6 @@ class CapitalMapperTest {
         capital.setTotal(1000.0);
         capital.setReserved(200.0);
         capital.setBankAccount(bankAccount);
-        capital.setCurrency(currency);
         Double price = 10.0;
 
         // Act
@@ -64,7 +61,6 @@ class CapitalMapperTest {
         assertEquals(capital.getTotal(), capitalProfitDto.getTotal());
         assertEquals(capital.getReserved(), capitalProfitDto.getReserved());
         assertEquals(bankAccount.getAccountNumber(), capitalProfitDto.getBankAccountNumber());
-        assertEquals(currency.getCurrencyName(), capitalProfitDto.getCurrencyName());
         assertEquals((capital.getTotal() - capital.getReserved()) * price, capitalProfitDto.getTotalPrice());
     }
 }

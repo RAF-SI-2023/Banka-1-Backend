@@ -14,6 +14,9 @@ import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
 import rs.edu.raf.banka1.exceptions.CreateBankAccountException;
 import rs.edu.raf.banka1.exceptions.ForbiddenException;
+import rs.edu.raf.banka1.exceptions.InvalidCapitalAmountException;
+import rs.edu.raf.banka1.exceptions.InvalidReservationAmountException;
+import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
 import rs.edu.raf.banka1.mapper.BankAccountMapper;
 import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.model.*;
@@ -22,6 +25,7 @@ import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CardService;
 import rs.edu.raf.banka1.services.EmployeeService;
+import rs.edu.raf.banka1.utils.Constants;
 import rs.edu.raf.banka1.utils.RandomUtil;
 
 import java.time.LocalDate;
@@ -177,6 +181,26 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
+    public BankAccount getBankAccountByCompanyAndCurrencyCode(Long companyId, String currencyCode) {
+        return bankAccountRepository.findByCompany_IdAndCurrency_CurrencyCode(companyId, currencyCode).orElseThrow(BankAccountNotFoundException::new);
+    }
+
+    @Override
+    public BankAccount getBankAccountByCustomerAndCurrencyCode(Long customerId, String currencyCode) {
+        return bankAccountRepository.findByCustomer_UserIdAndCurrency_CurrencyCode(customerId, currencyCode).orElseThrow(BankAccountNotFoundException::new);
+    }
+
+    @Override
+    public BankAccount getDefaultBankAccount() {
+        return bankAccountRepository.findBankByCurrencyCode(Constants.DEFAULT_CURRENCY).orElseThrow(BankAccountNotFoundException::new);
+    }
+
+    @Override
+    public BankAccount getBankAccountByNumber(String accountNumber) {
+        return bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
+    }
+
+    @Override
     public void activateBankAccount(BankAccount bankAccount) {
         bankAccount.setAccountStatus(true);
         bankAccountRepository.save(bankAccount);
@@ -196,6 +220,66 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccountRepository.save(b);
         Logger.info("Bank account edited successfully: {}", accountNumber);
         return 1;
+    }
+
+    @Override
+    public void reserveBalance(BankAccount bankAccount, Double amount) {
+        if(amount <= 0) {
+            throw new InvalidReservationAmountException();
+        }
+        if(amount > bankAccount.getAvailableBalance()) {
+            throw new NotEnoughCapitalAvailableException();
+        }
+        bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() - amount);
+
+        bankAccountRepository.save(bankAccount);
+    }
+
+    @Override
+    public void commitReserved(BankAccount bankAccount, Double amount) {
+        if(amount <= 0) {
+            throw new InvalidCapitalAmountException(amount);
+        }
+
+        double reserved = bankAccount.getBalance() - bankAccount.getAvailableBalance();
+
+        if(amount > reserved) {
+            double leftAmount = amount - reserved;
+            if(leftAmount > bankAccount.getAvailableBalance()) throw new NotEnoughCapitalAvailableException();
+            bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() - leftAmount);
+        }
+
+        bankAccount.setBalance(bankAccount.getBalance() - amount);
+        bankAccountRepository.save(bankAccount);
+    }
+
+    @Override
+    public void releaseReserved(BankAccount bankAccount, Double amount) {
+        if(amount <= 0 || amount > bankAccount.getBalance() - bankAccount.getAvailableBalance()) {
+            throw new InvalidReservationAmountException();
+        }
+        bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() + amount);
+        bankAccountRepository.save(bankAccount);
+    }
+
+    @Override
+    public void addBalance(BankAccount bankAccount, Double amount) {
+        if(amount <= 0) {
+            throw new InvalidReservationAmountException();
+        }
+        bankAccount.setBalance(bankAccount.getBalance() + amount);
+        bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() + amount);
+        bankAccountRepository.save(bankAccount);
+    }
+
+    @Override
+    public void removeBalance(BankAccount bankAccount, Double amount) {
+        if(amount <= 0 || amount > bankAccount.getAvailableBalance()) {
+            throw new NotEnoughCapitalAvailableException();
+        }
+        bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() - amount);
+        bankAccount.setBalance(bankAccount.getBalance() - amount);
+        bankAccountRepository.save(bankAccount);
     }
 
     private Long getEmployeeId() {

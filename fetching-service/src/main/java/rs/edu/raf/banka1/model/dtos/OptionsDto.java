@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OptionsDto {
+public class OptionsDto extends ListingBaseDto{
     private String ticker;
     private String optionType;
     private Double strikePrice;
