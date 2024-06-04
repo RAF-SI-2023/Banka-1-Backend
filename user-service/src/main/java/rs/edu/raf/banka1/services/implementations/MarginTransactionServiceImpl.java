@@ -29,6 +29,11 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
         double loanValue = price - initialMargin;
         double interest = loanValue * Constants.MARGIN_INTEREST_RATE;
 
+        if(order.getListingType().equals(ListingType.FUTURE)) {
+            //Po dokumentaciji
+            interest = 0;
+        }
+
         MarginTransaction transaction = new MarginTransaction();
         transaction.setOrder(order);
         transaction.setCustomerAccount(marginAccount);
