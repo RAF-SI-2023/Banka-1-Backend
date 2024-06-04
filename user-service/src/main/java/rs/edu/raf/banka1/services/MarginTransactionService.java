@@ -5,6 +5,12 @@ import rs.edu.raf.banka1.model.Currency;
 import rs.edu.raf.banka1.model.MarketOrder;
 import rs.edu.raf.banka1.model.TransactionType;
 
+import rs.edu.raf.banka1.model.MarginTransaction;
+
+import java.util.List;
+
 public interface MarginTransactionService {
     void createTransaction(MarketOrder order, BankAccount userAccount, Currency currency, String description, TransactionType transactionType, Double price);
+    List<MarginTransaction> getAllTransactions();
+    List<MarginTransaction> getTransactionsForMarginAccountId(Long marginAccountId);
 }

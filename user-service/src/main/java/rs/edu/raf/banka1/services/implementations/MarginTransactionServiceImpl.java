@@ -3,10 +3,15 @@ package rs.edu.raf.banka1.services.implementations;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.model.MarginAccount;
+import rs.edu.raf.banka1.model.MarginTransaction;
 import rs.edu.raf.banka1.repositories.MarginTransactionRepository;
 import rs.edu.raf.banka1.services.MarginAccountService;
 import rs.edu.raf.banka1.services.MarginTransactionService;
 import rs.edu.raf.banka1.utils.Constants;
+import rs.edu.raf.banka1.services.MarginTransactionService;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -44,5 +49,14 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
     private Long getUserIdFromOrder(MarketOrder order) {
         if(order.getOwner() == null) return order.getCustomer().getUserId();
         return order.getOwner().getUserId();
+    }
+    @Override
+    public List<MarginTransaction> getAllTransactions() {
+        return marginTransactionRepository.findAll();
+    }
+
+    @Override
+    public List<MarginTransaction> getTransactionsForMarginAccountId(Long marginAccountId) {
+        return marginTransactionRepository.findAllByCustomerAccount_Id(marginAccountId);
     }
 }
