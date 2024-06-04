@@ -39,6 +39,7 @@ public class OrderServiceImpl implements OrderService {
     private final BankAccountService bankAccountService;
 
     private final EmployeeRepository employeeRepository;
+    private final MarginTransactionService marginTransactionService;
 
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private final Random random = new Random();
@@ -57,7 +58,8 @@ public class OrderServiceImpl implements OrderService {
         final TransactionService transactionService,
         final CapitalService capitalService,
         final BankAccountService bankAccountService,
-        EmployeeRepository employeeRepository) {
+        EmployeeRepository employeeRepository,
+        MarginTransactionService marginTransactionService) {
         this.orderMapper = orderMapper;
         this.orderRepository = orderRepository;
         this.marketService = marketService;
@@ -66,6 +68,7 @@ public class OrderServiceImpl implements OrderService {
         this.capitalService = capitalService;
         this.employeeRepository = employeeRepository;
         this.bankAccountService = bankAccountService;
+        this.marginTransactionService = marginTransactionService;
 
         scheduledFutureMap = new ConcurrentHashMap<>();
     }
@@ -142,6 +145,7 @@ public class OrderServiceImpl implements OrderService {
                 transactionService,
                 capitalService,
                 bankAccountService,
+                    marginTransactionService,
                 orderId,
                     bankAccountNumber
             ),
