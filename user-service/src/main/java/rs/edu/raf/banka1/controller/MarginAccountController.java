@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
@@ -50,6 +51,7 @@ public class MarginAccountController {
                     description = "You aren't authorized to get all cards by account number"),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
+    @PreAuthorize("hasAuthority('manageMargins')")
     public ResponseEntity<List<MarginAccountDto>> getAllMarginAccounts() {
         return new ResponseEntity<>(marginAccountService.getAllMarginAccounts(), HttpStatus.OK);
     }
@@ -71,6 +73,39 @@ public class MarginAccountController {
         return new ResponseEntity<>(marginAccountService.getMyMargin(currentAuth), HttpStatus.OK);
     }
 
+    @GetMapping(value = "/all/marginCall", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all margin accounts whose margin call is true.", description = "Get all margin accounts whose margin call is true.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class,
+                            subTypes = {MarginAccountDto.class}))}),
+            @ApiResponse(responseCode = "403",
+                    description = "You aren't authorized to get it."),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+    })
+    @PreAuthorize("hasAuthority('manageMargins')")
+    public ResponseEntity<List<MarginAccountDto>> getAllMarginAccountsMarginCallTrue() {
+        return new ResponseEntity<>(marginAccountService.getAllMarginAccountsMarginCallTrue(), HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/deposit/{marginId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Deposit capital to margin account.", description = "Deposit capital to margin account.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Boolean.class))}),
+            @ApiResponse(responseCode = "403",
+                    description = "You aren't authorized."),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+    })
+    public ResponseEntity<Boolean> depositToMarginAccount(
+            @PathVariable Long marginId,
+            @RequestBody Double amount
+    ) {
+        if(marginAccountService.depositMarginCall(marginId, amount))
+            return ResponseEntity.ok(true);
+        return new ResponseEntity<>(false, HttpStatus.OK);
+    }
+
 
     @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all cards by account number", description = "Get all cards by account number")
@@ -82,10 +117,8 @@ public class MarginAccountController {
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
     public ResponseEntity<Boolean> getMyMarginAccounts(
-            @RequestBody MarginAccountCreateDto marginAccountCreateDto,
-            @AuthenticationPrincipal User userPrincipal
+            @RequestBody MarginAccountCreateDto marginAccountCreateDto
     ) {
-        Customer currentAuth = customerService.findCustomerByEmail(userPrincipal.getUsername());
         if(marginAccountService.createMarginAccount(marginAccountCreateDto))
             return ResponseEntity.ok(true);
         return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
@@ -116,7 +149,7 @@ public class MarginAccountController {
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
     public ResponseEntity<List<MarginTransaction>> getMarginTransactionForMarginAccountId(
-        @RequestParam Long id
+        @PathVariable Long id
     ) {
         return new ResponseEntity<>(marginTransactionService.getTransactionsForMarginAccountId(id), HttpStatus.OK);
     }
