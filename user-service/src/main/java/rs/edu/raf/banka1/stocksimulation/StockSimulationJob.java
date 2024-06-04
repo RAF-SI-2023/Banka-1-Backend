@@ -100,10 +100,42 @@ public class StockSimulationJob implements Runnable {
             createCashTransaction(order, listingBaseDto, processedNum, bankAccountNumber);
             return;
         }
-        createMarginTransaction();
+        createMarginTransaction(order, listingBaseDto, processedNum, bankAccountNumber);
     }
 
-    private void createMarginTransaction() {
+    private void createMarginTransaction(MarketOrder order, ListingBaseDto listingBaseDto, Long processedNum, String bankAccountNumber) {
+        TransactionType transactionType;
+        BankAccount bankAccount;
+        if(bankAccountNumber == null) {
+            bankAccount = bankAccountService.getDefaultBankAccount();
+        }
+        else{
+            bankAccount = bankAccountService.findBankAccountByAccountNumber(bankAccountNumber);
+        }
+        Capital securityCapital = capitalService.getCapitalByListingIdAndTypeAndBankAccount(listingBaseDto.getListingId(), ListingType.valueOf(listingBaseDto.getListingType().toUpperCase()), bankAccount);
+
+        if (order.getOrderType() == OrderType.BUY) {
+            Double oldAmount = securityCapital.getTotal();
+            Double oldAverageBuyingPrice = securityCapital.getAverageBuyingPrice();
+            Double newTotalPrice = order.getPrice();
+            Long newAmount = order.getCurrentAmount();
+            Double newAverageBuyingPrice = (oldAmount * oldAverageBuyingPrice + newTotalPrice) / (oldAmount + newAmount);
+            securityCapital.setAverageBuyingPrice(newAverageBuyingPrice);
+
+            transactionType = TransactionType.DEPOSIT;
+        } else {
+            transactionType = TransactionType.WITHDRAWAL;
+        }
+
+        Double price = orderService.calculatePrice(order,listingBaseDto,processedNum);
+        //price = convertPrice(price,null,null);
+        try {
+            transactionService.createTransaction(bankAccount, securityCapital, price, order, processedNum);
+        } catch (InvalidReservationAmountException e) {
+            orderService.cancelOrder(orderId);
+        }
+
+        marginTransactionService.createTransaction(order, bankAccount, bankAccount.getCurrency(), "Uplaćivanje sredstava na račun - Initial Margin", transactionType, price);
 
     }
 
