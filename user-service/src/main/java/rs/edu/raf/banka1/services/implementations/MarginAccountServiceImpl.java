@@ -2,20 +2,99 @@ package rs.edu.raf.banka1.services.implementations;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.MarginAccountCreateDto;
 import rs.edu.raf.banka1.exceptions.MarginAccountNotFoundException;
+import rs.edu.raf.banka1.mapper.MarginAccountMapper;
 import rs.edu.raf.banka1.model.ListingType;
 import rs.edu.raf.banka1.model.MarginAccount;
+import org.tinylog.Logger;
+import rs.edu.raf.banka1.dtos.MarginAccountDto;
+import rs.edu.raf.banka1.model.BankAccount;
+import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.repositories.MarginAccountRepository;
+import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.MarginAccountService;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MarginAccountServiceImpl implements MarginAccountService {
+
     private final MarginAccountRepository marginAccountRepository;
+    private final BankAccountService bankAccountService;
+    private final MarginAccountMapper marginAccountMapper;
 
     @Override
     public MarginAccount getMarginAccount(Long id, ListingType listingType, String currencyCode) {
         return marginAccountRepository.findByCustomer_IdAndListingTypeAndCurrency_CurrencyCode(id, listingType, currencyCode)
                 .orElseThrow(() -> new MarginAccountNotFoundException(id, listingType, currencyCode));
+    }
+
+    @Override
+    public List<MarginAccountDto> getAllMarginAccounts() {
+        return marginAccountRepository.findAll().stream()
+                .map(marginAccountMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MarginAccountDto> getMyMargin(Customer customer) {
+        List<BankAccount> bankAccounts = customer.getAccountIds();
+        return marginAccountRepository.findAll()
+                .stream()
+                .filter(marginAccount -> {
+                    for (BankAccount ba : bankAccounts) {
+                        if (ba.getId().equals(marginAccount.getCustomer().getId())) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }).map(marginAccountMapper::toDto).collect(Collectors.toList());
+    }
+    @Override
+    public Boolean createMarginAccount(MarginAccountCreateDto marginAccountCreateDto) {
+        // samo proveri da li vec postoji margin account sa
+        // prosledjuje se valuta i listingtype
+        // provera da li korisnik vec ima margin acc sa tom valutom i tim listing type.
+        // ako nema onda se kreira a bank account za koji je
+        List<BankAccount> bankAccounts;
+        if(marginAccountCreateDto.getCustomerId() != null) {
+            bankAccounts = bankAccountService.getBankAccountsByCustomer(marginAccountCreateDto.getCustomerId());
+        } else if(marginAccountCreateDto.getCompanyId() != null) {
+            bankAccounts = bankAccountService.getBankAccountsByCompany(marginAccountCreateDto.getCompanyId());
+        } else {
+            Logger.error("Please provide customer id or company id in craete margin account request.");
+            return false;
+        }
+
+        // get all bank accounts with the customer
+        // bankAccounts su svi bank accounti koje mogu da iskoristim za pravljenje margin acc
+        // sada sam ih profiltrirala tako da imam ovde samo bank accounte koji imaju odredjen currency
+        bankAccounts = bankAccounts.stream()
+                .filter(bankAccount ->
+                        bankAccount.getCurrency().getCurrencyCode().equals(marginAccountCreateDto.getCurrency().getCurrencyCode()))
+                .collect(Collectors.toList());
+
+        // sad treba u for petlji da za svaki od tih bank accounta pitam da li vec postoji u mojim margin accountima
+        List<String> finalBankAccountNumbers = bankAccounts.stream().map(BankAccount::getAccountNumber).toList();
+        if(marginAccountRepository.findAll().stream().anyMatch(marginAccount ->
+            marginAccount.getListingType().equals(marginAccountCreateDto.getListingType()) &&
+            marginAccount.getCustomer().getCurrency().getCurrencyCode().equals(marginAccountCreateDto.getCurrency().getCurrencyCode()) &&
+            finalBankAccountNumbers.contains(marginAccount.getCustomer().getAccountNumber())
+        )) {
+         // znaci da vec imamo account taj koji zelimo da napravimo
+            Logger.error("Margin account already exists for ");
+            return false;
+        }
+
+        MarginAccount marginAccount = new MarginAccount();
+        marginAccount.setMaintenanceMargin(marginAccountCreateDto.getMaintenanceMargin());
+        marginAccount.setCurrency(marginAccountCreateDto.getCurrency());
+        marginAccount.setBalance(marginAccount.getBalance());
+        marginAccount.setListingType(marginAccountCreateDto.getListingType());
+        marginAccountRepository.save(marginAccount);
+        return true;
     }
 }
