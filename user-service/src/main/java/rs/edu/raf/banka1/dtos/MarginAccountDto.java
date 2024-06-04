@@ -15,5 +15,5 @@ public class MarginAccountDto {
     private Double balance;
     private Double loanValue;
     private Double maintenanceMargin;
-    private Boolean marginCall;
+    private int marginCall;
 }
