@@ -29,7 +29,7 @@ public class MarginAccount {
 
     private Double maintenanceMargin;
 
-    private Boolean marginCallLevel = false;
+    private int marginCallLevel = 0; //0 -> margin call not triggered, 1 -> margin call triggered, 2 -> margin call time exceeded - automatic liquidation
 
     @Version
     private Integer version;
