@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.services.implementations;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.MarginAccountCreateDto;
+import rs.edu.raf.banka1.exceptions.InvalidCapitalAmountException;
 import rs.edu.raf.banka1.exceptions.MarginAccountNotFoundException;
 import rs.edu.raf.banka1.mapper.MarginAccountMapper;
 import rs.edu.raf.banka1.model.ListingType;
@@ -14,6 +15,7 @@ import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.repositories.MarginAccountRepository;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.MarginAccountService;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -96,5 +98,30 @@ public class MarginAccountServiceImpl implements MarginAccountService {
         marginAccount.setListingType(marginAccountCreateDto.getListingType());
         marginAccountRepository.save(marginAccount);
         return true;
+    }
+
+    @Override
+    public void depositToMarginAccount(MarginAccount marginAccount, Double fullAmount) {
+        if(fullAmount < 0) {
+            throw new InvalidCapitalAmountException(fullAmount);
+        }
+        double initialMargin = fullAmount * Constants.MARGIN_RATE;
+        double loanedMoney = fullAmount - initialMargin;
+
+        marginAccount.setBalance(marginAccount.getBalance() + initialMargin);
+        marginAccount.setLoanValue(marginAccount.getLoanValue() + loanedMoney);
+        marginAccountRepository.save(marginAccount);
+    }
+
+    @Override
+    public void withdrawFromMarginAccount(MarginAccount marginAccount, Double amount) {
+        if(amount < 0) {
+            throw new InvalidCapitalAmountException(amount);
+        }
+        double newLoanValue = marginAccount.getLoanValue() - amount * Constants.MARGIN_RATE;
+
+        marginAccount.setBalance(marginAccount.getBalance() - amount);
+        marginAccount.setLoanValue(newLoanValue);
+        marginAccountRepository.save(marginAccount);
     }
 }

@@ -6,6 +6,7 @@ import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.model.MarginAccount;
 import rs.edu.raf.banka1.model.MarginTransaction;
 import rs.edu.raf.banka1.repositories.MarginTransactionRepository;
+import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.MarginAccountService;
 import rs.edu.raf.banka1.services.MarginTransactionService;
 import rs.edu.raf.banka1.utils.Constants;
@@ -18,6 +19,7 @@ import java.util.List;
 public class MarginTransactionServiceImpl implements MarginTransactionService {
     private final MarginTransactionRepository marginTransactionRepository;
     private final MarginAccountService marginAccountService;
+    private final BankAccountService bankAccountService;
 
     @Override
     public void createTransaction(MarketOrder order, BankAccount userAccount, Currency currency, String description, TransactionType transactionType, Double price) {
@@ -37,13 +39,19 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
         transaction.setLoanValue(loanValue);
         transaction.setMaintenanceMargin(marginAccount.getMaintenanceMargin());
         transaction.setInterest(interest);
-        marginTransactionRepository.save(transaction);
 
         if(order.getOrderType().equals(OrderType.BUY)) {
             //Prebaciti initialMargin sa bankAccounta na margin
+            bankAccountService.removeBalance(userAccount, initialMargin);
+            marginAccountService.depositToMarginAccount(marginAccount, initialMargin);
+            transaction.setDeposit(initialMargin);
         } else {
             //Isplatiti + kamata
+            marginAccountService.withdrawFromMarginAccount(marginAccount, initialMargin);
+            bankAccountService.addBalance(userAccount, initialMargin - interest);
+            transaction.setDeposit(initialMargin - interest);
         }
+        marginTransactionRepository.save(transaction);
     }
 
     private Long getUserIdFromOrder(MarketOrder order) {
