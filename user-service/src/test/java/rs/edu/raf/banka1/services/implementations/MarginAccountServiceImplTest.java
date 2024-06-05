@@ -19,8 +19,6 @@ import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.MarginAccountService;
 import rs.edu.raf.banka1.services.MarginTransactionService;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -160,7 +158,6 @@ class MarginAccountServiceImplTest {
             verify(marginAccountRepository).findMarginAccountByListingTypeAndCurrency_CurrencyCodeAndCustomer_AccountNumber(any(), any(), any());
         }
     }
-
     @Nested
     class DepositMarginCall {
         @Test
@@ -174,12 +171,13 @@ class MarginAccountServiceImplTest {
             marginAccount.setId(1L);
             marginAccount.setCustomer(bankAccount);
             marginAccount.setCurrency(currency);
-            marginAccount.setBalance(1000.0);
+            marginAccount.setBalance(900.0);
             marginAccount.setLoanValue(400.0);
+            marginAccount.setMaintenanceMargin(1000.0);
 
             when(marginAccountRepository.findById(1L)).thenReturn(Optional.of(marginAccount));
 
-            marginAccountService.depositMarginCall(1L, 1000.0);
+            assertTrue(marginAccountService.depositMarginCall(1L, 100.0));
 
             verify(bankAccountService).removeBalance(any(), any());
             verify(marginTransactionService).createTransactionMarginCall(any(), any());
@@ -211,29 +209,78 @@ class MarginAccountServiceImplTest {
             when(marginAccountRepository.findById(any())).thenThrow(MarginAccountNotFoundException.class);
             assertThrows(MarginAccountNotFoundException.class, () -> marginAccountService.depositMarginCall(1L, 1000.0));
         }
+
+        @Test
+        public void badAmountForDeposit() {
+            BankAccount bankAccount = new BankAccount();
+            Currency currency = new Currency();
+            currency.setCurrencyCode("currencyCode");
+            bankAccount.setCurrency(currency);
+
+            MarginAccount marginAccount = new MarginAccount();
+            marginAccount.setId(1L);
+            marginAccount.setCustomer(bankAccount);
+            marginAccount.setCurrency(currency);
+            marginAccount.setBalance(200.0);
+            marginAccount.setMaintenanceMargin(800.0);
+            marginAccount.setLoanValue(400.0);
+
+            when(marginAccountRepository.findById(1L)).thenReturn(Optional.of(marginAccount));
+
+            assertFalse(marginAccountService.depositMarginCall(1L, 100.0));
+        }
     }
 
     @Nested
-    class getMyMargin {
+    class supervisorForceWithdrawalTest {
         @Test
-        public void getMarginCompany() {
-            Customer customer = new Customer();
-            Company company = new Company();
-            company.setPib("pibpibpib");
-            company.setId(1L);
-            customer.setCompany(company);
+        public void successForceWithdrawalTest() {
+            BankAccount bankAccount = new BankAccount();
+            Currency currency = new Currency();
+            currency.setCurrencyCode("currencyCode");
+            bankAccount.setCurrency(currency);
 
-            List<MarginAccount> marginAccounts = new ArrayList<>();
-            marginAccounts.add(new MarginAccount());
-            marginAccounts.add(new MarginAccount());
-            when(marginAccountRepository.findAllByCustomer_Company_Id(1L)).thenReturn(Optional.of(marginAccounts));
+            MarginAccount marginAccount = new MarginAccount();
+            marginAccount.setId(1L);
+            marginAccount.setCustomer(bankAccount);
+            marginAccount.setCurrency(currency);
+            marginAccount.setBalance(900.0);
+            marginAccount.setLoanValue(400.0);
+            marginAccount.setMaintenanceMargin(1000.0);
+            marginAccount.setMarginCallLevel(2);
+            when(marginAccountRepository.findById(1L)).thenReturn(Optional.of(marginAccount));
 
-//            List<MarginAccountDto> result = marginAccountService.getMyMargin(customer);
+            assertTrue(marginAccountService.supervisorForceWithdrawal(1L));
 
+            verify(bankAccountService).removeBalance(any(), eq(100.0));
         }
+
         @Test
-        public void getMarginCustomer() {
-
+        public void marginNotFoundTest() {
+            when(marginAccountRepository.findById(1L)).thenThrow(MarginAccountNotFoundException.class);
+            assertThrows(MarginAccountNotFoundException.class, () -> marginAccountService.supervisorForceWithdrawal(1L));
         }
+
+        @Test
+        public void badMarginLevel() {
+            BankAccount bankAccount = new BankAccount();
+            Currency currency = new Currency();
+            currency.setCurrencyCode("currencyCode");
+            bankAccount.setCurrency(currency);
+
+            MarginAccount marginAccount = new MarginAccount();
+            marginAccount.setId(1L);
+            marginAccount.setCustomer(bankAccount);
+            marginAccount.setCurrency(currency);
+            marginAccount.setBalance(900.0);
+            marginAccount.setLoanValue(400.0);
+            marginAccount.setMaintenanceMargin(1000.0);
+            marginAccount.setMarginCallLevel(1);
+            when(marginAccountRepository.findById(1L)).thenReturn(Optional.of(marginAccount));
+
+            assertFalse(marginAccountService.supervisorForceWithdrawal(1L));
+        }
+
+
     }
 }

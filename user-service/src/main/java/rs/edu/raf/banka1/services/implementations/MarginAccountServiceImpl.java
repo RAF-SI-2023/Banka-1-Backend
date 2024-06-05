@@ -114,7 +114,7 @@ public class MarginAccountServiceImpl implements MarginAccountService {
             return false;
         }
 
-        if(amount > marginAccount.getMaintenanceMargin() - marginAccount.getBalance()) {
+        if(amount < marginAccount.getMaintenanceMargin() - marginAccount.getBalance()) {
             Logger.error("Wrong amount for deposit margin call.");
             return false;
         }
@@ -125,6 +125,17 @@ public class MarginAccountServiceImpl implements MarginAccountService {
         marginAccount.setMarginCallLevel(0);
         marginAccountRepository.save(marginAccount);
         return true;
+    }
+
+    @Override
+    public Boolean supervisorForceWithdrawal(Long marginAccountId) {
+        MarginAccount marginAccount = marginAccountRepository.findById(marginAccountId).orElseThrow(() -> new MarginAccountNotFoundException(marginAccountId, null, null));
+        if(marginAccount.getMarginCallLevel() != 2) {
+            Logger.error("Margin Call Level is not 2.");
+            return false;
+        }
+        Double amount = marginAccount.getMaintenanceMargin() - marginAccount.getBalance();
+        return depositMarginCall(marginAccountId, amount);
     }
 
     @Override
@@ -188,16 +199,5 @@ public class MarginAccountServiceImpl implements MarginAccountService {
         }
         marginAccount.setMarginCallLevel(2);
         this.marginAccountRepository.save(marginAccount);
-    }
-
-    @Override
-    public Boolean supervisorForceWithdrawal(Long marginAccountId) {
-        MarginAccount marginAccount = marginAccountRepository.findById(marginAccountId).orElseThrow(() -> new MarginAccountNotFoundException(marginAccountId, null, null));
-        if(marginAccount.getMarginCallLevel() != 2) {
-            Logger.error("Margin Call Level is not 2.");
-            return false;
-        }
-        Double amount = marginAccount.getMaintenanceMargin() - marginAccount.getBalance();
-        return depositMarginCall(marginAccountId, amount);
     }
 }
