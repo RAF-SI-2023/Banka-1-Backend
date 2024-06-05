@@ -98,6 +98,13 @@ in the ".git/hooks" folder in your project root directory. For example:
 4. Open a terminal and navigate to your project root directory.
 5. Run the following command in the terminal:
 ```
+
+### Redis
+dusan tisma — 05/27/2024 12:54 PM
+@Backend sad vam za pokretanje market servisa treba pokrenut redis, najlakše je preko dokera sa 
+docker-compose -f docker.compose.yaml up -d redis
+Ako vec ne pokrecete sve preko dokera
+U market servisu se većina stvari kesira, da obrisete kes u terminalu od redis containera ukucajte redis-cli flushdb
 icacls .git\hooks\pre-commit /inheritance:r /grant:r "$($env:UserName):(RX)"
 ```
 6. Everything should be set now.
