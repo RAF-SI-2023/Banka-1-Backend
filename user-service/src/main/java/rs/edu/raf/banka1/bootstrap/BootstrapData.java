@@ -104,7 +104,6 @@ public class BootstrapData implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        /*
         try {
 //            Logger.info("Loading Data...");
         seedPermissions();
@@ -398,7 +397,6 @@ public class BootstrapData implements CommandLineRunner {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-*/
     }
 
     private void seedLoanRequest() {
