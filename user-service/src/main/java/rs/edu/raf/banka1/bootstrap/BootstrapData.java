@@ -104,7 +104,6 @@ public class BootstrapData implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
- /*
         try {
 //            Logger.info("Loading Data...");
         seedPermissions();
@@ -219,32 +218,49 @@ public class BootstrapData implements CommandLineRunner {
         }
         // dovde
 
+            BankAccount bankAccount1 = new BankAccount();
+            bankAccount1.setAccountStatus(true);
+            bankAccount1.setAccountType(AccountType.CURRENT);
+            bankAccount1.setAvailableBalance(10000.0);
+            bankAccount1.setBalance(10000.0);
+            bankAccount1.setMaintenanceCost(240.0);
+//            bankAccount1.setCompany(company);
+            bankAccount1.setCreatedByAgentId(52L);
+            bankAccount1.setCreationDate(new Date().getTime());
+            bankAccount1.setCurrency(this.currencyRepository.getReferenceById(1L));
+            bankAccount1.setCustomer(customer);
+            bankAccount1.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+            bankAccount1.setAccountName("124141j2kraslL");
+            bankAccount1.setAccountNumber("12345");
+            bankAccount1.setSubtypeOfAccount("LICNI");
+            if (bankAccountService.findBankAccountByAccountNumber(bankAccount1.getAccountNumber()) == null) {
+                bankAccountService.saveBankAccount(bankAccount1);
+            }
+
         MarginAccount marginAccount = new MarginAccount();
-        marginAccount.setCustomer(bankAccount);
-        marginAccount.setCurrency(this.currencyRepository.getReferenceById(1L));
+        marginAccount.setCustomer(bankAccount1);
+        marginAccount.setCurrency(bankAccount.getCurrency());
         marginAccount.setListingType(ListingType.STOCK);
         this.marginAccountRepository.save(marginAccount);
 
-
-
-        //ovo samo za test moze da se obrise
-        BankAccount bankAccount1 = new BankAccount();
-        bankAccount1.setAccountStatus(true);
-        bankAccount1.setAccountType(AccountType.FOREIGN_CURRENCY);
-        bankAccount1.setAvailableBalance(10000.0);
-        bankAccount1.setBalance(10000.0);
-        bankAccount1.setMaintenanceCost(240.0);
-        bankAccount1.setCreatedByAgentId(52L);
-        bankAccount1.setCreationDate(new Date().getTime());
-        bankAccount1.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("USD").orElse(null));
-        bankAccount1.setCustomer(customer);
-        bankAccount1.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
-        bankAccount1.setAccountName("1asd");
-        bankAccount1.setAccountNumber("usd");
-        bankAccount1.setSubtypeOfAccount("LICNI");
-        if (bankAccountService.findBankAccountByAccountNumber(bankAccount1.getAccountNumber()) == null) {
-            bankAccountService.saveBankAccount(bankAccount1);
-        }
+//        //ovo samo za test moze da se obrise
+//        BankAccount bankAccount1 = new BankAccount();
+//        bankAccount1.setAccountStatus(true);
+//        bankAccount1.setAccountType(AccountType.FOREIGN_CURRENCY);
+//        bankAccount1.setAvailableBalance(10000.0);
+//        bankAccount1.setBalance(10000.0);
+//        bankAccount1.setMaintenanceCost(240.0);
+//        bankAccount1.setCreatedByAgentId(52L);
+//        bankAccount1.setCreationDate(new Date().getTime());
+//        bankAccount1.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("USD").orElse(null));
+//        bankAccount1.setCustomer(customer);
+//        bankAccount1.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+//        bankAccount1.setAccountName("1asd");
+//        bankAccount1.setAccountNumber("usd");
+//        bankAccount1.setSubtypeOfAccount("LICNI");
+//        if (bankAccountService.findBankAccountByAccountNumber(bankAccount1.getAccountNumber()) == null) {
+//            bankAccountService.saveBankAccount(bankAccount1);
+//        }
         // dovde
 
         //ovo samo za test moze da se obrise
@@ -381,7 +397,7 @@ public class BootstrapData implements CommandLineRunner {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-            */
+
     }
 
     private void seedLoanRequest() {

@@ -24,4 +24,5 @@ public interface MarginAccountService {
     void updateOnMarginSummary(MarginAccount marginAccount, Double equity, Double maintenanceMargin);
     void triggerMarginCall(MarginAccount marginAccount);
     void triggerMarginCallAutomaticLiquidation(MarginAccount marginAccount);
+    Boolean supervisorForceWithdrawal(Long marginAccountId);
 }

@@ -9,19 +9,17 @@ import rs.edu.raf.banka1.exceptions.MarginAccountNotFoundException;
 import rs.edu.raf.banka1.mapper.MarginAccountMapper;
 import rs.edu.raf.banka1.margincalljob.MarginCallMidnightJob;
 import rs.edu.raf.banka1.margincalljob.MarginCallMidnightTrigger;
-import rs.edu.raf.banka1.model.ListingType;
-import rs.edu.raf.banka1.model.MarginAccount;
 import rs.edu.raf.banka1.model.*;
 import org.tinylog.Logger;
 import rs.edu.raf.banka1.dtos.MarginAccountDto;
-import rs.edu.raf.banka1.model.BankAccount;
-import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.repositories.MarginAccountRepository;
 import rs.edu.raf.banka1.repositories.MarginTransactionRepository;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.MarginAccountService;
 import rs.edu.raf.banka1.services.MarginTransactionService;
+import rs.edu.raf.banka1.repositories.MarginTransactionRepository;
+import rs.edu.raf.banka1.services.*;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.ArrayList;
@@ -123,13 +121,25 @@ public class MarginAccountServiceImpl implements MarginAccountService {
             return false;
         }
 
+        if(amount < marginAccount.getMaintenanceMargin() - marginAccount.getBalance()) {
+            Logger.error("Wrong amount for deposit margin call.");
+            return false;
+        }
+
         bankAccountService.removeBalance(bankAccount, amount);
         depositToMarginAccount(marginAccount, amount);
-        //marginTransactionService.createTransactionMarginCall(marginAccount, amount);
+
+        createTransactionMarginCall(marginAccount, amount);
+        marginAccount.setMarginCallLevel(0);
+        marginAccountRepository.save(marginAccount);
+        return true;
+    }
+
+    private void createTransactionMarginCall(MarginAccount marginAccount, Double amount) {
         MarginTransaction transaction = new MarginTransaction();
         transaction.setOrder(null);
         transaction.setCustomerAccount(marginAccount);
-        transaction.setDescription("Uplaćivanje sredstava na račun - Deposit Margin Call");
+        transaction.setDescription("Uplaćivanje sredstava na račun - Margin Call.");
         transaction.setCurrency(marginAccount.getCurrency());
         transaction.setTransactionType(TransactionType.DEPOSIT);
         transaction.setDeposit(amount);
@@ -137,7 +147,17 @@ public class MarginAccountServiceImpl implements MarginAccountService {
         transaction.setMaintenanceMargin(marginAccount.getMaintenanceMargin());
         transaction.setInterest(null);
         marginTransactionRepository.save(transaction);
-        return true;
+    }
+
+    @Override
+    public Boolean supervisorForceWithdrawal(Long marginAccountId) {
+        MarginAccount marginAccount = marginAccountRepository.findById(marginAccountId).orElseThrow(() -> new MarginAccountNotFoundException(marginAccountId, null, null));
+        if(marginAccount.getMarginCallLevel() != 2) {
+            Logger.error("Margin Call Level is not 2.");
+            return false;
+        }
+        Double amount = marginAccount.getMaintenanceMargin() - marginAccount.getBalance();
+        return depositMarginCall(marginAccountId, amount);
     }
 
     @Override
