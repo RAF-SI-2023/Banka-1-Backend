@@ -10,8 +10,6 @@ import rs.edu.raf.banka1.model.ListingType;
 public class MarginAccountCreateDto {
     private ListingType listingType;
     private Currency currency;
-    private Double balance;
-    private Double maintenanceMargin;
     private Long customerId;
     private Long companyId;
 }

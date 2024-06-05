@@ -14,6 +14,6 @@ public interface MarginAccountRepository extends JpaRepository<MarginAccount, Lo
     Optional<MarginAccount> findByCustomer_IdAndListingTypeAndCurrency_CurrencyCode(Long id, ListingType listingType, String currencyCode);
     Optional<List<MarginAccount>> findAllByCustomer_Company_Id(Long customer_company_id); // bankAccount_company_id
     Optional<List<MarginAccount>> findMarginAccountsByCustomer_Customer_UserId(Long customer_customer_userId); // bankAccount_customer_userId
-    Optional<MarginAccount> findMarginAccountByListingTypeAndCurrencyAndCustomer_AccountNumber(ListingType listingType, Currency currency, String customer_accountNumber); // bankAccount_accountNumber
-    Optional<List<MarginAccount>> findMarginAccountsByMarginCallLevelTrue();
+    Optional<MarginAccount> findMarginAccountByListingTypeAndCurrency_CurrencyCodeAndCustomer_AccountNumber(ListingType listingType, String currency_currencyCode, String customer_accountNumber); // bankAccount_accountNumber
+    Optional<List<MarginAccount>> findMarginAccountsByMarginCallLevelEquals(int marginCallLevel);
 }

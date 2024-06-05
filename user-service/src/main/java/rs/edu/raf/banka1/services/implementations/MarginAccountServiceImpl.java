@@ -6,15 +6,13 @@ import rs.edu.raf.banka1.dtos.MarginAccountCreateDto;
 import rs.edu.raf.banka1.exceptions.InvalidCapitalAmountException;
 import rs.edu.raf.banka1.exceptions.MarginAccountNotFoundException;
 import rs.edu.raf.banka1.mapper.MarginAccountMapper;
-import rs.edu.raf.banka1.model.ListingType;
-import rs.edu.raf.banka1.model.MarginAccount;
+import rs.edu.raf.banka1.model.*;
 import org.tinylog.Logger;
 import rs.edu.raf.banka1.dtos.MarginAccountDto;
-import rs.edu.raf.banka1.model.BankAccount;
-import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.repositories.MarginAccountRepository;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.MarginAccountService;
+import rs.edu.raf.banka1.services.MarginTransactionService;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.ArrayList;
@@ -28,6 +26,7 @@ public class MarginAccountServiceImpl implements MarginAccountService {
 
     private final MarginAccountRepository marginAccountRepository;
     private final BankAccountService bankAccountService;
+    private final MarginTransactionService marginTransactionService;
     private final MarginAccountMapper marginAccountMapper;
 
     @Override
@@ -44,10 +43,15 @@ public class MarginAccountServiceImpl implements MarginAccountService {
     }
 
     @Override
-    public List<MarginAccountDto> getAllMarginAccountsMarginCallTrue() {
-        return marginAccountRepository.findMarginAccountsByMarginCallLevelTrue().orElse(new ArrayList<>()).stream()
+    public List<MarginAccountDto> findMarginAccountsMarginCallLevelTwo() {
+        return marginAccountRepository.findMarginAccountsByMarginCallLevelEquals(2).orElse(new ArrayList<>()).stream()
                 .map(marginAccountMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MarginAccountDto> findMarginAccountsMarginCallLevelOne(Customer customer) {
+        return getMyMargin(customer).stream().filter(marginAccountDto -> marginAccountDto.getMarginCall() == 1).collect(Collectors.toList());
     }
 
     @Override
@@ -69,13 +73,13 @@ public class MarginAccountServiceImpl implements MarginAccountService {
         } else if(marginAccountCreateDto.getCompanyId() != null) {
             bankAccount = bankAccountService.getBankAccountByCompanyAndCurrencyCode(marginAccountCreateDto.getCompanyId(), marginAccountCreateDto.getCurrency().getCurrencyCode());
         } else {
-            Logger.error("Please provide customer id or company id in create margin account request.");
+            Logger.error("Provide customer id or company id in create margin account request.");
             return false;
         }
 
-        Optional<MarginAccount> optionalMarginAccount = marginAccountRepository.findMarginAccountByListingTypeAndCurrencyAndCustomer_AccountNumber(
+        Optional<MarginAccount> optionalMarginAccount = marginAccountRepository.findMarginAccountByListingTypeAndCurrency_CurrencyCodeAndCustomer_AccountNumber(
                 marginAccountCreateDto.getListingType(),
-                marginAccountCreateDto.getCurrency(),
+                marginAccountCreateDto.getCurrency().getCurrencyCode(),
                 bankAccount.getAccountNumber()
         );
         if(optionalMarginAccount.isPresent()) {
@@ -84,10 +88,12 @@ public class MarginAccountServiceImpl implements MarginAccountService {
         }
 
         MarginAccount marginAccount = new MarginAccount();
-        marginAccount.setMaintenanceMargin(marginAccountCreateDto.getMaintenanceMargin());
-        marginAccount.setCurrency(marginAccountCreateDto.getCurrency());
-        marginAccount.setBalance(marginAccount.getBalance());
+        marginAccount.setCustomer(bankAccount);
         marginAccount.setListingType(marginAccountCreateDto.getListingType());
+        marginAccount.setCurrency(marginAccountCreateDto.getCurrency());
+        marginAccount.setBalance(0.0);
+        marginAccount.setLoanValue(0.0);
+        marginAccount.setMaintenanceMargin(0.0);
         marginAccountRepository.save(marginAccount);
         return true;
     }
@@ -97,9 +103,14 @@ public class MarginAccountServiceImpl implements MarginAccountService {
         MarginAccount marginAccount = marginAccountRepository.findById(marginAccountId).orElseThrow(() -> new MarginAccountNotFoundException(marginAccountId, null, null));
         BankAccount bankAccount = marginAccount.getCustomer();
 
+        if(!bankAccount.getCurrency().getCurrencyCode().equals(marginAccount.getCurrency().getCurrencyCode())) {
+            Logger.error("Margin account and bank account do not have the same currency!");
+            return false;
+        }
+
         bankAccountService.removeBalance(bankAccount, amount);
         depositToMarginAccount(marginAccount, amount);
-        // TODO: zabeleziti transakciju za ovo!
+        marginTransactionService.createTransactionMarginCall(marginAccount, amount);
         return true;
     }
 

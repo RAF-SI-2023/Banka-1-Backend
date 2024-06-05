@@ -73,7 +73,7 @@ public class MarginAccountController {
         return new ResponseEntity<>(marginAccountService.getMyMargin(currentAuth), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/all/marginCall", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/all/supervisor/marginCall", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all margin accounts whose margin call is true.", description = "Get all margin accounts whose margin call is true.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -85,7 +85,24 @@ public class MarginAccountController {
     })
     @PreAuthorize("hasAuthority('manageMargins')")
     public ResponseEntity<List<MarginAccountDto>> getAllMarginAccountsMarginCallTrue() {
-        return new ResponseEntity<>(marginAccountService.getAllMarginAccountsMarginCallTrue(), HttpStatus.OK);
+        return new ResponseEntity<>(marginAccountService.findMarginAccountsMarginCallLevelTwo(), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/all/marginCall", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all margin accounts whose margin call is true.", description = "Get all margin accounts whose margin call is true.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = List.class,
+                            subTypes = {MarginAccountDto.class}))}),
+            @ApiResponse(responseCode = "403",
+                    description = "You aren't authorized to get it."),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+    })
+    public ResponseEntity<List<MarginAccountDto>> getAllMineMarginAccountsMarginCallTrue(
+            @AuthenticationPrincipal User userPrincipal
+    ) {
+        Customer currentAuth = customerService.findCustomerByEmail(userPrincipal.getUsername());
+        return new ResponseEntity<>(marginAccountService.findMarginAccountsMarginCallLevelOne(currentAuth), HttpStatus.OK);
     }
 
     @PutMapping(value = "/deposit/{marginId}", produces = MediaType.APPLICATION_JSON_VALUE)
