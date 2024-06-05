@@ -16,6 +16,7 @@ public class MarginAccountMapper {
         marginAccountDto.setListingType(marginAccount.getListingType());
         marginAccountDto.setLoanValue(marginAccount.getLoanValue());
         marginAccountDto.setCurrency(marginAccount.getCurrency());
+        marginAccountDto.setBankAccountNumber(marginAccount.getCustomer().getAccountNumber());
         return marginAccountDto;
     }
 }

@@ -67,7 +67,7 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
         MarginTransaction transaction = new MarginTransaction();
         transaction.setOrder(null);
         transaction.setCustomerAccount(marginAccount);
-        transaction.setDescription("Uplaćivanje sredstava na račun - Deposit Margin Call");
+        transaction.setDescription("Uplaćivanje sredstava na račun - Margin Call.");
         transaction.setCurrency(marginAccount.getCurrency());
         transaction.setTransactionType(TransactionType.DEPOSIT);
         transaction.setDeposit(amount);

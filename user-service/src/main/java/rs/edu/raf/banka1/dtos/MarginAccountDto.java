@@ -9,7 +9,7 @@ import rs.edu.raf.banka1.model.ListingType;
 @Setter
 public class MarginAccountDto {
     private Long id;
-//    private BankAccount customer;
+    private String bankAccountNumber;
     private Currency currency;
     private ListingType listingType;
     private Double balance;

@@ -1,22 +1,21 @@
 package rs.edu.raf.banka1.services.implementations;
 
-import org.hibernate.mapping.Any;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.scheduling.TaskScheduler;
 import rs.edu.raf.banka1.dtos.MarginAccountCreateDto;
-import rs.edu.raf.banka1.dtos.MarginAccountDto;
 import rs.edu.raf.banka1.exceptions.MarginAccountNotFoundException;
 import rs.edu.raf.banka1.mapper.MarginAccountMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.MarginAccountRepository;
 import rs.edu.raf.banka1.services.BankAccountService;
+import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.MarginAccountService;
 import rs.edu.raf.banka1.services.MarginTransactionService;
 
@@ -39,12 +38,21 @@ class MarginAccountServiceImplTest {
     @Mock
     private MarginAccountRepository marginAccountRepository;
     @Mock
+    private EmailService emailService;
+    @Mock
+    private TaskScheduler taskScheduler;
+    @Mock
     private MarginTransactionService marginTransactionService;
     private MarginAccountService marginAccountService;
 
     @BeforeEach
     void setup() {
-        marginAccountService = new MarginAccountServiceImpl(marginAccountRepository, bankAccountService, marginTransactionService, marginAccountMapper);
+        marginAccountService = new MarginAccountServiceImpl(marginAccountRepository,
+                bankAccountService,
+                marginTransactionService,
+                marginAccountMapper,
+                emailService,
+                taskScheduler);
     }
 
     @Nested

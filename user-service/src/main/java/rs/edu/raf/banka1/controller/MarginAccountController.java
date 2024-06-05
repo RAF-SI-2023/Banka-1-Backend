@@ -56,7 +56,7 @@ public class MarginAccountController {
         return new ResponseEntity<>(marginAccountService.getAllMarginAccounts(), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get all cards by account number", description = "Get all cards by account number")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -123,9 +123,25 @@ public class MarginAccountController {
         return new ResponseEntity<>(false, HttpStatus.OK);
     }
 
-
+    @PutMapping(value = "/force/deposit/{marginId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Supervisor Force Deposit capital to margin account.", description = "Supervisor Force Deposit capital to margin account.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Boolean.class))}),
+            @ApiResponse(responseCode = "403",
+                    description = "You aren't authorized."),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+    })
+    @PreAuthorize("hasAuthority('manageMargins')")
+    public ResponseEntity<Boolean> forceDepositToMarginAccount(
+            @PathVariable Long marginId
+    ) {
+        if(marginAccountService.supervisorForceWithdrawal(marginId))
+            return ResponseEntity.ok(true);
+        return new ResponseEntity<>(false, HttpStatus.OK);
+    }
     @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get all cards by account number", description = "Get all cards by account number")
+    @Operation(summary = "Create margin account", description = "Create margin account")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Boolean.class))}),
@@ -133,7 +149,7 @@ public class MarginAccountController {
                     description = "You aren't authorized to get all cards by account number"),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
-    public ResponseEntity<Boolean> getMyMarginAccounts(
+    public ResponseEntity<Boolean> createMarginAccount(
             @RequestBody MarginAccountCreateDto marginAccountCreateDto
     ) {
         if(marginAccountService.createMarginAccount(marginAccountCreateDto))
