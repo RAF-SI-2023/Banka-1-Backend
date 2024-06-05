@@ -3,6 +3,7 @@ package rs.edu.raf.banka1.bootstrap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.tinylog.Logger;
@@ -22,6 +23,7 @@ import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.TransferService;
 import rs.edu.raf.banka1.utils.Constants;
 
+import javax.swing.text.html.parser.Entity;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -97,9 +99,10 @@ public class BootstrapData implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
-        Logger.info("Loading Data...");
-
+    public void run(String... args) {
+ /*
+        try {
+//            Logger.info("Loading Data...");
         seedPermissions();
         seedCurencies();
 
@@ -116,7 +119,9 @@ public class BootstrapData implements CommandLineRunner {
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
         user1.setRequireApproval(false);
         user1.setCompany(bank);
-        employeeRepository.save(user1);
+        if (employeeRepository.findByEmail(user1.getEmail()).isEmpty()) {
+            employeeRepository.save(user1);
+        }
 
         Employee client = new Employee();
         client.setEmail("client@gmail.com");
@@ -129,7 +134,9 @@ public class BootstrapData implements CommandLineRunner {
         client.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
         client.setLastName("ClientPrezime");
         client.setCompany(bank);
-        employeeRepository.save(client);
+        if (employeeRepository.findByEmail(client.getEmail()).isEmpty()) {
+            employeeRepository.save(client);
+        }
 
         // Sprint5 Bootstrap
         // - Supervizor
@@ -144,7 +151,9 @@ public class BootstrapData implements CommandLineRunner {
         ray.setActive(true);
         ray.setPermissions(new HashSet<>(permissionRepository.findAll()));
         ray.setCompany(bank);
-        employeeRepository.save(ray);
+        if (employeeRepository.findByEmail(ray.getEmail()).isEmpty()) {
+            employeeRepository.save(ray);
+        }
 
         // - Agent koji ima realan limit i nema cekiran fleg za odobravanje
         //    - donnie@gmail.com
@@ -160,7 +169,9 @@ public class BootstrapData implements CommandLineRunner {
         donnie.setRequireApproval(false);
         donnie.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
         donnie.setCompany(bank);
-        employeeRepository.save(donnie);
+        if (employeeRepository.findByEmail(donnie.getEmail()).isEmpty()) {
+            employeeRepository.save(donnie);
+        }
 
         Company company = new Company();
         company.setCompanyName("Sony");
@@ -179,7 +190,9 @@ public class BootstrapData implements CommandLineRunner {
         customer.setLastName("Trajkovic");
 //        customer.setPosition("customer");
         customer.setActive(true);
-        customerRepository.save(customer);
+        if (customerRepository.findCustomerByEmail(customer.getEmail()).isEmpty()) {
+            customerRepository.save(customer);
+        }
 
         //ovo samo za test moze da se obrise
         BankAccount bankAccount = new BankAccount();
@@ -197,7 +210,9 @@ public class BootstrapData implements CommandLineRunner {
         bankAccount.setAccountName("124141j2kraslL");
         bankAccount.setAccountNumber("1234");
         bankAccount.setSubtypeOfAccount("LICNI");
-        bankAccountService.saveBankAccount(bankAccount);
+        if (bankAccountService.findBankAccountByAccountNumber(bankAccount.getAccountNumber()) == null) {
+            bankAccountService.saveBankAccount(bankAccount);
+        }
         // dovde
 
 
@@ -217,7 +232,9 @@ public class BootstrapData implements CommandLineRunner {
         bankAccount1.setAccountName("1asd");
         bankAccount1.setAccountNumber("usd");
         bankAccount1.setSubtypeOfAccount("LICNI");
-        bankAccountService.saveBankAccount(bankAccount1);
+        if (bankAccountService.findBankAccountByAccountNumber(bankAccount1.getAccountNumber()) == null) {
+            bankAccountService.saveBankAccount(bankAccount1);
+        }
         // dovde
 
         //ovo samo za test moze da se obrise
@@ -235,7 +252,9 @@ public class BootstrapData implements CommandLineRunner {
         bankAccount2.setAccountName("1asd");
         bankAccount2.setAccountNumber("eur");
         bankAccount2.setSubtypeOfAccount("LICNI");
-        bankAccountService.saveBankAccount(bankAccount2);
+        if (bankAccountService.findBankAccountByAccountNumber(bankAccount2.getAccountNumber()) == null) {
+            bankAccountService.saveBankAccount(bankAccount2);
+        }
         // dovde
 
         //ovo samo za test moze da se obrise
@@ -253,7 +272,9 @@ public class BootstrapData implements CommandLineRunner {
         bankAccount3.setAccountName("1asd");
         bankAccount3.setAccountNumber("rsd");
         bankAccount3.setSubtypeOfAccount("LICNI");
-        bankAccountService.saveBankAccount(bankAccount3);
+        if (bankAccountService.findBankAccountByAccountNumber(bankAccount3.getAccountNumber()) == null) {
+            bankAccountService.saveBankAccount(bankAccount3);
+        }
         // dovde
 
         Capital capital = new Capital();
@@ -265,7 +286,7 @@ public class BootstrapData implements CommandLineRunner {
         capital.setBankAccount(bankAccount3);
         capital.setTotal(50D);
         capitalRepository.save(capital);
-      
+
         transferService.processTransfer(transferService.createTransfer(new CreateTransferRequest(bankAccount3.getAccountNumber(), bankAccount2.getAccountNumber(), 100.0)));
         transferService.processTransfer(transferService.createTransfer(new CreateTransferRequest(bankAccount3.getAccountNumber(), bankAccount1.getAccountNumber(), 100.0)));
 
@@ -342,9 +363,15 @@ public class BootstrapData implements CommandLineRunner {
 
 
         seedBankCapital(bank);
-        transferService.seedExchangeRates();
+        if (transferService.getExchangeRates().isEmpty()) {
+            transferService.seedExchangeRates();
+        }
 
         Contract contract = new Contract();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+            */
     }
 
     private void seedLoanRequest() {
@@ -414,7 +441,9 @@ public class BootstrapData implements CommandLineRunner {
     }
 
     private void seedBankCapital(Company bank){
-        companyRepository.save(bank);
+        if (companyRepository.findCompaniesByIdNumberContainingIgnoreCase(bank.getIdNumber()).isEmpty()) {
+            companyRepository.save(bank);
+        }
 
         List<rs.edu.raf.banka1.model.Currency> allCurrencies = currencyRepository.findAll();
 

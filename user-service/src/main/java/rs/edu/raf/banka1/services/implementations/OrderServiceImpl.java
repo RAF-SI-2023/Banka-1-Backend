@@ -156,8 +156,10 @@ public class OrderServiceImpl implements OrderService {
             return marketService.getStockById(order.getListingId());
         } else if(order.getListingType().equals(ListingType.FOREX)) {
             return marketService.getForexById(order.getListingId());
-        }else if(order.getListingType().equals(ListingType.OPTIONS)){
-            return marketService.getOptionsById(order.getListingId());
+        }else if(order.getListingType().equals(ListingType.OPTIONS) && order.getOrderType().equals(OrderType.BUY)){
+            return marketService.getCallOptionById(order.getListingId());
+        }else if(order.getListingType().equals(ListingType.OPTIONS) && order.getOrderType().equals(OrderType.SELL)){
+            return marketService.getPutOptionById(order.getListingId());
         }
         return marketService.getFutureById(order.getListingId());
 

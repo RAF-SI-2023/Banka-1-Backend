@@ -105,6 +105,15 @@ public class StockSimulationJob implements Runnable {
         }
         Capital securityCapital = capitalService.getCapitalByListingIdAndTypeAndBankAccount(listingBaseDto.getListingId(), ListingType.valueOf(listingBaseDto.getListingType().toUpperCase()), bankAccount);
 
+        if (order.getOrderType() == OrderType.BUY) {
+            Double oldAmount = securityCapital.getTotal();
+            Double oldAverageBuyingPrice = securityCapital.getAverageBuyingPrice();
+            Double newTotalPrice = order.getPrice();
+            Long newAmount = order.getCurrentAmount();
+            Double newAverageBuyingPrice = (oldAmount * oldAverageBuyingPrice + newTotalPrice) / (oldAmount + newAmount);
+            securityCapital.setAverageBuyingPrice(newAverageBuyingPrice);
+        }
+        
         Double price = orderService.calculatePrice(order,listingBaseDto,processedNum);
         //price = convertPrice(price,null,null);
         try {
