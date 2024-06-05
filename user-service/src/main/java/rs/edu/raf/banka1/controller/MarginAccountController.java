@@ -70,6 +70,9 @@ public class MarginAccountController {
             @AuthenticationPrincipal User userPrincipal
     ) {
         Customer currentAuth = customerService.findCustomerByEmail(userPrincipal.getUsername());
+        if(currentAuth == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
         return new ResponseEntity<>(marginAccountService.getMyMargin(currentAuth), HttpStatus.OK);
     }
 
@@ -102,6 +105,9 @@ public class MarginAccountController {
             @AuthenticationPrincipal User userPrincipal
     ) {
         Customer currentAuth = customerService.findCustomerByEmail(userPrincipal.getUsername());
+        if(currentAuth == null) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        }
         return new ResponseEntity<>(marginAccountService.findMarginAccountsMarginCallLevelOne(currentAuth), HttpStatus.OK);
     }
 
