@@ -102,6 +102,7 @@ public class OrderServiceImpl implements OrderService {
 
         order.setPrice(calculatePrice(order,listingBaseDto,order.getContractSize()));
         order.setFee(calculateFee(request.getLimitValue(), order.getPrice()));
+        order.setIsMargin(request.getIsMargin());
         if(currentAuth instanceof Employee) {
             order.setOwner((Employee)currentAuth);
         }

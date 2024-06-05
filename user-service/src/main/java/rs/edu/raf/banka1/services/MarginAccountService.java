@@ -9,7 +9,7 @@ import rs.edu.raf.banka1.model.MarginAccount;
 import java.util.List;
 
 public interface MarginAccountService {
-    MarginAccount getMarginAccount(Long id, ListingType listingType, String currencyCode);
+    MarginAccount getMarginAccount(Long id, ListingType listingType, String currencyCode, boolean isCompany);
     List<MarginAccountDto> getAllMarginAccounts();
     List<MarginAccountDto> findMarginAccountsMarginCallLevelTwo();
     List<MarginAccountDto> findMarginAccountsMarginCallLevelOne(Customer customer);

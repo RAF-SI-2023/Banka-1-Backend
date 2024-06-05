@@ -25,7 +25,7 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
 
     @Override
     public void createTransaction(MarketOrder order, BankAccount userAccount, Currency currency, String description, TransactionType transactionType, Double price, Double processedNum) {
-        MarginAccount marginAccount = marginAccountService.getMarginAccount(getUserIdFromOrder(order), order.getListingType(), currency.getCurrencyCode());
+        MarginAccount marginAccount = marginAccountService.getMarginAccount(getUserIdFromOrder(order), order.getListingType(), currency.getCurrencyCode(), userAccount.getCompany() != null);
 
         double initialMargin = price * Constants.MARGIN_RATE;
         double loanValue = price - initialMargin;

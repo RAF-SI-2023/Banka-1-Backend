@@ -19,6 +19,7 @@ import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Getter
@@ -63,12 +64,14 @@ public class CapitalServiceImpl implements CapitalService {
             capital.setTicker(this.marketService.getOptionsById(capital.getListingId()).getTicker());
         }
 
+        this.capitalRepository.save(capital);
+
         return capital;
     }
 
     @Override
     public Capital getCapitalByListingIdAndTypeAndBankAccount(Long listingId, ListingType type, BankAccount bankAccount) {
-        return capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
+        return capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseGet(() -> createCapital(type, listingId, 0D, 0D, bankAccount));
     }
 
     @Override
