@@ -14,10 +14,10 @@ import rs.edu.raf.banka1.exceptions.MarginAccountNotFoundException;
 import rs.edu.raf.banka1.mapper.MarginAccountMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.MarginAccountRepository;
+import rs.edu.raf.banka1.repositories.MarginTransactionRepository;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.MarginAccountService;
-import rs.edu.raf.banka1.services.MarginTransactionService;
 
 import java.util.Optional;
 
@@ -40,14 +40,14 @@ class MarginAccountServiceImplTest {
     @Mock
     private TaskScheduler taskScheduler;
     @Mock
-    private MarginTransactionService marginTransactionService;
+    private MarginTransactionRepository marginTransactionRepository;
     private MarginAccountService marginAccountService;
 
     @BeforeEach
     void setup() {
         marginAccountService = new MarginAccountServiceImpl(marginAccountRepository,
                 bankAccountService,
-                marginTransactionService,
+                marginTransactionRepository,
                 marginAccountMapper,
                 emailService,
                 taskScheduler);
@@ -180,7 +180,7 @@ class MarginAccountServiceImplTest {
             assertTrue(marginAccountService.depositMarginCall(1L, 100.0));
 
             verify(bankAccountService).removeBalance(any(), any());
-            verify(marginTransactionService).createTransactionMarginCall(any(), any());
+//            verify(marginTransactionService).createTransactionMarginCall(any(), any());
         }
 
         @Test

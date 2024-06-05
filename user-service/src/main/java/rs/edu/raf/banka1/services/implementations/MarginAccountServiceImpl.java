@@ -9,13 +9,11 @@ import rs.edu.raf.banka1.exceptions.MarginAccountNotFoundException;
 import rs.edu.raf.banka1.mapper.MarginAccountMapper;
 import rs.edu.raf.banka1.margincalljob.MarginCallMidnightJob;
 import rs.edu.raf.banka1.margincalljob.MarginCallMidnightTrigger;
-import rs.edu.raf.banka1.model.ListingType;
-import rs.edu.raf.banka1.model.MarginAccount;
+import rs.edu.raf.banka1.model.*;
 import org.tinylog.Logger;
 import rs.edu.raf.banka1.dtos.MarginAccountDto;
-import rs.edu.raf.banka1.model.BankAccount;
-import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.repositories.MarginAccountRepository;
+import rs.edu.raf.banka1.repositories.MarginTransactionRepository;
 import rs.edu.raf.banka1.services.*;
 import rs.edu.raf.banka1.utils.Constants;
 
@@ -30,7 +28,7 @@ public class MarginAccountServiceImpl implements MarginAccountService {
 
     private final MarginAccountRepository marginAccountRepository;
     private final BankAccountService bankAccountService;
-    private final MarginTransactionService marginTransactionService;
+    private final MarginTransactionRepository marginTransactionRepository;
     private final MarginAccountMapper marginAccountMapper;
     private final EmailService emailService;
     private final TaskScheduler taskScheduler;
@@ -121,10 +119,24 @@ public class MarginAccountServiceImpl implements MarginAccountService {
 
         bankAccountService.removeBalance(bankAccount, amount);
         depositToMarginAccount(marginAccount, amount);
-        marginTransactionService.createTransactionMarginCall(marginAccount, amount);
+        createTransactionMarginCall(marginAccount, amount);
         marginAccount.setMarginCallLevel(0);
         marginAccountRepository.save(marginAccount);
         return true;
+    }
+
+    private void createTransactionMarginCall(MarginAccount marginAccount, Double amount) {
+        MarginTransaction transaction = new MarginTransaction();
+        transaction.setOrder(null);
+        transaction.setCustomerAccount(marginAccount);
+        transaction.setDescription("Uplaćivanje sredstava na račun - Margin Call.");
+        transaction.setCurrency(marginAccount.getCurrency());
+        transaction.setTransactionType(TransactionType.DEPOSIT);
+        transaction.setDeposit(amount);
+        transaction.setLoanValue(marginAccount.getLoanValue());
+        transaction.setMaintenanceMargin(marginAccount.getMaintenanceMargin());
+        transaction.setInterest(null);
+        marginTransactionRepository.save(transaction);
     }
 
     @Override

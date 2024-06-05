@@ -62,21 +62,6 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
         marginTransactionRepository.save(transaction);
     }
 
-    @Override
-    public void createTransactionMarginCall(MarginAccount marginAccount, Double amount) {
-        MarginTransaction transaction = new MarginTransaction();
-        transaction.setOrder(null);
-        transaction.setCustomerAccount(marginAccount);
-        transaction.setDescription("Uplaćivanje sredstava na račun - Margin Call.");
-        transaction.setCurrency(marginAccount.getCurrency());
-        transaction.setTransactionType(TransactionType.DEPOSIT);
-        transaction.setDeposit(amount);
-        transaction.setLoanValue(marginAccount.getLoanValue());
-        transaction.setMaintenanceMargin(marginAccount.getMaintenanceMargin());
-        transaction.setInterest(null);
-        marginTransactionRepository.save(transaction);
-    }
-
     private Long getUserIdFromOrder(MarketOrder order) {
         if(order.getOwner() == null) return order.getCustomer().getUserId();
         return order.getOwner().getUserId();
