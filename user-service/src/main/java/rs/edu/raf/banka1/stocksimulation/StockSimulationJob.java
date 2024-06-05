@@ -129,14 +129,19 @@ public class StockSimulationJob implements Runnable {
 
         Double price = orderService.calculatePrice(order,listingBaseDto,processedNum);
         //price = convertPrice(price,null,null);
+
+        String description;
+        if(transactionType.equals(TransactionType.DEPOSIT)) {
+            description = "Uplaćivanje sredstava na račun - Initial Margin";
+        } else {
+            description = "Isplata kamate";
+        }
+
         try {
-            transactionService.createTransaction(bankAccount, securityCapital, price, order, processedNum);
+            marginTransactionService.createTransaction(order, bankAccount, bankAccount.getCurrency(), description, transactionType, price, (double)processedNum);
         } catch (InvalidReservationAmountException e) {
             orderService.cancelOrder(orderId);
         }
-
-        marginTransactionService.createTransaction(order, bankAccount, bankAccount.getCurrency(), "Uplaćivanje sredstava na račun - Initial Margin", transactionType, price);
-
     }
 
     //todo treba da se radi sa currency i da se doda u listingdto exchangedto koji ce da ima i currency u sebi

@@ -57,6 +57,8 @@ public class BootstrapData implements CommandLineRunner {
 
     private final OrderRepository orderRepository;
 
+    private final MarginAccountRepository marginAccountRepository;
+
     private final ScheduledExecutorService resetLimitExecutor = Executors.newScheduledThreadPool(1);
 
     @Autowired
@@ -76,7 +78,8 @@ public class BootstrapData implements CommandLineRunner {
         final CapitalRepository capitalRepository,
         final EmployeeService employeeService,
         final OrderRepository orderRepository,
-        final TransferService transferService) {
+        final TransferService transferService,
+        final MarginAccountRepository marginAccountRepository) {
       
         this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -94,6 +97,7 @@ public class BootstrapData implements CommandLineRunner {
         this.employeeService = employeeService;
         this.orderRepository = orderRepository;
         this.transferService = transferService;
+        this.marginAccountRepository = marginAccountRepository;
     }
 
     @Override
@@ -200,6 +204,12 @@ public class BootstrapData implements CommandLineRunner {
         bankAccount.setSubtypeOfAccount("LICNI");
         bankAccountService.saveBankAccount(bankAccount);
         // dovde
+
+        MarginAccount marginAccount = new MarginAccount();
+        marginAccount.setCustomer(bankAccount);
+        marginAccount.setCurrency(this.currencyRepository.getReferenceById(1L));
+        marginAccount.setListingType(ListingType.STOCK);
+        this.marginAccountRepository.save(marginAccount);
 
 
 

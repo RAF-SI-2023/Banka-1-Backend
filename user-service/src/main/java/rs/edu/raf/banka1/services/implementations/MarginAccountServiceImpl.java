@@ -1,11 +1,14 @@
 package rs.edu.raf.banka1.services.implementations;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.MarginAccountCreateDto;
 import rs.edu.raf.banka1.exceptions.InvalidCapitalAmountException;
 import rs.edu.raf.banka1.exceptions.MarginAccountNotFoundException;
 import rs.edu.raf.banka1.mapper.MarginAccountMapper;
+import rs.edu.raf.banka1.margincalljob.MarginCallMidnightJob;
+import rs.edu.raf.banka1.margincalljob.MarginCallMidnightTrigger;
 import rs.edu.raf.banka1.model.ListingType;
 import rs.edu.raf.banka1.model.MarginAccount;
 import org.tinylog.Logger;
@@ -14,6 +17,7 @@ import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.repositories.MarginAccountRepository;
 import rs.edu.raf.banka1.services.BankAccountService;
+import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.MarginAccountService;
 import rs.edu.raf.banka1.utils.Constants;
 
@@ -27,6 +31,8 @@ public class MarginAccountServiceImpl implements MarginAccountService {
     private final MarginAccountRepository marginAccountRepository;
     private final BankAccountService bankAccountService;
     private final MarginAccountMapper marginAccountMapper;
+    private final EmailService emailService;
+    private final TaskScheduler taskScheduler;
 
     @Override
     public MarginAccount getMarginAccount(Long id, ListingType listingType, String currencyCode) {
@@ -123,5 +129,43 @@ public class MarginAccountServiceImpl implements MarginAccountService {
         marginAccount.setBalance(marginAccount.getBalance() - amount);
         marginAccount.setLoanValue(newLoanValue);
         marginAccountRepository.save(marginAccount);
+    }
+
+    @Override
+    public List<MarginAccount> getAllMarginAccountEntities() {
+        return this.marginAccountRepository.findAll();
+    }
+
+    @Override
+    public void updateOnMarginSummary(MarginAccount marginAccount, Double equity, Double maintenanceMargin) {
+        marginAccount.setMaintenanceMargin(maintenanceMargin);
+        marginAccount.setBalance(equity);
+        this.marginAccountRepository.save(marginAccount);
+    }
+
+    @Override
+    public void triggerMarginCall(MarginAccount marginAccount) {
+        if(marginAccount.getMarginCallLevel() != 0) {
+            return;
+        }
+        marginAccount.setMarginCallLevel(1);
+        this.marginAccountRepository.save(marginAccount);
+
+        //Send email
+        if(marginAccount.getCustomer().getCompany() == null) {
+            emailService.sendEmail(marginAccount.getCustomer().getCustomer().getEmail(), "MARGIN CALL TRIGGERED", "Margin call triggered. Please deposit money to the margin account or liquidate some positions.");
+        }
+
+        //Schedule job to alert at midnight
+        taskScheduler.schedule(new MarginCallMidnightJob(marginAccount, this), new MarginCallMidnightTrigger());
+    }
+
+    @Override
+    public void triggerMarginCallAutomaticLiquidation(MarginAccount marginAccount) {
+        if(marginAccount.getMarginCallLevel() != 1) {
+            return;
+        }
+        marginAccount.setMarginCallLevel(2);
+        this.marginAccountRepository.save(marginAccount);
     }
 }

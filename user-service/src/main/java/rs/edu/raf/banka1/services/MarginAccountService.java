@@ -16,4 +16,10 @@ public interface MarginAccountService {
 
     void depositToMarginAccount(MarginAccount marginAccount, Double amount);
     void withdrawFromMarginAccount(MarginAccount marginAccount, Double amount);
+
+    List<MarginAccount> getAllMarginAccountEntities();
+
+    void updateOnMarginSummary(MarginAccount marginAccount, Double equity, Double maintenanceMargin);
+    void triggerMarginCall(MarginAccount marginAccount);
+    void triggerMarginCallAutomaticLiquidation(MarginAccount marginAccount);
 }

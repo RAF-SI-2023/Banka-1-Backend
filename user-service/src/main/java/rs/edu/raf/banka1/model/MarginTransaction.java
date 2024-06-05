@@ -42,4 +42,6 @@ public class MarginTransaction {
 
     private Double interest;
 
+    private Double capitalAmount;
+
 }

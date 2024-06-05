@@ -23,11 +23,11 @@ public class MarginAccount {
     @JoinColumn(name = "currency_id", referencedColumnName = "id")
     private Currency currency;
 
-    private Double balance;
+    private Double balance = 0d;
 
-    private Double loanValue;
+    private Double loanValue = 0d;
 
-    private Double maintenanceMargin;
+    private Double maintenanceMargin = 0d;
 
     private int marginCallLevel = 0; //0 -> margin call not triggered, 1 -> margin call triggered, 2 -> margin call time exceeded - automatic liquidation
 
