@@ -58,6 +58,7 @@ public class BootstrapData implements CommandLineRunner {
     private final EmployeeService employeeService;
 
     private final OrderRepository orderRepository;
+    private final ContractRepository contractRepository;
 
     private final ScheduledExecutorService resetLimitExecutor = Executors.newScheduledThreadPool(1);
 
@@ -78,7 +79,8 @@ public class BootstrapData implements CommandLineRunner {
         final CapitalRepository capitalRepository,
         final EmployeeService employeeService,
         final OrderRepository orderRepository,
-        final TransferService transferService) {
+        final TransferService transferService,
+        final ContractRepository contractRepository) {
       
         this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -96,11 +98,16 @@ public class BootstrapData implements CommandLineRunner {
         this.employeeService = employeeService;
         this.orderRepository = orderRepository;
         this.transferService = transferService;
+        this.contractRepository = contractRepository;
     }
 
     @Override
     public void run(String... args) {
- /*
+
+        if(employeeRepository.findByEmail("admin").isPresent()) {
+            return;
+        }
+
         try {
 //            Logger.info("Loading Data...");
         seedPermissions();
@@ -278,14 +285,26 @@ public class BootstrapData implements CommandLineRunner {
         // dovde
 
         Capital capital = new Capital();
-        capital.setPublicTotal(0D);
+        capital.setPublicTotal(500000D);
         capital.setListingType(ListingType.STOCK);
         capital.setReserved(0D);
         capital.setListingId(1L);
         capital.setTicker("DT");
         capital.setBankAccount(bankAccount3);
-        capital.setTotal(50D);
+        capital.setTotal(500D);
+        capital.setListingType(ListingType.STOCK);
         capitalRepository.save(capital);
+
+        Capital capital1 = new Capital();
+        capital1.setPublicTotal(500000D);
+        capital1.setListingType(ListingType.STOCK);
+        capital1.setReserved(0D);
+        capital1.setListingId(1L);
+        capital1.setTicker("DT");
+        capital1.setBankAccount(bankAccount1);
+        capital1.setTotal(500D);
+        capital1.setListingType(ListingType.STOCK);
+        capitalRepository.save(capital1);
 
         transferService.processTransfer(transferService.createTransfer(new CreateTransferRequest(bankAccount3.getAccountNumber(), bankAccount2.getAccountNumber(), 100.0)));
         transferService.processTransfer(transferService.createTransfer(new CreateTransferRequest(bankAccount3.getAccountNumber(), bankAccount1.getAccountNumber(), 100.0)));
@@ -363,15 +382,31 @@ public class BootstrapData implements CommandLineRunner {
 
 
         seedBankCapital(bank);
-        if (transferService.getExchangeRates().isEmpty()) {
+//        if (currencyRepository.findAll().isEmpty()) {
             transferService.seedExchangeRates();
-        }
+//        }
+
+
 
         Contract contract = new Contract();
+        contract.setBuyer(bankAccount1);
+        contract.setSeller(bankAccount3);
+        contract.setBankApproval(true);
+        contract.setSellerApproval(true);
+        contract.setComment("Komentar vezan za ugovor");
+        contract.setCreationDate(Instant.now().toEpochMilli() - 50000L);
+        contract.setRealizationDate(Instant.now().toEpochMilli() - 20000L);
+        contract.setReferenceNumber("123456789");
+        contract.setTicker("DT");
+        contract.setAmount(100.0);
+        contract.setPrice(100.0);
+        contract.setListingId(1L);
+        contract.setListingType(ListingType.STOCK);
+        contractRepository.save(contract);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println(e.getMessage());//TODO: nzm da li ovde da zovem logger, cuo sam od nekog da se restartuje sistem onda?
         }
-            */
+
     }
 
     private void seedLoanRequest() {
