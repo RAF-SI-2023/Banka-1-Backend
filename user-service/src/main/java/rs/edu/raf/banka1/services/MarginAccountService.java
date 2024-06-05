@@ -11,9 +11,11 @@ import java.util.List;
 public interface MarginAccountService {
     MarginAccount getMarginAccount(Long id, ListingType listingType, String currencyCode);
     List<MarginAccountDto> getAllMarginAccounts();
+    List<MarginAccountDto> findMarginAccountsMarginCallLevelTwo();
+    List<MarginAccountDto> findMarginAccountsMarginCallLevelOne(Customer customer);
     List<MarginAccountDto> getMyMargin(Customer loggedIn);
     Boolean createMarginAccount(MarginAccountCreateDto marginAccountCreateDto);
-
+    Boolean depositMarginCall(Long marginAccountId, Double amount);
     void depositToMarginAccount(MarginAccount marginAccount, Double amount);
     void withdrawFromMarginAccount(MarginAccount marginAccount, Double amount);
 

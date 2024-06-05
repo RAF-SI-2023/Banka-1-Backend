@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Entity
 @Getter
 @Setter
@@ -33,4 +35,17 @@ public class MarginAccount {
 
     @Version
     private Integer version;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MarginAccount that = (MarginAccount) o;
+        return Objects.equals(customer.getId(), that.customer.getId()) && listingType == that.listingType && Objects.equals(currency, that.currency);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(customer.getId(), listingType, currency);
+    }
 }

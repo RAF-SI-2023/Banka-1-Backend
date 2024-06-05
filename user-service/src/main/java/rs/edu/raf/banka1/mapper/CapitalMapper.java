@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.mapper;
 
 import org.springframework.stereotype.Component;
+import rs.edu.raf.banka1.dtos.AllPublicCapitalsDto;
 import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.dtos.CapitalProfitDto;
 import rs.edu.raf.banka1.dtos.PublicCapitalDto;
@@ -39,5 +40,17 @@ public class CapitalMapper {
         publicCapitalDto.setIsIndividual(capital.getBankAccount().getCompany() == null);
 
         return publicCapitalDto;
+    }
+
+    public AllPublicCapitalsDto capitalToAllPublicCapitalsDto(Capital capital, String ownerName) {
+        AllPublicCapitalsDto dto = new AllPublicCapitalsDto();
+        dto.setListingId(capital.getListingId());
+        dto.setListingType(capital.getListingType());
+        dto.setTicker(capital.getTicker());
+        dto.setBankAccountNumber(capital.getBankAccount().getAccountNumber());
+        dto.setLastModified(capital.getLastModified());
+        dto.setAmount(capital.getPublicTotal());
+        dto.setOwnerName(ownerName);
+        return dto;
     }
 }

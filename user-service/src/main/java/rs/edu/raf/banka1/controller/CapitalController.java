@@ -13,10 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
-import rs.edu.raf.banka1.dtos.CapitalDto;
-import rs.edu.raf.banka1.dtos.CapitalProfitDto;
-import rs.edu.raf.banka1.dtos.AddPublicCapitalDto;
-import rs.edu.raf.banka1.dtos.PublicCapitalDto;
+import rs.edu.raf.banka1.dtos.*;
 import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.model.Employee;
 import rs.edu.raf.banka1.services.CapitalService;
@@ -79,6 +76,20 @@ public class CapitalController {
         // vraca za SVE customere iz banke
         // endpoint za pravna lica --> sve hartije od vrednosti od drugih pravnih lica
         return new ResponseEntity<>(capitalService.getAllPublicListingCapitals(), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/public/all", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get all public capitals.", description = "Get all public capitals.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {PublicCapitalDto.class}))}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<AllPublicCapitalsDto>> getAllPublicCapitals() {
+        return new ResponseEntity<>(capitalService.getAllPublicCapitals(), HttpStatus.OK);
     }
 
     @PutMapping(value = "/customer/addPublic", produces = MediaType.APPLICATION_JSON_VALUE)

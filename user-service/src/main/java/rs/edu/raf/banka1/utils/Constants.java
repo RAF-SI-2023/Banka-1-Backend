@@ -24,7 +24,7 @@ public class Constants {
     public static final List<String> allPermissions = Arrays.asList(
             "addUser", "modifyUser", "deleteUser", "readUser",
             "manageLoans", "manageLoanRequests", "modifyCustomer",
-            "manageOrderRequests");
+            "manageOrderRequests", "manageMargins");
 
     public static final Map<String, List<String>> userPermissions = new HashMap<String, List<String>>(){{
         put(AGENT, Arrays.asList("addUser", "modifyUser", "deleteUser", "readUser",
