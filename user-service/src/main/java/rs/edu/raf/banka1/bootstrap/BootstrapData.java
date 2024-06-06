@@ -59,6 +59,8 @@ public class BootstrapData implements CommandLineRunner {
 
     private final OrderRepository orderRepository;
 
+    private final MarginAccountRepository marginAccountRepository;
+
     private final ScheduledExecutorService resetLimitExecutor = Executors.newScheduledThreadPool(1);
 
     @Autowired
@@ -78,7 +80,8 @@ public class BootstrapData implements CommandLineRunner {
         final CapitalRepository capitalRepository,
         final EmployeeService employeeService,
         final OrderRepository orderRepository,
-        final TransferService transferService) {
+        final TransferService transferService,
+        final MarginAccountRepository marginAccountRepository) {
       
         this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -96,6 +99,7 @@ public class BootstrapData implements CommandLineRunner {
         this.employeeService = employeeService;
         this.orderRepository = orderRepository;
         this.transferService = transferService;
+        this.marginAccountRepository = marginAccountRepository;
     }
 
     @Override
@@ -214,7 +218,30 @@ public class BootstrapData implements CommandLineRunner {
         }
         // dovde
 
+            BankAccount bankAccount4 = new BankAccount();
+            bankAccount4.setAccountStatus(true);
+            bankAccount4.setAccountType(AccountType.CURRENT);
+            bankAccount4.setAvailableBalance(10000.0);
+            bankAccount4.setBalance(10000.0);
+            bankAccount4.setMaintenanceCost(240.0);
+//            bankAccount1.setCompany(company);
+            bankAccount4.setCreatedByAgentId(52L);
+            bankAccount4.setCreationDate(new Date().getTime());
+            bankAccount4.setCurrency(this.currencyRepository.getReferenceById(1L));
+            bankAccount4.setCustomer(customer);
+            bankAccount4.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+            bankAccount4.setAccountName("124141j2kraslL");
+            bankAccount4.setAccountNumber("12345");
+            bankAccount4.setSubtypeOfAccount("LICNI");
+            if (bankAccountService.findBankAccountByAccountNumber(bankAccount4.getAccountNumber()) == null) {
+                bankAccountService.saveBankAccount(bankAccount4);
+            }
 
+        MarginAccount marginAccount = new MarginAccount();
+        marginAccount.setCustomer(bankAccount4);
+        marginAccount.setCurrency(bankAccount4.getCurrency());
+        marginAccount.setListingType(ListingType.STOCK);
+        this.marginAccountRepository.save(marginAccount);
 
         //ovo samo za test moze da se obrise
         BankAccount bankAccount1 = new BankAccount();
