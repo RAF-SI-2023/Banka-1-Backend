@@ -27,4 +27,6 @@ public interface CapitalService {
     void removeFromPublicCapital(Long listingId, ListingType listingType, BankAccount bankAccount, Double amount);
     CapitalDto getCapitalForStockId(Long stockId);
     CapitalDto getCapitalForForexId(Long forexId);
+
+    List<AllPublicCapitalsDto> getAllPublicCapitals();
 }

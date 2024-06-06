@@ -38,13 +38,16 @@ class StockSimulationJobTest {
     @Mock
     private CapitalService capitalService;
 
+    @Mock
+    private MarginTransactionService marginTransactionService;
+
     Long orderId = 1L;
 
     private StockSimulationJob stockSimulationJob;
 
     @BeforeEach
     void setup() {
-        stockSimulationJob = new StockSimulationJob(orderService, marketService, transactionService, capitalService, bankAccountService, orderId, null);
+        stockSimulationJob = new StockSimulationJob(orderService, marketService, transactionService, capitalService, bankAccountService, marginTransactionService, orderId, null);
     }
 
     @Test
