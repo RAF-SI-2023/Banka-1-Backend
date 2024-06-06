@@ -81,7 +81,8 @@ public class BootstrapData implements CommandLineRunner {
         final EmployeeService employeeService,
         final OrderRepository orderRepository,
         final TransferService transferService,
-        final MarginAccountRepository marginAccountRepository) {
+        final MarginAccountRepository marginAccountRepository,
+        TransferRepository transferRepository) {
       
         this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -100,6 +101,7 @@ public class BootstrapData implements CommandLineRunner {
         this.orderRepository = orderRepository;
         this.transferService = transferService;
         this.marginAccountRepository = marginAccountRepository;
+        this.transferRepository = transferRepository;
     }
 
     @Override
@@ -389,9 +391,7 @@ public class BootstrapData implements CommandLineRunner {
 
 
         seedBankCapital(bank);
-        if (transferService.getExchangeRates().isEmpty()) {
-            transferService.seedExchangeRates();
-        }
+        transferService.seedExchangeRates();
 
         Contract contract = new Contract();
         } catch (Exception e) {
@@ -538,6 +538,7 @@ public class BootstrapData implements CommandLineRunner {
     }
 
     private static final Random random = new Random();
+    private final TransferRepository transferRepository;
 
     private LoanRequest generateLoanRequest() {
         LoanRequest loanRequest = new LoanRequest();
