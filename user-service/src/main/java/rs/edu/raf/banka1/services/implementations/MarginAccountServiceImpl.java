@@ -86,7 +86,7 @@ public class MarginAccountServiceImpl implements MarginAccountService {
         } else if(marginAccountCreateDto.getCompanyId() != null) {
             bankAccount = bankAccountService.getBankAccountByCompanyAndCurrencyCode(marginAccountCreateDto.getCompanyId(), marginAccountCreateDto.getCurrency().getCurrencyCode());
         } else {
-            Logger.error("Provide customer id or company id in create margin account request.");
+//            Logger.error("Provide customer id or company id in create margin account request.");
             return false;
         }
 
@@ -96,7 +96,7 @@ public class MarginAccountServiceImpl implements MarginAccountService {
                 bankAccount.getAccountNumber()
         );
         if(optionalMarginAccount.isPresent()) {
-            Logger.error("Margin account already exists.");
+//            Logger.error("Margin account already exists.");
             return false;
         }
 
@@ -117,12 +117,12 @@ public class MarginAccountServiceImpl implements MarginAccountService {
         BankAccount bankAccount = marginAccount.getCustomer();
 
         if(!bankAccount.getCurrency().getCurrencyCode().equals(marginAccount.getCurrency().getCurrencyCode())) {
-            Logger.error("Margin account and bank account do not have the same currency!");
+//            Logger.error("Margin account and bank account do not have the same currency!");
             return false;
         }
 
         if(amount < marginAccount.getMaintenanceMargin() - marginAccount.getBalance()) {
-            Logger.error("Wrong amount for deposit margin call.");
+//            Logger.error("Wrong amount for deposit margin call.");
             return false;
         }
 
@@ -153,7 +153,7 @@ public class MarginAccountServiceImpl implements MarginAccountService {
     public Boolean supervisorForceWithdrawal(Long marginAccountId) {
         MarginAccount marginAccount = marginAccountRepository.findById(marginAccountId).orElseThrow(() -> new MarginAccountNotFoundException(marginAccountId, null, null));
         if(marginAccount.getMarginCallLevel() != 2) {
-            Logger.error("Margin Call Level is not 2.");
+//            Logger.error("Margin Call Level is not 2.");
             return false;
         }
         Double amount = marginAccount.getMaintenanceMargin() - marginAccount.getBalance();
