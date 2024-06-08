@@ -108,6 +108,7 @@ public class BootstrapData implements CommandLineRunner {
     public void run(String... args) {
         try {
 //            Logger.info("Loading Data...");
+            
         seedPermissions();
         seedCurencies();
 
@@ -124,6 +125,7 @@ public class BootstrapData implements CommandLineRunner {
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
         user1.setRequireApproval(false);
         user1.setCompany(bank);
+            
         if (employeeRepository.findByEmail(user1.getEmail()).isEmpty()) {
             employeeRepository.save(user1);
         } else {
@@ -141,6 +143,7 @@ public class BootstrapData implements CommandLineRunner {
         client.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
         client.setLastName("ClientPrezime");
         client.setCompany(bank);
+            
         if (employeeRepository.findByEmail(client.getEmail()).isEmpty()) {
             employeeRepository.save(client);
         } else {
@@ -160,6 +163,7 @@ public class BootstrapData implements CommandLineRunner {
         ray.setActive(true);
         ray.setPermissions(new HashSet<>(permissionRepository.findAll()));
         ray.setCompany(bank);
+            
         if (employeeRepository.findByEmail(ray.getEmail()).isEmpty()) {
             employeeRepository.save(ray);
         } else {
