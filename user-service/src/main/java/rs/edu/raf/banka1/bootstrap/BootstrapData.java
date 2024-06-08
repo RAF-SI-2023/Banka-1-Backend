@@ -213,6 +213,73 @@ public class BootstrapData implements CommandLineRunner {
             customer = customerRepository.findCustomerByEmail(customer.getEmail()).get();
         }
 
+        Customer testCustomer = new Customer();
+        testCustomer.setFirstName("testCustomer");
+        testCustomer.setEmail("testCustomer@gmail.com");
+        testCustomer.setPassword(passwordEncoder.encode("customer"));
+        testCustomer.setLastName("Trajkovic");
+//        customer.setPosition("customer");
+        testCustomer.setActive(true);
+        if (customerRepository.findCustomerByEmail(testCustomer.getEmail()).isEmpty()) {
+            customerRepository.save(testCustomer);
+        } else {
+            customer = customerRepository.findCustomerByEmail(testCustomer.getEmail()).get();
+        }
+
+        Customer testCustomer2 = new Customer();
+        testCustomer2.setFirstName("testCustomer2");
+        testCustomer2.setEmail("testCustomer2@gmail.com");
+        testCustomer2.setPassword(passwordEncoder.encode("customer"));
+        testCustomer2.setLastName("Trajkovic");
+//        customer.setPosition("customer");
+        testCustomer2.setActive(true);
+        if (customerRepository.findCustomerByEmail(testCustomer2.getEmail()).isEmpty()) {
+            customerRepository.save(testCustomer2);
+        } else {
+            customer = customerRepository.findCustomerByEmail(testCustomer2.getEmail()).get();
+        }
+
+            BankAccount bankAccount4test = new BankAccount();
+            bankAccount4test.setAccountStatus(true);
+            bankAccount4test.setAccountType(AccountType.CURRENT);
+            bankAccount4test.setAvailableBalance(10000.0);
+            bankAccount4test.setBalance(10000.0);
+            bankAccount4test.setMaintenanceCost(240.0);
+//            bankAccount1.setCompany(company);
+            bankAccount4test.setCreatedByAgentId(52L);
+            bankAccount4test.setCreationDate(new Date().getTime());
+            bankAccount4test.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElse(null));
+            bankAccount4test.setCustomer(testCustomer);
+            bankAccount4test.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+            bankAccount4test.setAccountName("testCustomerAccountRSD");
+            bankAccount4test.setAccountNumber("12345");
+            bankAccount4test.setSubtypeOfAccount("LICNI");
+            if (bankAccountService.findBankAccountByAccountNumber(bankAccount4test.getAccountNumber()) == null) {
+                bankAccountService.saveBankAccount(bankAccount4test);
+            } else {
+                bankAccount4test = bankAccountService.findBankAccountByAccountNumber(bankAccount4test.getAccountNumber());
+            }
+
+            BankAccount bankAccount4testa = new BankAccount();
+            bankAccount4testa.setAccountStatus(true);
+            bankAccount4testa.setAccountType(AccountType.CURRENT);
+            bankAccount4testa.setAvailableBalance(10000.0);
+            bankAccount4testa.setBalance(10000.0);
+            bankAccount4testa.setMaintenanceCost(240.0);
+            bankAccount4testa.setCompany(company);
+            bankAccount4testa.setCreatedByAgentId(52L);
+            bankAccount4testa.setCreationDate(new Date().getTime());
+            bankAccount4testa.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("USD").orElse(null));
+            bankAccount4testa.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+            bankAccount4testa.setAccountName("testCompanyAccountUSD");
+            bankAccount4testa.setAccountNumber("12345");
+            bankAccount4testa.setSubtypeOfAccount("LICNI");
+            if (bankAccountService.findBankAccountByAccountNumber(bankAccount4testa.getAccountNumber()) == null) {
+                bankAccountService.saveBankAccount(bankAccount4testa);
+            } else {
+                bankAccount4testa = bankAccountService.findBankAccountByAccountNumber(bankAccount4testa.getAccountNumber());
+            }
+
         //ovo samo za test moze da se obrise
         BankAccount bankAccount = new BankAccount();
         bankAccount.setAccountStatus(true);
