@@ -83,8 +83,7 @@ public class BootstrapData implements CommandLineRunner {
         final OrderRepository orderRepository,
         final TransferService transferService,
         final MarginAccountRepository marginAccountRepository,
-        TransferRepository transferRepository) {
-        final TransferService transferService,
+        TransferRepository transferRepository,
         final ContractRepository contractRepository) {
 
         this.employeeRepository = userRepository;
