@@ -43,7 +43,7 @@ public class ProfitController {
         return new ResponseEntity<>(profitService.getStockProfitBank(), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/getStockProfitAgent", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/getStockProfitAgent/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get stock profit for a single agent", description = "Get stock profit for a single agent",
             parameters = {
                     @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
