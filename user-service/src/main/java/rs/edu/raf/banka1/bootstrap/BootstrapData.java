@@ -60,6 +60,8 @@ public class BootstrapData implements CommandLineRunner {
     private final OrderRepository orderRepository;
     private final ContractRepository contractRepository;
 
+    private final MarginAccountRepository marginAccountRepository;
+
     private final ScheduledExecutorService resetLimitExecutor = Executors.newScheduledThreadPool(1);
 
     @Autowired
@@ -80,8 +82,11 @@ public class BootstrapData implements CommandLineRunner {
         final EmployeeService employeeService,
         final OrderRepository orderRepository,
         final TransferService transferService,
+        final MarginAccountRepository marginAccountRepository,
+        TransferRepository transferRepository) {
+        final TransferService transferService,
         final ContractRepository contractRepository) {
-      
+
         this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.permissionRepository = permissionRepository;
@@ -98,6 +103,8 @@ public class BootstrapData implements CommandLineRunner {
         this.employeeService = employeeService;
         this.orderRepository = orderRepository;
         this.transferService = transferService;
+        this.marginAccountRepository = marginAccountRepository;
+        this.transferRepository = transferRepository;
         this.contractRepository = contractRepository;
     }
 
@@ -110,6 +117,7 @@ public class BootstrapData implements CommandLineRunner {
 
         try {
 //            Logger.info("Loading Data...");
+
         seedPermissions();
         seedCurencies();
 
@@ -126,8 +134,11 @@ public class BootstrapData implements CommandLineRunner {
         user1.setPermissions(new HashSet<>(permissionRepository.findAll()));
         user1.setRequireApproval(false);
         user1.setCompany(bank);
+
         if (employeeRepository.findByEmail(user1.getEmail()).isEmpty()) {
             employeeRepository.save(user1);
+        } else {
+            user1 = employeeRepository.findByEmail(user1.getEmail()).get();
         }
 
         Employee client = new Employee();
@@ -141,8 +152,11 @@ public class BootstrapData implements CommandLineRunner {
         client.setPermissions(new HashSet<>(getPermissionsForSupervisor()));
         client.setLastName("ClientPrezime");
         client.setCompany(bank);
+
         if (employeeRepository.findByEmail(client.getEmail()).isEmpty()) {
             employeeRepository.save(client);
+        } else {
+            client = employeeRepository.findByEmail(client.getEmail()).get();
         }
 
         // Sprint5 Bootstrap
@@ -158,8 +172,11 @@ public class BootstrapData implements CommandLineRunner {
         ray.setActive(true);
         ray.setPermissions(new HashSet<>(permissionRepository.findAll()));
         ray.setCompany(bank);
+
         if (employeeRepository.findByEmail(ray.getEmail()).isEmpty()) {
             employeeRepository.save(ray);
+        } else {
+            ray = employeeRepository.findByEmail(ray.getEmail()).get();
         }
 
         // - Agent koji ima realan limit i nema cekiran fleg za odobravanje
@@ -178,9 +195,12 @@ public class BootstrapData implements CommandLineRunner {
         donnie.setCompany(bank);
         if (employeeRepository.findByEmail(donnie.getEmail()).isEmpty()) {
             employeeRepository.save(donnie);
+        } else {
+            donnie = employeeRepository.findByEmail(donnie.getEmail()).get();
         }
 
-        Company company = new Company();
+
+            Company company = new Company();
         company.setCompanyName("Sony");
         company.setTelephoneNumber("123456789");
         company.setFaxNumber("987654321");
@@ -188,8 +208,11 @@ public class BootstrapData implements CommandLineRunner {
         company.setIdNumber("987654321");
         company.setJobId("123456789");
         company.setRegistrationNumber("987654321");
-        companyRepository.save(company);
-
+        if (companyRepository.findCompaniesByIdNumberContainingIgnoreCase(company.getIdNumber()).isEmpty()) {
+            companyRepository.save(company);
+        } else {
+            company = companyRepository.findCompaniesByIdNumberContainingIgnoreCase(company.getIdNumber()).get(0);
+        }
         Customer customer = new Customer();
         customer.setFirstName("Customer1");
         customer.setEmail("customer@gmail.com");
@@ -199,7 +222,76 @@ public class BootstrapData implements CommandLineRunner {
         customer.setActive(true);
         if (customerRepository.findCustomerByEmail(customer.getEmail()).isEmpty()) {
             customerRepository.save(customer);
+        } else {
+            customer = customerRepository.findCustomerByEmail(customer.getEmail()).get();
         }
+
+        Customer testCustomer = new Customer();
+        testCustomer.setFirstName("testCustomer");
+        testCustomer.setEmail("testCustomer@gmail.com");
+        testCustomer.setPassword(passwordEncoder.encode("customer"));
+        testCustomer.setLastName("Trajkovic");
+//        customer.setPosition("customer");
+        testCustomer.setActive(true);
+        if (customerRepository.findCustomerByEmail(testCustomer.getEmail()).isEmpty()) {
+            customerRepository.save(testCustomer);
+        } else {
+            customer = customerRepository.findCustomerByEmail(testCustomer.getEmail()).get();
+        }
+
+        Customer testCustomer2 = new Customer();
+        testCustomer2.setFirstName("testCustomer2");
+        testCustomer2.setEmail("testCustomer2@gmail.com");
+        testCustomer2.setPassword(passwordEncoder.encode("customer"));
+        testCustomer2.setLastName("Trajkovic");
+//        customer.setPosition("customer");
+        testCustomer2.setActive(true);
+        if (customerRepository.findCustomerByEmail(testCustomer2.getEmail()).isEmpty()) {
+            customerRepository.save(testCustomer2);
+        } else {
+            customer = customerRepository.findCustomerByEmail(testCustomer2.getEmail()).get();
+        }
+
+            BankAccount bankAccount4test = new BankAccount();
+            bankAccount4test.setAccountStatus(true);
+            bankAccount4test.setAccountType(AccountType.CURRENT);
+            bankAccount4test.setAvailableBalance(10000.0);
+            bankAccount4test.setBalance(10000.0);
+            bankAccount4test.setMaintenanceCost(240.0);
+//            bankAccount1.setCompany(company);
+            bankAccount4test.setCreatedByAgentId(52L);
+            bankAccount4test.setCreationDate(new Date().getTime());
+            bankAccount4test.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElse(null));
+            bankAccount4test.setCustomer(testCustomer);
+            bankAccount4test.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+            bankAccount4test.setAccountName("testCustomerAccountRSD");
+            bankAccount4test.setAccountNumber("12345");
+            bankAccount4test.setSubtypeOfAccount("LICNI");
+            if (bankAccountService.findBankAccountByAccountNumber(bankAccount4test.getAccountNumber()) == null) {
+                bankAccountService.saveBankAccount(bankAccount4test);
+            } else {
+                bankAccount4test = bankAccountService.findBankAccountByAccountNumber(bankAccount4test.getAccountNumber());
+            }
+
+            BankAccount bankAccount4testa = new BankAccount();
+            bankAccount4testa.setAccountStatus(true);
+            bankAccount4testa.setAccountType(AccountType.CURRENT);
+            bankAccount4testa.setAvailableBalance(10000.0);
+            bankAccount4testa.setBalance(10000.0);
+            bankAccount4testa.setMaintenanceCost(240.0);
+            bankAccount4testa.setCompany(company);
+            bankAccount4testa.setCreatedByAgentId(52L);
+            bankAccount4testa.setCreationDate(new Date().getTime());
+            bankAccount4testa.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("USD").orElse(null));
+            bankAccount4testa.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+            bankAccount4testa.setAccountName("testCompanyAccountUSD");
+            bankAccount4testa.setAccountNumber("12345");
+            bankAccount4testa.setSubtypeOfAccount("LICNI");
+            if (bankAccountService.findBankAccountByAccountNumber(bankAccount4testa.getAccountNumber()) == null) {
+                bankAccountService.saveBankAccount(bankAccount4testa);
+            } else {
+                bankAccount4testa = bankAccountService.findBankAccountByAccountNumber(bankAccount4testa.getAccountNumber());
+            }
 
         //ovo samo za test moze da se obrise
         BankAccount bankAccount = new BankAccount();
@@ -219,10 +311,37 @@ public class BootstrapData implements CommandLineRunner {
         bankAccount.setSubtypeOfAccount("LICNI");
         if (bankAccountService.findBankAccountByAccountNumber(bankAccount.getAccountNumber()) == null) {
             bankAccountService.saveBankAccount(bankAccount);
+        } else {
+            bankAccount = bankAccountService.findBankAccountByAccountNumber(bankAccount.getAccountNumber());
         }
         // dovde
 
+            BankAccount bankAccount4 = new BankAccount();
+            bankAccount4.setAccountStatus(true);
+            bankAccount4.setAccountType(AccountType.CURRENT);
+            bankAccount4.setAvailableBalance(10000.0);
+            bankAccount4.setBalance(10000.0);
+            bankAccount4.setMaintenanceCost(240.0);
+//            bankAccount1.setCompany(company);
+            bankAccount4.setCreatedByAgentId(52L);
+            bankAccount4.setCreationDate(new Date().getTime());
+            bankAccount4.setCurrency(this.currencyRepository.getReferenceById(1L));
+            bankAccount4.setCustomer(customer);
+            bankAccount4.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+            bankAccount4.setAccountName("124141j2kraslL");
+            bankAccount4.setAccountNumber("12345");
+            bankAccount4.setSubtypeOfAccount("LICNI");
+            if (bankAccountService.findBankAccountByAccountNumber(bankAccount4.getAccountNumber()) == null) {
+                bankAccountService.saveBankAccount(bankAccount4);
+            } else {
+                bankAccount4 = bankAccountService.findBankAccountByAccountNumber(bankAccount4.getAccountNumber());
+            }
 
+        MarginAccount marginAccount = new MarginAccount();
+        marginAccount.setCustomer(bankAccount4);
+        marginAccount.setCurrency(bankAccount4.getCurrency());
+        marginAccount.setListingType(ListingType.STOCK);
+        this.marginAccountRepository.save(marginAccount);
 
         //ovo samo za test moze da se obrise
         BankAccount bankAccount1 = new BankAccount();
@@ -241,6 +360,8 @@ public class BootstrapData implements CommandLineRunner {
         bankAccount1.setSubtypeOfAccount("LICNI");
         if (bankAccountService.findBankAccountByAccountNumber(bankAccount1.getAccountNumber()) == null) {
             bankAccountService.saveBankAccount(bankAccount1);
+        } else {
+            bankAccount1 = bankAccountService.findBankAccountByAccountNumber(bankAccount1.getAccountNumber());
         }
         // dovde
 
@@ -261,6 +382,8 @@ public class BootstrapData implements CommandLineRunner {
         bankAccount2.setSubtypeOfAccount("LICNI");
         if (bankAccountService.findBankAccountByAccountNumber(bankAccount2.getAccountNumber()) == null) {
             bankAccountService.saveBankAccount(bankAccount2);
+        } else {
+            bankAccount2 = bankAccountService.findBankAccountByAccountNumber(bankAccount2.getAccountNumber());
         }
         // dovde
 
@@ -281,6 +404,8 @@ public class BootstrapData implements CommandLineRunner {
         bankAccount3.setSubtypeOfAccount("LICNI");
         if (bankAccountService.findBankAccountByAccountNumber(bankAccount3.getAccountNumber()) == null) {
             bankAccountService.saveBankAccount(bankAccount3);
+        } else {
+            bankAccount3 = bankAccountService.findBankAccountByAccountNumber(bankAccount3.getAccountNumber());
         }
         // dovde
 
@@ -387,6 +512,7 @@ public class BootstrapData implements CommandLineRunner {
 //        }
 
 
+        transferService.seedExchangeRates();
 
         Contract contract = new Contract();
         contract.setBuyer(bankAccount1);
@@ -495,25 +621,45 @@ public class BootstrapData implements CommandLineRunner {
         BankAccount defaultBankAccount = bankAccountService.getDefaultBankAccount();
         for(ListingStockDto stock : stocks) {
             Capital capital = capitalService.createCapital(ListingType.STOCK, stock.getListingId(), 100.0, 0.0, defaultBankAccount);
-            capitalRepository.save(capital);
+            if (capitalRepository.findAll()
+                    .stream()
+                    .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
+                    .toList().isEmpty()) {
+                capitalRepository.save(capital);
+            }
         }
 
         List<ListingFutureDto> futures = marketService.getAllFutures();
         for(ListingFutureDto future : futures) {
             Capital capital = capitalService.createCapital(ListingType.FUTURE, future.getListingId(), 100.0, 0.0, defaultBankAccount);
-            capitalRepository.save(capital);
+            if (capitalRepository.findAll()
+                    .stream()
+                    .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
+                    .toList().isEmpty()) {
+                capitalRepository.save(capital);
+            }
         }
 
         List<ListingForexDto> forexes = marketService.getAllForex();
         for(ListingForexDto forex : forexes) {
             Capital capital = capitalService.createCapital(ListingType.FOREX, forex.getListingId(), 100.0, 0.0, defaultBankAccount);
-            capitalRepository.save(capital);
+            if (capitalRepository.findAll()
+                    .stream()
+                    .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
+                    .toList().isEmpty()) {
+                capitalRepository.save(capital);
+            }
         }
 
         List<OptionsDto> options = marketService.getAllOptions();
         for(OptionsDto optionsDto:options) {
             Capital capital = capitalService.createCapital(ListingType.OPTIONS, optionsDto.getListingId(), 100.0, 0.0,defaultBankAccount);
-            capitalRepository.save(capital);
+            if (capitalRepository.findAll()
+                    .stream()
+                    .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
+                    .toList().isEmpty()) {
+                capitalRepository.save(capital);
+            }
         }
     }
 
@@ -535,19 +681,23 @@ public class BootstrapData implements CommandLineRunner {
     }
 
     private Company createBankCompany(){
-        Company bank = new Company();
-        bank.setCompanyName("Banka1");
-        bank.setTelephoneNumber("069 678 7889");
-        bank.setFaxNumber("555-123-4567");
-        bank.setPib("123-45-6789");
-        bank.setIdNumber("987654321");
-        bank.setJobId("1777838");
-        bank.setRegistrationNumber("7737");
-        companyRepository.save(bank);
-        return bank;
+        if (companyRepository.findCompaniesByIdNumberContainingIgnoreCase("987654321").isEmpty()) {
+            Company bank = new Company();
+            bank.setCompanyName("Banka1");
+            bank.setTelephoneNumber("069 678 7889");
+            bank.setFaxNumber("555-123-4567");
+            bank.setPib("123-45-6789");
+            bank.setIdNumber("987654321");
+            bank.setJobId("1777838");
+            bank.setRegistrationNumber("7737");
+            companyRepository.save(bank);
+            return bank;
+        }
+        return companyRepository.findCompaniesByIdNumberContainingIgnoreCase("987654321").get(0);
     }
 
     private static final Random random = new Random();
+    private final TransferRepository transferRepository;
 
     private LoanRequest generateLoanRequest() {
         LoanRequest loanRequest = new LoanRequest();

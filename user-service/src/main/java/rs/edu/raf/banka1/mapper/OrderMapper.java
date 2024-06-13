@@ -27,6 +27,7 @@ public class OrderMapper {
         marketOrder.setLimitValue(request.getLimitValue() == 0.0 ? null : request.getLimitValue());
         marketOrder.setStopValue(request.getStopValue() == 0.0 ? null : request.getStopValue());
         marketOrder.setAllOrNone(request.getAllOrNone());
+        marketOrder.setIsMargin(request.getIsMargin());
         //marketOrder.setOwner((Employee)owner);
         marketOrder.setCurrentAmount(0L);
         marketOrder.setTimestamp(System.currentTimeMillis()/1000);
@@ -51,6 +52,7 @@ public class OrderMapper {
         orderDto.setAllOrNone(marketOrder.getAllOrNone());
         orderDto.setUpdatedAt(marketOrder.getUpdatedAt().getEpochSecond());
         orderDto.setApprovedBy(employeeMapper.employeeToEmployeeDto(marketOrder.getApprovedBy()));
+        orderDto.setIsMargin(marketOrder.getIsMargin());
         return orderDto;
     }
 
@@ -63,6 +65,7 @@ public class OrderMapper {
         createOrderRequest.setLimitValue(marketOrder.getLimitValue());
         createOrderRequest.setStopValue(marketOrder.getStopValue());
         createOrderRequest.setAllOrNone(marketOrder.getAllOrNone());
+        createOrderRequest.setIsMargin(marketOrder.getIsMargin());
         return createOrderRequest;
     }
 

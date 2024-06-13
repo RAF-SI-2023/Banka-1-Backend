@@ -17,11 +17,14 @@ public class Constants {
     public static final String ADMIN = "admin";
 
     public static final String DEFAULT_CURRENCY = "RSD";
+    public static final float MARGIN_RATE = 0.6f;
+    public static final float MARGIN_INTEREST_RATE = 0.05f;
+    public static final float MAINTENANCE_MARGIN_RATE = 0.25f;
 
     public static final List<String> allPermissions = Arrays.asList(
             "addUser", "modifyUser", "deleteUser", "readUser",
             "manageLoans", "manageLoanRequests", "modifyCustomer",
-            "manageOrderRequests");
+            "manageOrderRequests", "manageMargins");
 
     public static final Map<String, List<String>> userPermissions = new HashMap<String, List<String>>(){{
         put(AGENT, Arrays.asList("addUser", "modifyUser", "deleteUser", "readUser",

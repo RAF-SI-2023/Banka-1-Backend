@@ -33,6 +33,7 @@ public class MarketOrder {
     private Double fee;
     private Double price;
     private Boolean allOrNone;
+    private Boolean isMargin = false;
 
     @UpdateTimestamp
     private Instant updatedAt;
