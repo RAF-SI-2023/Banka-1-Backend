@@ -10,6 +10,7 @@ import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
 import rs.edu.raf.banka1.exceptions.OrderListingNotFoundByIdException;
 import rs.edu.raf.banka1.exceptions.OrderNotFoundByIdException;
 import rs.edu.raf.banka1.exceptions.ForbiddenException;
+import rs.edu.raf.banka1.exceptions.*;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
@@ -38,6 +39,7 @@ public class OrderServiceImpl implements OrderService {
     private final BankAccountService bankAccountService;
 
     private final EmployeeRepository employeeRepository;
+    private final MarginTransactionService marginTransactionService;
 
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private final Random random = new Random();
@@ -56,7 +58,8 @@ public class OrderServiceImpl implements OrderService {
         final TransactionService transactionService,
         final CapitalService capitalService,
         final BankAccountService bankAccountService,
-        EmployeeRepository employeeRepository) {
+        EmployeeRepository employeeRepository,
+        MarginTransactionService marginTransactionService) {
         this.orderMapper = orderMapper;
         this.orderRepository = orderRepository;
         this.marketService = marketService;
@@ -65,6 +68,7 @@ public class OrderServiceImpl implements OrderService {
         this.capitalService = capitalService;
         this.employeeRepository = employeeRepository;
         this.bankAccountService = bankAccountService;
+        this.marginTransactionService = marginTransactionService;
 
         scheduledFutureMap = new ConcurrentHashMap<>();
     }
@@ -85,6 +89,10 @@ public class OrderServiceImpl implements OrderService {
             order.setBankAccountNumber(bankAccountNumber);
         }
         else if(currentAuth instanceof Employee){
+            if(request.getIsMargin()) {
+                //Employee cannot create a margin order
+                throw new ForbiddenException();
+            }
             order.setOwner((Employee)currentAuth);
         }
         if(order.getContractSize() <= 0) throw new InvalidOrderListingAmountException();
@@ -94,6 +102,7 @@ public class OrderServiceImpl implements OrderService {
 
         order.setPrice(calculatePrice(order,listingBaseDto,order.getContractSize()));
         order.setFee(calculateFee(request.getLimitValue(), order.getPrice()));
+        order.setIsMargin(request.getIsMargin());
         if(currentAuth instanceof Employee) {
             order.setOwner((Employee)currentAuth);
         }
@@ -137,6 +146,7 @@ public class OrderServiceImpl implements OrderService {
                 transactionService,
                 capitalService,
                 bankAccountService,
+                    marginTransactionService,
                 orderId,
                     bankAccountNumber
             ),
@@ -155,10 +165,13 @@ public class OrderServiceImpl implements OrderService {
             return marketService.getStockById(order.getListingId());
         } else if(order.getListingType().equals(ListingType.FOREX)) {
             return marketService.getForexById(order.getListingId());
-        }else if(order.getListingType().equals(ListingType.OPTIONS)){
-            return marketService.getOptionsById(order.getListingId());
+        }else if(order.getListingType().equals(ListingType.OPTIONS) && order.getOrderType().equals(OrderType.BUY)){
+            return marketService.getCallOptionById(order.getListingId());
+        }else if(order.getListingType().equals(ListingType.OPTIONS) && order.getOrderType().equals(OrderType.SELL)){
+            return marketService.getPutOptionById(order.getListingId());
         }
         return marketService.getFutureById(order.getListingId());
+
     }
 
     @Override

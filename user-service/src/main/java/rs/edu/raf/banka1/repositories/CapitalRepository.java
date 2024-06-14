@@ -22,4 +22,6 @@ public interface CapitalRepository extends JpaRepository<Capital, Long> {
 
     @Query("SELECT c FROM Capital c WHERE c.bankAccount.company IS NOT NULL AND c.publicTotal > 0")
     List<Capital> getAllPublicCapitals();
+
+    List<Capital> getAllByPublicTotalGreaterThan(Double publicTotal);
 }

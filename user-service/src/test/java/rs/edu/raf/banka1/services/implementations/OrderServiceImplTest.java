@@ -28,10 +28,7 @@ import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.EmployeeRepository;
 import rs.edu.raf.banka1.repositories.OrderRepository;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
-import rs.edu.raf.banka1.services.BankAccountService;
-import rs.edu.raf.banka1.services.CapitalService;
-import rs.edu.raf.banka1.services.MarketService;
-import rs.edu.raf.banka1.services.TransactionService;
+import rs.edu.raf.banka1.services.*;
 import rs.edu.raf.banka1.utils.Constants;
 
 import java.time.Instant;
@@ -71,6 +68,9 @@ class OrderServiceImplTest {
     @Mock
     private EmployeeRepository employeeRepository;
 
+    @Mock
+    private MarginTransactionService marginTransactionService;
+
 
     @InjectMocks
     private OrderServiceImpl orderService;
@@ -82,7 +82,7 @@ class OrderServiceImplTest {
                 mock(PasswordEncoder.class),
                 mock(PermissionRepository.class)
         ));
-        orderService = new OrderServiceImpl(orderMapper, orderRepository, marketService, taskScheduler, transactionService, capitalService, bankAccountService, employeeRepository);
+        orderService = new OrderServiceImpl(orderMapper, orderRepository, marketService, taskScheduler, transactionService, capitalService, bankAccountService, employeeRepository, marginTransactionService);
     }
 
     @Test

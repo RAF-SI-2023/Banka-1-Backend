@@ -18,6 +18,7 @@ public class StockSimulationJob implements Runnable {
     private final TransactionService transactionService;
     private final CapitalService capitalService;
     private final BankAccountService bankAccountService;
+    private final MarginTransactionService marginTransactionService;
     private final Long orderId;
     private final String bankAccountNumber;
     private final Random random = new Random();
@@ -94,8 +95,16 @@ public class StockSimulationJob implements Runnable {
             (bid < marketOrder.getStopValue());
     }
 
-    //todo treba da se radi sa currency i da se doda u listingdto exchangedto koji ce da ima i currency u sebi
-    private void createTransaction(MarketOrder order, ListingBaseDto listingBaseDto, Long processedNum, String bankAccountNumber){
+    private void createTransaction(MarketOrder order, ListingBaseDto listingBaseDto, Long processedNum, String bankAccountNumber) {
+        if(!order.getIsMargin()) {
+            createCashTransaction(order, listingBaseDto, processedNum, bankAccountNumber);
+            return;
+        }
+        createMarginTransaction(order, listingBaseDto, processedNum, bankAccountNumber);
+    }
+
+    private void createMarginTransaction(MarketOrder order, ListingBaseDto listingBaseDto, Long processedNum, String bankAccountNumber) {
+        TransactionType transactionType;
         BankAccount bankAccount;
         if(bankAccountNumber == null) {
             bankAccount = bankAccountService.getDefaultBankAccount();
@@ -105,6 +114,56 @@ public class StockSimulationJob implements Runnable {
         }
         Capital securityCapital = capitalService.getCapitalByListingIdAndTypeAndBankAccount(listingBaseDto.getListingId(), ListingType.valueOf(listingBaseDto.getListingType().toUpperCase()), bankAccount);
 
+        if (order.getOrderType() == OrderType.BUY) {
+            Double oldAmount = securityCapital.getTotal();
+            Double oldAverageBuyingPrice = securityCapital.getAverageBuyingPrice();
+            Double newTotalPrice = order.getPrice();
+            Long newAmount = order.getCurrentAmount();
+            Double newAverageBuyingPrice = (oldAmount * oldAverageBuyingPrice + newTotalPrice) / (oldAmount + newAmount);
+            securityCapital.setAverageBuyingPrice(newAverageBuyingPrice);
+
+            transactionType = TransactionType.DEPOSIT;
+        } else {
+            transactionType = TransactionType.WITHDRAWAL;
+        }
+
+        Double price = orderService.calculatePrice(order,listingBaseDto,processedNum);
+        //price = convertPrice(price,null,null);
+
+        String description;
+        if(transactionType.equals(TransactionType.DEPOSIT)) {
+            description = "Uplaćivanje sredstava na račun - Initial Margin";
+        } else {
+            description = "Isplata kamate";
+        }
+
+        try {
+            marginTransactionService.createTransaction(order, bankAccount, bankAccount.getCurrency(), description, transactionType, price, (double)processedNum);
+        } catch (InvalidReservationAmountException e) {
+            orderService.cancelOrder(orderId);
+        }
+    }
+
+    //todo treba da se radi sa currency i da se doda u listingdto exchangedto koji ce da ima i currency u sebi
+    private void createCashTransaction(MarketOrder order, ListingBaseDto listingBaseDto, Long processedNum, String bankAccountNumber){
+        BankAccount bankAccount;
+        if(bankAccountNumber == null) {
+            bankAccount = bankAccountService.getDefaultBankAccount();
+        }
+        else{
+            bankAccount = bankAccountService.findBankAccountByAccountNumber(bankAccountNumber);
+        }
+        Capital securityCapital = capitalService.getCapitalByListingIdAndTypeAndBankAccount(listingBaseDto.getListingId(), ListingType.valueOf(listingBaseDto.getListingType().toUpperCase()), bankAccount);
+
+        if (order.getOrderType() == OrderType.BUY) {
+            Double oldAmount = securityCapital.getTotal();
+            Double oldAverageBuyingPrice = securityCapital.getAverageBuyingPrice();
+            Double newTotalPrice = order.getPrice();
+            Long newAmount = order.getCurrentAmount();
+            Double newAverageBuyingPrice = (oldAmount * oldAverageBuyingPrice + newTotalPrice) / (oldAmount + newAmount);
+            securityCapital.setAverageBuyingPrice(newAverageBuyingPrice);
+        }
+        
         Double price = orderService.calculatePrice(order,listingBaseDto,processedNum);
         //price = convertPrice(price,null,null);
         try {

@@ -33,6 +33,7 @@ public class MarketOrder {
     private Double fee;
     private Double price;
     private Boolean allOrNone;
+    private Boolean isMargin = false;
 
     @UpdateTimestamp
     private Instant updatedAt;
@@ -44,7 +45,7 @@ public class MarketOrder {
     private Employee approvedBy;
 
     private Long timestamp;
-    private Long currentAmount;
+    private Long currentAmount = 0l;
     //we only keep this in case a order is being processed when the server crashes
     private String bankAccountNumber;
 }

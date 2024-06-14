@@ -27,4 +27,5 @@ public class OrderDto {
     private Boolean allOrNone;
     private Long updatedAt;
     private EmployeeDto approvedBy;
+    private Boolean isMargin;
 }
