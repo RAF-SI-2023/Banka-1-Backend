@@ -273,7 +273,8 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     @Override
     public void releaseReserved(BankAccount bankAccount, Double amount) {
-        if(amount <= 0 || amount > bankAccount.getBalance() - bankAccount.getAvailableBalance()) {
+        if(amount == 0) return;
+        if(amount < 0 || amount > bankAccount.getBalance() - bankAccount.getAvailableBalance()) {
             throw new InvalidReservationAmountException();
         }
         bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() + amount);
