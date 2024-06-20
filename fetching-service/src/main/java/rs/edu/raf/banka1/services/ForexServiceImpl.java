@@ -209,7 +209,7 @@ public class ForexServiceImpl implements ForexService {
         double high = dataNode.get("2. high").asDouble();
         double low = dataNode.get("3. low").asDouble();
         double close = dataNode.get("4. close").asDouble();
-        int volume = 0;
+        int volume = 1000; //todo wtf
 
         return listingHistoryMapper.createHistory(ticker, date, open, high, low, close, volume);
     }

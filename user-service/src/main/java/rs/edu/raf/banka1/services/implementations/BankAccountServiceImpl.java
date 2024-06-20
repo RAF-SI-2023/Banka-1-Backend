@@ -121,9 +121,14 @@ public class BankAccountServiceImpl implements BankAccountService {
 
         bankAccount.setPayments(new ArrayList<>());
 
-        saveBankAccount(bankAccount);
+        if (bankAccount.getCompany() != null &&
+                bankAccountRepository.findByCompany_IdAndCurrency_CurrencyCode(bankAccount.getCompany().getId(), bankAccount.getCurrency().getCurrencyCode()).isEmpty()) {
+            saveBankAccount(bankAccount);
+            Logger.info("Bank account created successfully: {}", bankAccount.getAccountNumber());
+        } else if (bankAccount.getCompany() != null) {
+            bankAccount = bankAccountRepository.findByCompany_IdAndCurrency_CurrencyCode(bankAccount.getCompany().getId(), bankAccount.getCurrency().getCurrencyCode()).get();
+        }
 
-        Logger.info("Bank account created successfully: {}", bankAccount.getAccountNumber());
         return bankAccount;
     }
 
@@ -161,9 +166,11 @@ public class BankAccountServiceImpl implements BankAccountService {
         if (bankAccount == null) {
             return;
         }
-        bankAccountRepository.save(bankAccount);
-        cardService.saveCard(cardService.createCard("VISA", "VisaCard", bankAccount.getAccountNumber(), 1000));
-        cardService.saveCard(cardService.createCard("MASTER", "MasterCard", bankAccount.getAccountNumber(), 10000));
+        if (bankAccountRepository.findBankAccountByAccountNumber(bankAccount.getAccountNumber()).isEmpty()) {
+            bankAccountRepository.save(bankAccount);
+            cardService.saveCard(cardService.createCard("VISA", "VisaCard", bankAccount.getAccountNumber(), 1000));
+            cardService.saveCard(cardService.createCard("MASTER", "MasterCard", bankAccount.getAccountNumber(), 10000));
+        }
     }
 
     private String generateBankAccountNumber(){
@@ -266,7 +273,8 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     @Override
     public void releaseReserved(BankAccount bankAccount, Double amount) {
-        if(amount <= 0 || amount > bankAccount.getBalance() - bankAccount.getAvailableBalance()) {
+        if(amount == 0) return;
+        if(amount < 0 || amount > bankAccount.getBalance() - bankAccount.getAvailableBalance()) {
             throw new InvalidReservationAmountException();
         }
         bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() + amount);
