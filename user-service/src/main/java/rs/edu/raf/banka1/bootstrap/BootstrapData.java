@@ -313,14 +313,10 @@ public class BootstrapData implements CommandLineRunner {
             company.setTelephoneNumber("123456789");
             company.setFaxNumber("987654321");
             company.setPib("123456789");
-            company.setIdNumber("987654321");
+            company.setIdNumber("98765432111");
             company.setJobId("123456789");
             company.setRegistrationNumber("987654321");
-            if (companyRepository.findCompaniesByIdNumberContainingIgnoreCase(company.getIdNumber()).isEmpty()) {
-                companyRepository.save(company);
-            } else {
-                company = companyRepository.findCompaniesByIdNumberContainingIgnoreCase(company.getIdNumber()).get(0);
-            }
+            companyRepository.save(company);
 
             Customer customerCompany = new Customer();
             customerCompany.setFirstName("Customer");
@@ -329,11 +325,7 @@ public class BootstrapData implements CommandLineRunner {
             customerCompany.setLastName("Trajkovic");
             customerCompany.setCompany(company);
             customerCompany.setActive(true);
-            if (customerRepository.findCustomerByEmail(customerCompany.getEmail()).isEmpty()) {
-                customerRepository.save(customerCompany);
-            } else {
-                customerCompany = customerRepository.findCustomerByEmail(customerCompany.getEmail()).get();
-            }
+            customerRepository.save(customerCompany);
 
             BankAccount bankAccountCompany = new BankAccount();
             bankAccountCompany.setAccountStatus(true);
@@ -393,7 +385,7 @@ public class BootstrapData implements CommandLineRunner {
             bankAccount4test.setCustomer(testCustomer);
             bankAccount4test.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccount4test.setAccountName("testCustomerAccountRSD");
-            bankAccount4test.setAccountNumber("12345");
+            bankAccount4test.setAccountNumber("12345876");
             bankAccount4test.setSubtypeOfAccount("LICNI");
             if (bankAccountService.findBankAccountByAccountNumber(bankAccount4test.getAccountNumber()) == null) {
                 bankAccountService.saveBankAccount(bankAccount4test);
@@ -413,7 +405,7 @@ public class BootstrapData implements CommandLineRunner {
             bankAccount4testa.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("USD").orElse(null));
             bankAccount4testa.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccount4testa.setAccountName("testCompanyAccountUSD");
-            bankAccount4testa.setAccountNumber("12345");
+            bankAccount4testa.setAccountNumber("1234534");
             bankAccount4testa.setSubtypeOfAccount("LICNI");
             if (bankAccountService.findBankAccountByAccountNumber(bankAccount4testa.getAccountNumber()) == null) {
                 bankAccountService.saveBankAccount(bankAccount4testa);
@@ -454,7 +446,7 @@ public class BootstrapData implements CommandLineRunner {
             company1.setTelephoneNumber("123456789");
             company1.setFaxNumber("987654321");
             company1.setPib("123456789");
-            company1.setIdNumber("987654321");
+            company1.setIdNumber("98765432123");
             company1.setJobId("123456789");
             company1.setRegistrationNumber("987654321");
             companyRepository.save(company1);
@@ -466,11 +458,7 @@ public class BootstrapData implements CommandLineRunner {
             customerCompany1.setLastName("Trajkovic");
             customerCompany1.setCompany(company1);
             customerCompany1.setActive(true);
-            if (customerRepository.findCustomerByEmail(customerCompany1.getEmail()).isEmpty()) {
-                customerRepository.save(customerCompany1);
-            }else {
-                customerCompany1 = customerRepository.findCustomerByEmail(customerCompany1.getEmail()).get();
-            }
+            customerRepository.save(customerCompany1);
 
             // dovde
 
@@ -487,7 +475,7 @@ public class BootstrapData implements CommandLineRunner {
             bankAccount4.setCustomer(customerCompany1);
             bankAccount4.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccount4.setAccountName("124141j2kraslL");
-            bankAccount4.setAccountNumber("12345");
+            bankAccount4.setAccountNumber("1234511");
             bankAccount4.setSubtypeOfAccount("LICNI");
             if (bankAccountService.findBankAccountByAccountNumber(bankAccount4.getAccountNumber()) == null) {
                 bankAccountService.saveBankAccount(bankAccount4);
@@ -525,7 +513,7 @@ public class BootstrapData implements CommandLineRunner {
             bankAccount1.setCustomer(customerCompany);
             bankAccount1.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccount1.setAccountName("1asd");
-            bankAccount1.setAccountNumber("usd");
+            bankAccount1.setAccountNumber("usd111");
             bankAccount1.setSubtypeOfAccount("LICNI");
             if (bankAccountService.findBankAccountByAccountNumber(bankAccount1.getAccountNumber()) == null) {
                 bankAccountService.saveBankAccount(bankAccount1);
@@ -547,7 +535,7 @@ public class BootstrapData implements CommandLineRunner {
             bankAccount2.setCustomer(customerCompany);
             bankAccount2.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccount2.setAccountName("1asd");
-            bankAccount2.setAccountNumber("eur");
+            bankAccount2.setAccountNumber("eur111");
             bankAccount2.setSubtypeOfAccount("LICNI");
             if (bankAccountService.findBankAccountByAccountNumber(bankAccount2.getAccountNumber()) == null) {
                 bankAccountService.saveBankAccount(bankAccount2);
@@ -635,7 +623,7 @@ public class BootstrapData implements CommandLineRunner {
             customerBasicBankAccount.setCustomer(customerBasic);
             customerBasicBankAccount.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             customerBasicBankAccount.setAccountName("1asd");
-            customerBasicBankAccount.setAccountNumber("rsd");
+            customerBasicBankAccount.setAccountNumber("rsd111");
             customerBasicBankAccount.setSubtypeOfAccount("LICNI");
             if (bankAccountService.findBankAccountByAccountNumber(customerBasicBankAccount.getAccountNumber()) == null) {
                 bankAccountService.saveBankAccount(customerBasicBankAccount);
@@ -653,7 +641,7 @@ public class BootstrapData implements CommandLineRunner {
             bankAccount2Basic.setCustomer(customerBasic);
             bankAccount2Basic.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccount2Basic.setAccountName("1asd");
-            bankAccount2Basic.setAccountNumber("eur");
+            bankAccount2Basic.setAccountNumber("eur22");
             bankAccount2Basic.setSubtypeOfAccount("LICNI");
             if (bankAccountService.findBankAccountByAccountNumber(bankAccount2Basic.getAccountNumber()) == null) {
                 bankAccountService.saveBankAccount(bankAccount2Basic);
@@ -689,7 +677,7 @@ public class BootstrapData implements CommandLineRunner {
             customerBasicBankAccount1.setCustomer(customerBasic1);
             customerBasicBankAccount1.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             customerBasicBankAccount1.setAccountName("1asd");
-            customerBasicBankAccount1.setAccountNumber("rsd");
+            customerBasicBankAccount1.setAccountNumber("rsd223");
             customerBasicBankAccount1.setSubtypeOfAccount("LICNI");
             if (bankAccountService.findBankAccountByAccountNumber(customerBasicBankAccount1.getAccountNumber()) == null) {
                 bankAccountService.saveBankAccount(customerBasicBankAccount1);
@@ -707,7 +695,7 @@ public class BootstrapData implements CommandLineRunner {
             bankAccount2Basic1.setCustomer(customerBasic1);
             bankAccount2Basic1.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccount2Basic1.setAccountName("1asd");
-            bankAccount2Basic1.setAccountNumber("eur");
+            bankAccount2Basic1.setAccountNumber("eur44");
             bankAccount2Basic1.setSubtypeOfAccount("LICNI");
             if (bankAccountService.findBankAccountByAccountNumber(bankAccount2Basic1.getAccountNumber()) == null) {
                 bankAccountService.saveBankAccount(bankAccount2Basic1);
