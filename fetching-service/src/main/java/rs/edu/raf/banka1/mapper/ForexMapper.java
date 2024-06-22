@@ -27,7 +27,7 @@ public class ForexMapper {
         forex.setPrice(0.0);
         forex.setHigh(0.0);
         forex.setLow(0.0);
-        forex.setVolume(0);
+        forex.setVolume(1000); //mora da ne bi bilo deljenje sa 0
         forex.setPriceChange(0.0);
 
         int currentTime = (int) Instant.now().getEpochSecond();
