@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.List;
 
 public interface OrderService {
-    void createOrder(final CreateOrderRequest request, final User currentAuth, String bankAccountNumber);
+    void createOrder(final CreateOrderRequest request, final User currentAuth);
     MarketOrder getOrderById(Long orderId);
     void finishOrder(Long orderId);
     void setProcessedNumber(Long orderId, Long processedNumber);
