@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -299,6 +300,22 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() - amount);
         bankAccount.setBalance(bankAccount.getBalance() - amount);
         bankAccountRepository.save(bankAccount);
+    }
+
+    @Override
+    public BankAccount getCustomerBankAccountForOrder(Customer customer) {
+        List <BankAccount> accounts = customer.getAccountIds().stream()
+                .filter(account -> account.getCurrency().getCurrencyCode().equals(Constants.DEFAULT_CURRENCY))
+                .collect(Collectors.toList());
+        if(accounts.isEmpty()){
+            return null;
+        }
+        for(var account : accounts){
+            if(account.getCompany()!=null){
+                return account;
+            }
+        }
+        return accounts.get(0);
     }
 
     private Long getEmployeeId() {
