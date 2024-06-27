@@ -3,11 +3,13 @@ package rs.edu.raf.banka1.services.implementations;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.Setter;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.TransactionDto;
 import rs.edu.raf.banka1.mapper.TransactionMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.OrderRepository;
+import rs.edu.raf.banka1.repositories.StockProfitRepository;
 import rs.edu.raf.banka1.repositories.TransactionRepository;
 import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.model.BankAccount;
@@ -32,17 +34,20 @@ public class TransactionServiceImpl implements TransactionService {
     private final CapitalService capitalService;
     private final BankAccountService bankAccountService;
     private final OrderRepository orderRepository;
+    private final StockProfitRepository stockProfitRepository;
 
     public TransactionServiceImpl(TransactionMapper transactionMapper,
                                   TransactionRepository transactionRepository,
                                   BankAccountService bankAccountService,
                                   CapitalService capitalService,
-                                  OrderRepository orderRepository) {
+                                  OrderRepository orderRepository,
+                                  StockProfitRepository stockProfitRepository) {
         this.transactionMapper = transactionMapper;
         this.transactionRepository = transactionRepository;
         this.bankAccountService = bankAccountService;
         this.capitalService = capitalService;
         this.orderRepository = orderRepository;
+        this.stockProfitRepository = stockProfitRepository;
     }
 
     @Override
@@ -71,6 +76,16 @@ public class TransactionServiceImpl implements TransactionService {
             //Add money
             Double taxReturn = checkTaxReturn(order);
             bankAccountService.addBalance(bankAccount, price - taxReturn);
+
+            if (order.getListingType().equals(ListingType.STOCK)) {
+                StockProfit stockProfitRecord = new StockProfit();
+                stockProfitRecord.setTransaction(transaction);
+                stockProfitRecord.setDateTime(transaction.getDateTime());
+                stockProfitRecord.setEmployee(transaction.getEmployee());
+                Double profit = price - securityCapital.getAverageBuyingPrice() * securityCapital.getTotal();
+                stockProfitRecord.setTransactionProfit(0.85 * profit);
+                stockProfitRepository.save(stockProfitRecord);
+            }
         }
         transaction.setMarketOrder(order);
         transaction.setEmployee(order.getOwner());

@@ -75,6 +75,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Boolean denyContract(Long contractId, String comment) {
         contractRepository.updateCommentById(comment, contractId);
+        contractRepository.denyContract(contractId);
         return true;
     }
 
@@ -121,6 +122,7 @@ public class ContractServiceImpl implements ContractService {
         List<ContractDto> contractDtos = new ArrayList<>();
 
         contracts.forEach((Contract contract) -> {
+
             ContractDto contractDto = contractMapper.contractToContractDto(contract);
             contractDtos.add(contractDto);
         });
@@ -133,6 +135,8 @@ public class ContractServiceImpl implements ContractService {
         Contract contract = contractRepository.findById(contractId).orElseThrow(() -> new ContractNotFoundByIdException(contractId));
         if(!contract.getBankApproval() || !contract.getSellerApproval()) return;
 
+        if(contract.getRealizationDate() != null) return;
+
         //Transfer capital
         capitalService.removeFromPublicCapital(contract.getListingId(), contract.getListingType(), contract.getSeller(), contract.getAmount());
         capitalService.removeBalance(contract.getListingId(), contract.getListingType(), contract.getSeller(), contract.getAmount());
@@ -141,6 +145,8 @@ public class ContractServiceImpl implements ContractService {
         //Transfer funds
         bankAccountService.removeBalance(contract.getBuyer(), contract.getPrice());
         bankAccountService.addBalance(contract.getSeller(), contract.getPrice());
+
+        contract.setRealizationDate(Instant.now().toEpochMilli());
     }
 
 }

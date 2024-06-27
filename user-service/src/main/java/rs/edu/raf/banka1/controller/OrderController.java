@@ -11,14 +11,12 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import rs.edu.raf.banka1.configuration.authproviders.CurrentAuth;
 import rs.edu.raf.banka1.dtos.LegalOrderRequest;
 import rs.edu.raf.banka1.dtos.OrderDto;
-import rs.edu.raf.banka1.mapper.EmployeeMapper;
 import rs.edu.raf.banka1.mapper.OrderMapper;
 import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.model.DecideOrderResponse;
@@ -62,7 +60,6 @@ public class OrderController {
             parameters = {
                     @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
             })
-    @PreAuthorize("hasAuthority('manageOrderRequests')")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Successful operation",
             content = {@Content(mediaType = "application/json",
@@ -99,7 +96,7 @@ public class OrderController {
             @AuthenticationPrincipal User userPrincipal
             ) {
         Employee currentAuth = employeeService.getEmployeeEntityByEmail(userPrincipal.getUsername());
-        orderService.createOrder(request, currentAuth, null);
+        orderService.createOrder(request, currentAuth);
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
@@ -127,7 +124,6 @@ public class OrderController {
             parameters = {
                     @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
             })
-    @PreAuthorize("hasAuthority('manageOrderRequests')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -146,7 +142,6 @@ public class OrderController {
             parameters = {
                     @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
             })
-    @PreAuthorize("hasAuthority('manageOrderRequests')")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
@@ -178,13 +173,12 @@ public class OrderController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Boolean> createLegalPersonOrder(
-            @RequestBody final LegalOrderRequest request,
+            @RequestBody final CreateOrderRequest request,
             @AuthenticationPrincipal User userPrincipal
     ){
         Customer currentAuth = customerService.findCustomerByEmail(userPrincipal.getUsername());
-        String bankAccountNumber = request.getBankAccountNumber();
-        CreateOrderRequest createOrderRequest = orderMapper.legalMarketOrderToCreateOrderRequest(request);
-        orderService.createOrder(createOrderRequest, currentAuth, bankAccountNumber);
+//        CreateOrderRequest createOrderRequest = orderMapper.legalMarketOrderToCreateOrderRequest(request);
+        orderService.createOrder(request, currentAuth);
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
@@ -201,9 +195,9 @@ public class OrderController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<List<OrderDto>> getAllOrdersForLegalUser(
-            @CurrentAuth Employee currentAuth
+            @CurrentAuth Customer currentAuth
     ) {
-        return new ResponseEntity<>(orderService.getAllOrdersForEmployee(currentAuth), HttpStatus.OK);
+        return new ResponseEntity<>(orderService.getAllOrdersForLegalPerson(currentAuth), HttpStatus.OK);
     }
 
 }

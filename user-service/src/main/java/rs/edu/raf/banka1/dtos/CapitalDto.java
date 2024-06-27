@@ -14,4 +14,5 @@ public class CapitalDto {
     private Double total;
     private Double reserved;
     private Double publicTotal;
+    private Double averageBuyingPrice;
 }

@@ -15,4 +15,5 @@ public class CreateOrderRequest {
     private Double limitValue;
     private Double stopValue;
     private Boolean allOrNone;
+    private Boolean isMargin;
 }

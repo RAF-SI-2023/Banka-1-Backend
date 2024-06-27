@@ -45,25 +45,25 @@ public class ListingStockServiceImpl implements ListingStockService {
     }
 
     @Override
-    @Cacheable(value = "listingStockServiceAllStocks")
+//    @Cacheable(value = "listingStockServiceAllStocks")
     public List<ListingStock> getAllStocks(){
         return stockRepository.findAll();
     }
 
     @Override
-    @Cacheable(value = "listingStockServiceFindByTicker", key = "#ticker")
+//    @Cacheable(value = "listingStockServiceFindByTicker", key = "#ticker")
     public Optional<ListingStock> findByTicker(String ticker) {
         return stockRepository.findByTicker(ticker);
     }
 
     @Override
-    @Cacheable(value = "listingStockServiceFindById", key = "#id")
+//    @Cacheable(value = "listingStockServiceFindById", key = "#id")
     public Optional<ListingStock> findById(Long id) {
         return stockRepository.findById(id);
     }
 
     @Override
-    @Cacheable(value = "listingStockServiceListingHistoriesByTickerTimestamp", key = "{#ticker, #from, #to}")
+//    @Cacheable(value = "listingStockServiceListingHistoriesByTickerTimestamp", key = "{#ticker, #from, #to}")
     public List<ListingHistory> getListingHistoriesByTimestamp(String ticker, Integer from, Integer to) {
         List<ListingHistory> listingHistories = new ArrayList<>();
 //        return all timestamps
@@ -87,7 +87,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     }
 
     @Override
-    @Cacheable(value = "listingStockServiceWorkingTimeById", key = "#id")
+//    @Cacheable(value = "listingStockServiceWorkingTimeById", key = "#id")
     public String getWorkingTimeById(Long id) {
         Optional<ListingStock> optionalListingStock = stockRepository.findById(id);
         if (!optionalListingStock.isPresent())
@@ -135,7 +135,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     }
 
     @Override
-    @Cacheable(value = "listingStockServiceListingHistoriesByIdTimestamp",  key = "{#id, #from, #to}")
+//    @Cacheable(value = "listingStockServiceListingHistoriesByIdTimestamp",  key = "{#id, #from, #to}")
     public List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to) {
         List<ListingHistory> listingHistories = new ArrayList<>();
 //        find stock in database
