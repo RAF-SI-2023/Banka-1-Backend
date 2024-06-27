@@ -1,7 +1,10 @@
-package zews.otc_testing.entity.offer;
+package rs.edu.raf.banka1.model.offer;
 
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.*;
 
 import java.io.Serializable;

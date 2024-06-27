@@ -1,17 +1,16 @@
-package zews.otc_testing.controller;
+package rs.edu.raf.banka1.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import zews.otc_testing.dto.FrontendOfferDto;
-import zews.otc_testing.dto.MyStockDto;
-import zews.otc_testing.dto.OfferDto;
-import zews.otc_testing.entity.listing.BankOTCStock;
-import zews.otc_testing.entity.offer.MyOffer;
-import zews.otc_testing.entity.offer.Offer;
-import zews.otc_testing.service.BankOtcService;
-
+import rs.edu.raf.banka1.model.dtos.otc.FrontendOfferDto;
+import rs.edu.raf.banka1.model.dtos.otc.MyStockDto;
+import rs.edu.raf.banka1.model.dtos.otc.OfferDto;
+import rs.edu.raf.banka1.model.listing.BankOTCStock;
+import rs.edu.raf.banka1.model.offer.MyOffer;
+import rs.edu.raf.banka1.model.offer.Offer;
+import rs.edu.raf.banka1.services.otc.BankOtcService;
 import java.util.List;
 
 @RestController
