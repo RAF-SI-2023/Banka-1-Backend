@@ -96,7 +96,7 @@ public class OrderController {
             @AuthenticationPrincipal User userPrincipal
             ) {
         Employee currentAuth = employeeService.getEmployeeEntityByEmail(userPrincipal.getUsername());
-        orderService.createOrder(request, currentAuth, null);
+        orderService.createOrder(request, currentAuth);
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
@@ -173,13 +173,12 @@ public class OrderController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Boolean> createLegalPersonOrder(
-            @RequestBody final LegalOrderRequest request,
+            @RequestBody final CreateOrderRequest request,
             @AuthenticationPrincipal User userPrincipal
     ){
         Customer currentAuth = customerService.findCustomerByEmail(userPrincipal.getUsername());
-        String bankAccountNumber = request.getBankAccountNumber();
-        CreateOrderRequest createOrderRequest = orderMapper.legalMarketOrderToCreateOrderRequest(request);
-        orderService.createOrder(createOrderRequest, currentAuth, bankAccountNumber);
+//        CreateOrderRequest createOrderRequest = orderMapper.legalMarketOrderToCreateOrderRequest(request);
+        orderService.createOrder(request, currentAuth);
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 

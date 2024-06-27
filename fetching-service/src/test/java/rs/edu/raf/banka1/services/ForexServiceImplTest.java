@@ -55,7 +55,7 @@ public class ForexServiceImplTest {
         double high = 138.0;
         double low = 134.0;
         double close = 137.0;
-        int volume = 0;
+        int volume = 1000;
         JsonNode openNode = createMockNode(open);
         JsonNode highNode = createMockNode(high);
         JsonNode lowNode = createMockNode(low);

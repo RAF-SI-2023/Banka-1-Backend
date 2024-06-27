@@ -102,28 +102,28 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
             if(!order.getListingType().equals(listingType)) continue;
 
             switch(transaction.getOrder().getListingType()) {
-                case ListingType.STOCK:
+                case STOCK:
                     ListingBaseDto stockDto = marketService.getStockById(order.getListingId());
                     if(!capital.containsKey(stockDto)) {
                         capital.put(stockDto, 0d);
                     }
                     capital.put(stockDto, capital.get(stockDto) + transaction.getCapitalAmount());
                     break;
-                case ListingType.FUTURE:
+                case FUTURE:
                     ListingBaseDto futureDto = marketService.getFutureById(order.getListingId());
                     if(!capital.containsKey(futureDto)) {
                         capital.put(futureDto, 0d);
                     }
                     capital.put(futureDto, capital.get(futureDto) + transaction.getCapitalAmount());
                     break;
-                case ListingType.FOREX:
+                case FOREX:
                     ListingBaseDto forexDto = marketService.getForexById(order.getListingId());
                     if(!capital.containsKey(forexDto)) {
                         capital.put(forexDto, 0d);
                     }
                     capital.put(forexDto, capital.get(forexDto) + transaction.getCapitalAmount());
                     break;
-                case ListingType.OPTIONS:
+                case OPTIONS:
                     ListingBaseDto optionDto = marketService.getOptionsById(order.getListingId());
                     if(!capital.containsKey(optionDto)) {
                         capital.put(optionDto, 0d);
@@ -139,28 +139,28 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
             if(!order.getListingType().equals(listingType)) continue;
 
             switch(transaction.getOrder().getListingType()) {
-                case ListingType.STOCK:
+                case STOCK:
                     ListingBaseDto stockDto = marketService.getStockById(order.getListingId());
                     if(!capital.containsKey(stockDto)) {
                         capital.put(stockDto, 0d);
                     }
                     capital.put(stockDto, capital.get(stockDto) - transaction.getCapitalAmount());
                     break;
-                case ListingType.FUTURE:
+                case FUTURE:
                     ListingBaseDto futureDto = marketService.getFutureById(order.getListingId());
                     if(!capital.containsKey(futureDto)) {
                         capital.put(futureDto, 0d);
                     }
                     capital.put(futureDto, capital.get(futureDto) - transaction.getCapitalAmount());
                     break;
-                case ListingType.FOREX:
+                case FOREX:
                     ListingBaseDto forexDto = marketService.getForexById(order.getListingId());
                     if(!capital.containsKey(forexDto)) {
                         capital.put(forexDto, 0d);
                     }
                     capital.put(forexDto, capital.get(forexDto) - transaction.getCapitalAmount());
                     break;
-                case ListingType.OPTIONS:
+                case OPTIONS:
                     ListingBaseDto optionDto = marketService.getOptionsById(order.getListingId());
                     if(!capital.containsKey(optionDto)) {
                         capital.put(optionDto, 0d);

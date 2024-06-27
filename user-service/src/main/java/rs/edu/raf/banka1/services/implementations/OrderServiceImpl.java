@@ -74,10 +74,16 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void createOrder(final CreateOrderRequest request, final User currentAuth, String bankAccountNumber) {
+    public void createOrder(final CreateOrderRequest request, final User currentAuth) {
         MarketOrder order = orderMapper.requestToMarketOrder(request, currentAuth);
+        String bankAccountNumber = null;
         if(currentAuth instanceof Customer) {
-            BankAccount bankAccount = bankAccountService.findBankAccountByAccountNumber(bankAccountNumber);
+            BankAccount bankAccount = bankAccountService.getCustomerBankAccountForOrder((Customer)currentAuth);
+            if(bankAccount == null){
+                throw new BankAccountNotFoundException();
+            }
+            bankAccountNumber = bankAccount.getAccountNumber();
+//            BankAccount bankAccount = bankAccountService.findBankAccountByAccountNumber(bankAccountNumber);
             if(!((Customer)currentAuth).getAccountIds().contains(bankAccount)){
                 //mozda ovde treba drugaciji exception?
                 throw new ForbiddenException();
