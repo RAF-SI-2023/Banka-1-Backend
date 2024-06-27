@@ -75,6 +75,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Boolean denyContract(Long contractId, String comment) {
         contractRepository.updateCommentById(comment, contractId);
+        contractRepository.denyContract(contractId);
         return true;
     }
 

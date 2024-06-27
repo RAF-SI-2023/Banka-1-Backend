@@ -436,8 +436,8 @@ public class BootstrapData implements CommandLineRunner {
             this.marginAccountRepository.save(marginAccountCompany1);
 
             MarginAccount marginAccountCompany2 = new MarginAccount();
-            marginAccountCompany.setCustomer(bankAccountCompany);
-            marginAccountCompany.setCurrency(bankAccountCompany.getCurrency());
+            marginAccountCompany2.setCustomer(bankAccountCompany);
+            marginAccountCompany2.setCurrency(bankAccountCompany.getCurrency());
             marginAccountCompany2.setListingType(ListingType.FOREX);
             this.marginAccountRepository.save(marginAccountCompany2);
 

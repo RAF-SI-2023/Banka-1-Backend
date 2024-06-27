@@ -29,5 +29,9 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     @Query("update Contract c set c.bankApproval = true where c.id = ?1")
     void approveContract(Long id);
 
+    @Transactional
+    @Modifying
+    @Query("update Contract c set c.bankApproval = false where c.id = ?1")
+    void denyContract(Long id);
 
 }
