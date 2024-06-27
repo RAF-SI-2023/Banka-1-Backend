@@ -16,7 +16,7 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     @Query("update Contract c set c.comment = ?1 where c.id = ?2")
     void updateCommentById(String comment, Long id);
 
-    @Query("select c from Contract c where c.buyer.accountNumber = ?1 or c.seller.accountNumber = ?1")
+    @Query("select c from Contract c where c.buyer.accountNumber = ?1")
     List<Contract> findAllCustomerContracts(String accountNumber);
 
     @Transactional

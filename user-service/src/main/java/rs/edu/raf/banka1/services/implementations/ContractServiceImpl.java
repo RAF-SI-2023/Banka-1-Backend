@@ -122,6 +122,7 @@ public class ContractServiceImpl implements ContractService {
         List<ContractDto> contractDtos = new ArrayList<>();
 
         contracts.forEach((Contract contract) -> {
+
             ContractDto contractDto = contractMapper.contractToContractDto(contract);
             contractDtos.add(contractDto);
         });
