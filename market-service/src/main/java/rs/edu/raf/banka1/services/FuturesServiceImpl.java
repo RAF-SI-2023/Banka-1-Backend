@@ -67,7 +67,7 @@ public class FuturesServiceImpl implements FuturesService {
     }
 
     @Override
-    @Cacheable(value = "futures", key = "#ticker")
+//    @Cacheable(value = "futures", key = "#ticker")
     public Optional<ListingFuture> findByTicker(String ticker) {
         return futureRepository.findByTicker(ticker);
     }

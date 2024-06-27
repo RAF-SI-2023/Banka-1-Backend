@@ -24,7 +24,7 @@ public class OptionsServiceImpl implements OptionsService {
     }
 
     @Override
-    @Cacheable(value = "optionsServiceOptionsByTicker", key = "#ticker")
+//    @Cacheable(value = "optionsServiceOptionsByTicker", key = "#ticker")
     public List<OptionsDto> getOptionsByTicker(String ticker) {
         List<OptionsDto> options = this.optionsRepository.findByTicker(ticker).map(optionsModels ->
                         optionsModels.stream()
@@ -38,36 +38,36 @@ public class OptionsServiceImpl implements OptionsService {
     }
 
     @Override
-    @Cacheable(value = "optionsServiceFindById", key = "#id")
+//    @Cacheable(value = "optionsServiceFindById", key = "#id")
     public Optional<OptionsModel> findById(Long id) {
         return optionsRepository.findById(id);
     }
 
     @Override
-    @Cacheable(value = "optionsServiceAllOptions")
+//    @Cacheable(value = "optionsServiceAllOptions")
     public List<OptionsModel> getAllOptions(){
         return optionsRepository.findAll();
     }
     @Override
-    @Cacheable(value = "optionsServiceAllCallOptions")
+//    @Cacheable(value = "optionsServiceAllCallOptions")
     public Optional<List<OptionsModel>> getAllCallOptions(){
         return optionsRepository.getAllCallsOptions();
     }
 
     @Override
-    @Cacheable(value = "optionsServiceFindCallOptionById", key = "#id")
+//    @Cacheable(value = "optionsServiceFindCallOptionById", key = "#id")
     public Optional<OptionsModel> getCallOptionById(Long id) {
         return optionsRepository.getCallOptionById(id);
     }
 
     @Override
-    @Cacheable(value = "optionsServiceAllPutOptions")
+//    @Cacheable(value = "optionsServiceAllPutOptions")
     public Optional<List<OptionsModel>> getAllPutOptions(){
         return optionsRepository.getAllPutsOptions();
     }
 
     @Override
-    @Cacheable(value = "optionsServiceFindPutOptionById", key = "#id")
+//    @Cacheable(value = "optionsServiceFindPutOptionById", key = "#id")
     public Optional<OptionsModel> getPutOptionById(Long id) {
         return optionsRepository.getPutOptionById(id);
     }

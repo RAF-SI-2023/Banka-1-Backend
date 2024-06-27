@@ -2,11 +2,13 @@ package rs.edu.raf.banka1.services;
 
 import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.model.BankAccount;
+import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.model.ListingType;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 
 import java.util.Currency;
 import java.util.List;
+import java.util.Optional;
 
 public interface BankAccountService {
     BankAccount createBankAccount(CreateBankAccountRequest createRequest);
@@ -29,6 +31,7 @@ public interface BankAccountService {
     void releaseReserved(BankAccount bankAccount, Double amount);
     void addBalance(BankAccount bankAccount, Double amount);
     void removeBalance(BankAccount bankAccount, Double amount);
+    BankAccount getCustomerBankAccountForOrder(Customer customer);
 
 
 }
