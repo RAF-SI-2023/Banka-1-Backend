@@ -1,4 +1,4 @@
-package zews.otc_testing.service;
+package rs.edu.raf.banka1.services.otc;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
@@ -6,20 +6,19 @@ import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import zews.otc_testing.dto.FrontendOfferDto;
-import zews.otc_testing.dto.MyOfferDto;
-import zews.otc_testing.dto.MyStockDto;
-import zews.otc_testing.dto.OfferDto;
-import zews.otc_testing.entity.listing.MyStock;
-import zews.otc_testing.entity.listing.BankOTCStock;
-import zews.otc_testing.entity.offer.MyOffer;
-import zews.otc_testing.entity.offer.Offer;
-import zews.otc_testing.entity.offer.OfferStatus;
-import zews.otc_testing.repository.BankOTCStockRepository;
-import zews.otc_testing.repository.MyOfferRepository;
-import zews.otc_testing.repository.MyStockRepository;
-import zews.otc_testing.repository.OfferRepository;
-
+import rs.edu.raf.banka1.model.dtos.otc.FrontendOfferDto;
+import rs.edu.raf.banka1.model.dtos.otc.MyOfferDto;
+import rs.edu.raf.banka1.model.dtos.otc.MyStockDto;
+import rs.edu.raf.banka1.model.dtos.otc.OfferDto;
+import rs.edu.raf.banka1.model.listing.BankOTCStock;
+import rs.edu.raf.banka1.model.listing.MyStock;
+import rs.edu.raf.banka1.model.offer.MyOffer;
+import rs.edu.raf.banka1.model.offer.Offer;
+import rs.edu.raf.banka1.model.offer.OfferStatus;
+import rs.edu.raf.banka1.repositories.otc.BankOTCStockRepository;
+import rs.edu.raf.banka1.repositories.otc.MyOfferRepository;
+import rs.edu.raf.banka1.repositories.otc.MyStockRepository;
+import rs.edu.raf.banka1.repositories.otc.OfferRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,8 +32,8 @@ public class BankOtcService {
     private final MyOfferRepository myOfferRepository;
 
     //URL
-//    private static final String URL_TO_BANK3 =  "https://banka-3-dev.si.raf.edu.rs/exchange-service/api/v1/otcTrade";
-    private static final String URL_TO_BANK3 =  "http://localhost:8083/api/v1/otcTrade";
+    private static final String URL_TO_BANK3 =  "https://banka-3-dev.si.raf.edu.rs/exchange-service/api/v1/otcTrade";
+//    private static final String URL_TO_BANK3 =  "http://localhost:8083/api/v1/otcTrade";
 
     //GET: /getOurStocks
     //dohvatamo sve Stocks koje mi nudimo
@@ -195,8 +194,7 @@ public class BankOtcService {
         myOfferDto.setPrice(myOffer1.getPrice());
         myOfferDto.setIdBank(myOffer1.getMyOfferId());
 
-        //TODO: promeni na broj svoje banke
-        String url = URL_TO_BANK3 + "/sendOffer/bank5";
+        String url = URL_TO_BANK3 + "/sendOffer/bank1";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -292,8 +290,7 @@ public class BankOtcService {
         List<Offer> offers = offerRepository.findAllByOfferStatus(OfferStatus.ACCEPTED);
         if (!offers.isEmpty()) {
             for (Offer offer : offers) {
-                //TODO: promeni na broj svoje banke
-                String url = URL_TO_BANK3 + "/offerAccepted/bank5/" + offer.getIdBank();
+                String url = URL_TO_BANK3 + "/offerAccepted/bank1/" + offer.getIdBank();
 
                 try {
                     RestTemplate restTemplate = new RestTemplate();
@@ -321,9 +318,7 @@ public class BankOtcService {
         List<Offer> offers = offerRepository.findAllByOfferStatus(OfferStatus.DECLINED);
         if(!offers.isEmpty()){
             for(Offer offer : offers){
-                //TODO: promeni na broj svoje banke
-                String url = URL_TO_BANK3 + "/offerDeclined/bank5/" + offer.getIdBank();
-
+                String url = URL_TO_BANK3 + "/offerDeclined/bank1/" + offer.getIdBank();
                 try {
                     RestTemplate restTemplate = new RestTemplate();
                     ResponseEntity<String> response = restTemplate.exchange(
