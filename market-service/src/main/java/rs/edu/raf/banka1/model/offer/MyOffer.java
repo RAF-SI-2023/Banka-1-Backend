@@ -1,6 +1,5 @@
 package rs.edu.raf.banka1.model.offer;
 
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

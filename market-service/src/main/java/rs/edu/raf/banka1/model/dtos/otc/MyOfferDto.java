@@ -1,6 +1,5 @@
 package rs.edu.raf.banka1.model.dtos.otc;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

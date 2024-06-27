@@ -319,7 +319,6 @@ public class BankOtcService {
         if(!offers.isEmpty()){
             for(Offer offer : offers){
                 String url = URL_TO_BANK3 + "/offerDeclined/bank1/" + offer.getIdBank();
-
                 try {
                     RestTemplate restTemplate = new RestTemplate();
                     ResponseEntity<String> response = restTemplate.exchange(
