@@ -329,15 +329,6 @@ public class BootstrapData implements CommandLineRunner {
             company.setJobId("123456789");
             company.setRegistrationNumber("987654321");
             companyRepository.save(company);
-            // generate default bank account for the company
-            BankAccount bankAccount = bankAccountMapper.generateBankAccountCompany(company, currencyRepository.findCurrencyByCurrencyCode(Constants.DEFAULT_CURRENCY).get());
-            bankAccountRepository.save(bankAccount);
-            // generate default capital for company
-            Capital capitalVanja = capitalMapper.generateCapitalForBankAccount(bankAccount);
-            capitalVanja.setTotal(10005.0);
-            capitalVanja.setListingType(ListingType.STOCK);
-            capitalVanja.setListingId(1L);
-            capitalRepository.save(capitalVanja);
 
             Customer customerCompany = new Customer();
             customerCompany.setFirstName("Customer");
