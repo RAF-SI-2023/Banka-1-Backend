@@ -12,11 +12,12 @@ import rs.edu.raf.banka1.dtos.CreateCompanyDto;
 import rs.edu.raf.banka1.dtos.JoinCompanyDto;
 import rs.edu.raf.banka1.exceptions.CompanyNotFoundException;
 import rs.edu.raf.banka1.exceptions.CustomerNotFoundException;
+import rs.edu.raf.banka1.mapper.BankAccountMapper;
+import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.mapper.CompanyMapper;
 import rs.edu.raf.banka1.model.Company;
 import rs.edu.raf.banka1.model.Customer;
-import rs.edu.raf.banka1.repositories.CompanyRepository;
-import rs.edu.raf.banka1.repositories.CustomerRepository;
+import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.services.CompanyService;
 
 import java.util.ArrayList;
@@ -40,11 +41,23 @@ class CompanyServiceImplTest {
     private CompanyRepository companyRepository;
     @Mock
     private CustomerRepository customerRepository;
+    @Mock
+    private BankAccountMapper bankAccountMapper;
+    @Mock
+    private CurrencyRepository currencyRepository;
+    @Mock
+    private BankAccountRepository bankAccountRepository;
+    @Mock
+    private CapitalMapper capitalMapper;
+    @Mock
+    private CapitalRepository capitalRepository;
 
     private CompanyService companyService;
     @BeforeEach
     void setup() {
-        companyService = new CompanyServiceImpl(companyRepository, companyMapper, customerRepository);
+        companyService = new CompanyServiceImpl(companyRepository, companyMapper,
+                customerRepository, bankAccountMapper, currencyRepository, bankAccountRepository,
+                capitalMapper, capitalRepository);
     }
 
     @Nested

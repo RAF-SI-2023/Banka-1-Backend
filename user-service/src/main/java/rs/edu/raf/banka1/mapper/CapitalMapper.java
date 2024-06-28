@@ -5,7 +5,9 @@ import rs.edu.raf.banka1.dtos.AllPublicCapitalsDto;
 import rs.edu.raf.banka1.dtos.CapitalDto;
 import rs.edu.raf.banka1.dtos.CapitalProfitDto;
 import rs.edu.raf.banka1.dtos.PublicCapitalDto;
+import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Capital;
+
 @Component
 public class CapitalMapper {
     public CapitalDto capitalToCapitalDto(Capital capital) {
@@ -52,5 +54,14 @@ public class CapitalMapper {
         dto.setAmount(capital.getPublicTotal());
         dto.setOwnerName(ownerName);
         return dto;
+    }
+
+    public Capital generateCapitalForBankAccount(BankAccount bankAccount) {
+        Capital capital = new Capital();
+        capital.setPublicTotal(0D);
+        capital.setReserved(0D);
+        capital.setTotal(0D);
+        capital.setBankAccount(bankAccount);
+        return capital;
     }
 }
