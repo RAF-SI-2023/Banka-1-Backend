@@ -9,6 +9,8 @@ import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
 import rs.edu.raf.banka1.dtos.market_service.OptionsDto;
+import rs.edu.raf.banka1.mapper.BankAccountMapper;
+import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
@@ -58,6 +60,10 @@ public class BootstrapData implements CommandLineRunner {
 
     private final MarginAccountRepository marginAccountRepository;
 
+    private final BankAccountRepository bankAccountRepository;
+    private final BankAccountMapper bankAccountMapper;
+    private final CapitalMapper capitalMapper;
+
     private final ScheduledExecutorService resetLimitExecutor = Executors.newScheduledThreadPool(1);
 
     @Autowired
@@ -80,7 +86,10 @@ public class BootstrapData implements CommandLineRunner {
         final TransferService transferService,
         final MarginAccountRepository marginAccountRepository,
         TransferRepository transferRepository,
-        final ContractRepository contractRepository) {
+        final ContractRepository contractRepository,
+        final BankAccountRepository bankAccountRepository,
+        final BankAccountMapper bankAccountMapper,
+        final CapitalMapper capitalMapper) {
 
         this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -101,6 +110,9 @@ public class BootstrapData implements CommandLineRunner {
         this.marginAccountRepository = marginAccountRepository;
         this.transferRepository = transferRepository;
         this.contractRepository = contractRepository;
+        this.bankAccountRepository = bankAccountRepository;
+        this.bankAccountMapper = bankAccountMapper;
+        this.capitalMapper = capitalMapper;
     }
 
     @Override
@@ -317,6 +329,15 @@ public class BootstrapData implements CommandLineRunner {
             company.setJobId("123456789");
             company.setRegistrationNumber("987654321");
             companyRepository.save(company);
+            // generate default bank account for the company
+            BankAccount bankAccount = bankAccountMapper.generateBankAccountCompany(company, currencyRepository.findCurrencyByCurrencyCode(Constants.DEFAULT_CURRENCY).get());
+            bankAccountRepository.save(bankAccount);
+            // generate default capital for company
+            Capital capitalVanja = capitalMapper.generateCapitalForBankAccount(bankAccount);
+            capitalVanja.setTotal(10005.0);
+            capitalVanja.setListingType(ListingType.STOCK);
+            capitalVanja.setListingId(1L);
+            capitalRepository.save(capitalVanja);
 
             Customer customerCompany = new Customer();
             customerCompany.setFirstName("Customer");
@@ -500,6 +521,16 @@ public class BootstrapData implements CommandLineRunner {
             company1.setJobId("123456789");
             company1.setRegistrationNumber("987654321");
             companyRepository.save(company1);
+
+            // generate default bank account for company
+            BankAccount bankAccountCompany1 = bankAccountMapper.generateBankAccountCompany(company1, currencyRepository.findCurrencyByCurrencyCode(Constants.DEFAULT_CURRENCY).get());
+            bankAccountRepository.save(bankAccountCompany1);
+            // generate default capital for company
+            Capital capitalCompany1 = capitalMapper.generateCapitalForBankAccount(bankAccountCompany1);
+            capitalCompany1.setTotal(10005.0);
+            capitalCompany1.setListingType(ListingType.STOCK);
+            capitalCompany1.setListingId(1L);
+            capitalRepository.save(capitalCompany1);
 
             Customer customerCompany1 = new Customer();
             customerCompany1.setFirstName("Customer1");
@@ -1000,6 +1031,15 @@ public class BootstrapData implements CommandLineRunner {
             bank.setJobId("1777838");
             bank.setRegistrationNumber("7737");
             companyRepository.save(bank);
+
+            // generate default bank account for company
+            BankAccount bankAccount = bankAccountMapper.generateBankAccountCompany(bank, currencyRepository.findCurrencyByCurrencyCode(Constants.DEFAULT_CURRENCY).get());
+            bankAccountRepository.save(bankAccount);
+            // generate default capital for company
+            Capital capital = capitalMapper.generateCapitalForBankAccount(bankAccount);
+            capital.setTotal(10000.0);
+            capitalRepository.save(capital);
+
             return bank;
         }
         return companyRepository.findCompaniesByIdNumberContainingIgnoreCase("987654321").get(0);
