@@ -346,6 +346,53 @@ public class BootstrapData implements CommandLineRunner {
                 bankAccountService.saveBankAccount(bankAccountCompany);
             }
 
+            Company company2 = new Company();
+            company2.setCompanyName("Company2");
+            company2.setTelephoneNumber("987654321");
+            company2.setFaxNumber("523459876");
+            company2.setPib("567891234");
+            company2.setIdNumber("98765432123");
+            company2.setJobId("123456789");
+            company2.setRegistrationNumber("987654321");
+            companyRepository.save(company2);
+
+            Customer customerCompany3 = new Customer();
+            customerCompany3.setFirstName("Customer3");
+            customerCompany3.setEmail("customer3@gmail.com");
+            customerCompany3.setPassword(passwordEncoder.encode("customer3"));
+            customerCompany3.setLastName("Jovanovic");
+            customerCompany3.setCompany(company2);
+            customerCompany3.setActive(true);
+            customerRepository.save(customerCompany3);
+
+            BankAccount bankAccountCompany33 = new BankAccount();
+            bankAccountCompany33.setAccountStatus(true);
+            bankAccountCompany33.setAccountType(AccountType.BUSINESS);
+            bankAccountCompany33.setAvailableBalance(20000.0);
+            bankAccountCompany33.setBalance(20000.0);
+            bankAccountCompany33.setMaintenanceCost(340.0);
+            bankAccountCompany33.setCompany(company2);
+            bankAccountCompany33.setCreatedByAgentId(1L);
+            bankAccountCompany33.setCreationDate(new Date().getTime());
+            bankAccountCompany33.setCurrency(this.currencyRepository.getReferenceById(1L));
+            bankAccountCompany33.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+            bankAccountCompany33.setAccountName("4333juo2kralL");
+            bankAccountCompany33.setAccountNumber("433321");
+            bankAccountCompany33.setSubtypeOfAccount("LICNI");
+            if (bankAccountService.findBankAccountByAccountNumber(bankAccountCompany33.getAccountNumber()) == null) {
+                bankAccountService.saveBankAccount(bankAccountCompany33);
+            }
+
+            Capital capital33 = new Capital();
+            capital33.setPublicTotal(200D);
+            capital33.setListingType(ListingType.STOCK);
+            capital33.setReserved(0D);
+            capital33.setListingId(1L);
+            capital33.setTicker("DT");
+            capital33.setBankAccount(bankAccountCompany33);
+            capital33.setTotal(500D);
+            capitalRepository.save(capital33);
+
             Customer testCustomer = new Customer();
             testCustomer.setFirstName("testCustomer");
             testCustomer.setEmail("testCustomer@gmail.com");
@@ -472,6 +519,56 @@ public class BootstrapData implements CommandLineRunner {
             capital22.setBankAccount(bankAccount6testa);
             capital22.setTotal(50D);
             capitalRepository.save(capital22);
+
+            Capital capital1ForTestCustomer = new Capital();
+            capital1ForTestCustomer.setPublicTotal(20D);
+            capital1ForTestCustomer.setListingType(ListingType.STOCK);
+            capital1ForTestCustomer.setReserved(0D);
+            capital1ForTestCustomer.setListingId(2L);
+            capital1ForTestCustomer.setTicker("ORCL");
+            capital1ForTestCustomer.setBankAccount(bankAccount4test);
+            capital1ForTestCustomer.setTotal(50D);
+            capitalRepository.save(capital1ForTestCustomer);
+
+            Capital capital2ForTestCustomer = new Capital();
+            capital2ForTestCustomer.setPublicTotal(30D);
+            capital2ForTestCustomer.setListingType(ListingType.STOCK);
+            capital2ForTestCustomer.setReserved(0D);
+            capital2ForTestCustomer.setListingId(3L);
+            capital2ForTestCustomer.setTicker("WYY");
+            capital2ForTestCustomer.setBankAccount(bankAccount4test);
+            capital2ForTestCustomer.setTotal(100D);
+            capitalRepository.save(capital2ForTestCustomer);
+
+            Capital capital1ForTestCustomer2 = new Capital();
+            capital1ForTestCustomer2.setPublicTotal(20D);
+            capital1ForTestCustomer2.setListingType(ListingType.STOCK);
+            capital1ForTestCustomer2.setReserved(0D);
+            capital1ForTestCustomer2.setListingId(2L);
+            capital1ForTestCustomer2.setTicker("ORCL");
+            capital1ForTestCustomer2.setBankAccount(bankAccount6testa);
+            capital1ForTestCustomer2.setTotal(50D);
+            capitalRepository.save(capital1ForTestCustomer2);
+
+            Capital capital2ForTestCustomer2 = new Capital();
+            capital2ForTestCustomer2.setPublicTotal(10D);
+            capital2ForTestCustomer2.setListingType(ListingType.STOCK);
+            capital2ForTestCustomer2.setReserved(0D);
+            capital2ForTestCustomer2.setListingId(3L);
+            capital2ForTestCustomer2.setTicker("WYY");
+            capital2ForTestCustomer2.setBankAccount(bankAccount6testa);
+            capital2ForTestCustomer2.setTotal(100D);
+            capitalRepository.save(capital2ForTestCustomer2);
+
+            Capital capital3ForTestCustomer2 = new Capital();
+            capital3ForTestCustomer2.setPublicTotal(40D);
+            capital3ForTestCustomer2.setListingType(ListingType.STOCK);
+            capital3ForTestCustomer2.setReserved(0D);
+            capital3ForTestCustomer2.setListingId(4L);
+            capital3ForTestCustomer2.setTicker("CDLX");
+            capital3ForTestCustomer2.setBankAccount(bankAccount6testa);
+            capital3ForTestCustomer2.setTotal(100D);
+            capitalRepository.save(capital3ForTestCustomer2);
 
             MarginAccount marginAccountCompany = new MarginAccount();
             marginAccountCompany.setCustomer(bankAccountCompany);
