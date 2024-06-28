@@ -9,8 +9,12 @@ import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
 import rs.edu.raf.banka1.dtos.market_service.OptionsDto;
+import rs.edu.raf.banka1.mapper.BankAccountMapper;
+import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.model.listing.MyStock;
 import rs.edu.raf.banka1.repositories.*;
+import rs.edu.raf.banka1.repositories.otc_trade.MyStockRepository;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateTransferRequest;
@@ -57,6 +61,11 @@ public class BootstrapData implements CommandLineRunner {
     private final ContractRepository contractRepository;
 
     private final MarginAccountRepository marginAccountRepository;
+    private final MyStockRepository myStockRepository;
+
+    private final BankAccountRepository bankAccountRepository;
+    private final BankAccountMapper bankAccountMapper;
+    private final CapitalMapper capitalMapper;
 
     private final ScheduledExecutorService resetLimitExecutor = Executors.newScheduledThreadPool(1);
 
@@ -80,7 +89,11 @@ public class BootstrapData implements CommandLineRunner {
         final TransferService transferService,
         final MarginAccountRepository marginAccountRepository,
         TransferRepository transferRepository,
-        final ContractRepository contractRepository) {
+        final ContractRepository contractRepository,
+        final BankAccountRepository bankAccountRepository,
+        final BankAccountMapper bankAccountMapper,
+        final CapitalMapper capitalMapper,
+    MyStockRepository myStockRepository) {
 
         this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -101,10 +114,48 @@ public class BootstrapData implements CommandLineRunner {
         this.marginAccountRepository = marginAccountRepository;
         this.transferRepository = transferRepository;
         this.contractRepository = contractRepository;
+        this.myStockRepository = myStockRepository;
+        this.bankAccountRepository = bankAccountRepository;
+        this.bankAccountMapper = bankAccountMapper;
+        this.capitalMapper = capitalMapper;
     }
 
     @Override
     public void run(String... args) {
+
+        if (myStockRepository.count() == 0) {
+            MyStock stok1 = new MyStock();
+            stok1.setTicker("STK1");
+            stok1.setAmount(100);
+            stok1.setCurrencyMark("RSD");
+            stok1.setPrivateAmount(50);
+            stok1.setPublicAmount(50);
+            stok1.setCompanyId(1L);
+            stok1.setUserId(null);
+            stok1.setMinimumPrice(500.0);
+
+            MyStock stok2 = new MyStock();
+            stok2.setTicker("STK2");
+            stok2.setAmount(100);
+            stok2.setCurrencyMark("RSD");
+            stok2.setPrivateAmount(50);
+            stok2.setPublicAmount(50);
+            stok2.setCompanyId(1L);
+            stok2.setUserId(null);
+            stok2.setMinimumPrice(1500.0);
+
+            MyStock stok3 = new MyStock();
+            stok3.setTicker("STK3");
+            stok3.setAmount(100);
+            stok3.setCurrencyMark("RSD");
+            stok3.setPrivateAmount(50);
+            stok3.setPublicAmount(50);
+            stok3.setCompanyId(1L);
+            stok3.setUserId(null);
+            stok3.setMinimumPrice(200.0);
+
+            myStockRepository.saveAll(List.of(stok1, stok2, stok3));
+        }
 
         if(employeeRepository.findByEmail("admin").isPresent()) {
             return;
@@ -336,7 +387,7 @@ public class BootstrapData implements CommandLineRunner {
             bankAccountCompany.setCompany(company);
             bankAccountCompany.setCreatedByAgentId(1L);
             bankAccountCompany.setCreationDate(new Date().getTime());
-            bankAccountCompany.setCurrency(this.currencyRepository.getReferenceById(1L));
+            bankAccountCompany.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElseThrow());
             bankAccountCompany.setCustomer(customerCompany);
             bankAccountCompany.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccountCompany.setAccountName("124141j2kraslL");
@@ -469,7 +520,7 @@ public class BootstrapData implements CommandLineRunner {
             bankAccount5testa.setCompany(company);
             bankAccount5testa.setCreatedByAgentId(52L);
             bankAccount5testa.setCreationDate(new Date().getTime());
-            bankAccount5testa.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElse(null));
+            bankAccount5testa.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("USD").orElse(null));
             bankAccount5testa.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccount5testa.setAccountName("testCompanyAccountUSD");
             bankAccount5testa.setAccountNumber("12345345323");
@@ -597,6 +648,16 @@ public class BootstrapData implements CommandLineRunner {
             company1.setJobId("123456789");
             company1.setRegistrationNumber("987654321");
             companyRepository.save(company1);
+
+            // generate default bank account for company
+            BankAccount bankAccountCompany1 = bankAccountMapper.generateBankAccountCompany(company1, currencyRepository.findCurrencyByCurrencyCode(Constants.DEFAULT_CURRENCY).get());
+            bankAccountRepository.save(bankAccountCompany1);
+            // generate default capital for company
+            Capital capitalCompany1 = capitalMapper.generateCapitalForBankAccount(bankAccountCompany1);
+            capitalCompany1.setTotal(10005.0);
+            capitalCompany1.setListingType(ListingType.STOCK);
+            capitalCompany1.setListingId(1L);
+            capitalRepository.save(capitalCompany1);
 
             Customer customerCompany1 = new Customer();
             customerCompany1.setFirstName("Customer1");
@@ -1097,6 +1158,15 @@ public class BootstrapData implements CommandLineRunner {
             bank.setJobId("1777838");
             bank.setRegistrationNumber("7737");
             companyRepository.save(bank);
+
+            // generate default bank account for company
+            BankAccount bankAccount = bankAccountMapper.generateBankAccountCompany(bank, currencyRepository.findCurrencyByCurrencyCode(Constants.DEFAULT_CURRENCY).get());
+            bankAccountRepository.save(bankAccount);
+            // generate default capital for company
+            Capital capital = capitalMapper.generateCapitalForBankAccount(bankAccount);
+            capital.setTotal(10000.0);
+            capitalRepository.save(capital);
+
             return bank;
         }
         return companyRepository.findCompaniesByIdNumberContainingIgnoreCase("987654321").get(0);

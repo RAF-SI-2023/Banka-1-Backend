@@ -5,12 +5,13 @@ import rs.edu.raf.banka1.dtos.CreateCompanyDto;
 import rs.edu.raf.banka1.dtos.JoinCompanyDto;
 import rs.edu.raf.banka1.exceptions.CompanyNotFoundException;
 import rs.edu.raf.banka1.exceptions.CustomerNotFoundException;
+import rs.edu.raf.banka1.mapper.BankAccountMapper;
+import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.mapper.CompanyMapper;
-import rs.edu.raf.banka1.model.Company;
-import rs.edu.raf.banka1.model.Customer;
-import rs.edu.raf.banka1.repositories.CompanyRepository;
-import rs.edu.raf.banka1.repositories.CustomerRepository;
+import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.services.CompanyService;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -20,13 +21,28 @@ public class CompanyServiceImpl implements CompanyService {
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
     private final CustomerRepository customerRepository;
+    private final BankAccountMapper bankAccountMapper;
+    private final CurrencyRepository currencyRepository;
+    private final BankAccountRepository bankAccountRepository;
+    private final CapitalMapper capitalMapper;
+    private final CapitalRepository capitalRepository;
 
     public CompanyServiceImpl(CompanyRepository companyRepository,
                               CompanyMapper companyMapper,
-                              CustomerRepository customerRepository) {
+                              CustomerRepository customerRepository,
+                              BankAccountMapper bankAccountMapper,
+                              CurrencyRepository currencyRepository,
+                              BankAccountRepository bankAccountRepository,
+                              CapitalMapper capitalMapper,
+                              CapitalRepository capitalRepository) {
         this.companyRepository = companyRepository;
         this.companyMapper = companyMapper;
         this.customerRepository = customerRepository;
+        this.bankAccountMapper = bankAccountMapper;
+        this.currencyRepository = currencyRepository;
+        this.bankAccountRepository = bankAccountRepository;
+        this.capitalMapper = capitalMapper;
+        this.capitalRepository = capitalRepository;
     }
 
     @Override
@@ -50,6 +66,12 @@ public class CompanyServiceImpl implements CompanyService {
     public Company createCompany(CreateCompanyDto createCompanyDto) {
         Company company = companyMapper.createCompany(createCompanyDto);
         companyRepository.save(company);
+
+        // generate default bank account for company
+        Currency defaultCurrency = currencyRepository.findCurrencyByCurrencyCode(Constants.DEFAULT_CURRENCY).get();
+        BankAccount bankAccount = bankAccountMapper.generateBankAccountCompany(company, defaultCurrency);
+        bankAccountRepository.save(bankAccount);
+
         return company;
     }
 
