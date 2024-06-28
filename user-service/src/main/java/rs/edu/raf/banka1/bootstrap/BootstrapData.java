@@ -368,15 +368,6 @@ public class BootstrapData implements CommandLineRunner {
             company.setJobId("123456789");
             company.setRegistrationNumber("987654321");
             companyRepository.save(company);
-            // generate default bank account for the company
-            BankAccount bankAccount = bankAccountMapper.generateBankAccountCompany(company, currencyRepository.findCurrencyByCurrencyCode(Constants.DEFAULT_CURRENCY).get());
-            bankAccountRepository.save(bankAccount);
-            // generate default capital for company
-            Capital capitalVanja = capitalMapper.generateCapitalForBankAccount(bankAccount);
-            capitalVanja.setTotal(10005.0);
-            capitalVanja.setListingType(ListingType.STOCK);
-            capitalVanja.setListingId(1L);
-            capitalRepository.save(capitalVanja);
 
             Customer customerCompany = new Customer();
             customerCompany.setFirstName("Customer");
@@ -396,7 +387,7 @@ public class BootstrapData implements CommandLineRunner {
             bankAccountCompany.setCompany(company);
             bankAccountCompany.setCreatedByAgentId(1L);
             bankAccountCompany.setCreationDate(new Date().getTime());
-            bankAccountCompany.setCurrency(this.currencyRepository.getReferenceById(1L));
+            bankAccountCompany.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElseThrow());
             bankAccountCompany.setCustomer(customerCompany);
             bankAccountCompany.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccountCompany.setAccountName("124141j2kraslL");
@@ -482,7 +473,7 @@ public class BootstrapData implements CommandLineRunner {
             bankAccount5testa.setCompany(company);
             bankAccount5testa.setCreatedByAgentId(52L);
             bankAccount5testa.setCreationDate(new Date().getTime());
-            bankAccount5testa.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElse(null));
+            bankAccount5testa.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("USD").orElse(null));
             bankAccount5testa.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccount5testa.setAccountName("testCompanyAccountUSD");
             bankAccount5testa.setAccountNumber("12345345323");
