@@ -139,12 +139,16 @@ public class ContractServiceImpl implements ContractService {
 
         //Transfer capital
         capitalService.removeFromPublicCapital(contract.getListingId(), contract.getListingType(), contract.getSeller(), contract.getAmount());
+        System.out.println("Test1");
         capitalService.removeBalance(contract.getListingId(), contract.getListingType(), contract.getSeller(), contract.getAmount());
+        System.out.println("Test2");
         capitalService.addBalance(contract.getListingId(), contract.getListingType(), contract.getBuyer(), contract.getAmount());
-
+        System.out.println("Test3");
         //Transfer funds
         bankAccountService.removeBalance(contract.getBuyer(), contract.getPrice());
+        System.out.println("Test4");
         bankAccountService.addBalance(contract.getSeller(), contract.getPrice());
+        System.out.println("Test5");
 
         contract.setRealizationDate(Instant.now().toEpochMilli());
     }

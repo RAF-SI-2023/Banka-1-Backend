@@ -617,7 +617,7 @@ public class BootstrapData implements CommandLineRunner {
             // dovde
 
         Capital capital111 = new Capital();
-        capital111.setPublicTotal(500000D);
+        capital111.setPublicTotal(0D);
         capital111.setListingType(ListingType.STOCK);
         capital111.setReserved(0D);
         capital111.setListingId(1L);
@@ -638,7 +638,7 @@ public class BootstrapData implements CommandLineRunner {
             capitalRepository.save(capital2);
 
         Capital capital123 = new Capital();
-        capital123.setPublicTotal(500000D);
+        capital123.setPublicTotal(0D);
         capital123.setListingType(ListingType.STOCK);
         capital123.setReserved(0D);
         capital123.setListingId(1L);
