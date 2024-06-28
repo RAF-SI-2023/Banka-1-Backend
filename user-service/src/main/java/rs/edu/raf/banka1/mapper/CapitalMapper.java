@@ -52,6 +52,7 @@ public class CapitalMapper {
         dto.setLastModified(capital.getLastModified());
         dto.setAmount(capital.getPublicTotal());
         dto.setOwnerName(ownerName);
+        dto.setIsIndividual(capital.getBankAccount().getCompany() == null);
         return dto;
     }
 }

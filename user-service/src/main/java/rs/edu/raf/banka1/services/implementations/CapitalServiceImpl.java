@@ -94,7 +94,11 @@ public class CapitalServiceImpl implements CapitalService {
 
     @Override
     public void addBalance(Long listingId, ListingType type, BankAccount bankAccount, Double amount) {
-        Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
+//        Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
+        Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElse(null);
+        if (capital == null) {
+            capital = createCapital(type, listingId, 0D, 0D, bankAccount);
+        }
         processAddBalance(capital, amount);
     }
 
