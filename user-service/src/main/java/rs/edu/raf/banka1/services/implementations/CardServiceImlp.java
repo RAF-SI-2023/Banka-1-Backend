@@ -1,6 +1,6 @@
 package rs.edu.raf.banka1.services.implementations;
 
-
+import org.springframework.cache.annotation.Cacheable;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +29,7 @@ public class CardServiceImlp implements CardService {
 
 
     @Override
+    @Cacheable(value = "getAllCardsByAccountNumber", key = "#account_number")
     public List<Card> getAllCardsByAccountNumber(String accountNumber) {
         return cardRepository.findByAccountNumber(accountNumber);
     }
@@ -57,6 +58,7 @@ public class CardServiceImlp implements CardService {
     }
 
     @Override
+    @Cacheable(value = "getAllCardsByCustomerId", key = "#user_id")
     public List<Card> getAllCardsByCustomerId(Long customerId) {
         Customer customer = customerRepository.findById(customerId).orElse(null);
         List<Card> cards = new ArrayList<>();

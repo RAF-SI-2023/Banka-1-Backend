@@ -1,5 +1,7 @@
 package rs.edu.raf.banka1.services.implementations;
 
+
+import org.springframework.cache.annotation.Cacheable;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.Setter;
@@ -51,6 +53,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Cacheable(value="getAllTransactions", key="#account_number")
     public List<TransactionDto> getAllTransaction(String accNum) {
         return transactionRepository.getTransactionsByBankAccount_AccountNumber(accNum)
             .stream()
@@ -144,6 +147,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Cacheable(value="getTransactionsForEmployee", key="#user_id")
     public List<TransactionDto> getTransactionsForEmployee(Long userId) {
         return transactionRepository.getTransactionsByEmployee_UserId(userId)
             .stream()

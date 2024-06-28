@@ -1,6 +1,7 @@
 package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -75,6 +76,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Cacheable(value = "employeesByEmail", key = "#email")
     public EmployeeDto findByEmail(String email) {
         return this.employeeRepository.findByEmail(email)
                 .map(this.employeeMapper::employeeToEmployeeDto)
@@ -82,6 +84,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Cacheable(value = "getAllEmployees")
     public List<EmployeeDto> findAll() {
         return this.employeeRepository.findAll()
                 .stream()
@@ -90,6 +93,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Cacheable(value = "employeesById", key = "#user_id")
     public EmployeeDto findById(Long id) {
         return this.employeeRepository.findById(id)
                 .map(this.employeeMapper::employeeToEmployeeDto)
@@ -285,6 +289,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Cacheable(value = "findEmployeesByUsername", key="#email")
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Employee> myEmployee = this.employeeRepository.findByEmail(username);
 
