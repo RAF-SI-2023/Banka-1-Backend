@@ -1,10 +1,10 @@
-package zews.otc_testing.repository;
+package rs.edu.raf.banka1.repositories.otc;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import zews.otc_testing.entity.listing.MyStock;
+import rs.edu.raf.banka1.model.listing.MyStock;
 
 import java.util.List;
 

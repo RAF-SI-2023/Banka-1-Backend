@@ -94,7 +94,11 @@ public class CapitalServiceImpl implements CapitalService {
 
     @Override
     public void addBalance(Long listingId, ListingType type, BankAccount bankAccount, Double amount) {
-        Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
+//        Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
+        Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElse(null);
+        if (capital == null) {
+            capital = createCapital(type, listingId, 0D, 0D, bankAccount);
+        }
         processAddBalance(capital, amount);
     }
 
@@ -164,20 +168,29 @@ public class CapitalServiceImpl implements CapitalService {
     }
 
     @Override
-    public List<AllPublicCapitalsDto> getAllPublicCapitals() {
+    public List<AllPublicCapitalsDto> getAllPublicCapitals(Customer customer) {
         List<Capital> capitals = this.capitalRepository.getAllByPublicTotalGreaterThan(0d);
 
         List<AllPublicCapitalsDto> allPublicCapitalsDtos = new ArrayList<>();
 
+        List<BankAccount> accounts;
+        if(customer!=null) {
+            accounts = customer.getAccountIds();
+        }
+        else{
+            accounts = new ArrayList<>();
+        }
         capitals.forEach((Capital capital) -> {
-            String name = "";
-            if(capital.getBankAccount().getCompany() != null) {
-                name = capital.getBankAccount().getCompany().getCompanyName();
-            } else {
-                name = capital.getBankAccount().getCustomer().getFirstName() + " " + capital.getBankAccount().getCustomer().getLastName();
-            }
+            if(!accounts.contains(capital.getBankAccount())){
+                String name = "";
+                if(capital.getBankAccount().getCompany() != null) {
+                    name = capital.getBankAccount().getCompany().getCompanyName();
+                } else {
+                    name = capital.getBankAccount().getCustomer().getFirstName() + " " + capital.getBankAccount().getCustomer().getLastName();
+                }
 
-            allPublicCapitalsDtos.add(capitalMapper.capitalToAllPublicCapitalsDto(capital, name));
+                allPublicCapitalsDtos.add(capitalMapper.capitalToAllPublicCapitalsDto(capital, name));
+            }
         });
 
 

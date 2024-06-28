@@ -434,6 +434,46 @@ public class BootstrapData implements CommandLineRunner {
                 bankAccount4testa = bankAccountService.findBankAccountByAccountNumber(bankAccount4testa.getAccountNumber());
             }
 
+            BankAccount bankAccount5testa = new BankAccount();
+            bankAccount5testa.setAccountStatus(true);
+            bankAccount5testa.setAccountType(AccountType.BUSINESS);
+            bankAccount5testa.setAvailableBalance(10000.0);
+            bankAccount5testa.setBalance(10000.0);
+            bankAccount5testa.setMaintenanceCost(240.0);
+            bankAccount5testa.setCompany(company);
+            bankAccount5testa.setCreatedByAgentId(52L);
+            bankAccount5testa.setCreationDate(new Date().getTime());
+            bankAccount5testa.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElse(null));
+            bankAccount5testa.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+            bankAccount5testa.setAccountName("testCompanyAccountUSD");
+            bankAccount5testa.setAccountNumber("12345345323");
+            bankAccount5testa.setSubtypeOfAccount("LICNI");
+            if (bankAccountService.findBankAccountByAccountNumber(bankAccount5testa.getAccountNumber()) == null) {
+                bankAccountService.saveBankAccount(bankAccount5testa);
+            } else {
+                bankAccount5testa = bankAccountService.findBankAccountByAccountNumber(bankAccount5testa.getAccountNumber());
+            }
+
+            BankAccount bankAccount6testa = new BankAccount();
+            bankAccount6testa.setAccountStatus(true);
+            bankAccount6testa.setAccountType(AccountType.CURRENT);
+            bankAccount6testa.setAvailableBalance(10000.0);
+            bankAccount6testa.setBalance(10000.0);
+            bankAccount6testa.setMaintenanceCost(240.0);
+            bankAccount6testa.setCustomer(testCustomer2);
+            bankAccount6testa.setCreatedByAgentId(52L);
+            bankAccount6testa.setCreationDate(new Date().getTime());
+            bankAccount6testa.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElse(null));
+            bankAccount6testa.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+            bankAccount6testa.setAccountName("testCompanyAccountUSD");
+            bankAccount6testa.setAccountNumber("12345345323123");
+            bankAccount6testa.setSubtypeOfAccount("LICNI");
+            if (bankAccountService.findBankAccountByAccountNumber(bankAccount6testa.getAccountNumber()) == null) {
+                bankAccountService.saveBankAccount(bankAccount6testa);
+            } else {
+                bankAccount6testa = bankAccountService.findBankAccountByAccountNumber(bankAccount6testa.getAccountNumber());
+            }
+
             Capital capital = new Capital();
             capital.setPublicTotal(0D);
             capital.setListingType(ListingType.STOCK);
@@ -443,6 +483,16 @@ public class BootstrapData implements CommandLineRunner {
             capital.setBankAccount(bankAccountCompany);
             capital.setTotal(50D);
             capitalRepository.save(capital);
+
+            Capital capital22 = new Capital();
+            capital22.setPublicTotal(10D);
+            capital22.setListingType(ListingType.STOCK);
+            capital22.setReserved(0D);
+            capital22.setListingId(1L);
+            capital22.setTicker("DT");
+            capital22.setBankAccount(bankAccount6testa);
+            capital22.setTotal(50D);
+            capitalRepository.save(capital22);
 
             MarginAccount marginAccountCompany = new MarginAccount();
             marginAccountCompany.setCustomer(bankAccountCompany);
@@ -598,7 +648,7 @@ public class BootstrapData implements CommandLineRunner {
             // dovde
 
         Capital capital111 = new Capital();
-        capital111.setPublicTotal(500000D);
+        capital111.setPublicTotal(0D);
         capital111.setListingType(ListingType.STOCK);
         capital111.setReserved(0D);
         capital111.setListingId(1L);
@@ -619,7 +669,7 @@ public class BootstrapData implements CommandLineRunner {
             capitalRepository.save(capital2);
 
         Capital capital123 = new Capital();
-        capital123.setPublicTotal(500000D);
+        capital123.setPublicTotal(0D);
         capital123.setListingType(ListingType.STOCK);
         capital123.setReserved(0D);
         capital123.setListingId(1L);

@@ -30,6 +30,7 @@ public class CapitalMapper {
         capitalProfitDto.setBankAccountNumber(capital.getBankAccount() == null ? null : capital.getBankAccount().getAccountNumber());
         capitalProfitDto.setTotalPrice((capital.getTotal()-capital.getReserved())*price);
         capitalProfitDto.setTicker(capital.getTicker());
+        capitalProfitDto.setPublicTotal(capital.getPublicTotal());
         return capitalProfitDto;
     }
 
@@ -53,6 +54,7 @@ public class CapitalMapper {
         dto.setLastModified(capital.getLastModified());
         dto.setAmount(capital.getPublicTotal());
         dto.setOwnerName(ownerName);
+        dto.setIsIndividual(capital.getBankAccount().getCompany() == null);
         return dto;
     }
 

@@ -1,4 +1,4 @@
-package zews.otc_testing.entity.offer;
+package rs.edu.raf.banka1.model.offer;
 
 public enum OfferStatus {
     PROCESSING,
