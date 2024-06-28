@@ -74,6 +74,12 @@ public class CapitalServiceImpl implements CapitalService {
         return capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseGet(() -> createCapital(type, listingId, 0D, 0D, bankAccount));
     }
 
+
+    @Override
+    public List<Capital> getCapitalStockForBank(BankAccount bankAccount) {
+        return capitalRepository.getCapitalsByListingTypeAndBankAccount(ListingType.STOCK, bankAccount);
+    }
+
     @Override
     public void reserveBalance(Long listingId, ListingType type, BankAccount bankAccount, Double amount) {
         Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
