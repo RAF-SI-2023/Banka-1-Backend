@@ -1,5 +1,7 @@
 package rs.edu.raf.banka1.services.implementations;
 
+
+import org.springframework.cache.annotation.Cacheable;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,8 +21,11 @@ import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.TransactionService;
 import rs.edu.raf.banka1.utils.Constants;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,6 +56,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Cacheable(value="getAllTransactions", key="#account_number")
     public List<TransactionDto> getAllTransaction(String accNum) {
         return transactionRepository.getTransactionsByBankAccount_AccountNumber(accNum)
             .stream()
@@ -63,6 +69,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction();
         transaction.setCurrency(bankAccount.getCurrency());
         transaction.setBankAccount(bankAccount);
+        transaction.setDateTime(new Date().getTime());
         if(order.getOrderType().equals(OrderType.BUY)) {
             transaction.setBuy(price);
             //Add stocks to capital
@@ -144,6 +151,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Cacheable(value="getTransactionsForEmployee", key="#user_id")
     public List<TransactionDto> getTransactionsForEmployee(Long userId) {
         return transactionRepository.getTransactionsByEmployee_UserId(userId)
             .stream()
