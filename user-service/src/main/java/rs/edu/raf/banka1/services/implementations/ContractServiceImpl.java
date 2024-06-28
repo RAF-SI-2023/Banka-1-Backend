@@ -75,6 +75,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public Boolean denyContract(Long contractId, String comment) {
         contractRepository.updateCommentById(comment, contractId);
+        contractRepository.denyContract(contractId);
         return true;
     }
 
@@ -121,6 +122,7 @@ public class ContractServiceImpl implements ContractService {
         List<ContractDto> contractDtos = new ArrayList<>();
 
         contracts.forEach((Contract contract) -> {
+
             ContractDto contractDto = contractMapper.contractToContractDto(contract);
             contractDtos.add(contractDto);
         });

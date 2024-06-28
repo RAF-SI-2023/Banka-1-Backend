@@ -413,6 +413,26 @@ public class BootstrapData implements CommandLineRunner {
                 bankAccount4testa = bankAccountService.findBankAccountByAccountNumber(bankAccount4testa.getAccountNumber());
             }
 
+            BankAccount bankAccount5testa = new BankAccount();
+            bankAccount5testa.setAccountStatus(true);
+            bankAccount5testa.setAccountType(AccountType.BUSINESS);
+            bankAccount5testa.setAvailableBalance(10000.0);
+            bankAccount5testa.setBalance(10000.0);
+            bankAccount5testa.setMaintenanceCost(240.0);
+            bankAccount5testa.setCompany(company);
+            bankAccount5testa.setCreatedByAgentId(52L);
+            bankAccount5testa.setCreationDate(new Date().getTime());
+            bankAccount5testa.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElse(null));
+            bankAccount5testa.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+            bankAccount5testa.setAccountName("testCompanyAccountUSD");
+            bankAccount5testa.setAccountNumber("12345345323");
+            bankAccount5testa.setSubtypeOfAccount("LICNI");
+            if (bankAccountService.findBankAccountByAccountNumber(bankAccount5testa.getAccountNumber()) == null) {
+                bankAccountService.saveBankAccount(bankAccount5testa);
+            } else {
+                bankAccount5testa = bankAccountService.findBankAccountByAccountNumber(bankAccount5testa.getAccountNumber());
+            }
+
             Capital capital = new Capital();
             capital.setPublicTotal(0D);
             capital.setListingType(ListingType.STOCK);
@@ -436,8 +456,8 @@ public class BootstrapData implements CommandLineRunner {
             this.marginAccountRepository.save(marginAccountCompany1);
 
             MarginAccount marginAccountCompany2 = new MarginAccount();
-            marginAccountCompany.setCustomer(bankAccountCompany);
-            marginAccountCompany.setCurrency(bankAccountCompany.getCurrency());
+            marginAccountCompany2.setCustomer(bankAccountCompany);
+            marginAccountCompany2.setCurrency(bankAccountCompany.getCurrency());
             marginAccountCompany2.setListingType(ListingType.FOREX);
             this.marginAccountRepository.save(marginAccountCompany2);
 

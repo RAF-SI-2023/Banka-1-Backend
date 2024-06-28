@@ -28,5 +28,5 @@ public interface CapitalService {
     CapitalDto getCapitalForStockId(Long stockId);
     CapitalDto getCapitalForForexId(Long forexId);
 
-    List<AllPublicCapitalsDto> getAllPublicCapitals();
+    List<AllPublicCapitalsDto> getAllPublicCapitals(Customer customer);
 }

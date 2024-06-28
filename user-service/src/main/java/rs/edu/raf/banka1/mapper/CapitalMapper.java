@@ -28,6 +28,7 @@ public class CapitalMapper {
         capitalProfitDto.setBankAccountNumber(capital.getBankAccount() == null ? null : capital.getBankAccount().getAccountNumber());
         capitalProfitDto.setTotalPrice((capital.getTotal()-capital.getReserved())*price);
         capitalProfitDto.setTicker(capital.getTicker());
+        capitalProfitDto.setPublicTotal(capital.getPublicTotal());
         return capitalProfitDto;
     }
 
