@@ -10,7 +10,9 @@ import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
 import rs.edu.raf.banka1.dtos.market_service.OptionsDto;
 import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.model.entity.listing.MyStock;
 import rs.edu.raf.banka1.repositories.*;
+import rs.edu.raf.banka1.repositories.otc_trade.MyStockRepository;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateTransferRequest;
@@ -57,30 +59,32 @@ public class BootstrapData implements CommandLineRunner {
     private final ContractRepository contractRepository;
 
     private final MarginAccountRepository marginAccountRepository;
+    private final MyStockRepository myStockRepository;
+
 
     private final ScheduledExecutorService resetLimitExecutor = Executors.newScheduledThreadPool(1);
 
     @Autowired
     public BootstrapData(
-        final EmployeeRepository userRepository,
-        final PasswordEncoder passwordEncoder,
-        final PermissionRepository permissionRepository,
-        final CurrencyRepository currencyRepository,
-        final CompanyRepository companyRepository,
-        final BankAccountService bankAccountService,
-        final CustomerRepository customerRepository,
-        final LoanRequestRepository loanRequestRepository,
-        final LoanRepository loanRepository,
-        final CardRepository cardRepository,
-        final MarketService marketService,
-        final CapitalService capitalService,
-        final CapitalRepository capitalRepository,
-        final EmployeeService employeeService,
-        final OrderRepository orderRepository,
-        final TransferService transferService,
-        final MarginAccountRepository marginAccountRepository,
-        TransferRepository transferRepository,
-        final ContractRepository contractRepository) {
+            final EmployeeRepository userRepository,
+            final PasswordEncoder passwordEncoder,
+            final PermissionRepository permissionRepository,
+            final CurrencyRepository currencyRepository,
+            final CompanyRepository companyRepository,
+            final BankAccountService bankAccountService,
+            final CustomerRepository customerRepository,
+            final LoanRequestRepository loanRequestRepository,
+            final LoanRepository loanRepository,
+            final CardRepository cardRepository,
+            final MarketService marketService,
+            final CapitalService capitalService,
+            final CapitalRepository capitalRepository,
+            final EmployeeService employeeService,
+            final OrderRepository orderRepository,
+            final TransferService transferService,
+            final MarginAccountRepository marginAccountRepository,
+            TransferRepository transferRepository,
+            final ContractRepository contractRepository, MyStockRepository myStockRepository) {
 
         this.employeeRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -101,10 +105,45 @@ public class BootstrapData implements CommandLineRunner {
         this.marginAccountRepository = marginAccountRepository;
         this.transferRepository = transferRepository;
         this.contractRepository = contractRepository;
+        this.myStockRepository = myStockRepository;
     }
 
     @Override
     public void run(String... args) {
+
+        if (myStockRepository.count() == 0) {
+            MyStock stok1 = new MyStock();
+            stok1.setTicker("STK1");
+            stok1.setAmount(100);
+            stok1.setCurrencyMark("RSD");
+            stok1.setPrivateAmount(50);
+            stok1.setPublicAmount(50);
+            stok1.setCompanyId(1L);
+            stok1.setUserId(null);
+            stok1.setMinimumPrice(500.0);
+
+            MyStock stok2 = new MyStock();
+            stok2.setTicker("STK2");
+            stok2.setAmount(100);
+            stok2.setCurrencyMark("RSD");
+            stok2.setPrivateAmount(50);
+            stok2.setPublicAmount(50);
+            stok2.setCompanyId(1L);
+            stok2.setUserId(null);
+            stok2.setMinimumPrice(1500.0);
+
+            MyStock stok3 = new MyStock();
+            stok3.setTicker("STK3");
+            stok3.setAmount(100);
+            stok3.setCurrencyMark("RSD");
+            stok3.setPrivateAmount(50);
+            stok3.setPublicAmount(50);
+            stok3.setCompanyId(1L);
+            stok3.setUserId(null);
+            stok3.setMinimumPrice(200.0);
+
+            myStockRepository.saveAll(List.of(stok1, stok2, stok3));
+        }
 
         if(employeeRepository.findByEmail("admin").isPresent()) {
             return;
