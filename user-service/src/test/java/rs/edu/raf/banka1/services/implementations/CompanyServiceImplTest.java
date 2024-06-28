@@ -16,6 +16,7 @@ import rs.edu.raf.banka1.mapper.BankAccountMapper;
 import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.mapper.CompanyMapper;
 import rs.edu.raf.banka1.model.Company;
+import rs.edu.raf.banka1.model.Currency;
 import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.services.CompanyService;
@@ -84,6 +85,7 @@ class CompanyServiceImplTest {
             companyResultExpected.setRegistrationNumber("regNumber");
             companyResultExpected.setTelephoneNumber("telephoneNumber");
 
+            when(currencyRepository.findCurrencyByCurrencyCode("RSD")).thenReturn(Optional.of(new Currency()));
             Company realResult = companyService.createCompany(createCompanyDto);
 
             assertEquals(companyResultExpected.getCompanyName(), realResult.getCompanyName());
