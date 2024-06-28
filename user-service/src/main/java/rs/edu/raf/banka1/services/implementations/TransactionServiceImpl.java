@@ -66,10 +66,9 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public void createTransaction(BankAccount bankAccount, Capital securityCapital, Double price, MarketOrder order, Long securityAmount) {
         Transaction transaction = new Transaction();
-        long creationDate = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toEpochSecond();      // currentDate
         transaction.setCurrency(bankAccount.getCurrency());
         transaction.setBankAccount(bankAccount);
-        transaction.setDateTime(creationDate);
+        transaction.setDateTime(new Date().getTime());
         if(order.getOrderType().equals(OrderType.BUY)) {
             transaction.setBuy(price);
             //Add stocks to capital
