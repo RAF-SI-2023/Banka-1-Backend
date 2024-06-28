@@ -101,6 +101,12 @@ public class CustomerMapper {
                 .map(permissionMapper::permissionToPermissionDto)
                 .collect(Collectors.toList())
         );
+        
+        if(customer.getCompany() != null) {
+            customerResponse.setIsLegalEntity(true);
+        } else {
+            customerResponse.setIsLegalEntity(false);
+        }
 
         customerResponse.setDateOfBirth(customer.getDateOfBirth());
         customerResponse.setGender(customer.getGender());

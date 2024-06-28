@@ -182,7 +182,7 @@ public class OrderController {
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
-    @GetMapping(value = "legal")
+    @GetMapping(value = "/legal")
     @Operation(summary = "Legal person lists his orders.", description = "Legal person lists his order.",
             parameters = {
                     @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
