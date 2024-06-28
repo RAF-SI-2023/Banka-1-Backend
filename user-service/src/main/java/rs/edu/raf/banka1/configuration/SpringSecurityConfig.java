@@ -58,6 +58,7 @@ public class SpringSecurityConfig {
                                         .requestMatchers(antMatcher("/customer/activate/**")).permitAll()
                                         .requestMatchers(antMatcher("/customer/newpassword/**")).permitAll()
                                         .requestMatchers(antMatcher("/customer/reset/**")).permitAll()
+                                        .requestMatchers(antMatcher("/api/v1/otcTrade/**")).permitAll()
                                         .anyRequest().authenticated()
 
                 )
