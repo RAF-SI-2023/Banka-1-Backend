@@ -334,6 +334,9 @@ public class CapitalServiceImpl implements CapitalService {
     private boolean checkCapitalForBuyOrder(MarketOrder order) {
 //        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingType(order.getListingId(), order.getListingType()).orElseThrow(()-> new CapitalNotFoundByListingIdAndTypeException(order.getListingId(), order.getListingType()));
         BankAccount defaultAccount = bankAccountService.getDefaultBankAccount();
+        if (order.getCustomer() != null) {
+            defaultAccount = bankAccountService.findBankAccountByAccountNumber(order.getBankAccountNumber());
+        }
         double available = defaultAccount.getAvailableBalance();
 
         return order.getPrice() <= available;

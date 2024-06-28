@@ -298,6 +298,9 @@ public class OrderServiceImpl implements OrderService {
 
     void reserveStockCapital(MarketOrder order) {
         BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
+        if (order.getCustomer() != null){
+            bankAccount = bankAccountService.findBankAccountByAccountNumber(order.getBankAccountNumber());
+        }
         if(order.getOrderType().equals(OrderType.BUY)) {
             bankAccountService.reserveBalance(bankAccount, order.getPrice());
         } else {
