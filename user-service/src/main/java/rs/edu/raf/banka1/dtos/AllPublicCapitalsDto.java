@@ -20,5 +20,4 @@ public class AllPublicCapitalsDto {
     private Double amount;
     private Instant lastModified;
     private String ownerName;
-    private Boolean isIndividual;
 }

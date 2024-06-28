@@ -122,7 +122,6 @@ public class ContractServiceImpl implements ContractService {
         List<ContractDto> contractDtos = new ArrayList<>();
 
         contracts.forEach((Contract contract) -> {
-
             ContractDto contractDto = contractMapper.contractToContractDto(contract);
             contractDtos.add(contractDto);
         });
@@ -141,6 +140,7 @@ public class ContractServiceImpl implements ContractService {
         capitalService.removeFromPublicCapital(contract.getListingId(), contract.getListingType(), contract.getSeller(), contract.getAmount());
         capitalService.removeBalance(contract.getListingId(), contract.getListingType(), contract.getSeller(), contract.getAmount());
         capitalService.addBalance(contract.getListingId(), contract.getListingType(), contract.getBuyer(), contract.getAmount());
+
         //Transfer funds
         bankAccountService.removeBalance(contract.getBuyer(), contract.getPrice());
         bankAccountService.addBalance(contract.getSeller(), contract.getPrice());
