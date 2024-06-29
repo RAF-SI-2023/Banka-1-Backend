@@ -1173,8 +1173,8 @@ public class BootstrapData implements CommandLineRunner {
                         new BankAccountRequest(
                                 AccountType.BUSINESS,
                                 "Bank's account",
-                                1000000.0,
-                                1000000.0,
+                                100000000000.0,
+                                100000000000.0,
                                 currency,
                                 null,
                                 0.0
