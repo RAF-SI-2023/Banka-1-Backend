@@ -14,6 +14,7 @@ import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.CapitalRepository;
+import rs.edu.raf.banka1.repositories.CompanyRepository;
 import rs.edu.raf.banka1.services.*;
 import rs.edu.raf.banka1.utils.Constants;
 
@@ -32,16 +33,20 @@ public class CapitalServiceImpl implements CapitalService {
     private CapitalRepository capitalRepository;
     private CapitalMapper capitalMapper;
     private BankAccountService bankAccountService;
+    private final CompanyRepository companyRepository;
+
     public CapitalServiceImpl(BankAccountRepository bankAccountRepository,
                               CapitalRepository capitalRepository,
                               CapitalMapper capitalMapper,
                               BankAccountService bankAccountService,
-                              MarketService marketService) {
+                              MarketService marketService,
+                              CompanyRepository companyRepository) {
         this.bankAccountRepository = bankAccountRepository;
         this.capitalRepository = capitalRepository;
         this.capitalMapper = capitalMapper;
         this.marketService = marketService;
         this.bankAccountService = bankAccountService;
+        this.companyRepository = companyRepository;
     }
 
     @Override
@@ -312,8 +317,16 @@ public class CapitalServiceImpl implements CapitalService {
     }
 
     @Override
-    public List<CapitalProfitDto> getListingCapitalsQuantity() {
-        return this.capitalRepository.findAll().stream()
+    public List<CapitalProfitDto> getListingCapitalsQuantity(User user) {
+        BankAccount bankAccount = null;
+
+        if(user.getCompany() == null) {
+            bankAccount = bankAccountService.getBankAccountByCustomerAndCurrencyCode(user.getUserId(), Constants.DEFAULT_CURRENCY);
+        } else {
+            bankAccount = bankAccountService.getBankAccountByCompanyAndCurrencyCode(user.getCompany().getId(), Constants.DEFAULT_CURRENCY);
+        }
+
+        return this.capitalRepository.findByBankAccount_AccountNumber(bankAccount.getAccountNumber()).stream()
                 .filter(capital -> capital.getListingType() != null)
                 .map(capital -> {
                     Double price = 0.0;

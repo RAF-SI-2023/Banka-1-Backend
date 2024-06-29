@@ -3,13 +3,17 @@ package rs.edu.raf.banka1.mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import rs.edu.raf.banka1.dtos.BankAccountDto;
+import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.repositories.PermissionRepository;
 import rs.edu.raf.banka1.requests.customer.CustomerData;
 import rs.edu.raf.banka1.requests.customer.EditCustomerRequest;
 import rs.edu.raf.banka1.responses.CustomerResponse;
+import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CompanyService;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -24,6 +28,9 @@ public class CustomerMapper {
 
     @Autowired
     private CompanyService companyService;
+
+    @Autowired
+    private BankAccountService bankAccountService;
 
     public CustomerMapper(PermissionMapper permissionMapper, BankAccountMapper bankAccountMapper) {
         this.permissionMapper = permissionMapper;
@@ -104,15 +111,29 @@ public class CustomerMapper {
 
         if(customer.getCompany() != null) {
             customerResponse.setIsLegalEntity(true);
+            customerResponse.setCompany(customer.getCompany().getCompanyName());
         } else {
             customerResponse.setIsLegalEntity(false);
+            customerResponse.setCompany("No company");
         }
+
 
         customerResponse.setDateOfBirth(customer.getDateOfBirth());
         customerResponse.setGender(customer.getGender());
         customerResponse.setAddress(customer.getAddress());
-        customerResponse.setAccountIds(customer.getAccountIds().stream().
-                map(bankAccountMapper::toDto).collect(Collectors.toList()));
+
+        List<BankAccountDto> accountDtoList = customer
+                .getAccountIds()
+                .stream()
+                .map(bankAccountMapper::toDto)
+                .collect(Collectors.toList());
+
+        if(customer.getCompany() != null) {
+            List<BankAccount> companyAccounts = bankAccountService.getBankAccountsByCompany(customer.getCompany().getId());
+            accountDtoList.addAll(companyAccounts.stream().map(bankAccountMapper::toDto).toList());
+        }
+
+        customerResponse.setAccountIds(accountDtoList);
 
         return customerResponse;
     }

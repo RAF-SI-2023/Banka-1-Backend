@@ -35,6 +35,7 @@ public class ContractMapper {
         contractDto.setListingId(contract.getListingId());
         contractDto.setAmount(contract.getAmount());
         contractDto.setPrice(contract.getPrice());
+        contractDto.setIsIndividual(contract.getSeller().getCompany() == null);
 
         return contractDto;
     }
