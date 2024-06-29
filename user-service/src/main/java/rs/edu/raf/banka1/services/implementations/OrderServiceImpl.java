@@ -186,6 +186,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<OrderDto> getAllOrdersForCustomer(Customer currentAuth) {
+        return orderRepository.getAllByCustomer(currentAuth).stream().map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
+    }
+
+    @Override
     public List<OrderDto> getAllOrders() {
         return orderRepository.findAll().stream().map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
     }
