@@ -303,8 +303,11 @@ public class ListingStockServiceImplTest {
     @Test
     public void testRefreshAllStocks() {
         List<ListingStock> expectedStocks = new ArrayList<>();
-        expectedStocks.add(new ListingStock());
-        expectedStocks.add(new ListingStock());
+        ListingStock stock1 = new ListingStock();
+        stock1.setPrice(100.0);
+        ListingStock stock2 = new ListingStock();
+        expectedStocks.add(stock1);
+        expectedStocks.add(stock2);
 
         when(stockRepository.findAll()).thenReturn(expectedStocks);
 
