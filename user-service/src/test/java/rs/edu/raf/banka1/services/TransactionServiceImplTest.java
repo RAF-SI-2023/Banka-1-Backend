@@ -13,12 +13,15 @@ import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.OrderRepository;
 import rs.edu.raf.banka1.repositories.StockProfitRepository;
 import rs.edu.raf.banka1.repositories.TransactionRepository;
+import rs.edu.raf.banka1.requests.BankAccountRequest;
+import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateTransactionRequest;
 import rs.edu.raf.banka1.services.implementations.TransactionServiceImpl;
 
 import java.time.Instant;
 import java.util.Arrays;
 import rs.edu.raf.banka1.model.Currency;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.Collections;
 import java.util.List;
@@ -195,8 +198,24 @@ class TransactionServiceImplTest {
             MarketOrder order = new MarketOrder();
             order.setOrderType(OrderType.BUY);
 
+            BankAccount bankAccDefaultAcc = bankAccountService.createBankAccount(
+                    new CreateBankAccountRequest(
+                            new BankAccountRequest(
+                                    AccountType.BUSINESS,
+                                    "Bank's account",
+                                    1000000.0,
+                                    1000000.0,
+                                    Constants.DEFAULT_CURRENCY,
+                                    null,
+                                    0.0
+                            ),
+                            null,
+                            1L
+                    ));
+
             transactionService.createTransaction(bankAccount, securityCapital, price, order, securityAmount);
 
+            when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccDefaultAcc);
             verify(capitalService).addBalance(eq(listingId), eq(listingType), eq(bankAccount), eq((double) securityAmount));
             verify(bankAccountService).commitReserved(eq(bankAccount), eq(price));
             verify(transactionRepository).save(any(Transaction.class));
