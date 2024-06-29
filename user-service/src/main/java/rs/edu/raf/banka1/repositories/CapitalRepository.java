@@ -15,6 +15,7 @@ import java.util.Optional;
 public interface CapitalRepository extends JpaRepository<Capital, Long> {
 
     Optional<Capital> getCapitalByListingIdAndListingTypeAndBankAccount(Long listingId, ListingType listingType, BankAccount bankAccount);
+    List<Capital> getCapitalsByListingTypeAndBankAccount(ListingType listingType, BankAccount bankAccount);
     List<Capital> getCapitalsByBankAccountAndListingType(BankAccount bankAccount, ListingType listingType);
 //    Optional<Capital> getCapitalByBankAccount(BankAccount bankAccount);
 

@@ -123,39 +123,39 @@ public class BootstrapData implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        if (myStockRepository.count() == 0) {
-            MyStock stok1 = new MyStock();
-            stok1.setTicker("STK1");
-            stok1.setAmount(100);
-            stok1.setCurrencyMark("RSD");
-            stok1.setPrivateAmount(50);
-            stok1.setPublicAmount(50);
-            stok1.setCompanyId(1L);
-            stok1.setUserId(null);
-            stok1.setMinimumPrice(500.0);
-
-            MyStock stok2 = new MyStock();
-            stok2.setTicker("STK2");
-            stok2.setAmount(100);
-            stok2.setCurrencyMark("RSD");
-            stok2.setPrivateAmount(50);
-            stok2.setPublicAmount(50);
-            stok2.setCompanyId(1L);
-            stok2.setUserId(null);
-            stok2.setMinimumPrice(1500.0);
-
-            MyStock stok3 = new MyStock();
-            stok3.setTicker("STK3");
-            stok3.setAmount(100);
-            stok3.setCurrencyMark("RSD");
-            stok3.setPrivateAmount(50);
-            stok3.setPublicAmount(50);
-            stok3.setCompanyId(1L);
-            stok3.setUserId(null);
-            stok3.setMinimumPrice(200.0);
-
-            myStockRepository.saveAll(List.of(stok1, stok2, stok3));
-        }
+//        if (myStockRepository.count() == 0) {
+//            MyStock stok1 = new MyStock();
+//            stok1.setTicker("STK1");
+//            stok1.setAmount(100);
+//            stok1.setCurrencyMark("RSD");
+//            stok1.setPrivateAmount(50);
+//            stok1.setPublicAmount(50);
+//            stok1.setCompanyId(1L);
+//            stok1.setUserId(null);
+//            stok1.setMinimumPrice(500.0);
+//
+//            MyStock stok2 = new MyStock();
+//            stok2.setTicker("STK2");
+//            stok2.setAmount(100);
+//            stok2.setCurrencyMark("RSD");
+//            stok2.setPrivateAmount(50);
+//            stok2.setPublicAmount(50);
+//            stok2.setCompanyId(1L);
+//            stok2.setUserId(null);
+//            stok2.setMinimumPrice(1500.0);
+//
+//            MyStock stok3 = new MyStock();
+//            stok3.setTicker("STK3");
+//            stok3.setAmount(100);
+//            stok3.setCurrencyMark("RSD");
+//            stok3.setPrivateAmount(50);
+//            stok3.setPublicAmount(50);
+//            stok3.setCompanyId(1L);
+//            stok3.setUserId(null);
+//            stok3.setMinimumPrice(200.0);
+//
+//            myStockRepository.saveAll(List.of(stok1, stok2, stok3));
+//        }
 
         if(employeeRepository.findByEmail("admin").isPresent()) {
             return;
@@ -966,6 +966,23 @@ public class BootstrapData implements CommandLineRunner {
         contractRepository.save(contract);
         } catch (Exception e) {
             System.out.println(e.getMessage());//TODO: nzm da li ovde da zovem logger, cuo sam od nekog da se restartuje sistem onda?
+        }
+
+        if (myStockRepository.count() == 0){
+            BankAccount rsdAcc = bankAccountService.getDefaultBankAccount();
+            List<Capital> myStocks = capitalService.getCapitalStockForBank(rsdAcc);
+            for (Capital capital:myStocks){
+                MyStock stok1 = new MyStock();
+                stok1.setTicker(capital.getTicker());
+                stok1.setAmount(capital.getTotal().intValue());
+                stok1.setCurrencyMark("RSD");
+                stok1.setPrivateAmount(capital.getTotal().intValue()-capital.getPublicTotal().intValue());
+                stok1.setPublicAmount(capital.getPublicTotal().intValue());
+                stok1.setCompanyId(1L);
+                stok1.setUserId(null);
+                stok1.setMinimumPrice(20.0);
+                myStockRepository.save(stok1);
+            }
         }
 
     }
