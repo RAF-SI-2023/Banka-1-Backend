@@ -85,6 +85,7 @@ class ContractServiceImplTest {
             resultDto.setAmount(1D);
             resultDto.setPrice(1D);
             resultDto.setListingId(1L);
+            resultDto.setIsIndividual(true);
 
             Capital sellerCapital = new Capital();
             sellerCapital.setTotal(2D);
@@ -143,6 +144,7 @@ class ContractServiceImplTest {
             resultDto.setAmount(1D);
             resultDto.setPrice(1D);
             resultDto.setListingId(1L);
+            resultDto.setIsIndividual(true);
 
             Capital sellerCapital = new Capital();
             sellerCapital.setTotal(2D);
