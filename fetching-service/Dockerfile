@@ -32,6 +32,23 @@ RUN --mount=type=cache,target=/root/.m2 mvn -DfinalName=app -Dmaven.test.skip -D
 # Ovde kopiramo .jar fajl napravljen u prethodnom, tj. prvom stage-u.
 FROM openjdk:23
 
+RUN microdnf install dnf
+
+RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
+    dnf install -y \
+    wget \
+    gnupg \
+    unzip \
+    https://dl.google.com/linux/chrome/rpm/stable/x86_64/google-chrome-stable-126.0.6478.126-1.x86_64.rpm && \
+    dnf clean all
+
+# Download and install ChromeDriver
+RUN CHROME_DRIVER_VERSION=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE) && \
+    wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip && \
+    unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
+    rm /tmp/chromedriver.zip && \
+    chmod +x /usr/local/bin/chromedriver
+
 COPY --from=builder /usr/app/target/app.jar /app.jar
 
 EXPOSE 8082
