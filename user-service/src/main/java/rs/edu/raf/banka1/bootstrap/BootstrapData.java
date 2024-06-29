@@ -984,25 +984,26 @@ public class BootstrapData implements CommandLineRunner {
         contract.setListingId(1L);
         contract.setListingType(ListingType.STOCK);
         contractRepository.save(contract);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());//TODO: nzm da li ovde da zovem logger, cuo sam od nekog da se restartuje sistem onda?
-        }
 
         if (myStockRepository.count() == 0){
             BankAccount rsdAcc = bankAccountService.getDefaultBankAccount();
             List<Capital> myStocks = capitalService.getCapitalStockForBank(rsdAcc);
-            for (Capital capital:myStocks){
+            for (Capital cpt:myStocks){
                 MyStock stok1 = new MyStock();
-                stok1.setTicker(capital.getTicker());
-                stok1.setAmount(capital.getTotal().intValue());
+                stok1.setTicker(cpt.getTicker());
+                stok1.setAmount(cpt.getTotal().intValue());
                 stok1.setCurrencyMark("RSD");
-                stok1.setPrivateAmount(capital.getTotal().intValue()-capital.getPublicTotal().intValue());
-                stok1.setPublicAmount(capital.getPublicTotal().intValue());
+                stok1.setPrivateAmount(cpt.getTotal().intValue()-cpt.getPublicTotal().intValue());
+                stok1.setPublicAmount(cpt.getPublicTotal().intValue());
                 stok1.setCompanyId(1L);
                 stok1.setUserId(null);
                 stok1.setMinimumPrice(20.0);
                 myStockRepository.save(stok1);
             }
+        }
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());//TODO: nzm da li ovde da zovem logger, cuo sam od nekog da se restartuje sistem onda?
         }
 
     }
