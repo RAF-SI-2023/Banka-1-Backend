@@ -101,7 +101,7 @@ public class CustomerMapper {
                 .map(permissionMapper::permissionToPermissionDto)
                 .collect(Collectors.toList())
         );
-        
+
         if(customer.getCompany() != null) {
             customerResponse.setIsLegalEntity(true);
         } else {
