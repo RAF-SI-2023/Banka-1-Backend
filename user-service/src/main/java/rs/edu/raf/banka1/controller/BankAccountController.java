@@ -242,20 +242,20 @@ public class BankAccountController {
         return new ResponseEntity<>(capitalService.estimateBalanceOptions(optionsId), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/capitals/listings", produces = MediaType.APPLICATION_JSON_VALUE)
-    @Operation(summary = "Get total for bank account", description = "Get total for bank account",
-            parameters = {
-                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
-            })
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = List.class,
-                                    subTypes = {CapitalProfitDto.class}))}),
-            @ApiResponse(responseCode = "403", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<List<CapitalProfitDto>> getCapitals() {
-        return new ResponseEntity<>(capitalService.getListingCapitalsQuantity(), HttpStatus.OK);
-    }
+//    @GetMapping(value = "/capitals/listings", produces = MediaType.APPLICATION_JSON_VALUE)
+//    @Operation(summary = "Get total for bank account", description = "Get total for bank account",
+//            parameters = {
+//                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+//            })
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "Successful operation",
+//                    content = {@Content(mediaType = "application/json",
+//                            schema = @Schema(implementation = List.class,
+//                                    subTypes = {CapitalProfitDto.class}))}),
+//            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+//            @ApiResponse(responseCode = "500", description = "Internal server error")
+//    })
+//    public ResponseEntity<List<CapitalProfitDto>> getCapitals() {
+//        return new ResponseEntity<>(capitalService.getListingCapitalsQuantity(), HttpStatus.OK);
+//    }
 }
