@@ -306,6 +306,7 @@ public class ListingStockServiceImplTest {
         ListingStock stock1 = new ListingStock();
         stock1.setPrice(100.0);
         ListingStock stock2 = new ListingStock();
+        stock2.setPrice(200.0);
         expectedStocks.add(stock1);
         expectedStocks.add(stock2);
 
