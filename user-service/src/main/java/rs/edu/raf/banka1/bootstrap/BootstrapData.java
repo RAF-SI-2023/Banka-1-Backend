@@ -1177,7 +1177,8 @@ public class BootstrapData implements CommandLineRunner {
             companyRepository.save(bank);
 
             // generate default bank account for company
-            BankAccount bankAccount = bankAccountMapper.generateBankAccountCompany(bank, currencyRepository.findCurrencyByCurrencyCode(Constants.DEFAULT_CURRENCY).get());
+//            BankAccount bankAccount = bankAccountMapper.generateBankAccountCompany(bank, currencyRepository.findCurrencyByCurrencyCode(Constants.DEFAULT_CURRENCY).get());
+            BankAccount bankAccount = createBankAccountByCurrency(Constants.DEFAULT_CURRENCY, bank);
             bankAccountRepository.save(bankAccount);
             // generate default capital for company
             Capital capital = capitalMapper.generateCapitalForBankAccount(bankAccount);
