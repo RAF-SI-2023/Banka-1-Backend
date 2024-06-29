@@ -198,24 +198,11 @@ class TransactionServiceImplTest {
             MarketOrder order = new MarketOrder();
             order.setOrderType(OrderType.BUY);
 
-            BankAccount bankAccDefaultAcc = bankAccountService.createBankAccount(
-                    new CreateBankAccountRequest(
-                            new BankAccountRequest(
-                                    AccountType.BUSINESS,
-                                    "Bank's account",
-                                    1000000.0,
-                                    1000000.0,
-                                    Constants.DEFAULT_CURRENCY,
-                                    null,
-                                    0.0
-                            ),
-                            null,
-                            1L
-                    ));
+            BankAccount bankAccDefaultAcc = new BankAccount();
+            when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccDefaultAcc);
 
             transactionService.createTransaction(bankAccount, securityCapital, price, order, securityAmount);
 
-            when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccDefaultAcc);
             verify(capitalService).addBalance(eq(listingId), eq(listingType), eq(bankAccount), eq((double) securityAmount));
             verify(bankAccountService).commitReserved(eq(bankAccount), eq(price));
             verify(transactionRepository).save(any(Transaction.class));
@@ -264,6 +251,9 @@ class TransactionServiceImplTest {
 
             marketOrder1.setTimestamp(Instant.now().toEpochMilli()/1000 - 3L);
             marketOrder1.setPrice(50.0);
+
+            BankAccount bankAccDefaultAcc = new BankAccount();
+            when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccDefaultAcc);
 
             when(orderRepository.getAllBuyOrders(eq(listingId), eq(listingType), eq(employee), eq(OrderType.BUY), eq(OrderStatus.DONE))).thenReturn(Optional.of(Arrays.asList(marketOrder1)));
 
@@ -319,6 +309,9 @@ class TransactionServiceImplTest {
             Instant elevenYearsAgo = now.minusSeconds(11L * 365 * 24 * 60 * 60);
             marketOrder1.setTimestamp(elevenYearsAgo.getEpochSecond());
             marketOrder1.setPrice(50.0);
+
+            BankAccount bankAccDefaultAcc = new BankAccount();
+            when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccDefaultAcc);
 
             when(orderRepository.getAllBuyOrders(eq(listingId), eq(listingType), eq(employee), eq(OrderType.BUY), eq(OrderStatus.DONE))).thenReturn(Optional.of(Arrays.asList(marketOrder1)));
 
@@ -382,6 +375,9 @@ class TransactionServiceImplTest {
             marketOrder1.setTimestamp(Instant.now().toEpochMilli()/1000 - 1L);
             marketOrder1.setPrice(80.0);
 
+            BankAccount bankAccDefaultAcc = new BankAccount();
+            when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccDefaultAcc);
+
             when(orderRepository.getAllBuyOrders(eq(listingId), eq(listingType), eq(employee), eq(OrderType.BUY), eq(OrderStatus.DONE))).thenReturn(Optional.of(Arrays.asList(marketOrder1)));
 
             transactionService.createTransaction(bankAccount, securityCapital, price, order, securityAmount);
@@ -434,6 +430,9 @@ class TransactionServiceImplTest {
 
             marketOrder1.setTimestamp(Instant.now().toEpochMilli()/1000 - 3L);
             marketOrder1.setPrice(200.0);
+
+            BankAccount bankAccDefaultAcc = new BankAccount();
+            when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccDefaultAcc);
 
             when(orderRepository.getAllBuyOrders(eq(listingId), eq(listingType), eq(employee), eq(OrderType.BUY), eq(OrderStatus.DONE))).thenReturn(Optional.of(Arrays.asList(marketOrder1)));
 
