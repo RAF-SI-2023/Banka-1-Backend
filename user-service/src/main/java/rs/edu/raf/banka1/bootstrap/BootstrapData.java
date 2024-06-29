@@ -397,7 +397,6 @@ public class BootstrapData implements CommandLineRunner {
             bankAccountCompany.setCreatedByAgentId(1L);
             bankAccountCompany.setCreationDate(new Date().getTime());
             bankAccountCompany.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElseThrow());
-            bankAccountCompany.setCustomer(customerCompany);
             bankAccountCompany.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccountCompany.setAccountName("124141j2kraslL");
             bankAccountCompany.setAccountNumber("1234");
@@ -685,7 +684,6 @@ public class BootstrapData implements CommandLineRunner {
             bankAccount4.setAvailableBalance(10000.0);
             bankAccount4.setBalance(10000.0);
             bankAccount4.setMaintenanceCost(240.0);
-            bankAccount4.setCompany(company1);
             bankAccount4.setCreatedByAgentId(52L);
             bankAccount4.setCreationDate(new Date().getTime());
             bankAccount4.setCurrency(this.currencyRepository.getReferenceById(1L));
