@@ -18,6 +18,7 @@ public interface OrderService {
     ListingBaseDto getListingByOrder(MarketOrder order);
     Double calculatePrice(final MarketOrder order, final ListingBaseDto listingBaseDto, long processNum);
     List<OrderDto> getAllOrdersForEmployee(Employee currentAuth);
+    List<OrderDto> getAllOrdersForCustomer(Customer currentAuth);
     List<OrderDto> getAllOrders();
     void cancelOrder(Long orderId);
     DecideOrderResponse decideOrder(Long orderId, String status, Employee currentAuth);

@@ -7,6 +7,7 @@ import rs.edu.raf.banka1.dtos.CapitalProfitDto;
 import rs.edu.raf.banka1.dtos.PublicCapitalDto;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Capital;
+import rs.edu.raf.banka1.model.listing.MyStock;
 
 @Component
 public class CapitalMapper {
@@ -65,5 +66,18 @@ public class CapitalMapper {
         capital.setTotal(0D);
         capital.setBankAccount(bankAccount);
         return capital;
+    }
+
+    public MyStock myStockFromCapital(Capital capital){
+        MyStock stock = new MyStock();
+        stock.setTicker(capital.getTicker());
+        stock.setAmount(capital.getTotal().intValue());
+        stock.setCurrencyMark("RSD");
+        stock.setPrivateAmount(capital.getTotal().intValue()-capital.getPublicTotal().intValue());
+        stock.setPublicAmount(capital.getPublicTotal().intValue());
+        stock.setCompanyId(1L);
+        stock.setUserId(null);
+        stock.setMinimumPrice(20.0);
+        return stock;
     }
 }

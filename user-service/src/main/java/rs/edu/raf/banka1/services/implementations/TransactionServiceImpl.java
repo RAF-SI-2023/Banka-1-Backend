@@ -1,26 +1,28 @@
 package rs.edu.raf.banka1.services.implementations;
 
+
+import org.springframework.cache.annotation.Cacheable;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.Setter;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.TransactionDto;
 import rs.edu.raf.banka1.mapper.TransactionMapper;
 import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.model.listing.MyStock;
 import rs.edu.raf.banka1.repositories.OrderRepository;
 import rs.edu.raf.banka1.repositories.StockProfitRepository;
 import rs.edu.raf.banka1.repositories.TransactionRepository;
+import rs.edu.raf.banka1.repositories.otc_trade.MyStockRepository;
 import rs.edu.raf.banka1.services.CapitalService;
 import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Transaction;
 import rs.edu.raf.banka1.requests.CreateTransactionRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.TransactionService;
-import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,22 +37,25 @@ public class TransactionServiceImpl implements TransactionService {
     private final BankAccountService bankAccountService;
     private final OrderRepository orderRepository;
     private final StockProfitRepository stockProfitRepository;
+    private final MyStockRepository myStockRepository;
 
     public TransactionServiceImpl(TransactionMapper transactionMapper,
                                   TransactionRepository transactionRepository,
                                   BankAccountService bankAccountService,
                                   CapitalService capitalService,
                                   OrderRepository orderRepository,
-                                  StockProfitRepository stockProfitRepository) {
+                                  StockProfitRepository stockProfitRepository, MyStockRepository myStockRepository) {
         this.transactionMapper = transactionMapper;
         this.transactionRepository = transactionRepository;
         this.bankAccountService = bankAccountService;
         this.capitalService = capitalService;
         this.orderRepository = orderRepository;
         this.stockProfitRepository = stockProfitRepository;
+        this.myStockRepository = myStockRepository;
     }
 
     @Override
+    @Cacheable(value="getAllTransactions", key="#account_number")
     public List<TransactionDto> getAllTransaction(String accNum) {
         return transactionRepository.getTransactionsByBankAccount_AccountNumber(accNum)
             .stream()
@@ -63,12 +68,23 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction();
         transaction.setCurrency(bankAccount.getCurrency());
         transaction.setBankAccount(bankAccount);
+        transaction.setDateTime(new Date().getTime());
         if(order.getOrderType().equals(OrderType.BUY)) {
             transaction.setBuy(price);
             //Add stocks to capital
             capitalService.addBalance(securityCapital.getListingId(), securityCapital.getListingType(), bankAccount, (double) securityAmount);
             //Commit reserved
             bankAccountService.commitReserved(bankAccount, price);
+
+            // stock i bankin RSD racun
+            if (bankAccountService.getDefaultBankAccount().equals(bankAccount)
+                    && securityCapital.getListingType().equals(ListingType.STOCK)){
+                MyStock stock = myStockRepository.findByTicker(securityCapital.getTicker());
+                stock.setAmount(stock.getAmount() + securityCapital.getTotal().intValue());
+                stock.setPublicAmount(stock.getPublicAmount() + securityCapital.getPublicTotal().intValue());
+                stock.setPrivateAmount(stock.getAmount() - stock.getPublicAmount());
+                myStockRepository.save(stock);
+            }
         } else {
             transaction.setSell(price);
             //Remove stocks
@@ -85,6 +101,15 @@ public class TransactionServiceImpl implements TransactionService {
                 Double profit = price - securityCapital.getAverageBuyingPrice() * securityCapital.getTotal();
                 stockProfitRecord.setTransactionProfit(0.85 * profit);
                 stockProfitRepository.save(stockProfitRecord);
+
+                if (bankAccountService.getDefaultBankAccount().equals(bankAccount)){
+                    MyStock stock = myStockRepository.findByTicker(securityCapital.getTicker());
+                    if (stock == null) return;
+                    stock.setAmount(stock.getAmount() - securityCapital.getTotal().intValue());
+                    stock.setPublicAmount(stock.getPublicAmount() - securityCapital.getPublicTotal().intValue());
+                    stock.setPrivateAmount(stock.getAmount() - stock.getPublicAmount());
+                    myStockRepository.save(stock);
+                }
             }
         }
         transaction.setMarketOrder(order);
@@ -144,6 +169,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Cacheable(value="getTransactionsForEmployee", key="#user_id")
     public List<TransactionDto> getTransactionsForEmployee(Long userId) {
         return transactionRepository.getTransactionsByEmployee_UserId(userId)
             .stream()

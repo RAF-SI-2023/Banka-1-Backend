@@ -123,39 +123,39 @@ public class BootstrapData implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        if (myStockRepository.count() == 0) {
-            MyStock stok1 = new MyStock();
-            stok1.setTicker("STK1");
-            stok1.setAmount(100);
-            stok1.setCurrencyMark("RSD");
-            stok1.setPrivateAmount(50);
-            stok1.setPublicAmount(50);
-            stok1.setCompanyId(1L);
-            stok1.setUserId(null);
-            stok1.setMinimumPrice(500.0);
-
-            MyStock stok2 = new MyStock();
-            stok2.setTicker("STK2");
-            stok2.setAmount(100);
-            stok2.setCurrencyMark("RSD");
-            stok2.setPrivateAmount(50);
-            stok2.setPublicAmount(50);
-            stok2.setCompanyId(1L);
-            stok2.setUserId(null);
-            stok2.setMinimumPrice(1500.0);
-
-            MyStock stok3 = new MyStock();
-            stok3.setTicker("STK3");
-            stok3.setAmount(100);
-            stok3.setCurrencyMark("RSD");
-            stok3.setPrivateAmount(50);
-            stok3.setPublicAmount(50);
-            stok3.setCompanyId(1L);
-            stok3.setUserId(null);
-            stok3.setMinimumPrice(200.0);
-
-            myStockRepository.saveAll(List.of(stok1, stok2, stok3));
-        }
+//        if (myStockRepository.count() == 0) {
+//            MyStock stok1 = new MyStock();
+//            stok1.setTicker("STK1");
+//            stok1.setAmount(100);
+//            stok1.setCurrencyMark("RSD");
+//            stok1.setPrivateAmount(50);
+//            stok1.setPublicAmount(50);
+//            stok1.setCompanyId(1L);
+//            stok1.setUserId(null);
+//            stok1.setMinimumPrice(500.0);
+//
+//            MyStock stok2 = new MyStock();
+//            stok2.setTicker("STK2");
+//            stok2.setAmount(100);
+//            stok2.setCurrencyMark("RSD");
+//            stok2.setPrivateAmount(50);
+//            stok2.setPublicAmount(50);
+//            stok2.setCompanyId(1L);
+//            stok2.setUserId(null);
+//            stok2.setMinimumPrice(1500.0);
+//
+//            MyStock stok3 = new MyStock();
+//            stok3.setTicker("STK3");
+//            stok3.setAmount(100);
+//            stok3.setCurrencyMark("RSD");
+//            stok3.setPrivateAmount(50);
+//            stok3.setPublicAmount(50);
+//            stok3.setCompanyId(1L);
+//            stok3.setUserId(null);
+//            stok3.setMinimumPrice(200.0);
+//
+//            myStockRepository.saveAll(List.of(stok1, stok2, stok3));
+//        }
 
         if(employeeRepository.findByEmail("admin").isPresent()) {
             return;
@@ -193,6 +193,7 @@ public class BootstrapData implements CommandLineRunner {
             adminOrder.setProcessedNumber(160L);
             adminOrder.setAllOrNone(false);
             adminOrder.setFee(7.00);
+            adminOrder.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(adminOrder);
 
             MarketOrder adminOrder1 = new MarketOrder();
@@ -208,6 +209,7 @@ public class BootstrapData implements CommandLineRunner {
             adminOrder1.setProcessedNumber(20L);
             adminOrder1.setAllOrNone(false);
             adminOrder1.setFee(7.00);
+            adminOrder1.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(adminOrder1);
 
             MarketOrder marketOrder = new MarketOrder();
@@ -223,6 +225,7 @@ public class BootstrapData implements CommandLineRunner {
             marketOrder.setProcessedNumber(100L);
             marketOrder.setAllOrNone(false);
             marketOrder.setFee(7.00);
+            marketOrder.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(marketOrder);
 
 
@@ -251,6 +254,7 @@ public class BootstrapData implements CommandLineRunner {
             supervisorOrder1.setProcessedNumber(20L);
             supervisorOrder1.setAllOrNone(false);
             supervisorOrder1.setFee(7.00);
+            supervisorOrder1.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(supervisorOrder1);
 
             MarketOrder supervisorOrder2 = new MarketOrder();
@@ -266,6 +270,7 @@ public class BootstrapData implements CommandLineRunner {
             supervisorOrder2.setProcessedNumber(160L);
             supervisorOrder2.setAllOrNone(false);
             supervisorOrder2.setFee(7.00);
+            supervisorOrder2.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(supervisorOrder2);
 
             MarketOrder supervisorOrder3 = new MarketOrder();
@@ -281,6 +286,7 @@ public class BootstrapData implements CommandLineRunner {
             supervisorOrder3.setProcessedNumber(100L);
             supervisorOrder3.setAllOrNone(false);
             supervisorOrder3.setFee(7.00);
+            supervisorOrder3.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(supervisorOrder3);
 
             // Sprint5 Bootstrap
@@ -327,6 +333,7 @@ public class BootstrapData implements CommandLineRunner {
             agentOrder1.setProcessedNumber(20L);
             agentOrder1.setAllOrNone(false);
             agentOrder1.setFee(7.00);
+            agentOrder1.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(agentOrder1);
 
             MarketOrder agentOrder2 = new MarketOrder();
@@ -342,6 +349,7 @@ public class BootstrapData implements CommandLineRunner {
             agentOrder2.setProcessedNumber(160L);
             agentOrder2.setAllOrNone(false);
             agentOrder2.setFee(7.00);
+            agentOrder2.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(agentOrder2);
 
             MarketOrder agentOrder3 = new MarketOrder();
@@ -357,6 +365,7 @@ public class BootstrapData implements CommandLineRunner {
             agentOrder3.setProcessedNumber(100L);
             agentOrder3.setAllOrNone(false);
             agentOrder3.setFee(7.00);
+            agentOrder3.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(agentOrder3);
 
             Company company = new Company();
@@ -388,7 +397,6 @@ public class BootstrapData implements CommandLineRunner {
             bankAccountCompany.setCreatedByAgentId(1L);
             bankAccountCompany.setCreationDate(new Date().getTime());
             bankAccountCompany.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElseThrow());
-            bankAccountCompany.setCustomer(customerCompany);
             bankAccountCompany.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccountCompany.setAccountName("124141j2kraslL");
             bankAccountCompany.setAccountNumber("1234");
@@ -396,6 +404,53 @@ public class BootstrapData implements CommandLineRunner {
             if (bankAccountService.findBankAccountByAccountNumber(bankAccountCompany.getAccountNumber()) == null) {
                 bankAccountService.saveBankAccount(bankAccountCompany);
             }
+
+            Company company2 = new Company();
+            company2.setCompanyName("Company2");
+            company2.setTelephoneNumber("987654321");
+            company2.setFaxNumber("523459876");
+            company2.setPib("567891234");
+            company2.setIdNumber("98765432123");
+            company2.setJobId("123456789");
+            company2.setRegistrationNumber("987654321");
+            companyRepository.save(company2);
+
+            Customer customerCompany3 = new Customer();
+            customerCompany3.setFirstName("Customer3");
+            customerCompany3.setEmail("customer3@gmail.com");
+            customerCompany3.setPassword(passwordEncoder.encode("customer3"));
+            customerCompany3.setLastName("Jovanovic");
+            customerCompany3.setCompany(company2);
+            customerCompany3.setActive(true);
+            customerRepository.save(customerCompany3);
+
+            BankAccount bankAccountCompany33 = new BankAccount();
+            bankAccountCompany33.setAccountStatus(true);
+            bankAccountCompany33.setAccountType(AccountType.BUSINESS);
+            bankAccountCompany33.setAvailableBalance(20000.0);
+            bankAccountCompany33.setBalance(20000.0);
+            bankAccountCompany33.setMaintenanceCost(340.0);
+            bankAccountCompany33.setCompany(company2);
+            bankAccountCompany33.setCreatedByAgentId(1L);
+            bankAccountCompany33.setCreationDate(new Date().getTime());
+            bankAccountCompany33.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElse(null));
+            bankAccountCompany33.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
+            bankAccountCompany33.setAccountName("4333juo2kralL");
+            bankAccountCompany33.setAccountNumber("433321");
+            bankAccountCompany33.setSubtypeOfAccount("LICNI");
+            if (bankAccountService.findBankAccountByAccountNumber(bankAccountCompany33.getAccountNumber()) == null) {
+                bankAccountService.saveBankAccount(bankAccountCompany33);
+            }
+
+            Capital capital33 = new Capital();
+            capital33.setPublicTotal(200D);
+            capital33.setListingType(ListingType.STOCK);
+            capital33.setReserved(0D);
+            capital33.setListingId(1L);
+            capital33.setTicker("DT");
+            capital33.setBankAccount(bankAccountCompany33);
+            capital33.setTotal(500D);
+            capitalRepository.save(capital33);
 
             Customer testCustomer = new Customer();
             testCustomer.setFirstName("testCustomer");
@@ -524,6 +579,56 @@ public class BootstrapData implements CommandLineRunner {
             capital22.setTotal(50D);
             capitalRepository.save(capital22);
 
+            Capital capital1ForTestCustomer = new Capital();
+            capital1ForTestCustomer.setPublicTotal(20D);
+            capital1ForTestCustomer.setListingType(ListingType.STOCK);
+            capital1ForTestCustomer.setReserved(0D);
+            capital1ForTestCustomer.setListingId(2L);
+            capital1ForTestCustomer.setTicker("ORCL");
+            capital1ForTestCustomer.setBankAccount(bankAccount4test);
+            capital1ForTestCustomer.setTotal(50D);
+            capitalRepository.save(capital1ForTestCustomer);
+
+            Capital capital2ForTestCustomer = new Capital();
+            capital2ForTestCustomer.setPublicTotal(30D);
+            capital2ForTestCustomer.setListingType(ListingType.STOCK);
+            capital2ForTestCustomer.setReserved(0D);
+            capital2ForTestCustomer.setListingId(3L);
+            capital2ForTestCustomer.setTicker("WYY");
+            capital2ForTestCustomer.setBankAccount(bankAccount4test);
+            capital2ForTestCustomer.setTotal(100D);
+            capitalRepository.save(capital2ForTestCustomer);
+
+            Capital capital1ForTestCustomer2 = new Capital();
+            capital1ForTestCustomer2.setPublicTotal(20D);
+            capital1ForTestCustomer2.setListingType(ListingType.STOCK);
+            capital1ForTestCustomer2.setReserved(0D);
+            capital1ForTestCustomer2.setListingId(2L);
+            capital1ForTestCustomer2.setTicker("ORCL");
+            capital1ForTestCustomer2.setBankAccount(bankAccount6testa);
+            capital1ForTestCustomer2.setTotal(50D);
+            capitalRepository.save(capital1ForTestCustomer2);
+
+            Capital capital2ForTestCustomer2 = new Capital();
+            capital2ForTestCustomer2.setPublicTotal(10D);
+            capital2ForTestCustomer2.setListingType(ListingType.STOCK);
+            capital2ForTestCustomer2.setReserved(0D);
+            capital2ForTestCustomer2.setListingId(3L);
+            capital2ForTestCustomer2.setTicker("WYY");
+            capital2ForTestCustomer2.setBankAccount(bankAccount6testa);
+            capital2ForTestCustomer2.setTotal(100D);
+            capitalRepository.save(capital2ForTestCustomer2);
+
+            Capital capital3ForTestCustomer2 = new Capital();
+            capital3ForTestCustomer2.setPublicTotal(40D);
+            capital3ForTestCustomer2.setListingType(ListingType.STOCK);
+            capital3ForTestCustomer2.setReserved(0D);
+            capital3ForTestCustomer2.setListingId(4L);
+            capital3ForTestCustomer2.setTicker("CDLX");
+            capital3ForTestCustomer2.setBankAccount(bankAccount6testa);
+            capital3ForTestCustomer2.setTotal(100D);
+            capitalRepository.save(capital3ForTestCustomer2);
+
             MarginAccount marginAccountCompany = new MarginAccount();
             marginAccountCompany.setCustomer(bankAccountCompany);
             marginAccountCompany.setCurrency(bankAccountCompany.getCurrency());
@@ -579,7 +684,6 @@ public class BootstrapData implements CommandLineRunner {
             bankAccount4.setAvailableBalance(10000.0);
             bankAccount4.setBalance(10000.0);
             bankAccount4.setMaintenanceCost(240.0);
-            bankAccount4.setCompany(company1);
             bankAccount4.setCreatedByAgentId(52L);
             bankAccount4.setCreationDate(new Date().getTime());
             bankAccount4.setCurrency(this.currencyRepository.getReferenceById(1L));
@@ -871,6 +975,23 @@ public class BootstrapData implements CommandLineRunner {
             System.out.println(e.getMessage());//TODO: nzm da li ovde da zovem logger, cuo sam od nekog da se restartuje sistem onda?
         }
 
+        if (myStockRepository.count() == 0){
+            BankAccount rsdAcc = bankAccountService.getDefaultBankAccount();
+            List<Capital> myStocks = capitalService.getCapitalStockForBank(rsdAcc);
+            for (Capital capital:myStocks){
+                MyStock stok1 = new MyStock();
+                stok1.setTicker(capital.getTicker());
+                stok1.setAmount(capital.getTotal().intValue());
+                stok1.setCurrencyMark("RSD");
+                stok1.setPrivateAmount(capital.getTotal().intValue()-capital.getPublicTotal().intValue());
+                stok1.setPublicAmount(capital.getPublicTotal().intValue());
+                stok1.setCompanyId(1L);
+                stok1.setUserId(null);
+                stok1.setMinimumPrice(20.0);
+                myStockRepository.save(stok1);
+            }
+        }
+
     }
 
     private Employee generateEmployee(
@@ -991,6 +1112,7 @@ public class BootstrapData implements CommandLineRunner {
         BankAccount defaultBankAccount = bankAccountService.getDefaultBankAccount();
         for(ListingStockDto stock : stocks) {
             Capital capital = capitalService.createCapital(ListingType.STOCK, stock.getListingId(), 100.0, 0.0, defaultBankAccount);
+            capital.setPublicTotal(50.0);
             if (capitalRepository.findAll()
                     .stream()
                     .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
@@ -1063,7 +1185,8 @@ public class BootstrapData implements CommandLineRunner {
             companyRepository.save(bank);
 
             // generate default bank account for company
-            BankAccount bankAccount = bankAccountMapper.generateBankAccountCompany(bank, currencyRepository.findCurrencyByCurrencyCode(Constants.DEFAULT_CURRENCY).get());
+//            BankAccount bankAccount = bankAccountMapper.generateBankAccountCompany(bank, currencyRepository.findCurrencyByCurrencyCode(Constants.DEFAULT_CURRENCY).get());
+            BankAccount bankAccount = createBankAccountByCurrency(Constants.DEFAULT_CURRENCY, bank);
             bankAccountRepository.save(bankAccount);
             // generate default capital for company
             Capital capital = capitalMapper.generateCapitalForBankAccount(bankAccount);

@@ -4,11 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import rs.edu.raf.banka1.model.MarketOrder;
-import rs.edu.raf.banka1.model.OrderStatus;
-import rs.edu.raf.banka1.model.User;
-import rs.edu.raf.banka1.model.ListingType;
-import rs.edu.raf.banka1.model.OrderType;
+import rs.edu.raf.banka1.model.*;
 
 import java.time.Instant;
 import java.util.List;
@@ -48,6 +44,8 @@ public interface OrderRepository extends JpaRepository<MarketOrder, Long> {
 
     List<MarketOrder> getAllByOwner(User owner);
 
+    List<MarketOrder> getAllByCustomer(Customer customer);
+
     @Query("SELECT mo FROM MarketOrder mo WHERE mo.listingId = :listingId AND mo.listingType = :listingType AND mo.owner = :owner AND mo.orderType = :orderType AND mo.status = :status AND mo.currentAmount < mo.contractSize ORDER BY mo.timestamp")
     Optional<List<MarketOrder>> getAllBuyOrders(
             Long listingId,
@@ -56,5 +54,4 @@ public interface OrderRepository extends JpaRepository<MarketOrder, Long> {
             OrderType orderType,
             OrderStatus status);
 
-    List<MarketOrder> getAllByCustomer(User customer);
 }

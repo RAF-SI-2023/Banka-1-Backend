@@ -32,6 +32,7 @@ public class CustomerResponse {
     private String address;
     private List<BankAccountDto> accountIds;
     private Boolean isLegalEntity;
+    private String company;
 
     @Override
     public boolean equals(Object o) {
