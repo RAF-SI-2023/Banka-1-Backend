@@ -1105,6 +1105,7 @@ public class BootstrapData implements CommandLineRunner {
         BankAccount defaultBankAccount = bankAccountService.getDefaultBankAccount();
         for(ListingStockDto stock : stocks) {
             Capital capital = capitalService.createCapital(ListingType.STOCK, stock.getListingId(), 100.0, 0.0, defaultBankAccount);
+            capital.setPublicTotal(50.0);
             if (capitalRepository.findAll()
                     .stream()
                     .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
