@@ -55,7 +55,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    @Cacheable(value="getAllTransactions", key="#account_number")
+    @Cacheable(value="getAllTransactions", key="#accNum")
     public List<TransactionDto> getAllTransaction(String accNum) {
         return transactionRepository.getTransactionsByBankAccount_AccountNumber(accNum)
             .stream()
@@ -169,7 +169,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    @Cacheable(value="getTransactionsForEmployee", key="#user_id")
+    @Cacheable(value="getTransactionsForEmployee", key="#userId")
     public List<TransactionDto> getTransactionsForEmployee(Long userId) {
         return transactionRepository.getTransactionsByEmployee_UserId(userId)
             .stream()
