@@ -144,6 +144,22 @@ public class ForexServiceImplTest {
     }
 
     @Test
+    public void refreshAllForexesTest(){
+        ListingForex forex1 = new ListingForex();
+        forex1.setPrice(100.0);
+        ListingForex forex2 = new ListingForex();
+        forex2.setPrice(100.0);
+        List<ListingForex> forexes = List.of(forex1, forex2);
+        when(forexRepository.findAll()).thenReturn(forexes);
+
+        List<ListingForex> allForexes = forexService.refreshAllForexes();
+
+        assertNotNull(allForexes);
+        assertEquals(2, allForexes.size());
+    }
+
+
+    @Test
     public void getForexByTickerTest(){
         String ticker = "ticker";
         ListingForex forex = new ListingForex();

@@ -42,8 +42,17 @@ public class CapitalController {
             @ApiResponse(responseCode = "403", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<CapitalProfitDto>> getCapitals() {
-        return new ResponseEntity<>(capitalService.getListingCapitalsQuantity(), HttpStatus.OK);
+    public ResponseEntity<List<CapitalProfitDto>> getCapitals(
+            @AuthenticationPrincipal User currentAuth
+    ) {
+        rs.edu.raf.banka1.model.User user = null;
+        try {
+            user = employeeService.getEmployeeEntityByEmail(currentAuth.getUsername());
+        } catch(Exception e) {
+            user = customerService.getByEmail(currentAuth.getUsername());
+        }
+
+        return new ResponseEntity<>(capitalService.getListingCapitalsQuantity(user), HttpStatus.OK);
     }
 
     @GetMapping(value = "/public/stock/all", produces = MediaType.APPLICATION_JSON_VALUE)
