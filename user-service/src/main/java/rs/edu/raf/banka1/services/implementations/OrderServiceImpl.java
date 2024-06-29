@@ -186,6 +186,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<OrderDto> getAllOrdersForCustomer(Customer currentAuth) {
+        return orderRepository.getAllByCustomer(currentAuth).stream().map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
+    }
+
+    @Override
     public List<OrderDto> getAllOrders() {
         return orderRepository.findAll().stream().map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
     }
@@ -298,6 +303,9 @@ public class OrderServiceImpl implements OrderService {
 
     void reserveStockCapital(MarketOrder order) {
         BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
+        if (order.getCustomer() != null){
+            bankAccount = bankAccountService.findBankAccountByAccountNumber(order.getBankAccountNumber());
+        }
         if(order.getOrderType().equals(OrderType.BUY)) {
             bankAccountService.reserveBalance(bankAccount, order.getPrice());
         } else {

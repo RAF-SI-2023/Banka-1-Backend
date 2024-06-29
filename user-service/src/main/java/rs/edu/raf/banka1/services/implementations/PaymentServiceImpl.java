@@ -1,5 +1,7 @@
 package rs.edu.raf.banka1.services.implementations;
 
+
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.tinylog.Logger;
@@ -97,7 +99,9 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Cacheable(value="getAllPaymentsForAccountNumber", key="#account_number")
     public List<PaymentDto> getAllPaymentsForAccountNumber(String accountNumber) {
+        System.out.println("redis:payments");
         Optional<BankAccount> bankAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(accountNumber);
         return bankAccountOpt.map(bankAccount ->
                 bankAccount.getPayments().stream()
@@ -107,6 +111,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Cacheable(value="getPaymentById", key="#id")
     public PaymentDto getPaymentById(Long id) {
         Optional<Payment> paymentOpt = paymentRepository.findById(id);
         return paymentOpt.map(paymentMapper::paymentToPaymentDto).orElse(null);

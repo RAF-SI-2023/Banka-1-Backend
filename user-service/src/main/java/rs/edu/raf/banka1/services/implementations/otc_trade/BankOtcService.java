@@ -15,10 +15,12 @@ import rs.edu.raf.banka1.model.listing.MyStock;
 import rs.edu.raf.banka1.model.offer.MyOffer;
 import rs.edu.raf.banka1.model.offer.Offer;
 import rs.edu.raf.banka1.model.offer.OfferStatus;
+import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.otc_trade.BankOTCStockRepository;
 import rs.edu.raf.banka1.repositories.otc_trade.MyOfferRepository;
 import rs.edu.raf.banka1.repositories.otc_trade.MyStockRepository;
 import rs.edu.raf.banka1.repositories.otc_trade.OfferRepository;
+import rs.edu.raf.banka1.services.BankAccountService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,7 @@ public class BankOtcService {
     private final MyStockRepository myStockRepository;
     private final BankOTCStockRepository bankOTCStockRepository;
     private final MyOfferRepository myOfferRepository;
+    private final BankAccountService bankAccountService;
 
     //URL
     private static final String URL_TO_BANK3 =  "https://banka-3-dev.si.raf.edu.rs/exchange-service/api/v1/otcTrade";
@@ -101,6 +104,7 @@ public class BankOtcService {
             }
 
             //TODO: skidamo pare sa naseg racuna
+            bankAccountService.removeBalance(bankAccountService.getDefaultBankAccount(), myOffer.getPrice());
 
             myOfferRepository.save(myOffer);
             return true;
@@ -237,6 +241,7 @@ public class BankOtcService {
             myStockRepository.save(myStock);
 
             //TODO: dodajemo pare na nas racun
+            bankAccountService.addBalance(bankAccountService.getDefaultBankAccount(), offer1.getPrice());
 
             offerRepository.save(offer1);
             return true;
