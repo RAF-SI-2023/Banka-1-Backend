@@ -93,7 +93,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    @Cacheable(value = "employeesById", key = "#user_id")
+    @Cacheable(value = "employeesById", key = "#id")
     public EmployeeDto findById(Long id) {
         return this.employeeRepository.findById(id)
                 .map(this.employeeMapper::employeeToEmployeeDto)
@@ -289,7 +289,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    @Cacheable(value = "findEmployeesByUsername", key="#email")
+    @Cacheable(value = "findEmployeesByUsername", key="#username")
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Employee> myEmployee = this.employeeRepository.findByEmail(username);
 
