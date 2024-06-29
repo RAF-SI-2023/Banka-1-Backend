@@ -272,7 +272,7 @@ public class TransferServiceImpl implements TransferService {
     }
 
     @Override
-    @Cacheable(value="getAllTransfersForAccountNumber", key= "#account_number")
+    @Cacheable(value="getAllTransfersForAccountNumber", key= "#accountNumber")
     public List<TransferDto> getAllTransfersForAccountNumber(String accountNumber) {
         Optional<BankAccount> bankAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(accountNumber);
         return bankAccountOpt.map(bankAccount ->
