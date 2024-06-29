@@ -3,9 +3,11 @@ package rs.edu.raf.banka1.services;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.OptionsMapper;
+import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.OptionsModel;
 import rs.edu.raf.banka1.model.dtos.OptionsDto;
 import rs.edu.raf.banka1.repositories.OptionsRepository;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +50,27 @@ public class OptionsServiceImpl implements OptionsService {
     public List<OptionsModel> getAllOptions(){
         return optionsRepository.findAll();
     }
+
+    @Override
+    public List<OptionsModel> refreshAllOptions() {
+        List<OptionsModel> options = optionsRepository.findAll();
+
+        for(OptionsModel option : options){
+            double random = Math.random();
+            if(random <= Constants.CHANCE_OF_CHANGE){
+                boolean isPositive = Math.random() > 0.5;
+                if(isPositive)
+                    option.setPrice(option.getPrice() + (Constants.PERCENTAGE_CHANGE * option.getPrice()));
+                else
+                    option.setPrice(option.getPrice() - (Constants.PERCENTAGE_CHANGE * option.getPrice()));
+
+                optionsRepository.save(option);
+            }
+        }
+
+        return options;
+    }
+
     @Override
 //    @Cacheable(value = "optionsServiceAllCallOptions")
     public Optional<List<OptionsModel>> getAllCallOptions(){

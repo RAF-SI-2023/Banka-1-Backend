@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface ForexService {
     List<ListingForex> getAllForexes();
 
+    List<ListingForex> refreshAllForexes();
+
     ListingForex getForexByTicker(String ticker);
 
     List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to);

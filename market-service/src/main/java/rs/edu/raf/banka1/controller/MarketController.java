@@ -168,6 +168,45 @@ public class MarketController {
 
     }
 
+    @GetMapping(value = "/listing/refresh/{listingType}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Refreshes and returns listings of specific type", description = "Returns list of specific "
+            + "listingType based on listingType param (forex, stock, futures)(refreshed)",
+            parameters = {
+                    @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class))}),
+            @ApiResponse(responseCode = "404", description = "Listing not found"),
+            @ApiResponse(responseCode = "400", description = "listingType not valid"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<?> refreshListingByType(@PathVariable String listingType) {
+
+        // TODO: implement refresh
+        if (listingType.equalsIgnoreCase("forex")) {
+            return new ResponseEntity<>(forexService.refreshAllForexes().stream().map(forexMapper::toDto).toList(), HttpStatus.OK);
+        }
+        else if(listingType.equalsIgnoreCase("stock")) {
+            return new ResponseEntity<>(listingStockService.refreshAllStocks().stream().map(stockMapper::stockDto), HttpStatus.OK);
+        }
+        else if(listingType.equalsIgnoreCase("futures")) {
+            return new ResponseEntity<>(this.futuresService.refreshAllFutures().stream().map(futureMapper::toDto), HttpStatus.OK);
+        }
+        else if(listingType.equalsIgnoreCase("options")) {
+            return new ResponseEntity<>(this.optionsService.refreshAllOptions().stream().map(optionsMapper::optionsModelToOptionsDto), HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+
+
+
+
     @GetMapping(value = "/listing/history/stock/{stockId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Get history by stock id", description = "Returns List of histories for given stock id, "
             + "timestampFrom and timestampTo are optional (if both are provided they are inclusive, if only one is "
