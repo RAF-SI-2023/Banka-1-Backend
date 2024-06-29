@@ -100,6 +100,21 @@ class OptionsServiceImplTest {
     }
 
     @Test
+    public void refreshAllOptionsTest(){
+        List<OptionsModel> options = new ArrayList<>();
+        OptionsModel option1 = new OptionsModel();
+        option1.setTicker("APPL");
+        option1.setPrice(100.0);
+        OptionsModel option2 = new OptionsModel();
+        option2.setTicker("ORCL");
+        option2.setPrice(100.0);
+        options.addAll(List.of(option1,option2));
+
+        when(optionsRepository.findAll()).thenReturn(options);
+        List<OptionsModel> optionsModels = optionsService.refreshAllOptions();
+        assertEquals(2,optionsModels.size());
+    }
+    @Test
     public void getAllCallOptionsTest(){
         OptionsModel option1 = new OptionsModel();
         option1.setTicker("APPL");
