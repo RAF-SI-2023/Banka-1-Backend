@@ -20,7 +20,7 @@ public interface CapitalService {
     Double estimateBalanceFuture(Long futureId);
     Double estimateBalanceStock(Long stockId);
     Double estimateBalanceOptions(Long optionsId);
-    List<CapitalProfitDto> getListingCapitalsQuantity();
+    List<CapitalProfitDto> getListingCapitalsQuantity(User user);
     boolean hasEnoughCapitalForOrder(MarketOrder order);
     List<PublicCapitalDto> getAllPublicStockCapitals();
     List<PublicCapitalDto> getAllPublicListingCapitals();

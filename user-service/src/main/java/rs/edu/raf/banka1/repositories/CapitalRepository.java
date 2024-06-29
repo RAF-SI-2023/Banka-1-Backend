@@ -25,4 +25,6 @@ public interface CapitalRepository extends JpaRepository<Capital, Long> {
     List<Capital> getAllPublicCapitals();
 
     List<Capital> getAllByPublicTotalGreaterThan(Double publicTotal);
+
+    List<Capital> findByBankAccount_AccountNumber(String accountNumber);
 }
