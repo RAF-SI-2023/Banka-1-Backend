@@ -147,15 +147,15 @@ public class CustomerServiceImpl implements CustomerService {
             return null;
         }
         CustomerResponse customerResponse = customerMapper.customerToCustomerResponse(customer);
-        List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCustomer(customer.getUserId());
-        Boolean isLegalEntity = false;
-        for(BankAccount bankAccount : bankAccounts){
-            if(bankAccount.getCompany()!=null){
-                isLegalEntity = true;
-                break;
-            }
-        }
-        customerResponse.setIsLegalEntity(isLegalEntity);
+//        List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCustomer(customer.getUserId());
+//        Boolean isLegalEntity = false;
+//        for(BankAccount bankAccount : bankAccounts){
+//            if(bankAccount.getCompany()!=null){
+//                isLegalEntity = true;
+//                break;
+//            }
+//        }
+//        customerResponse.setIsLegalEntity(isLegalEntity);
         return customerResponse;
     }
 
