@@ -25,4 +25,5 @@ public class ContractDto {
     private Long listingId;
     private Double amount;
     private Double price;
+    private Boolean isIndividual;
 }
