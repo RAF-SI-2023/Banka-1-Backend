@@ -193,6 +193,7 @@ public class BootstrapData implements CommandLineRunner {
             adminOrder.setProcessedNumber(160L);
             adminOrder.setAllOrNone(false);
             adminOrder.setFee(7.00);
+            adminOrder.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(adminOrder);
 
             MarketOrder adminOrder1 = new MarketOrder();
@@ -208,6 +209,7 @@ public class BootstrapData implements CommandLineRunner {
             adminOrder1.setProcessedNumber(20L);
             adminOrder1.setAllOrNone(false);
             adminOrder1.setFee(7.00);
+            adminOrder1.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(adminOrder1);
 
             MarketOrder marketOrder = new MarketOrder();
@@ -223,6 +225,7 @@ public class BootstrapData implements CommandLineRunner {
             marketOrder.setProcessedNumber(100L);
             marketOrder.setAllOrNone(false);
             marketOrder.setFee(7.00);
+            marketOrder.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(marketOrder);
 
 
@@ -251,6 +254,7 @@ public class BootstrapData implements CommandLineRunner {
             supervisorOrder1.setProcessedNumber(20L);
             supervisorOrder1.setAllOrNone(false);
             supervisorOrder1.setFee(7.00);
+            supervisorOrder1.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(supervisorOrder1);
 
             MarketOrder supervisorOrder2 = new MarketOrder();
@@ -266,6 +270,7 @@ public class BootstrapData implements CommandLineRunner {
             supervisorOrder2.setProcessedNumber(160L);
             supervisorOrder2.setAllOrNone(false);
             supervisorOrder2.setFee(7.00);
+            supervisorOrder2.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(supervisorOrder2);
 
             MarketOrder supervisorOrder3 = new MarketOrder();
@@ -281,6 +286,7 @@ public class BootstrapData implements CommandLineRunner {
             supervisorOrder3.setProcessedNumber(100L);
             supervisorOrder3.setAllOrNone(false);
             supervisorOrder3.setFee(7.00);
+            supervisorOrder3.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(supervisorOrder3);
 
             // Sprint5 Bootstrap
@@ -327,6 +333,7 @@ public class BootstrapData implements CommandLineRunner {
             agentOrder1.setProcessedNumber(20L);
             agentOrder1.setAllOrNone(false);
             agentOrder1.setFee(7.00);
+            agentOrder1.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(agentOrder1);
 
             MarketOrder agentOrder2 = new MarketOrder();
@@ -342,6 +349,7 @@ public class BootstrapData implements CommandLineRunner {
             agentOrder2.setProcessedNumber(160L);
             agentOrder2.setAllOrNone(false);
             agentOrder2.setFee(7.00);
+            agentOrder2.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(agentOrder2);
 
             MarketOrder agentOrder3 = new MarketOrder();
@@ -357,6 +365,7 @@ public class BootstrapData implements CommandLineRunner {
             agentOrder3.setProcessedNumber(100L);
             agentOrder3.setAllOrNone(false);
             agentOrder3.setFee(7.00);
+            agentOrder3.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(agentOrder3);
 
             Company company = new Company();
@@ -388,7 +397,6 @@ public class BootstrapData implements CommandLineRunner {
             bankAccountCompany.setCreatedByAgentId(1L);
             bankAccountCompany.setCreationDate(new Date().getTime());
             bankAccountCompany.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElseThrow());
-            bankAccountCompany.setCustomer(customerCompany);
             bankAccountCompany.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccountCompany.setAccountName("124141j2kraslL");
             bankAccountCompany.setAccountNumber("1234");
@@ -676,7 +684,6 @@ public class BootstrapData implements CommandLineRunner {
             bankAccount4.setAvailableBalance(10000.0);
             bankAccount4.setBalance(10000.0);
             bankAccount4.setMaintenanceCost(240.0);
-            bankAccount4.setCompany(company1);
             bankAccount4.setCreatedByAgentId(52L);
             bankAccount4.setCreationDate(new Date().getTime());
             bankAccount4.setCurrency(this.currencyRepository.getReferenceById(1L));
@@ -1105,6 +1112,7 @@ public class BootstrapData implements CommandLineRunner {
         BankAccount defaultBankAccount = bankAccountService.getDefaultBankAccount();
         for(ListingStockDto stock : stocks) {
             Capital capital = capitalService.createCapital(ListingType.STOCK, stock.getListingId(), 100.0, 0.0, defaultBankAccount);
+            capital.setPublicTotal(50.0);
             if (capitalRepository.findAll()
                     .stream()
                     .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
