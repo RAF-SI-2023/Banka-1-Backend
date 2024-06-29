@@ -9,6 +9,7 @@ import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.repositories.ForexRepository;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,26 @@ public class ForexServiceImpl implements ForexService {
 //    @Cacheable(value = "getAllForexes")
     public List<ListingForex> getAllForexes() {
         return forexRepository.findAll();
+    }
+
+    @Override
+    public List<ListingForex> refreshAllForexes() {
+        List<ListingForex> forexes = forexRepository.findAll();
+
+        for(ListingForex forex : forexes){
+            double random = Math.random();
+            if(random <= Constants.CHANCE_OF_CHANGE){
+                boolean isPositive = Math.random() > 0.5;
+                if(isPositive)
+                    forex.setPrice(forex.getPrice() + (Constants.PERCENTAGE_CHANGE * forex.getPrice()));
+                else
+                    forex.setPrice(forex.getPrice() - (Constants.PERCENTAGE_CHANGE * forex.getPrice()));
+
+                forexRepository.save(forex);
+            }
+        }
+
+        return forexes;
     }
 
     @Override

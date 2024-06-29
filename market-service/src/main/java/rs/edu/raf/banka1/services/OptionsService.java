@@ -10,6 +10,7 @@ public interface OptionsService {
     List<OptionsDto> getOptionsByTicker(String ticker);
     Optional<OptionsModel> findById(Long id);
     List<OptionsModel> getAllOptions();
+    List<OptionsModel> refreshAllOptions();
     Optional<List<OptionsModel>> getAllCallOptions();
     Optional<OptionsModel> getCallOptionById(Long id);
     Optional<List<OptionsModel>> getAllPutOptions();
