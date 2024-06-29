@@ -450,6 +450,7 @@ public class BootstrapData implements CommandLineRunner {
             capital33.setTicker("DT");
             capital33.setBankAccount(bankAccountCompany33);
             capital33.setTotal(500D);
+            capital33.setAverageBuyingPrice(marketService.getStockById(1L).getPrice());
             capitalRepository.save(capital33);
 
             Customer testCustomer = new Customer();
@@ -567,6 +568,7 @@ public class BootstrapData implements CommandLineRunner {
             capital.setTicker("DT");
             capital.setBankAccount(bankAccountCompany);
             capital.setTotal(50D);
+            capital.setAverageBuyingPrice(marketService.getStockById(1L).getPrice());
             capitalRepository.save(capital);
 
             Capital capital22 = new Capital();
@@ -577,6 +579,7 @@ public class BootstrapData implements CommandLineRunner {
             capital22.setTicker("DT");
             capital22.setBankAccount(bankAccount6testa);
             capital22.setTotal(50D);
+            capital22.setAverageBuyingPrice(marketService.getStockById(1L).getPrice());
             capitalRepository.save(capital22);
 
             Capital capital1ForTestCustomer = new Capital();
@@ -587,6 +590,7 @@ public class BootstrapData implements CommandLineRunner {
             capital1ForTestCustomer.setTicker("ORCL");
             capital1ForTestCustomer.setBankAccount(bankAccount4test);
             capital1ForTestCustomer.setTotal(50D);
+            capital1ForTestCustomer.setAverageBuyingPrice(marketService.getStockById(2L).getPrice());
             capitalRepository.save(capital1ForTestCustomer);
 
             Capital capital2ForTestCustomer = new Capital();
@@ -597,6 +601,7 @@ public class BootstrapData implements CommandLineRunner {
             capital2ForTestCustomer.setTicker("WYY");
             capital2ForTestCustomer.setBankAccount(bankAccount4test);
             capital2ForTestCustomer.setTotal(100D);
+            capital2ForTestCustomer.setAverageBuyingPrice(marketService.getStockById(3L).getPrice());
             capitalRepository.save(capital2ForTestCustomer);
 
             Capital capital1ForTestCustomer2 = new Capital();
@@ -607,6 +612,7 @@ public class BootstrapData implements CommandLineRunner {
             capital1ForTestCustomer2.setTicker("ORCL");
             capital1ForTestCustomer2.setBankAccount(bankAccount6testa);
             capital1ForTestCustomer2.setTotal(50D);
+            capital1ForTestCustomer2.setAverageBuyingPrice(marketService.getStockById(2L).getPrice());
             capitalRepository.save(capital1ForTestCustomer2);
 
             Capital capital2ForTestCustomer2 = new Capital();
@@ -617,6 +623,7 @@ public class BootstrapData implements CommandLineRunner {
             capital2ForTestCustomer2.setTicker("WYY");
             capital2ForTestCustomer2.setBankAccount(bankAccount6testa);
             capital2ForTestCustomer2.setTotal(100D);
+            capital2ForTestCustomer2.setAverageBuyingPrice(marketService.getStockById(3L).getPrice());
             capitalRepository.save(capital2ForTestCustomer2);
 
             Capital capital3ForTestCustomer2 = new Capital();
@@ -627,6 +634,7 @@ public class BootstrapData implements CommandLineRunner {
             capital3ForTestCustomer2.setTicker("CDLX");
             capital3ForTestCustomer2.setBankAccount(bankAccount6testa);
             capital3ForTestCustomer2.setTotal(100D);
+            capital3ForTestCustomer2.setAverageBuyingPrice(marketService.getStockById(4L).getPrice());
             capitalRepository.save(capital3ForTestCustomer2);
 
             MarginAccount marginAccountCompany = new MarginAccount();
@@ -706,6 +714,7 @@ public class BootstrapData implements CommandLineRunner {
             capital1.setTicker("DT");
             capital1.setBankAccount(bankAccount4);
             capital1.setTotal(50D);
+            capital1.setAverageBuyingPrice(marketService.getStockById(1L).getPrice());
             capitalRepository.save(capital1);
 
             MarginAccount marginAccount = new MarginAccount();
@@ -790,6 +799,7 @@ public class BootstrapData implements CommandLineRunner {
         capital111.setBankAccount(bankAccount3);
         capital111.setTotal(500D);
         capital111.setListingType(ListingType.STOCK);
+        capital111.setAverageBuyingPrice(marketService.getStockById(1L).getPrice());
         capitalRepository.save(capital111);
             
             Capital capital2 = new Capital();
@@ -800,6 +810,7 @@ public class BootstrapData implements CommandLineRunner {
             capital2.setTicker("DT");
             capital2.setBankAccount(bankAccount3);
             capital2.setTotal(50D);
+            capital2.setAverageBuyingPrice(marketService.getStockById(1L).getPrice());
             capitalRepository.save(capital2);
 
         Capital capital123 = new Capital();
@@ -811,6 +822,7 @@ public class BootstrapData implements CommandLineRunner {
         capital123.setBankAccount(bankAccount1);
         capital123.setTotal(500D);
         capital123.setListingType(ListingType.STOCK);
+        capital123.setAverageBuyingPrice(marketService.getStockById(1L).getPrice());
         capitalRepository.save(capital123);
 
         transferService.processTransfer(transferService.createTransfer(new CreateTransferRequest(bankAccount3.getAccountNumber(), bankAccount2.getAccountNumber(), 100.0)));
