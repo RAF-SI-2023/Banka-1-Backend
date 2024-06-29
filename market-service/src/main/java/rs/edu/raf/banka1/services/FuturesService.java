@@ -10,6 +10,9 @@ import java.util.Optional;
 
 public interface FuturesService {
     List<ListingFuture> getAllFutures();
+
+    List<ListingFuture> refreshAllFutures();
+
     Optional<ListingFuture> findById(Long id);
 
     List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to);

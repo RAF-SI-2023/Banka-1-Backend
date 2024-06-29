@@ -6,12 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.StockMapper;
+import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.entities.Country;
 import rs.edu.raf.banka1.model.entities.Exchange;
 import rs.edu.raf.banka1.model.entities.Holiday;
 import rs.edu.raf.banka1.repositories.*;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.time.*;
 import java.util.ArrayList;
@@ -48,6 +50,26 @@ public class ListingStockServiceImpl implements ListingStockService {
 //    @Cacheable(value = "listingStockServiceAllStocks")
     public List<ListingStock> getAllStocks(){
         return stockRepository.findAll();
+    }
+
+    @Override
+    public List<ListingStock> refreshAllStocks() {
+        List<ListingStock> stocks = stockRepository.findAll();
+
+        for(ListingStock stock : stocks){
+            double random = Math.random();
+            if(random <= Constants.CHANCE_OF_CHANGE){
+                boolean isPositive = Math.random() > 0.5;
+                if(isPositive)
+                    stock.setPrice(stock.getPrice() + (Constants.PERCENTAGE_CHANGE * stock.getPrice()));
+                else
+                    stock.setPrice(stock.getPrice() - (Constants.PERCENTAGE_CHANGE * stock.getPrice()));
+
+                stockRepository.save(stock);
+            }
+        }
+
+        return stocks;
     }
 
     @Override
