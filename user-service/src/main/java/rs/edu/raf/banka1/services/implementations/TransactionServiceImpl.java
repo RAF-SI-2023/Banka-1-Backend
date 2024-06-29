@@ -104,6 +104,7 @@ public class TransactionServiceImpl implements TransactionService {
 
                 if (bankAccountService.getDefaultBankAccount().equals(bankAccount)){
                     MyStock stock = myStockRepository.findByTicker(securityCapital.getTicker());
+                    if (stock == null) return;
                     stock.setAmount(stock.getAmount() - securityCapital.getTotal().intValue());
                     stock.setPublicAmount(stock.getPublicAmount() - securityCapital.getPublicTotal().intValue());
                     stock.setPrivateAmount(stock.getAmount() - stock.getPublicAmount());
