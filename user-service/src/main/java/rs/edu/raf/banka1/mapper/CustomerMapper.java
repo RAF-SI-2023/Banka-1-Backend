@@ -104,9 +104,12 @@ public class CustomerMapper {
         
         if(customer.getCompany() != null) {
             customerResponse.setIsLegalEntity(true);
+            customerResponse.setCompany(customer.getCompany().getCompanyName());
         } else {
             customerResponse.setIsLegalEntity(false);
+            customerResponse.setCompany("No company");
         }
+
 
         customerResponse.setDateOfBirth(customer.getDateOfBirth());
         customerResponse.setGender(customer.getGender());
