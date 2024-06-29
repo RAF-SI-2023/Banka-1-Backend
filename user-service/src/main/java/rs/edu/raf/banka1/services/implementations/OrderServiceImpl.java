@@ -78,20 +78,26 @@ public class OrderServiceImpl implements OrderService {
         MarketOrder order = orderMapper.requestToMarketOrder(request, currentAuth);
         String bankAccountNumber = null;
         if(currentAuth instanceof Customer) {
-            BankAccount bankAccount = bankAccountService.getCustomerBankAccountForOrder((Customer)currentAuth);
+            Customer customer = (Customer) currentAuth;
+            BankAccount bankAccount = null;
+            if(customer.getCompany() == null) {
+                bankAccount = bankAccountService.getCustomerBankAccountForOrder((Customer)currentAuth);
+            } else {
+                bankAccount = bankAccountService.getBankAccountByCompanyAndCurrencyCode(customer.getCompany().getId(), Constants.DEFAULT_CURRENCY);
+            }
             if(bankAccount == null){
                 throw new BankAccountNotFoundException();
             }
             bankAccountNumber = bankAccount.getAccountNumber();
 //            BankAccount bankAccount = bankAccountService.findBankAccountByAccountNumber(bankAccountNumber);
-            if(!((Customer)currentAuth).getAccountIds().contains(bankAccount)){
+            if(!customer.getAccountIds().contains(bankAccount) && bankAccount.getCompany() == null){
                 //mozda ovde treba drugaciji exception?
                 throw new ForbiddenException();
             }
             if(bankAccount.getCompany() == null && !order.getListingType().equals(ListingType.STOCK)){
                 throw new ForbiddenException();
             }
-            order.setCustomer((Customer)currentAuth);
+            order.setCustomer(customer);
             order.setBankAccountNumber(bankAccountNumber);
         }
         else if(currentAuth instanceof Employee){
@@ -312,7 +318,6 @@ public class OrderServiceImpl implements OrderService {
             Capital securityCapital = capitalService.getCapitalByListingIdAndTypeAndBankAccount(order.getListingId(), order.getListingType(), bankAccount);
             capitalService.reserveBalance(securityCapital.getListingId(), securityCapital.getListingType(), bankAccount, (double)order.getContractSize());
         }
-
     }
 
     void updateLimit(Long orderId) {

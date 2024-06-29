@@ -2,7 +2,9 @@ package rs.edu.raf.banka1.services.implementations;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.MarginAccountCreateDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
+import rs.edu.raf.banka1.exceptions.MarginAccountNotFoundException;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.model.MarginAccount;
 import rs.edu.raf.banka1.model.MarginTransaction;
@@ -25,7 +27,17 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
 
     @Override
     public void createTransaction(MarketOrder order, BankAccount userAccount, Currency currency, String description, TransactionType transactionType, Double price, Double processedNum) {
-        MarginAccount marginAccount = marginAccountService.getMarginAccount(getUserIdFromOrder(order), order.getListingType(), currency.getCurrencyCode(), userAccount.getCompany() != null);
+        MarginAccount marginAccount;
+        try {
+            marginAccount = marginAccountService.getMarginAccount(getUserIdFromOrder(order), order.getListingType(), currency.getCurrencyCode(), userAccount.getCompany() != null);
+        } catch (MarginAccountNotFoundException e) {
+            if(userAccount.getCompany() == null) {
+                marginAccountService.createMarginAccount(new MarginAccountCreateDto(order.getListingType(), currency, null, userAccount.getCompany().getId()));
+            } else {
+                marginAccountService.createMarginAccount(new MarginAccountCreateDto(order.getListingType(), currency, userAccount.getCustomer().getUserId(), null));
+            }
+            marginAccount = marginAccountService.getMarginAccount(getUserIdFromOrder(order), order.getListingType(), currency.getCurrencyCode(), userAccount.getCompany() != null);
+        }
 
         double initialMargin = price * Constants.MARGIN_RATE;
         double loanValue = price - initialMargin;
