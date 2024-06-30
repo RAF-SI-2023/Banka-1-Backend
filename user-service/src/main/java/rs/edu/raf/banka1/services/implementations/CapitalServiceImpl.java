@@ -209,6 +209,14 @@ public class CapitalServiceImpl implements CapitalService {
     }
 
     @Override
+    public void updateAverageBuyingPrice(Long listingId, ListingType listingType, BankAccount bankAccount, Double newAverageBuyingPrice) {
+        Capital capital = getCapitalByListingIdAndTypeAndBankAccount(listingId, listingType, bankAccount);
+        capital.setAverageBuyingPrice(newAverageBuyingPrice);
+        capitalRepository.save(capital);
+    }
+
+
+    @Override
     public void removeBalance(Long listingId, ListingType type, BankAccount bankAccount, Double amount) {
         Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
         processRemoveBalance(capital, amount);
