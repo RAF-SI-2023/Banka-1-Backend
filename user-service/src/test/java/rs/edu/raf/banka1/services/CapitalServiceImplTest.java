@@ -14,7 +14,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import org.mockito.quality.Strictness;
+import rs.edu.raf.banka1.dtos.AddPublicCapitalDto;
 import rs.edu.raf.banka1.dtos.CapitalProfitDto;
+import rs.edu.raf.banka1.dtos.PublicCapitalDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
 import rs.edu.raf.banka1.exceptions.InvalidReservationAmountException;
@@ -29,17 +31,14 @@ import rs.edu.raf.banka1.exceptions.CapitalNotFoundByCodeException;
 import org.junit.jupiter.api.Assertions;
 import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
 import rs.edu.raf.banka1.mapper.CapitalMapper;
-import rs.edu.raf.banka1.model.BankAccount;
-import rs.edu.raf.banka1.model.Capital;
-import rs.edu.raf.banka1.model.ListingType;
+import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.CapitalRepository;
 import rs.edu.raf.banka1.repositories.CompanyRepository;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.implementations.CapitalServiceImpl;
-
-import rs.edu.raf.banka1.model.Currency;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.Arrays;
 import java.util.List;
@@ -242,6 +241,105 @@ public class CapitalServiceImplTest {
         verify(capitalRepository, times(1)).getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount);
         verify(capitalRepository, never()).save(any(Capital.class));
     }
+
+    @Test
+    void testReleaseReserved_Success() {
+        Long listingId = 1L;
+        ListingType type = ListingType.STOCK;
+        BankAccount bankAccount = new BankAccount();
+        Double amount = 50.0;
+        Capital capital = new Capital();
+        capital.setReserved(100.0);
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount))
+                .thenReturn(Optional.of(capital));
+
+        capitalService.releaseReserved(listingId, type, bankAccount, amount);
+
+        assertEquals(50.0, capital.getReserved());
+        verify(capitalRepository, times(1)).getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount);
+        verify(capitalRepository, times(1)).save(capital);
+    }
+    @Test
+    void testReleaseReserved_CapitalNotFound() {
+        Long listingId = 1L;
+        ListingType type = ListingType.STOCK;
+        BankAccount bankAccount = new BankAccount();
+        Double amount = 50.0;
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount))
+                .thenReturn(Optional.empty());
+
+        assertThrows(CapitalNotFoundByListingIdAndTypeException.class, () -> {
+            capitalService.releaseReserved(listingId, type, bankAccount, amount);
+        });
+
+        verify(capitalRepository, times(1)).getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount);
+        verify(capitalRepository, never()).save(any(Capital.class));
+    }
+    @Test
+    void testReleaseReserved_InvalidAmount() {
+        Long listingId = 1L;
+        ListingType type = ListingType.STOCK;
+        BankAccount bankAccount = new BankAccount();
+        Double amount = -50.0;
+        Capital capital = new Capital();
+        capital.setReserved(100.0);
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount))
+                .thenReturn(Optional.of(capital));
+
+        assertThrows(InvalidReservationAmountException.class, () -> {
+            capitalService.releaseReserved(listingId, type, bankAccount, amount);
+        });
+
+        verify(capitalRepository, times(1)).getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount);
+        verify(capitalRepository, never()).save(any(Capital.class));
+    }
+    @Test
+    void testAddBalance_Success_CapitalExists() {
+        Long listingId = 1L;
+        ListingType type = ListingType.STOCK;
+        BankAccount bankAccount = new BankAccount();
+        Double amount = 50.0;
+        Capital capital = new Capital();
+        capital.setTotal(100.0);
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount))
+                .thenReturn(Optional.of(capital));
+
+        capitalService.addBalance(listingId, type, bankAccount, amount);
+
+        assertEquals(150.0, capital.getTotal());
+        verify(capitalRepository, times(1)).getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount);
+        verify(capitalRepository, times(1)).save(capital);
+    }
+
+//    @Test
+//    void testGetAllPublicStockCapitals() {
+//        Capital capital1 = new Capital();
+//        Capital capital2 = new Capital();
+//        List<Capital> publicCapitals = List.of(capital1, capital2);
+//
+//        PublicCapitalDto dto1 = new PublicCapitalDto();
+//        PublicCapitalDto dto2 = new PublicCapitalDto();
+//        List<PublicCapitalDto> expectedDtos = List.of(dto1, dto2);
+//
+//        when(capitalRepository.findByBankAccount_CompanyNullAndListingTypeAndPublicTotalGreaterThan(ListingType.STOCK, 0d))
+//                .thenReturn(publicCapitals);
+//        when(capitalMapper.capitalToPublicCapitalDto(capital1)).thenReturn(dto1);
+//        when(capitalMapper.capitalToPublicCapitalDto(capital2)).thenReturn(dto2);
+//
+//        List<PublicCapitalDto> actualDtos = capitalService.getAllPublicStockCapitals();
+//
+//        assertNotNull(actualDtos);
+//        assertEquals(expectedDtos.size(), actualDtos.size());
+//        assertEquals(expectedDtos, actualDtos);
+//
+//        verify(capitalRepository, times(1)).findByBankAccount_CompanyNullAndListingTypeAndPublicTotalGreaterThan(ListingType.STOCK, 0d);
+//        verify(capitalMapper, times(1)).capitalToPublicCapitalDto(capital1);
+//        verify(capitalMapper, times(1)).capitalToPublicCapitalDto(capital2);
+//    }
 
 //
 //    @Test
