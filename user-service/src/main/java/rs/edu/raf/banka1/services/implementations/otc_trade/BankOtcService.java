@@ -48,6 +48,7 @@ public class BankOtcService {
             MyStockDto dto = new MyStockDto();
             dto.setAmount(myStock.getPublicAmount());
             dto.setTicker(myStock.getTicker());
+            dto.setPublicAmount(myStock.getPublicAmount());
             dtos.add(dto);
         }
         return dtos;
