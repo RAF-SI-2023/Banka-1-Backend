@@ -14,4 +14,5 @@ import java.io.Serializable;
 public class MyStockDto implements Serializable {
     private Integer amount;
     private String ticker;
+    private Integer publicAmount;
 }
