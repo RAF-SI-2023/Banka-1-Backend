@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services.implementations;
 
+import org.springframework.cache.annotation.Cacheable;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,26 +140,29 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Cacheable(value = "findCustomerByEmail", key = "#email")
     public CustomerResponse findByEmail(String email) {
         Customer customer = customerRepository.findCustomerByEmail(email).orElse(null);
         if(customer == null){
             return null;
         }
         CustomerResponse customerResponse = customerMapper.customerToCustomerResponse(customer);
-        List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCustomer(customer.getUserId());
-        Boolean isLegalEntity = false;
-        for(BankAccount bankAccount : bankAccounts){
-            if(bankAccount.getCompany()!=null){
-                isLegalEntity = true;
-                break;
-            }
-        }
-        customerResponse.setIsLegalEntity(isLegalEntity);
+//        List<BankAccount> bankAccounts = bankAccountService.getBankAccountsByCustomer(customer.getUserId());
+//        Boolean isLegalEntity = false;
+//        for(BankAccount bankAccount : bankAccounts){
+//            if(bankAccount.getCompany()!=null){
+//                isLegalEntity = true;
+//                break;
+//            }
+//        }
+//        customerResponse.setIsLegalEntity(isLegalEntity);
         return customerResponse;
     }
 
     @Override
+    @Cacheable(value = "customersByEmail", key = "#email")
     public Customer getByEmail(String email) {
+        System.out.println("redis:email:customer");
         return this.customerRepository.findCustomerByEmail(email).orElseThrow(ForbiddenException::new);
     }
 
@@ -176,7 +180,9 @@ public class CustomerServiceImpl implements CustomerService {
         return customer.getUserId();
     }
 
+
     @Override
+    @Cacheable(value = "getAllCustomers")
     public List<CustomerResponse> findAll() {
         return customerRepository.findAll().stream().map(customerMapper::customerToCustomerResponse).toList();
     }

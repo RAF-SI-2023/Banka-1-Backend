@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services.implementations;
 
+import org.springframework.cache.annotation.Cacheable;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -134,6 +136,7 @@ public class BankAccountServiceImpl implements BankAccountService {
 
 
     @Override
+    @Cacheable(value="getBankAccountsByCustomer", key = "#customerId")
     public List<BankAccount> getBankAccountsByCustomer(Long customerId) {
         Customer customer = customerRepository.findById(customerId).orElse(null);
         if(customer != null){
@@ -145,6 +148,7 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
+    @Cacheable(value="getBankAccountsByCompany", key="#companyId")
     public List<BankAccount> getBankAccountsByCompany(Long companyId) {
         Company company = companyRepository.findById(companyId).orElse(null);
         if(company != null){
@@ -205,11 +209,13 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
+    @Cacheable(value="getDefaultBankAccount")
     public BankAccount getDefaultBankAccount() {
         return bankAccountRepository.findBankByCurrencyCode(Constants.DEFAULT_CURRENCY).orElseThrow(BankAccountNotFoundException::new);
     }
 
     @Override
+    @Cacheable(value = "getBankAccountByNumber", key = "#accountNumber")
     public BankAccount getBankAccountByNumber(String accountNumber) {
         return bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
     }
@@ -273,7 +279,8 @@ public class BankAccountServiceImpl implements BankAccountService {
 
     @Override
     public void releaseReserved(BankAccount bankAccount, Double amount) {
-        if(amount <= 0 || amount > bankAccount.getBalance() - bankAccount.getAvailableBalance()) {
+        if(amount == 0) return;
+        if(amount < 0 || amount > bankAccount.getBalance() - bankAccount.getAvailableBalance()) {
             throw new InvalidReservationAmountException();
         }
         bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() + amount);
@@ -298,6 +305,22 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccount.setAvailableBalance(bankAccount.getAvailableBalance() - amount);
         bankAccount.setBalance(bankAccount.getBalance() - amount);
         bankAccountRepository.save(bankAccount);
+    }
+
+    @Override
+    public BankAccount getCustomerBankAccountForOrder(Customer customer) {
+        List <BankAccount> accounts = customer.getAccountIds().stream()
+                .filter(account -> account.getCurrency().getCurrencyCode().equals(Constants.DEFAULT_CURRENCY))
+                .collect(Collectors.toList());
+        if(accounts.isEmpty()){
+            return null;
+        }
+        for(var account : accounts){
+            if(account.getCompany()!=null){
+                return account;
+            }
+        }
+        return accounts.get(0);
     }
 
     private Long getEmployeeId() {

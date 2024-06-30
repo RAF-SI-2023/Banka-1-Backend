@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.hibernate.query.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -96,7 +97,7 @@ public class OrderController {
             @AuthenticationPrincipal User userPrincipal
             ) {
         Employee currentAuth = employeeService.getEmployeeEntityByEmail(userPrincipal.getUsername());
-        orderService.createOrder(request, currentAuth, null);
+        orderService.createOrder(request, currentAuth);
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
@@ -114,9 +115,19 @@ public class OrderController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<List<OrderDto>> getAllOrdersForLoggedUser(
-        @CurrentAuth Employee currentAuth
+        @AuthenticationPrincipal User currentAuth
     ) {
-        return new ResponseEntity<>(orderService.getAllOrdersForEmployee(currentAuth), HttpStatus.OK);
+        Employee employee = null;
+        Customer customer = null;
+        List<OrderDto> orders = null;
+        try {
+            employee = employeeService.getEmployeeEntityByEmail(currentAuth.getUsername());
+            orders = orderService.getAllOrdersForEmployee(employee);
+        } catch (Exception e) {
+            customer = customerService.findCustomerByEmail(currentAuth.getUsername());
+            orders = orderService.getAllOrdersForCustomer(customer);
+        }
+        return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
     @GetMapping(value = "/supervisor/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -173,17 +184,16 @@ public class OrderController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Boolean> createLegalPersonOrder(
-            @RequestBody final LegalOrderRequest request,
+            @RequestBody final CreateOrderRequest request,
             @AuthenticationPrincipal User userPrincipal
     ){
         Customer currentAuth = customerService.findCustomerByEmail(userPrincipal.getUsername());
-        String bankAccountNumber = request.getBankAccountNumber();
-        CreateOrderRequest createOrderRequest = orderMapper.legalMarketOrderToCreateOrderRequest(request);
-        orderService.createOrder(createOrderRequest, currentAuth, bankAccountNumber);
+//        CreateOrderRequest createOrderRequest = orderMapper.legalMarketOrderToCreateOrderRequest(request);
+        orderService.createOrder(request, currentAuth);
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
-    @GetMapping(value = "legal")
+    @GetMapping(value = "/legal")
     @Operation(summary = "Legal person lists his orders.", description = "Legal person lists his order.",
             parameters = {
                     @Parameter(name = "Authorization", description = "JWT token", required = true, in = ParameterIn.HEADER)

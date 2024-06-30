@@ -6,12 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.StockMapper;
+import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.entities.Country;
 import rs.edu.raf.banka1.model.entities.Exchange;
 import rs.edu.raf.banka1.model.entities.Holiday;
 import rs.edu.raf.banka1.repositories.*;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.time.*;
 import java.util.ArrayList;
@@ -45,25 +47,45 @@ public class ListingStockServiceImpl implements ListingStockService {
     }
 
     @Override
-    @Cacheable(value = "listingStockServiceAllStocks")
+//    @Cacheable(value = "listingStockServiceAllStocks")
     public List<ListingStock> getAllStocks(){
         return stockRepository.findAll();
     }
 
     @Override
-    @Cacheable(value = "listingStockServiceFindByTicker", key = "#ticker")
+    public List<ListingStock> refreshAllStocks() {
+        List<ListingStock> stocks = stockRepository.findAll();
+
+        for(ListingStock stock : stocks){
+            double random = Math.random();
+            if(random <= Constants.CHANCE_OF_CHANGE){
+                boolean isPositive = Math.random() > 0.5;
+                if(isPositive)
+                    stock.setPrice(stock.getPrice() + (Constants.PERCENTAGE_CHANGE * stock.getPrice()));
+                else
+                    stock.setPrice(stock.getPrice() - (Constants.PERCENTAGE_CHANGE * stock.getPrice()));
+
+                stockRepository.save(stock);
+            }
+        }
+
+        return stocks;
+    }
+
+    @Override
+//    @Cacheable(value = "listingStockServiceFindByTicker", key = "#ticker")
     public Optional<ListingStock> findByTicker(String ticker) {
         return stockRepository.findByTicker(ticker);
     }
 
     @Override
-    @Cacheable(value = "listingStockServiceFindById", key = "#id")
+//    @Cacheable(value = "listingStockServiceFindById", key = "#id")
     public Optional<ListingStock> findById(Long id) {
         return stockRepository.findById(id);
     }
 
     @Override
-    @Cacheable(value = "listingStockServiceListingHistoriesByTickerTimestamp", key = "{#ticker, #from, #to}")
+//    @Cacheable(value = "listingStockServiceListingHistoriesByTickerTimestamp", key = "{#ticker, #from, #to}")
     public List<ListingHistory> getListingHistoriesByTimestamp(String ticker, Integer from, Integer to) {
         List<ListingHistory> listingHistories = new ArrayList<>();
 //        return all timestamps
@@ -87,7 +109,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     }
 
     @Override
-    @Cacheable(value = "listingStockServiceWorkingTimeById", key = "#id")
+//    @Cacheable(value = "listingStockServiceWorkingTimeById", key = "#id")
     public String getWorkingTimeById(Long id) {
         Optional<ListingStock> optionalListingStock = stockRepository.findById(id);
         if (!optionalListingStock.isPresent())
@@ -135,7 +157,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     }
 
     @Override
-    @Cacheable(value = "listingStockServiceListingHistoriesByIdTimestamp",  key = "{#id, #from, #to}")
+//    @Cacheable(value = "listingStockServiceListingHistoriesByIdTimestamp",  key = "{#id, #from, #to}")
     public List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to) {
         List<ListingHistory> listingHistories = new ArrayList<>();
 //        find stock in database

@@ -14,6 +14,7 @@ import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.CapitalRepository;
+import rs.edu.raf.banka1.repositories.CompanyRepository;
 import rs.edu.raf.banka1.services.*;
 import rs.edu.raf.banka1.utils.Constants;
 
@@ -32,16 +33,20 @@ public class CapitalServiceImpl implements CapitalService {
     private CapitalRepository capitalRepository;
     private CapitalMapper capitalMapper;
     private BankAccountService bankAccountService;
+    private final CompanyRepository companyRepository;
+
     public CapitalServiceImpl(BankAccountRepository bankAccountRepository,
                               CapitalRepository capitalRepository,
                               CapitalMapper capitalMapper,
                               BankAccountService bankAccountService,
-                              MarketService marketService) {
+                              MarketService marketService,
+                              CompanyRepository companyRepository) {
         this.bankAccountRepository = bankAccountRepository;
         this.capitalRepository = capitalRepository;
         this.capitalMapper = capitalMapper;
         this.marketService = marketService;
         this.bankAccountService = bankAccountService;
+        this.companyRepository = companyRepository;
     }
 
     @Override
@@ -74,6 +79,12 @@ public class CapitalServiceImpl implements CapitalService {
         return capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseGet(() -> createCapital(type, listingId, 0D, 0D, bankAccount));
     }
 
+
+    @Override
+    public List<Capital> getCapitalStockForBank(BankAccount bankAccount) {
+        return capitalRepository.getCapitalsByListingTypeAndBankAccount(ListingType.STOCK, bankAccount);
+    }
+
     @Override
     public void reserveBalance(Long listingId, ListingType type, BankAccount bankAccount, Double amount) {
         Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
@@ -94,7 +105,11 @@ public class CapitalServiceImpl implements CapitalService {
 
     @Override
     public void addBalance(Long listingId, ListingType type, BankAccount bankAccount, Double amount) {
-        Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
+//        Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(listingId, type));
+        Capital capital = capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount).orElse(null);
+        if (capital == null) {
+            capital = createCapital(type, listingId, 0D, 0D, bankAccount);
+        }
         processAddBalance(capital, amount);
     }
 
@@ -164,20 +179,29 @@ public class CapitalServiceImpl implements CapitalService {
     }
 
     @Override
-    public List<AllPublicCapitalsDto> getAllPublicCapitals() {
+    public List<AllPublicCapitalsDto> getAllPublicCapitals(Customer customer) {
         List<Capital> capitals = this.capitalRepository.getAllByPublicTotalGreaterThan(0d);
 
         List<AllPublicCapitalsDto> allPublicCapitalsDtos = new ArrayList<>();
 
+        List<BankAccount> accounts;
+        if(customer!=null) {
+            accounts = customer.getAccountIds();
+        }
+        else{
+            accounts = new ArrayList<>();
+        }
         capitals.forEach((Capital capital) -> {
-            String name = "";
-            if(capital.getBankAccount().getCompany() != null) {
-                name = capital.getBankAccount().getCompany().getCompanyName();
-            } else {
-                name = capital.getBankAccount().getCustomer().getFirstName() + " " + capital.getBankAccount().getCustomer().getLastName();
-            }
+            if(!accounts.contains(capital.getBankAccount())){
+                String name = "";
+                if(capital.getBankAccount().getCompany() != null) {
+                    name = capital.getBankAccount().getCompany().getCompanyName();
+                } else {
+                    name = capital.getBankAccount().getCustomer().getFirstName() + " " + capital.getBankAccount().getCustomer().getLastName();
+                }
 
-            allPublicCapitalsDtos.add(capitalMapper.capitalToAllPublicCapitalsDto(capital, name));
+                allPublicCapitalsDtos.add(capitalMapper.capitalToAllPublicCapitalsDto(capital, name));
+            }
         });
 
 
@@ -293,8 +317,16 @@ public class CapitalServiceImpl implements CapitalService {
     }
 
     @Override
-    public List<CapitalProfitDto> getListingCapitalsQuantity() {
-        return this.capitalRepository.findAll().stream()
+    public List<CapitalProfitDto> getListingCapitalsQuantity(User user) {
+        BankAccount bankAccount = null;
+
+        if(user.getCompany() == null) {
+            bankAccount = bankAccountService.getBankAccountByCustomerAndCurrencyCode(user.getUserId(), Constants.DEFAULT_CURRENCY);
+        } else {
+            bankAccount = bankAccountService.getBankAccountByCompanyAndCurrencyCode(user.getCompany().getId(), Constants.DEFAULT_CURRENCY);
+        }
+
+        return this.capitalRepository.findByBankAccount_AccountNumber(bankAccount.getAccountNumber()).stream()
                 .filter(capital -> capital.getListingType() != null)
                 .map(capital -> {
                     Double price = 0.0;
@@ -321,6 +353,9 @@ public class CapitalServiceImpl implements CapitalService {
     private boolean checkCapitalForBuyOrder(MarketOrder order) {
 //        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingType(order.getListingId(), order.getListingType()).orElseThrow(()-> new CapitalNotFoundByListingIdAndTypeException(order.getListingId(), order.getListingType()));
         BankAccount defaultAccount = bankAccountService.getDefaultBankAccount();
+        if (order.getCustomer() != null) {
+            defaultAccount = bankAccountService.findBankAccountByAccountNumber(order.getBankAccountNumber());
+        }
         double available = defaultAccount.getAvailableBalance();
 
         return order.getPrice() <= available;

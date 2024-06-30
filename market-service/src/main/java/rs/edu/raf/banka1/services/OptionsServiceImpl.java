@@ -3,9 +3,11 @@ package rs.edu.raf.banka1.services;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.mapper.OptionsMapper;
+import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.model.OptionsModel;
 import rs.edu.raf.banka1.model.dtos.OptionsDto;
 import rs.edu.raf.banka1.repositories.OptionsRepository;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,7 +26,7 @@ public class OptionsServiceImpl implements OptionsService {
     }
 
     @Override
-    @Cacheable(value = "optionsServiceOptionsByTicker", key = "#ticker")
+//    @Cacheable(value = "optionsServiceOptionsByTicker", key = "#ticker")
     public List<OptionsDto> getOptionsByTicker(String ticker) {
         List<OptionsDto> options = this.optionsRepository.findByTicker(ticker).map(optionsModels ->
                         optionsModels.stream()
@@ -38,36 +40,57 @@ public class OptionsServiceImpl implements OptionsService {
     }
 
     @Override
-    @Cacheable(value = "optionsServiceFindById", key = "#id")
+//    @Cacheable(value = "optionsServiceFindById", key = "#id")
     public Optional<OptionsModel> findById(Long id) {
         return optionsRepository.findById(id);
     }
 
     @Override
-    @Cacheable(value = "optionsServiceAllOptions")
+//    @Cacheable(value = "optionsServiceAllOptions")
     public List<OptionsModel> getAllOptions(){
         return optionsRepository.findAll();
     }
+
     @Override
-    @Cacheable(value = "optionsServiceAllCallOptions")
+    public List<OptionsModel> refreshAllOptions() {
+        List<OptionsModel> options = optionsRepository.findAll();
+
+        for(OptionsModel option : options){
+            double random = Math.random();
+            if(random <= Constants.CHANCE_OF_CHANGE){
+                boolean isPositive = Math.random() > 0.5;
+                if(isPositive)
+                    option.setPrice(option.getPrice() + (Constants.PERCENTAGE_CHANGE * option.getPrice()));
+                else
+                    option.setPrice(option.getPrice() - (Constants.PERCENTAGE_CHANGE * option.getPrice()));
+
+                optionsRepository.save(option);
+            }
+        }
+
+        return options;
+    }
+
+    @Override
+//    @Cacheable(value = "optionsServiceAllCallOptions")
     public Optional<List<OptionsModel>> getAllCallOptions(){
         return optionsRepository.getAllCallsOptions();
     }
 
     @Override
-    @Cacheable(value = "optionsServiceFindCallOptionById", key = "#id")
+//    @Cacheable(value = "optionsServiceFindCallOptionById", key = "#id")
     public Optional<OptionsModel> getCallOptionById(Long id) {
         return optionsRepository.getCallOptionById(id);
     }
 
     @Override
-    @Cacheable(value = "optionsServiceAllPutOptions")
+//    @Cacheable(value = "optionsServiceAllPutOptions")
     public Optional<List<OptionsModel>> getAllPutOptions(){
         return optionsRepository.getAllPutsOptions();
     }
 
     @Override
-    @Cacheable(value = "optionsServiceFindPutOptionById", key = "#id")
+//    @Cacheable(value = "optionsServiceFindPutOptionById", key = "#id")
     public Optional<OptionsModel> getPutOptionById(Long id) {
         return optionsRepository.getPutOptionById(id);
     }

@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface ListingStockService {
     List<ListingStock> getAllStocks();
+    List<ListingStock> refreshAllStocks();
     Optional<ListingStock> findByTicker(String ticker);
     Optional<ListingStock> findById(Long id);
     String getWorkingTimeById(Long id);

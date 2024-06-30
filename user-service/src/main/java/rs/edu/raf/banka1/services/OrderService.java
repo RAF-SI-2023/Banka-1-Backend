@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.List;
 
 public interface OrderService {
-    void createOrder(final CreateOrderRequest request, final User currentAuth, String bankAccountNumber);
+    void createOrder(final CreateOrderRequest request, final User currentAuth);
     MarketOrder getOrderById(Long orderId);
     void finishOrder(Long orderId);
     void setProcessedNumber(Long orderId, Long processedNumber);
@@ -18,6 +18,7 @@ public interface OrderService {
     ListingBaseDto getListingByOrder(MarketOrder order);
     Double calculatePrice(final MarketOrder order, final ListingBaseDto listingBaseDto, long processNum);
     List<OrderDto> getAllOrdersForEmployee(Employee currentAuth);
+    List<OrderDto> getAllOrdersForCustomer(Customer currentAuth);
     List<OrderDto> getAllOrders();
     void cancelOrder(Long orderId);
     DecideOrderResponse decideOrder(Long orderId, String status, Employee currentAuth);

@@ -6,8 +6,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.model.ListingFuture;
 import rs.edu.raf.banka1.model.ListingHistory;
+import rs.edu.raf.banka1.model.ListingStock;
 import rs.edu.raf.banka1.repositories.FutureRepository;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +69,27 @@ public class FuturesServiceImpl implements FuturesService {
     }
 
     @Override
-    @Cacheable(value = "futures", key = "#ticker")
+    public List<ListingFuture> refreshAllFutures() {
+        List<ListingFuture> futures = futureRepository.findAll();
+
+        for(ListingFuture future : futures){
+            double random = Math.random();
+            if(random <= Constants.CHANCE_OF_CHANGE){
+                boolean isPositive = Math.random() > 0.5;
+                if(isPositive)
+                    future.setPrice(future.getPrice() + (Constants.PERCENTAGE_CHANGE * future.getPrice()));
+                else
+                    future.setPrice(future.getPrice() - (Constants.PERCENTAGE_CHANGE * future.getPrice()));
+
+                futureRepository.save(future);
+            }
+        }
+
+        return futures;
+    }
+
+    @Override
+//    @Cacheable(value = "futures", key = "#ticker")
     public Optional<ListingFuture> findByTicker(String ticker) {
         return futureRepository.findByTicker(ticker);
     }

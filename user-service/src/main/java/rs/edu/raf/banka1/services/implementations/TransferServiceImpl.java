@@ -1,5 +1,7 @@
 package rs.edu.raf.banka1.services.implementations;
 
+
+import org.springframework.cache.annotation.Cacheable;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -215,13 +217,13 @@ public class TransferServiceImpl implements TransferService {
         if (senderAccount.getAccountType() == AccountType.CURRENT) {
             toBank = rsdBank;
         }
-        if (senderAccount.getAccountType() == AccountType.FOREIGN_CURRENCY) {
+        if (senderAccount.getAccountType() == AccountType.FOREIGN_CURRENCY && senderCurrency.getCurrencyCode() != null) {
             toBank = bankAccountRepository.findBankByCurrencyCode(senderCurrency.getCurrencyCode()).orElse(null);
         }
         if (recipientAccount.getAccountType() == AccountType.CURRENT) {
             fromBank = rsdBank;
         }
-        if (recipientAccount.getAccountType() == AccountType.FOREIGN_CURRENCY) {
+        if (recipientAccount.getAccountType() == AccountType.FOREIGN_CURRENCY && recipientCurrency.getCurrencyCode() != null) {
             fromBank = bankAccountRepository.findBankByCurrencyCode(recipientCurrency.getCurrencyCode()).orElse(null);
         }
 
@@ -263,12 +265,14 @@ public class TransferServiceImpl implements TransferService {
     }
 
     @Override
+    @Cacheable(value="getTransferById", key="#id")
     public TransferDto getTransferById(Long id) {
         Optional<Transfer> paymentOpt = transferRepository.findById(id);
         return paymentOpt.map(transferMapper::transferToTransferDto).orElse(null);
     }
 
     @Override
+    @Cacheable(value="getAllTransfersForAccountNumber", key= "#accountNumber")
     public List<TransferDto> getAllTransfersForAccountNumber(String accountNumber) {
         Optional<BankAccount> bankAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(accountNumber);
         return bankAccountOpt.map(bankAccount ->

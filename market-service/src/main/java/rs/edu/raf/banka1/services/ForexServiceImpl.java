@@ -9,6 +9,7 @@ import rs.edu.raf.banka1.model.ListingForex;
 import rs.edu.raf.banka1.model.ListingHistory;
 import rs.edu.raf.banka1.repositories.ForexRepository;
 import rs.edu.raf.banka1.repositories.ListingHistoryRepository;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,19 +25,39 @@ public class ForexServiceImpl implements ForexService {
     private ForexRepository forexRepository;
 
     @Override
-    @Cacheable(value = "getAllForexes")
+//    @Cacheable(value = "getAllForexes")
     public List<ListingForex> getAllForexes() {
         return forexRepository.findAll();
     }
 
     @Override
-    @Cacheable(value = "getForexByTicker", key = "#ticker")
+    public List<ListingForex> refreshAllForexes() {
+        List<ListingForex> forexes = forexRepository.findAll();
+
+        for(ListingForex forex : forexes){
+            double random = Math.random();
+            if(random <= Constants.CHANCE_OF_CHANGE){
+                boolean isPositive = Math.random() > 0.5;
+                if(isPositive)
+                    forex.setPrice(forex.getPrice() + (Constants.PERCENTAGE_CHANGE * forex.getPrice()));
+                else
+                    forex.setPrice(forex.getPrice() - (Constants.PERCENTAGE_CHANGE * forex.getPrice()));
+
+                forexRepository.save(forex);
+            }
+        }
+
+        return forexes;
+    }
+
+    @Override
+//    @Cacheable(value = "getForexByTicker", key = "#ticker")
     public ListingForex getForexByTicker(String ticker) {
         return forexRepository.findByTicker(ticker).orElse(null);
     }
 
     @Override
-    @Cacheable(value = "getListingHistoriesByTimestamp", key = "#id + '_' + #from + '_' + #to")
+//    @Cacheable(value = "getListingHistoriesByTimestamp", key = "#id + '_' + #from + '_' + #to")
     public List<ListingHistory> getListingHistoriesByTimestamp(Long id, Integer from, Integer to) {
         List<ListingHistory> listingHistories = new ArrayList<>();
         ListingForex forex = forexRepository.findById(id).orElse(null);
@@ -67,7 +88,7 @@ public class ForexServiceImpl implements ForexService {
     }
 
     @Override
-    @Cacheable(value = "forexServiceFindById", key = "#id")
+//    @Cacheable(value = "forexServiceFindById", key = "#id")
     public Optional<ListingForex> findById(Long id) {
         return forexRepository.findById(id);
     }

@@ -74,22 +74,34 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void createOrder(final CreateOrderRequest request, final User currentAuth, String bankAccountNumber) {
+    public void createOrder(final CreateOrderRequest request, final User currentAuth) {
         MarketOrder order = orderMapper.requestToMarketOrder(request, currentAuth);
+        String bankAccountNumber = null;
         if(currentAuth instanceof Customer) {
-            BankAccount bankAccount = bankAccountService.findBankAccountByAccountNumber(bankAccountNumber);
-            if(!((Customer)currentAuth).getAccountIds().contains(bankAccount)){
+            Customer customer = (Customer) currentAuth;
+            BankAccount bankAccount = null;
+            if(customer.getCompany() == null) {
+                bankAccount = bankAccountService.getCustomerBankAccountForOrder((Customer)currentAuth);
+            } else {
+                bankAccount = bankAccountService.getBankAccountByCompanyAndCurrencyCode(customer.getCompany().getId(), Constants.DEFAULT_CURRENCY);
+            }
+            if(bankAccount == null){
+                throw new BankAccountNotFoundException();
+            }
+            bankAccountNumber = bankAccount.getAccountNumber();
+//            BankAccount bankAccount = bankAccountService.findBankAccountByAccountNumber(bankAccountNumber);
+            if(!customer.getAccountIds().contains(bankAccount) && bankAccount.getCompany() == null){
                 //mozda ovde treba drugaciji exception?
                 throw new ForbiddenException();
             }
             if(bankAccount.getCompany() == null && !order.getListingType().equals(ListingType.STOCK)){
                 throw new ForbiddenException();
             }
-            order.setCustomer((Customer)currentAuth);
+            order.setCustomer(customer);
             order.setBankAccountNumber(bankAccountNumber);
         }
         else if(currentAuth instanceof Employee){
-            if(request.getIsMargin()) {
+            if(request.getIsMargin() != null && request.getIsMargin()) {
                 //Employee cannot create a margin order
                 throw new ForbiddenException();
             }
@@ -102,7 +114,7 @@ public class OrderServiceImpl implements OrderService {
 
         order.setPrice(calculatePrice(order,listingBaseDto,order.getContractSize()));
         order.setFee(calculateFee(request.getLimitValue(), order.getPrice()));
-        order.setIsMargin(request.getIsMargin());
+        order.setIsMargin(request.getIsMargin() != null && request.getIsMargin());
         if(currentAuth instanceof Employee) {
             order.setOwner((Employee)currentAuth);
         }
@@ -180,6 +192,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<OrderDto> getAllOrdersForCustomer(Customer currentAuth) {
+        return orderRepository.getAllByCustomer(currentAuth).stream().map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
+    }
+
+    @Override
     public List<OrderDto> getAllOrders() {
         return orderRepository.findAll().stream().map(orderMapper::marketOrderToOrderDto).collect(Collectors.toList());
     }
@@ -233,8 +250,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void finishOrder(Long orderId) {
+        MarketOrder order = getOrderById(orderId);
         this.orderRepository.finishOrder(orderId, OrderStatus.DONE);
-        releaseLeftoverReservedFunds(orderId);
+        if(!order.getIsMargin())
+            releaseLeftoverReservedFunds(orderId);
 //        updateLimit(orderId);
         this.scheduledFutureMap.get(orderId).cancel(false);
     }
@@ -292,13 +311,15 @@ public class OrderServiceImpl implements OrderService {
 
     void reserveStockCapital(MarketOrder order) {
         BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
+        if (order.getCustomer() != null){
+            bankAccount = bankAccountService.findBankAccountByAccountNumber(order.getBankAccountNumber());
+        }
         if(order.getOrderType().equals(OrderType.BUY)) {
             bankAccountService.reserveBalance(bankAccount, order.getPrice());
         } else {
             Capital securityCapital = capitalService.getCapitalByListingIdAndTypeAndBankAccount(order.getListingId(), order.getListingType(), bankAccount);
             capitalService.reserveBalance(securityCapital.getListingId(), securityCapital.getListingType(), bankAccount, (double)order.getContractSize());
         }
-
     }
 
     void updateLimit(Long orderId) {
