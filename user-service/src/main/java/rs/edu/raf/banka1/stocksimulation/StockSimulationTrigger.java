@@ -37,7 +37,7 @@ public class StockSimulationTrigger implements Trigger {
             timeInterval = (long)random.nextDouble((24 * 60) / ( volume / remainingQuantity ) * 1000);
             timeInterval = marketService.getWorkingHoursForStock(listingBaseDto.getListingId()).equals(WorkingHoursStatus.AFTER_HOURS) ? timeInterval + 30 * 60 * 1000 : timeInterval;
             if (marketOrder.getStatus().equals(OrderStatus.PROCESSING)) {
-                timeInterval = 15000;
+                timeInterval = 7000;
             }
         }
         return Instant.now().plusMillis(timeInterval);
