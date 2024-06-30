@@ -130,6 +130,9 @@ public class BankAccountServiceImpl implements BankAccountService {
         } else if (bankAccount.getCompany() != null) {
             bankAccount = bankAccountRepository.findByCompany_IdAndCurrency_CurrencyCode(bankAccount.getCompany().getId(), bankAccount.getCurrency().getCurrencyCode()).get();
         }
+        else {
+            saveBankAccount(bankAccount);
+        }
 
         return bankAccount;
     }
@@ -171,6 +174,13 @@ public class BankAccountServiceImpl implements BankAccountService {
             return;
         }
         if (bankAccountRepository.findBankAccountByAccountNumber(bankAccount.getAccountNumber()).isEmpty()) {
+            if (bankAccount.getAvailableBalance() == null || bankAccount.getAvailableBalance() == 0) {
+                bankAccount.setAvailableBalance(1000000.0);
+            }
+            if (bankAccount.getBalance() == null || bankAccount.getBalance() == 0) {
+                bankAccount.setBalance(1000000.0);
+            }
+
             bankAccountRepository.save(bankAccount);
             cardService.saveCard(cardService.createCard("VISA", "VisaCard", bankAccount.getAccountNumber(), 1000));
             cardService.saveCard(cardService.createCard("MASTER", "MasterCard", bankAccount.getAccountNumber(), 10000));

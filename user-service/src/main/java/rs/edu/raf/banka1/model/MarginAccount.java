@@ -33,8 +33,8 @@ public class MarginAccount {
 
     private int marginCallLevel = 0; //0 -> margin call not triggered, 1 -> margin call triggered, 2 -> margin call time exceeded - automatic liquidation
 
-    @Version
-    private Integer version;
+//    @Version
+//    private Integer version;
 
     @Override
     public boolean equals(Object o) {
