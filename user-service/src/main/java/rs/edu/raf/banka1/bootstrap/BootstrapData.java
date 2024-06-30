@@ -1126,7 +1126,7 @@ public class BootstrapData implements CommandLineRunner {
             companyRepository.save(bank);
         }
 
-        if (capitalRepository.findAll().size() > 10) {
+        if (capitalRepository.findAll().size() > 15) {
             return;
         }
 
