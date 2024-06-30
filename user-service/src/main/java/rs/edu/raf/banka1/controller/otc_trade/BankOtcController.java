@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.dtos.otc_trade.EditMyStockDto;
 import rs.edu.raf.banka1.dtos.otc_trade.FrontendOfferDto;
 import rs.edu.raf.banka1.dtos.otc_trade.MyStockDto;
 import rs.edu.raf.banka1.dtos.otc_trade.OfferDto;
@@ -20,6 +21,14 @@ import java.util.List;
 @RequestMapping(value = "/api/v1/otcTrade")
 public class BankOtcController {
     private final BankOtcService bankOtcService;
+
+    @PostMapping("/editOurStock")
+    @Operation(description = "menja nas stock")
+    public ResponseEntity<String> editMyStock(@RequestBody EditMyStockDto dto){
+        boolean success = bankOtcService.editMyStock(dto);
+        if (success) return ResponseEntity.ok("success");
+        return ResponseEntity.badRequest().build();
+    }
 
     @GetMapping("/getOurStocks")
     @Operation(description = "dohvata stockove nase banke")
