@@ -31,7 +31,7 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
         try {
             marginAccount = marginAccountService.getMarginAccount(getUserIdFromOrder(order), order.getListingType(), currency.getCurrencyCode(), userAccount.getCompany() != null);
         } catch (MarginAccountNotFoundException e) {
-            if(userAccount.getCompany() == null) {
+            if(userAccount.getCompany() != null) {
                 marginAccountService.createMarginAccount(new MarginAccountCreateDto(order.getListingType(), currency, null, userAccount.getCompany().getId()));
             } else {
                 marginAccountService.createMarginAccount(new MarginAccountCreateDto(order.getListingType(), currency, userAccount.getCustomer().getUserId(), null));
