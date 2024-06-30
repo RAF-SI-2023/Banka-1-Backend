@@ -223,6 +223,7 @@ public class ListingStockServiceImpl implements ListingStockService {
     }
     @Override
     public int addAllListingStocks(List<ListingStock> listingStocks) {
+        if (!stockRepository.findAll().isEmpty()) return 0;
         return listingStocks.stream().mapToInt(this::addListingStock).sum();
     }
     @Override
@@ -292,6 +293,7 @@ public class ListingStockServiceImpl implements ListingStockService {
 
     @Override
     public int addAllListingsToHistory(List<ListingHistory> listingHistoriesModels) {
+        if (!listingHistoryRepository.findAll().isEmpty()) return 0;
         return listingHistoriesModels.stream().mapToInt(this::addListingToHistory).sum();
     }
 
