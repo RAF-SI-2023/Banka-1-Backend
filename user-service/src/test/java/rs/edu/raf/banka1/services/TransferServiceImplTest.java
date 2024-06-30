@@ -444,7 +444,7 @@ class TransferServiceImplTest {
         rsdCurrency.setActive(true);
         rsdCurrency.setCurrencySymbol("RSD");
 
-        transferService.setExchangeRateAPIToken("40f2aa4e59165c6aab10cd02");
+        transferService.setExchangeRateAPIToken("6f2fe71358f82f6f372edee7");
         transferService.setExchangeRateApiUrl("https://v6.exchangerate-api.com/v6/");
         transferService.setHttpClient(httpClientMock);
 

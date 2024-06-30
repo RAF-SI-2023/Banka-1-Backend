@@ -217,13 +217,13 @@ public class TransferServiceImpl implements TransferService {
         if (senderAccount.getAccountType() == AccountType.CURRENT) {
             toBank = rsdBank;
         }
-        if (senderAccount.getAccountType() == AccountType.FOREIGN_CURRENCY) {
+        if (senderAccount.getAccountType() == AccountType.FOREIGN_CURRENCY && senderCurrency.getCurrencyCode() != null) {
             toBank = bankAccountRepository.findBankByCurrencyCode(senderCurrency.getCurrencyCode()).orElse(null);
         }
         if (recipientAccount.getAccountType() == AccountType.CURRENT) {
             fromBank = rsdBank;
         }
-        if (recipientAccount.getAccountType() == AccountType.FOREIGN_CURRENCY) {
+        if (recipientAccount.getAccountType() == AccountType.FOREIGN_CURRENCY && recipientCurrency.getCurrencyCode() != null) {
             fromBank = bankAccountRepository.findBankByCurrencyCode(recipientCurrency.getCurrencyCode()).orElse(null);
         }
 
