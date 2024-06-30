@@ -20,6 +20,7 @@ public class Constants {
     public static final float MARGIN_RATE = 0.6f;
     public static final float MARGIN_INTEREST_RATE = 0.05f;
     public static final float MAINTENANCE_MARGIN_RATE = 0.25f;
+    public static final float TAX_OTC = 0.1f;
 
     public static final List<String> allPermissions = Arrays.asList(
             "addUser", "modifyUser", "deleteUser", "readUser",
