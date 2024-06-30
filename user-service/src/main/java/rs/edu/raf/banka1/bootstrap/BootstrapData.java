@@ -450,6 +450,7 @@ public class BootstrapData implements CommandLineRunner {
             capital33.setTicker("DT");
             capital33.setBankAccount(bankAccountCompany33);
             capital33.setTotal(500D);
+            capital33.setAverageBuyingPrice(123.0);
             capitalRepository.save(capital33);
 
             Customer testCustomer = new Customer();
@@ -567,6 +568,7 @@ public class BootstrapData implements CommandLineRunner {
             capital.setTicker("DT");
             capital.setBankAccount(bankAccountCompany);
             capital.setTotal(50D);
+            capital.setAverageBuyingPrice(321.0);
             capitalRepository.save(capital);
 
             Capital capital22 = new Capital();
@@ -577,6 +579,7 @@ public class BootstrapData implements CommandLineRunner {
             capital22.setTicker("DT");
             capital22.setBankAccount(bankAccount6testa);
             capital22.setTotal(50D);
+            capital22.setAverageBuyingPrice(112.0);
             capitalRepository.save(capital22);
 
             Capital capital1ForTestCustomer = new Capital();
@@ -587,6 +590,7 @@ public class BootstrapData implements CommandLineRunner {
             capital1ForTestCustomer.setTicker("ORCL");
             capital1ForTestCustomer.setBankAccount(bankAccount4test);
             capital1ForTestCustomer.setTotal(50D);
+            capital1ForTestCustomer.setAverageBuyingPrice(1244.0);
             capitalRepository.save(capital1ForTestCustomer);
 
             Capital capital2ForTestCustomer = new Capital();
@@ -597,6 +601,7 @@ public class BootstrapData implements CommandLineRunner {
             capital2ForTestCustomer.setTicker("WYY");
             capital2ForTestCustomer.setBankAccount(bankAccount4test);
             capital2ForTestCustomer.setTotal(100D);
+            capital2ForTestCustomer.setAverageBuyingPrice(100.0);
             capitalRepository.save(capital2ForTestCustomer);
 
             Capital capital1ForTestCustomer2 = new Capital();
@@ -607,6 +612,7 @@ public class BootstrapData implements CommandLineRunner {
             capital1ForTestCustomer2.setTicker("ORCL");
             capital1ForTestCustomer2.setBankAccount(bankAccount6testa);
             capital1ForTestCustomer2.setTotal(50D);
+            capital1ForTestCustomer2.setAverageBuyingPrice(100.0);
             capitalRepository.save(capital1ForTestCustomer2);
 
             Capital capital2ForTestCustomer2 = new Capital();
@@ -617,6 +623,7 @@ public class BootstrapData implements CommandLineRunner {
             capital2ForTestCustomer2.setTicker("WYY");
             capital2ForTestCustomer2.setBankAccount(bankAccount6testa);
             capital2ForTestCustomer2.setTotal(100D);
+            capital2ForTestCustomer2.setAverageBuyingPrice(100.0);
             capitalRepository.save(capital2ForTestCustomer2);
 
             Capital capital3ForTestCustomer2 = new Capital();
@@ -627,6 +634,7 @@ public class BootstrapData implements CommandLineRunner {
             capital3ForTestCustomer2.setTicker("CDLX");
             capital3ForTestCustomer2.setBankAccount(bankAccount6testa);
             capital3ForTestCustomer2.setTotal(100D);
+            capital3ForTestCustomer2.setAverageBuyingPrice(100.0);
             capitalRepository.save(capital3ForTestCustomer2);
 
             MarginAccount marginAccountCompany = new MarginAccount();
@@ -665,6 +673,7 @@ public class BootstrapData implements CommandLineRunner {
             capitalCompany1.setTotal(10005.0);
             capitalCompany1.setListingType(ListingType.STOCK);
             capitalCompany1.setListingId(1L);
+            capitalCompany1.setAverageBuyingPrice(100.0);
             capitalRepository.save(capitalCompany1);
 
             Customer customerCompany1 = new Customer();
@@ -706,6 +715,7 @@ public class BootstrapData implements CommandLineRunner {
             capital1.setTicker("DT");
             capital1.setBankAccount(bankAccount4);
             capital1.setTotal(50D);
+            capital1.setAverageBuyingPrice(150.0);
             capitalRepository.save(capital1);
 
             MarginAccount marginAccount = new MarginAccount();
@@ -790,17 +800,19 @@ public class BootstrapData implements CommandLineRunner {
         capital111.setBankAccount(bankAccount3);
         capital111.setTotal(500D);
         capital111.setListingType(ListingType.STOCK);
+        capital111.setAverageBuyingPrice(200.0);
         capitalRepository.save(capital111);
             
-            Capital capital2 = new Capital();
-            capital2.setPublicTotal(0D);
-            capital2.setListingType(ListingType.STOCK);
-            capital2.setReserved(0D);
-            capital2.setListingId(1L);
-            capital2.setTicker("DT");
-            capital2.setBankAccount(bankAccount3);
-            capital2.setTotal(50D);
-            capitalRepository.save(capital2);
+        Capital capital2 = new Capital();
+        capital2.setPublicTotal(0D);
+        capital2.setListingType(ListingType.STOCK);
+        capital2.setReserved(0D);
+        capital2.setListingId(1L);
+        capital2.setTicker("DT");
+        capital2.setBankAccount(bankAccount3);
+        capital2.setTotal(50D);
+        capital2.setAverageBuyingPrice(200.0);
+        capitalRepository.save(capital2);
 
         Capital capital123 = new Capital();
         capital123.setPublicTotal(0D);
@@ -811,6 +823,7 @@ public class BootstrapData implements CommandLineRunner {
         capital123.setBankAccount(bankAccount1);
         capital123.setTotal(500D);
         capital123.setListingType(ListingType.STOCK);
+        capital123.setAverageBuyingPrice(200.0);
         capitalRepository.save(capital123);
 
         transferService.processTransfer(transferService.createTransfer(new CreateTransferRequest(bankAccount3.getAccountNumber(), bankAccount2.getAccountNumber(), 100.0)));
@@ -971,25 +984,26 @@ public class BootstrapData implements CommandLineRunner {
         contract.setListingId(1L);
         contract.setListingType(ListingType.STOCK);
         contractRepository.save(contract);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());//TODO: nzm da li ovde da zovem logger, cuo sam od nekog da se restartuje sistem onda?
-        }
 
         if (myStockRepository.count() == 0){
             BankAccount rsdAcc = bankAccountService.getDefaultBankAccount();
             List<Capital> myStocks = capitalService.getCapitalStockForBank(rsdAcc);
-            for (Capital capital:myStocks){
+            for (Capital cpt:myStocks){
                 MyStock stok1 = new MyStock();
-                stok1.setTicker(capital.getTicker());
-                stok1.setAmount(capital.getTotal().intValue());
+                stok1.setTicker(cpt.getTicker());
+                stok1.setAmount(cpt.getTotal().intValue());
                 stok1.setCurrencyMark("RSD");
-                stok1.setPrivateAmount(capital.getTotal().intValue()-capital.getPublicTotal().intValue());
-                stok1.setPublicAmount(capital.getPublicTotal().intValue());
+                stok1.setPrivateAmount(cpt.getTotal().intValue()-cpt.getPublicTotal().intValue());
+                stok1.setPublicAmount(cpt.getPublicTotal().intValue());
                 stok1.setCompanyId(1L);
                 stok1.setUserId(null);
                 stok1.setMinimumPrice(20.0);
                 myStockRepository.save(stok1);
             }
+        }
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());//TODO: nzm da li ovde da zovem logger, cuo sam od nekog da se restartuje sistem onda?
         }
 
     }
@@ -1113,6 +1127,7 @@ public class BootstrapData implements CommandLineRunner {
         for(ListingStockDto stock : stocks) {
             Capital capital = capitalService.createCapital(ListingType.STOCK, stock.getListingId(), 100.0, 0.0, defaultBankAccount);
             capital.setPublicTotal(50.0);
+            capital.setAverageBuyingPrice(100.0);
             if (capitalRepository.findAll()
                     .stream()
                     .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
@@ -1124,6 +1139,7 @@ public class BootstrapData implements CommandLineRunner {
         List<ListingFutureDto> futures = marketService.getAllFutures();
         for(ListingFutureDto future : futures) {
             Capital capital = capitalService.createCapital(ListingType.FUTURE, future.getListingId(), 100.0, 0.0, defaultBankAccount);
+            capital.setAverageBuyingPrice(100.0);
             if (capitalRepository.findAll()
                     .stream()
                     .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
@@ -1135,6 +1151,7 @@ public class BootstrapData implements CommandLineRunner {
         List<ListingForexDto> forexes = marketService.getAllForex();
         for(ListingForexDto forex : forexes) {
             Capital capital = capitalService.createCapital(ListingType.FOREX, forex.getListingId(), 100.0, 0.0, defaultBankAccount);
+            capital.setAverageBuyingPrice(100.0);
             if (capitalRepository.findAll()
                     .stream()
                     .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
@@ -1146,6 +1163,7 @@ public class BootstrapData implements CommandLineRunner {
         List<OptionsDto> options = marketService.getAllOptions();
         for(OptionsDto optionsDto:options) {
             Capital capital = capitalService.createCapital(ListingType.OPTIONS, optionsDto.getListingId(), 100.0, 0.0,defaultBankAccount);
+            capital.setAverageBuyingPrice(100.0);
             if (capitalRepository.findAll()
                     .stream()
                     .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
@@ -1191,6 +1209,7 @@ public class BootstrapData implements CommandLineRunner {
             // generate default capital for company
             Capital capital = capitalMapper.generateCapitalForBankAccount(bankAccount);
             capital.setTotal(10000.0);
+            capital.setAverageBuyingPrice(100.0);
             capitalRepository.save(capital);
 
             return bank;

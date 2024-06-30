@@ -136,7 +136,7 @@ public class BankAccountServiceImpl implements BankAccountService {
 
 
     @Override
-    @Cacheable(value="getBankAccountsByCustomer", key = "#user_id")
+    @Cacheable(value="getBankAccountsByCustomer", key = "#customerId")
     public List<BankAccount> getBankAccountsByCustomer(Long customerId) {
         Customer customer = customerRepository.findById(customerId).orElse(null);
         if(customer != null){
@@ -148,7 +148,7 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
-    @Cacheable(value="getBankAccountsByCompany", key="#id")
+    @Cacheable(value="getBankAccountsByCompany", key="#companyId")
     public List<BankAccount> getBankAccountsByCompany(Long companyId) {
         Company company = companyRepository.findById(companyId).orElse(null);
         if(company != null){
@@ -209,13 +209,13 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
-    @Cacheable(value="getDefaultBankAccount", key="#currency_code")
+    @Cacheable(value="getDefaultBankAccount")
     public BankAccount getDefaultBankAccount() {
         return bankAccountRepository.findBankByCurrencyCode(Constants.DEFAULT_CURRENCY).orElseThrow(BankAccountNotFoundException::new);
     }
 
     @Override
-    @Cacheable(value = "getBankAccountByNumber", key = "#account_number")
+    @Cacheable(value = "getBankAccountByNumber", key = "#accountNumber")
     public BankAccount getBankAccountByNumber(String accountNumber) {
         return bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
     }

@@ -250,8 +250,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void finishOrder(Long orderId) {
+        MarketOrder order = getOrderById(orderId);
         this.orderRepository.finishOrder(orderId, OrderStatus.DONE);
-        releaseLeftoverReservedFunds(orderId);
+        if(!order.getIsMargin())
+            releaseLeftoverReservedFunds(orderId);
 //        updateLimit(orderId);
         this.scheduledFutureMap.get(orderId).cancel(false);
     }

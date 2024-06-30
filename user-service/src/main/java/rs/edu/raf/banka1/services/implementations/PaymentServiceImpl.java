@@ -99,7 +99,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @Cacheable(value="getAllPaymentsForAccountNumber", key="#account_number")
+    @Cacheable(value="getAllPaymentsForAccountNumber", key="#accountNumber")
     public List<PaymentDto> getAllPaymentsForAccountNumber(String accountNumber) {
         System.out.println("redis:payments");
         Optional<BankAccount> bankAccountOpt = bankAccountRepository.findBankAccountByAccountNumber(accountNumber);

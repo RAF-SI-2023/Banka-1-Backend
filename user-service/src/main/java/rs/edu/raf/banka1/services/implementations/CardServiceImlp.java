@@ -29,7 +29,7 @@ public class CardServiceImlp implements CardService {
 
 
     @Override
-    @Cacheable(value = "getAllCardsByAccountNumber", key = "#account_number")
+    @Cacheable(value = "getAllCardsByAccountNumber", key = "#accountNumber")
     public List<Card> getAllCardsByAccountNumber(String accountNumber) {
         return cardRepository.findByAccountNumber(accountNumber);
     }
@@ -58,7 +58,7 @@ public class CardServiceImlp implements CardService {
     }
 
     @Override
-    @Cacheable(value = "getAllCardsByCustomerId", key = "#user_id")
+    @Cacheable(value = "getAllCardsByCustomerId", key = "#customerId")
     public List<Card> getAllCardsByCustomerId(Long customerId) {
         Customer customer = customerRepository.findById(customerId).orElse(null);
         List<Card> cards = new ArrayList<>();
