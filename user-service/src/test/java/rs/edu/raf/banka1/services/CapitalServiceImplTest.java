@@ -1,88 +1,273 @@
-//package rs.edu.raf.banka1.services;
+package rs.edu.raf.banka1.services;
+
+import org.junit.Ignore;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.Mock;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import org.mockito.quality.Strictness;
+import rs.edu.raf.banka1.dtos.CapitalProfitDto;
+import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
+import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
+import rs.edu.raf.banka1.exceptions.InvalidReservationAmountException;
+import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
+import rs.edu.raf.banka1.exceptions.InvalidCapitalAmountException;
+import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
+import rs.edu.raf.banka1.exceptions.CapitalNotFoundByBankAccountException;
+import rs.edu.raf.banka1.exceptions.CapitalNotFoundByListingIdAndTypeException;
+import rs.edu.raf.banka1.exceptions.CapitalNotFoundByCodeException;
+
+
+import org.junit.jupiter.api.Assertions;
+import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
+import rs.edu.raf.banka1.mapper.CapitalMapper;
+import rs.edu.raf.banka1.model.BankAccount;
+import rs.edu.raf.banka1.model.Capital;
+import rs.edu.raf.banka1.model.ListingType;
+import rs.edu.raf.banka1.repositories.BankAccountRepository;
+import rs.edu.raf.banka1.repositories.CapitalRepository;
+import rs.edu.raf.banka1.repositories.CompanyRepository;
+import rs.edu.raf.banka1.services.BankAccountService;
+import rs.edu.raf.banka1.services.MarketService;
+import rs.edu.raf.banka1.services.implementations.CapitalServiceImpl;
+
+import rs.edu.raf.banka1.model.Currency;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+public class CapitalServiceImplTest {
+    @Mock
+    private BankAccountRepository bankAccountRepository;
+    @Mock
+    private CapitalRepository capitalRepository;
+    @Mock
+    private CompanyRepository companyRepository;
+    private CapitalMapper capitalMapper;
+
+    @Mock
+    private BankAccountService bankAccountService;
+    @Mock
+    private MarketService marketService;
+
+    private CapitalServiceImpl capitalService;
+
+    @BeforeEach
+    public void setUp() {
+        capitalMapper = new CapitalMapper();
+        capitalService = new CapitalServiceImpl(bankAccountRepository, capitalRepository, capitalMapper, bankAccountService, marketService, companyRepository);
+    }
+
+    @Test
+    void shouldCreateCapitalForBankAccount() {
+        BankAccount bankAccount = new BankAccount();
+        Double total = 1.00;
+        Double reserved = 0.00;
+        Long listingId = 1l;
+        ListingType listingType = ListingType.STOCK;
+        ListingStockDto stockDto = new ListingStockDto();
+        stockDto.setTicker("DT");
+
+        Capital capital = new Capital();
+        capital.setBankAccount(bankAccount);
+        capital.setTotal(total);
+        capital.setReserved(reserved);
+        capital.setListingId(listingId);
+        capital.setListingType(ListingType.STOCK);
+
+        when(marketService.getStockById(listingId)).thenReturn(stockDto);
+
+        Capital result = capitalService.createCapital(listingType, listingId, total, reserved, bankAccount);
+        assertEquals(capital.getBankAccount(), result.getBankAccount());
+    }
+
+    @Test
+    void testGetCapitalByListingIdAndTypeAndBankAccount_CapitalExists() {
+        Long listingId = 1L;
+        BankAccount bankAccount = new BankAccount();
+        ListingType type = ListingType.STOCK;
+        Capital capital = new Capital();
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount))
+                .thenReturn(Optional.of(capital));
+
+        Capital result = capitalService.getCapitalByListingIdAndTypeAndBankAccount(listingId, type, bankAccount);
+
+        assertNotNull(result);
+        assertEquals(capital, result);
+        verify(capitalRepository, times(1)).getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount);
+    }
+
+    @Test
+    void testGetCapitalStockForBank() {
+        Capital capital1 = new Capital();
+        Capital capital2 = new Capital();
+        BankAccount bankAccount = new BankAccount();
+        List<Capital> capitalList = Arrays.asList(capital1, capital2);
+
+        when(capitalRepository.getCapitalsByListingTypeAndBankAccount(ListingType.STOCK, bankAccount))
+                .thenReturn(capitalList);
+
+        List<Capital> result = capitalService.getCapitalStockForBank(bankAccount);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals(capitalList, result);
+        verify(capitalRepository, times(1)).getCapitalsByListingTypeAndBankAccount(ListingType.STOCK, bankAccount);
+    }
+
+    @Test
+    void testRemoveBalance_Success() {
+        Long listingId = 1L;
+        ListingType type = ListingType.STOCK;
+        BankAccount bankAccount = new BankAccount();
+        Double amount = 100.0;
+        Capital capital = new Capital();
+        capital.setTotal(200.0);
+        capital.setReserved(50.0);
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount))
+                .thenReturn(Optional.of(capital));
+
+        capitalService.removeBalance(listingId, type, bankAccount, amount);
+
+        assertEquals(100.0, capital.getTotal());
+        verify(capitalRepository, times(1)).getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount);
+        verify(capitalRepository, times(1)).save(capital);
+    }
+    @Test
+    void testRemoveBalance_CapitalNotFound() {
+        Long listingId = 1L;
+        BankAccount bankAccount = new BankAccount();
+        ListingType type = ListingType.STOCK; // Replace with actual ListingType
+        Double amount = 100.0;
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount))
+                .thenReturn(Optional.empty());
+
+        assertThrows(CapitalNotFoundByListingIdAndTypeException.class, () -> {
+            capitalService.removeBalance(listingId, type, bankAccount, amount);
+        });
+
+        verify(capitalRepository, times(1)).getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount);
+        verify(capitalRepository, never()).save(any(Capital.class));
+    }
+    @Test
+    void testRemoveBalance_InvalidAmount() {
+        Long listingId = 1L;
+        ListingType type = ListingType.STOCK;
+        BankAccount bankAccount = new BankAccount();
+        Double amount = -100.0;
+        Capital capital = new Capital();
+        capital.setTotal(200.0);
+        capital.setReserved(50.0);
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount))
+                .thenReturn(Optional.of(capital));
+
+        assertThrows(InvalidCapitalAmountException.class, () -> {
+            capitalService.removeBalance(listingId, type, bankAccount, amount);
+        });
+
+        verify(capitalRepository, times(1)).getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount);
+        verify(capitalRepository, never()).save(any(Capital.class));
+    }
+
+    @Test
+    void testCommitReserved_Success() {
+        Long listingId = 1L;
+        ListingType type = ListingType.STOCK;
+        BankAccount bankAccount = new BankAccount();
+        Double amount = 50.0;
+        Capital capital = new Capital();
+        capital.setTotal(200.0);
+        capital.setReserved(100.0);
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount))
+                .thenReturn(Optional.of(capital));
+
+        capitalService.commitReserved(listingId, type, bankAccount, amount);
+
+        assertEquals(150.0, capital.getTotal());
+        assertEquals(50.0, capital.getReserved());
+        verify(capitalRepository, times(1)).getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount);
+        verify(capitalRepository, times(1)).save(capital);
+    }
+    @Test
+    void testCommitReserved_CapitalNotFound() {
+        Long listingId = 1L;
+        ListingType type = ListingType.STOCK;
+        BankAccount bankAccount = new BankAccount();
+        Double amount = 50.0;
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount))
+                .thenReturn(Optional.empty());
+
+        assertThrows(CapitalNotFoundByListingIdAndTypeException.class, () -> {
+            capitalService.commitReserved(listingId, type, bankAccount, amount);
+        });
+
+        verify(capitalRepository, times(1)).getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount);
+        verify(capitalRepository, never()).save(any(Capital.class));
+    }
+
+    @Test
+    void testCommitReserved_InvalidAmount() {
+        Long listingId = 1L;
+        ListingType type = ListingType.STOCK;
+        BankAccount bankAccount = new BankAccount();
+        Double amount = -50.0;
+        Capital capital = new Capital();
+        capital.setTotal(200.0);
+        capital.setReserved(100.0);
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount))
+                .thenReturn(Optional.of(capital));
+
+        assertThrows(InvalidReservationAmountException.class, () -> {
+            capitalService.commitReserved(listingId, type, bankAccount, amount);
+        });
+
+        verify(capitalRepository, times(1)).getCapitalByListingIdAndListingTypeAndBankAccount(listingId, type, bankAccount);
+        verify(capitalRepository, never()).save(any(Capital.class));
+    }
+
 //
-//import org.junit.Ignore;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Disabled;
-//import org.junit.jupiter.api.Nested;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//import org.mockito.junit.jupiter.MockitoSettings;
-//import org.mockito.Mock;
+//    @Test
+//        void shouldReserveFundsForBuyOrder() {
+//            Capital capital = new Capital();
+//            BankAccount bankAccount = new BankAccount();
+//            bankAccount.setBalance(1000.0);
+//            bankAccount.setAvailableBalance(1000.0);
+//            capital.setBankAccount(bankAccount);
+//            capital.setTotal(1000.0);
+//            capital.setReserved(0.00);
 //
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.mockito.Mockito.*;
+//            Long listingId = 1l;
+//            String currencyCode = "RSD";
+//            double amount = 100.0;
 //
-//import org.mockito.quality.Strictness;
-//import rs.edu.raf.banka1.dtos.CapitalProfitDto;
-//import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
-//import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
-//import rs.edu.raf.banka1.exceptions.InvalidReservationAmountException;
-//import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
-//import rs.edu.raf.banka1.exceptions.InvalidCapitalAmountException;
-//import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
-//import rs.edu.raf.banka1.exceptions.CapitalNotFoundByBankAccountException;
-//import rs.edu.raf.banka1.exceptions.CapitalNotFoundByListingIdAndTypeException;
-//import rs.edu.raf.banka1.exceptions.CapitalNotFoundByCodeException;
+//            when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
 //
+//            capitalService.reserveBalance(listingId,ListingType.STOCK,bankAccount, amount);
 //
-//import org.junit.jupiter.api.Assertions;
-//import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
-//import rs.edu.raf.banka1.mapper.CapitalMapper;
-//import rs.edu.raf.banka1.model.BankAccount;
-//import rs.edu.raf.banka1.model.Capital;
-//import rs.edu.raf.banka1.model.ListingType;
-//import rs.edu.raf.banka1.repositories.BankAccountRepository;
-//import rs.edu.raf.banka1.repositories.CapitalRepository;
-//import rs.edu.raf.banka1.services.implementations.CapitalServiceImpl;
-//
-//import rs.edu.raf.banka1.model.Currency;
-//
-//import java.util.Arrays;
-//import java.util.List;
-//import java.util.Optional;
-//
-//@ExtendWith(MockitoExtension.class)
-//@MockitoSettings(strictness = Strictness.LENIENT)
-//class CapitalServiceImplTest {
-//    @Mock
-//    private BankAccountRepository bankAccountRepository;
-//    @Mock
-//    private CapitalRepository capitalRepository;
-//    private CapitalMapper capitalMapper;
-//
-//    @Mock
-//    private BankAccountService bankAccountService;
-//    @Mock
-//    private MarketService marketService;
-//
-//    private CapitalServiceImpl capitalService;
-//
-//    @BeforeEach
-//    public void setUp() {
-//        capitalMapper = new CapitalMapper();
-//        capitalService = new CapitalServiceImpl(bankAccountRepository, capitalRepository, capitalMapper, bankAccountService, marketService);
-//    }
-//
-//    @Nested
-//    class CreateCapitalForBankAccountTests {
-////        @Test
-////        void shouldCreateCapitalForBankAccount() {
-////            Currency currency = new Currency();
-////            BankAccount bankAccount = new BankAccount();
-////            Double total = 1.00;
-////            Double reserved = 0.00;
-////
-////            Capital capital = new Capital();
-////            capital.setBankAccount(bankAccount);
-////            capital.setTotal(total);
-////            capital.setReserved(reserved);
-////
-////            Capital result = capitalService.createCapital(bankAccount, currency, total, reserved);
-////            assertEquals(capital.getBankAccount(), result.getBankAccount());
-////        }
-//    }
-//
+//            verify(capitalRepository).getCapitalByCurrency_CurrencyCode(eq(currencyCode));
+//            verify(capitalRepository).save(eq(capital));
+//     }
+
+
+}
 //    @Nested
 //    class CreateCapitalForListingTests {
 //        @Test
@@ -105,29 +290,30 @@
 //            assertEquals(capital.getListingId(), result.getListingId());
 //        }
 //    }
-//
+
 //    @Nested
 //    class ProcessReservationTests {
-////        @Test
-////        void shouldReserveFundsForBuyOrder() {
-////            Capital capital = new Capital();
-////            BankAccount bankAccount = new BankAccount();
-////            bankAccount.setBalance(1000.0);
-////            bankAccount.setAvailableBalance(1000.0);
-////            capital.setBankAccount(bankAccount);
-////            capital.setTotal(1000.0);
-////            capital.setReserved(0.00);
-////
-////            String currencyCode = "RSD";
-////            double amount = 100.0;
-////
-////            when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
-////
-////            capitalService.reserveBalance(currencyCode, amount);
-////
-////            verify(capitalRepository).getCapitalByCurrency_CurrencyCode(eq(currencyCode));
-////            verify(capitalRepository).save(eq(capital));
-////        }
+//        @Test
+//        void shouldReserveFundsForBuyOrder() {
+//            Capital capital = new Capital();
+//            BankAccount bankAccount = new BankAccount();
+//            bankAccount.setBalance(1000.0);
+//            bankAccount.setAvailableBalance(1000.0);
+//            capital.setBankAccount(bankAccount);
+//            capital.setTotal(1000.0);
+//            capital.setReserved(0.00);
+//
+//            Long listingId = 1l;
+//            String currencyCode = "RSD";
+//            double amount = 100.0;
+//
+//            when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
+//
+//            capitalService.reserveBalance(listingId,ListingType.STOCK,bankAccount, amount);
+//
+//            verify(capitalRepository).getCapitalByCurrency_CurrencyCode(eq(currencyCode));
+//            verify(capitalRepository).save(eq(capital));
+       // }
 //        @Test
 //        void shouldReserveFundsForSellOrder() {
 //            ListingType listingType = ListingType.STOCK;
@@ -783,5 +969,6 @@
 //        when(capitalRepository.getCapitalByListingIdAndListingType(2L, ListingType.FOREX)).thenReturn(Optional.empty());
 //        assertThrows(CapitalNotFoundByListingIdAndTypeException.class, () -> capitalService.getCapitalByListingIdAndType(2L, ListingType.FOREX));
 //    }
-//}
-//
+
+
+
