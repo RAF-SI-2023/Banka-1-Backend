@@ -6,10 +6,7 @@ import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import rs.edu.raf.banka1.dtos.otc_trade.FrontendOfferDto;
-import rs.edu.raf.banka1.dtos.otc_trade.MyOfferDto;
-import rs.edu.raf.banka1.dtos.otc_trade.MyStockDto;
-import rs.edu.raf.banka1.dtos.otc_trade.OfferDto;
+import rs.edu.raf.banka1.dtos.otc_trade.*;
 import rs.edu.raf.banka1.model.listing.BankOTCStock;
 import rs.edu.raf.banka1.model.listing.MyStock;
 import rs.edu.raf.banka1.model.offer.MyOffer;
@@ -129,6 +126,21 @@ public class BankOtcService {
     }
 
     ///////////////////////FRONTEND/////////////////////////////////////////////////
+
+    public boolean editMyStock(EditMyStockDto stockDto){
+        try {
+            MyStock stock = myStockRepository.findByTickerAndCompanyId(stockDto.getTicker(), 1L);
+
+            stock.setPublicAmount(stockDto.getPublicAmount());
+            stock.setMinimumPrice(stockDto.getPrice());
+
+            myStockRepository.save(stock);
+        }catch (Exception e){
+            return false;
+        }
+
+        return true;
+    }
 
     //GET: /getBanksStocks
     //dohvatamo sve Stocks od drugih banaka
