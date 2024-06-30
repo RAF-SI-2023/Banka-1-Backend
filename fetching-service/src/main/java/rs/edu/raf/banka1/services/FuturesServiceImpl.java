@@ -224,6 +224,7 @@ public class FuturesServiceImpl implements FuturesService {
 
     @Override
     public int addAllFutures(List<ListingFuture> futures) {
+        if (!futureRepository.findAll().isEmpty()) return 0;
         return (int) futures.stream().filter(this::addFuture).count();
     }
 

@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services.implementations;
 
+import org.springframework.cache.annotation.Cacheable;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,12 +130,16 @@ public class BankAccountServiceImpl implements BankAccountService {
         } else if (bankAccount.getCompany() != null) {
             bankAccount = bankAccountRepository.findByCompany_IdAndCurrency_CurrencyCode(bankAccount.getCompany().getId(), bankAccount.getCurrency().getCurrencyCode()).get();
         }
+        else {
+            saveBankAccount(bankAccount);
+        }
 
         return bankAccount;
     }
 
 
     @Override
+    @Cacheable(value="getBankAccountsByCustomer", key = "#customerId")
     public List<BankAccount> getBankAccountsByCustomer(Long customerId) {
         Customer customer = customerRepository.findById(customerId).orElse(null);
         if(customer != null){
@@ -146,6 +151,7 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
+    @Cacheable(value="getBankAccountsByCompany", key="#companyId")
     public List<BankAccount> getBankAccountsByCompany(Long companyId) {
         Company company = companyRepository.findById(companyId).orElse(null);
         if(company != null){
@@ -168,6 +174,13 @@ public class BankAccountServiceImpl implements BankAccountService {
             return;
         }
         if (bankAccountRepository.findBankAccountByAccountNumber(bankAccount.getAccountNumber()).isEmpty()) {
+            if (bankAccount.getAvailableBalance() == null || bankAccount.getAvailableBalance() == 0) {
+                bankAccount.setAvailableBalance(1000000.0);
+            }
+            if (bankAccount.getBalance() == null || bankAccount.getBalance() == 0) {
+                bankAccount.setBalance(1000000.0);
+            }
+
             bankAccountRepository.save(bankAccount);
             cardService.saveCard(cardService.createCard("VISA", "VisaCard", bankAccount.getAccountNumber(), 1000));
             cardService.saveCard(cardService.createCard("MASTER", "MasterCard", bankAccount.getAccountNumber(), 10000));
@@ -206,11 +219,13 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
+    @Cacheable(value="getDefaultBankAccount")
     public BankAccount getDefaultBankAccount() {
         return bankAccountRepository.findBankByCurrencyCode(Constants.DEFAULT_CURRENCY).orElseThrow(BankAccountNotFoundException::new);
     }
 
     @Override
+    @Cacheable(value = "getBankAccountByNumber", key = "#accountNumber")
     public BankAccount getBankAccountByNumber(String accountNumber) {
         return bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
     }

@@ -38,7 +38,7 @@ services:
         "server.port": 8080,
         "front.port": 4200,
         "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
-        "exchangeRateAPIToken": "5eb8b116c5d704eea74c42f1",
+        "exchangeRateAPIToken": "6f2fe71358f82f6f372edee7",
         "exchangeRateApiUrl": "https://v6.exchangerate-api.com/v6/",
         "marketServiceUrl" = "http://market-service:8081"
       }'

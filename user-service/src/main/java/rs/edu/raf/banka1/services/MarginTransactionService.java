@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface MarginTransactionService {
-    void createTransaction(MarketOrder order, BankAccount userAccount, Currency currency, String description, TransactionType transactionType, Double price, Double processedNum);
+    void createTransaction(MarketOrder order, BankAccount userAccount, Capital capital, Currency currency, String description, TransactionType transactionType, Double price, Double processedNum);
     List<MarginTransaction> getAllTransactions();
     List<MarginTransaction> getTransactionsForMarginAccountId(Long marginAccountId);
     Map<ListingBaseDto, Double> getAllMarginPositions(MarginAccount account);

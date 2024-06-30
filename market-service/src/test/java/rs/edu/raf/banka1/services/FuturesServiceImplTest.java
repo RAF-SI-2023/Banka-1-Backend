@@ -195,4 +195,12 @@ public class FuturesServiceImplTest {
         assertThat(listingFutures).isNotNull();
         assertThat(listingFutures).hasSize(2);
     }
+
+    @Test
+    public void RefreshAllFutures(){
+        when(futureRepository.findAll()).thenReturn(futures);
+        List<ListingFuture> listingFutures = futuresService.refreshAllFutures();
+        assertThat(listingFutures).isNotNull();
+        assertThat(listingFutures).hasSize(2);
+    }
 }

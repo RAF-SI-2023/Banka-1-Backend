@@ -57,7 +57,7 @@ public class StockSimulationJob implements Runnable {
         );
 
         createTransaction(order,listingBaseDto, processedNumber, bankAccountNumber);
-        if(bankAccountNumber != null) {
+        if(bankAccountNumber != null && order.getOwner() != null) {
             orderService.updateEmployeeLimit(order.getId());// Ovo je ovde jer bi u transaction servisu bio circular dependency. Trebalo bi promeniti kasnije
         }
 
@@ -118,9 +118,10 @@ public class StockSimulationJob implements Runnable {
             Double oldAmount = securityCapital.getTotal();
             Double oldAverageBuyingPrice = securityCapital.getAverageBuyingPrice();
             Double newTotalPrice = order.getPrice();
-            Long newAmount = order.getCurrentAmount();
+            Long newAmount = processedNum;
             Double newAverageBuyingPrice = (oldAmount * oldAverageBuyingPrice + newTotalPrice) / (oldAmount + newAmount);
-            securityCapital.setAverageBuyingPrice(newAverageBuyingPrice);
+//            securityCapital.setAverageBuyingPrice(newAverageBuyingPrice);
+            capitalService.updateAverageBuyingPrice(securityCapital.getListingId(), securityCapital.getListingType(), securityCapital.getBankAccount(), newAverageBuyingPrice);
 
             transactionType = TransactionType.DEPOSIT;
         } else {
@@ -138,7 +139,7 @@ public class StockSimulationJob implements Runnable {
         }
 
         try {
-            marginTransactionService.createTransaction(order, bankAccount, bankAccount.getCurrency(), description, transactionType, price, (double)processedNum);
+            marginTransactionService.createTransaction(order, bankAccount, securityCapital, bankAccount.getCurrency(), description, transactionType, price, (double)processedNum);
         } catch (InvalidReservationAmountException e) {
             orderService.cancelOrder(orderId);
         }
@@ -161,7 +162,7 @@ public class StockSimulationJob implements Runnable {
             Double newTotalPrice = order.getPrice();
             Long newAmount = order.getCurrentAmount();
             Double newAverageBuyingPrice = (oldAmount * oldAverageBuyingPrice + newTotalPrice) / (oldAmount + newAmount);
-            securityCapital.setAverageBuyingPrice(newAverageBuyingPrice);
+            capitalService.updateAverageBuyingPrice(securityCapital.getListingId(), securityCapital.getListingType(), securityCapital.getBankAccount(), newAverageBuyingPrice);
         }
         
         Double price = orderService.calculatePrice(order,listingBaseDto,processedNum);

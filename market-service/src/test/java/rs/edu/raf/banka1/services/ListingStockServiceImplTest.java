@@ -299,6 +299,25 @@ public class ListingStockServiceImplTest {
         verify(stockRepository, times(1)).findAll();
     }
 
+
+    @Test
+    public void testRefreshAllStocks() {
+        List<ListingStock> expectedStocks = new ArrayList<>();
+        ListingStock stock1 = new ListingStock();
+        stock1.setPrice(100.0);
+        ListingStock stock2 = new ListingStock();
+        stock2.setPrice(200.0);
+        expectedStocks.add(stock1);
+        expectedStocks.add(stock2);
+
+        when(stockRepository.findAll()).thenReturn(expectedStocks);
+
+        List<ListingStock> actualStocks = listingStockService.refreshAllStocks();
+
+        assertEquals(expectedStocks.size(), actualStocks.size());
+        verify(stockRepository, times(1)).findAll();
+    }
+
     @Test
     public void testFindByTicker() {
 

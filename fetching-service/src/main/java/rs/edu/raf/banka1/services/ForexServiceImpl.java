@@ -156,6 +156,7 @@ public class ForexServiceImpl implements ForexService {
 
     @Override
     public void saveAllForexes(List<ListingForex> listingForexList) {
+        if (!forexRepository.findAll().isEmpty()) return;
         forexRepository.saveAll(listingForexList);
     }
 
