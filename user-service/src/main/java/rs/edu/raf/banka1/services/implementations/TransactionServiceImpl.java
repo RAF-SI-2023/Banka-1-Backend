@@ -69,8 +69,11 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setCurrency(bankAccount.getCurrency());
         transaction.setBankAccount(bankAccount);
         transaction.setDateTime(new Date().getTime());
+        transaction.setMarketOrder(order);
+        transaction.setEmployee(order.getOwner());
         if(order.getOrderType().equals(OrderType.BUY)) {
             transaction.setBuy(price);
+            transactionRepository.save(transaction);
             //Add stocks to capital
             capitalService.addBalance(securityCapital.getListingId(), securityCapital.getListingType(), bankAccount, (double) securityAmount);
             //Commit reserved
@@ -87,10 +90,11 @@ public class TransactionServiceImpl implements TransactionService {
             }
         } else {
             transaction.setSell(price);
+            transactionRepository.save(transaction);
             //Remove stocks
             capitalService.commitReserved(securityCapital.getListingId(), securityCapital.getListingType(), bankAccount, (double)securityAmount);
             //Add money
-            Double taxReturn = checkTaxReturn(order);
+            Double taxReturn = Math.max((securityAmount*price - securityAmount*securityCapital.getAverageBuyingPrice())*0.1, 0);
             bankAccountService.addBalance(bankAccount, price - taxReturn);
 
             if (order.getListingType().equals(ListingType.STOCK)) {
@@ -112,41 +116,39 @@ public class TransactionServiceImpl implements TransactionService {
                 }
             }
         }
-        transaction.setMarketOrder(order);
-        transaction.setEmployee(order.getOwner());
-        transactionRepository.save(transaction);
     }
 
-    private Double checkTaxReturn(MarketOrder order){
-        List<MarketOrder> orders = orderRepository.getAllBuyOrders(order.getListingId(), order.getListingType(), order.getOwner(), OrderType.BUY, OrderStatus.DONE).orElse(null);
-        //this should not happen, checking just so java doesn't freak out
-        if(orders == null){
-            return 0.0;
-        }
-        Double returnAmount = 0.0;
-        Long counter = order.getContractSize();
-        for(MarketOrder buyOrder : orders){
-            long amount = Math.min(counter, buyOrder.getContractSize() - buyOrder.getCurrentAmount());
-            buyOrder.setCurrentAmount(amount - counter);
-            long timestampNow = System.currentTimeMillis()/1000;
-            //if order is older than 10 years, we don't need to return tax
-            long period = timestampNow - buyOrder.getTimestamp();
-            period = period - 10*365*24*60*60;
-            if(period < 0){
-                //we dont return tax if no money was made
-                if(order.getPrice() > buyOrder.getPrice()){
-                    returnAmount += amount * (order.getPrice() - buyOrder.getPrice()) * 0.2;
-                }
-            }
-            orderRepository.save(buyOrder);
-
-            counter-=amount;
-            if(counter == 0L){
-                break;
-            }
-        }
-        return returnAmount;
-    }
+//    private Double checkTaxReturn(Capital securityCapital, Double securityAmount){
+//
+//        List<MarketOrder> orders = orderRepository.getAllBuyOrders(order.getListingId(), order.getListingType(), order.getOwner(), OrderType.BUY, OrderStatus.DONE).orElse(null);
+//        //this should not happen, checking just so java doesn't freak out
+//        if(orders == null){
+//            return 0.0;
+//        }
+//        Double returnAmount = 0.0;
+//        Long counter = order.getContractSize();
+//        for(MarketOrder buyOrder : orders){
+//            long amount = Math.min(counter, buyOrder.getContractSize() - buyOrder.getCurrentAmount());
+//            buyOrder.setCurrentAmount(amount - counter);
+//            long timestampNow = System.currentTimeMillis()/1000;
+//            //if order is older than 10 years, we don't need to return tax
+//            long period = timestampNow - buyOrder.getTimestamp();
+//            period = period - 10*365*24*60*60;
+//            if(period < 0){
+//                //we dont return tax if no money was made
+//                if(order.getPrice() > buyOrder.getPrice()){
+//                    returnAmount += amount * (order.getPrice() - buyOrder.getPrice()) * 0.2;
+//                }
+//            }
+//            orderRepository.save(buyOrder);
+//
+//            counter-=amount;
+//            if(counter == 0L){
+//                break;
+//            }
+//        }
+//        return returnAmount;
+//    }
 
     @Override
     public TransactionDto createBuyTransaction(CreateTransactionRequest request) {
