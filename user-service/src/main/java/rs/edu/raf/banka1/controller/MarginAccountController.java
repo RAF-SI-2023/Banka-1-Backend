@@ -51,7 +51,7 @@ public class MarginAccountController {
                     description = "You aren't authorized to get all cards by account number"),
             @ApiResponse(responseCode = "500", description = "Internal server error"),
     })
-    @PreAuthorize("hasAuthority('manageMargins')")
+//    @PreAuthorize("hasAuthority('manageMargins')")
     public ResponseEntity<List<MarginAccountDto>> getAllMarginAccounts() {
         return new ResponseEntity<>(marginAccountService.getAllMarginAccounts(), HttpStatus.OK);
     }
