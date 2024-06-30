@@ -16,7 +16,7 @@ public interface MarginAccountService {
     List<MarginAccountDto> getMyMargin(Customer loggedIn);
     Boolean createMarginAccount(MarginAccountCreateDto marginAccountCreateDto);
     Boolean depositMarginCall(Long marginAccountId, Double amount);
-    void depositToMarginAccount(MarginAccount marginAccount, Double amount);
+    void depositToMarginAccount(MarginAccount marginAccount, Double amount, Double loanedAmount);
     void withdrawFromMarginAccount(MarginAccount marginAccount, Double amount);
 
     List<MarginAccount> getAllMarginAccountEntities();

@@ -39,7 +39,6 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
             }
             marginAccount = marginAccountService.getMarginAccount(getUserIdFromOrder(order), order.getListingType(), currency.getCurrencyCode(), userAccount.getCompany() != null);
         }
-
         double initialMargin = price * Constants.MARGIN_RATE;
         double loanValue = price - initialMargin;
         double interest = loanValue * Constants.MARGIN_INTEREST_RATE;
@@ -64,7 +63,7 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
         if(order.getOrderType().equals(OrderType.BUY)) {
             //Prebaciti initialMargin sa bankAccounta na margin
             bankAccountService.removeBalance(userAccount, initialMargin);
-            marginAccountService.depositToMarginAccount(marginAccount, initialMargin);
+            marginAccountService.depositToMarginAccount(marginAccount, initialMargin, loanValue);
             capitalService.addBalance(securityCapital.getListingId(), securityCapital.getListingType(), userAccount, processedNum);
             transaction.setDeposit(initialMargin);
         } else {

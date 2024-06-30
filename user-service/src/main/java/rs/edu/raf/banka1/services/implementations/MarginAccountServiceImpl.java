@@ -127,7 +127,7 @@ public class MarginAccountServiceImpl implements MarginAccountService {
         }
 
         bankAccountService.removeBalance(bankAccount, amount);
-        depositToMarginAccount(marginAccount, amount);
+        depositToMarginAccount(marginAccount, amount, 0d);
 
         createTransactionMarginCall(marginAccount, amount);
         marginAccount.setMarginCallLevel(0);
@@ -161,15 +161,13 @@ public class MarginAccountServiceImpl implements MarginAccountService {
     }
 
     @Override
-    public void depositToMarginAccount(MarginAccount marginAccount, Double fullAmount) {
+    public void depositToMarginAccount(MarginAccount marginAccount, Double fullAmount, Double loanedAmount) {
         if(fullAmount < 0) {
             throw new InvalidCapitalAmountException(fullAmount);
         }
-        double initialMargin = fullAmount * Constants.MARGIN_RATE;
-        double loanedMoney = fullAmount - initialMargin;
 
-        marginAccount.setBalance(marginAccount.getBalance() + initialMargin);
-        marginAccount.setLoanValue(marginAccount.getLoanValue() + loanedMoney);
+        marginAccount.setBalance(marginAccount.getBalance() + fullAmount);
+        marginAccount.setLoanValue(marginAccount.getLoanValue() + loanedAmount);
         marginAccountRepository.save(marginAccount);
     }
 
