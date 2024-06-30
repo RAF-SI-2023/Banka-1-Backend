@@ -295,7 +295,7 @@ public class CapitalServiceImpl implements CapitalService {
     public Double estimateBalanceFuture(Long futureId) {
         BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
         ListingFutureDto listingFutureDto = this.marketService.getFutureById(futureId);
-        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(futureId, ListingType.FOREX, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(futureId, ListingType.FOREX));
+        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(futureId, ListingType.FUTURE, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(futureId, ListingType.FUTURE));
         return (capital.getTotal()-capital.getReserved())*listingFutureDto.getPrice();
     }
 
@@ -304,7 +304,7 @@ public class CapitalServiceImpl implements CapitalService {
         BankAccount bankAccount = bankAccountService.getDefaultBankAccount();
 
         ListingStockDto listingStockDto = this.marketService.getStockById(stockId);
-        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(stockId, ListingType.FOREX, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(stockId, ListingType.FOREX));
+        Capital capital = this.capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(stockId, ListingType.STOCK, bankAccount).orElseThrow(() -> new CapitalNotFoundByListingIdAndTypeException(stockId, ListingType.STOCK));
         return (capital.getTotal()-capital.getReserved())*listingStockDto.getPrice();
     }
 
