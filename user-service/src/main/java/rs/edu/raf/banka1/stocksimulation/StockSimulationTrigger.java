@@ -6,6 +6,7 @@ import org.springframework.scheduling.TriggerContext;
 import rs.edu.raf.banka1.dtos.market_service.ListingBaseDto;
 import rs.edu.raf.banka1.model.ListingType;
 import rs.edu.raf.banka1.model.MarketOrder;
+import rs.edu.raf.banka1.model.OrderStatus;
 import rs.edu.raf.banka1.model.WorkingHoursStatus;
 import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.OrderService;
@@ -35,6 +36,9 @@ public class StockSimulationTrigger implements Trigger {
         if(marketOrder.getListingType().equals(ListingType.STOCK)) {
             timeInterval = (long)random.nextDouble((24 * 60) / ( volume / remainingQuantity ) * 1000);
             timeInterval = marketService.getWorkingHoursForStock(listingBaseDto.getListingId()).equals(WorkingHoursStatus.AFTER_HOURS) ? timeInterval + 30 * 60 * 1000 : timeInterval;
+            if (marketOrder.getStatus().equals(OrderStatus.PROCESSING)) {
+                timeInterval = 15000;
+            }
         }
         return Instant.now().plusMillis(timeInterval);
     }
