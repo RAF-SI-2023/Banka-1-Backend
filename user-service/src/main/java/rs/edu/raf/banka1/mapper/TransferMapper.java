@@ -27,6 +27,9 @@ public class TransferMapper {
         if (transfer.getRecipientBankAccount() != null) {
             dto.setRecipientAccountNumber(transfer.getRecipientBankAccount().getAccountNumber());
         }
+        dto.setPreviousCurrency(transfer.getCurrencyFrom().getCurrencyCode());
+        dto.setExchangedTo(transfer.getCurrencyTo().getCurrencyCode());
+        dto.setProfit(transfer.getCommission());
 
         return dto;
     }
