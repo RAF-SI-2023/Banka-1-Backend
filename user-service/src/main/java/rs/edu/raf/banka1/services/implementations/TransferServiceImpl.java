@@ -318,8 +318,8 @@ public class TransferServiceImpl implements TransferService {
                         .collect(Collectors.toList()));
 
         for (Transfer t:allTransfers){
-            double commisison = Transfer.calculateCommission(t.getAmount());
-            totalProfit+=commisison;
+//            double commisison = Transfer.calculateCommission(t.getAmount());
+            totalProfit+=t.getCommission();
         }
         transfersReportDto.setProfit(totalProfit);
 
