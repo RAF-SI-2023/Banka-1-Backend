@@ -57,7 +57,7 @@ public class StockSimulationJob implements Runnable {
         );
 
         createTransaction(order,listingBaseDto, processedNumber, bankAccountNumber);
-        if(bankAccountNumber != null) {
+        if(bankAccountNumber != null && order.getOwner() != null) {
             orderService.updateEmployeeLimit(order.getId());// Ovo je ovde jer bi u transaction servisu bio circular dependency. Trebalo bi promeniti kasnije
         }
 

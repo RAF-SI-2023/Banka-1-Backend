@@ -9,6 +9,7 @@ import java.util.List;
 public interface CapitalService {
     Capital createCapital(ListingType listingType, Long listingId, Double total, Double reserved, BankAccount bankAccount);
     Capital getCapitalByListingIdAndTypeAndBankAccount(Long listingId, ListingType type, BankAccount bankAccount);
+    List<Capital> getCapitalStockForBank(BankAccount bankAccount);
     void reserveBalance(Long listingId, ListingType type, BankAccount bankAccount, Double amount);
     void commitReserved(Long listingId, ListingType type, BankAccount bankAccount, Double amount);
     void releaseReserved(Long listingId, ListingType type, BankAccount bankAccount, Double amount);
@@ -19,7 +20,7 @@ public interface CapitalService {
     Double estimateBalanceFuture(Long futureId);
     Double estimateBalanceStock(Long stockId);
     Double estimateBalanceOptions(Long optionsId);
-    List<CapitalProfitDto> getListingCapitalsQuantity();
+    List<CapitalProfitDto> getListingCapitalsQuantity(User user);
     boolean hasEnoughCapitalForOrder(MarketOrder order);
     List<PublicCapitalDto> getAllPublicStockCapitals();
     List<PublicCapitalDto> getAllPublicListingCapitals();
