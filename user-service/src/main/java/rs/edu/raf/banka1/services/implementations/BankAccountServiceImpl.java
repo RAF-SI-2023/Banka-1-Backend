@@ -1,5 +1,6 @@
 package rs.edu.raf.banka1.services.implementations;
 
+import org.springframework.cache.annotation.Cacheable;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,6 +136,7 @@ public class BankAccountServiceImpl implements BankAccountService {
 
 
     @Override
+    @Cacheable(value="getBankAccountsByCustomer", key = "#customerId")
     public List<BankAccount> getBankAccountsByCustomer(Long customerId) {
         Customer customer = customerRepository.findById(customerId).orElse(null);
         if(customer != null){
@@ -146,6 +148,7 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
+    @Cacheable(value="getBankAccountsByCompany", key="#companyId")
     public List<BankAccount> getBankAccountsByCompany(Long companyId) {
         Company company = companyRepository.findById(companyId).orElse(null);
         if(company != null){
@@ -206,11 +209,13 @@ public class BankAccountServiceImpl implements BankAccountService {
     }
 
     @Override
+    @Cacheable(value="getDefaultBankAccount")
     public BankAccount getDefaultBankAccount() {
         return bankAccountRepository.findBankByCurrencyCode(Constants.DEFAULT_CURRENCY).orElseThrow(BankAccountNotFoundException::new);
     }
 
     @Override
+    @Cacheable(value = "getBankAccountByNumber", key = "#accountNumber")
     public BankAccount getBankAccountByNumber(String accountNumber) {
         return bankAccountRepository.findBankAccountByAccountNumber(accountNumber).orElseThrow(BankAccountNotFoundException::new);
     }
