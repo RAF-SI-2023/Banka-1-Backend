@@ -165,8 +165,11 @@ public class BootstrapData implements CommandLineRunner {
 //            Logger.info("Loading Data...");
             seedPermissions();
             seedCurencies();
+            transferService.seedExchangeRates();
 
             Company bank = createBankCompany();
+
+            createBanka1Accounts(bank);
 
             Employee admin = generateEmployee(
                 bank,
@@ -802,7 +805,7 @@ public class BootstrapData implements CommandLineRunner {
         capital111.setListingType(ListingType.STOCK);
         capital111.setAverageBuyingPrice(200.0);
         capitalRepository.save(capital111);
-            
+
         Capital capital2 = new Capital();
         capital2.setPublicTotal(0D);
         capital2.setListingType(ListingType.STOCK);
@@ -825,9 +828,6 @@ public class BootstrapData implements CommandLineRunner {
         capital123.setListingType(ListingType.STOCK);
         capital123.setAverageBuyingPrice(200.0);
         capitalRepository.save(capital123);
-
-        transferService.processTransfer(transferService.createTransfer(new CreateTransferRequest(bankAccount3.getAccountNumber(), bankAccount2.getAccountNumber(), 100.0)));
-        transferService.processTransfer(transferService.createTransfer(new CreateTransferRequest(bankAccount3.getAccountNumber(), bankAccount1.getAccountNumber(), 100.0)));
 
             Customer customerBasic = new Customer();
             customerBasic.setFirstName("Customer1");
@@ -963,11 +963,11 @@ public class BootstrapData implements CommandLineRunner {
 
             seedBankCapital(bank);
     //        if (currencyRepository.findAll().isEmpty()) {
-                transferService.seedExchangeRates();
+//                transferService.seedExchangeRates();
     //        }
 
-
-        transferService.seedExchangeRates();
+        long transfer1 = transferService.createTransfer(new CreateTransferRequest(bankAccount3.getAccountNumber(), bankAccount2.getAccountNumber(), 100.0));
+        long transfer2 = transferService.createTransfer(new CreateTransferRequest(bankAccount3.getAccountNumber(), bankAccount1.getAccountNumber(), 100.0));
 
         Contract contract = new Contract();
         contract.setBuyer(bankAccount1);
@@ -1106,13 +1106,12 @@ public class BootstrapData implements CommandLineRunner {
         }
     }
 
-    private void seedBankCapital(Company bank){
-        if (companyRepository.findCompaniesByIdNumberContainingIgnoreCase(bank.getIdNumber()).isEmpty()) {
-            companyRepository.save(bank);
-        }
-
+    private void createBanka1Accounts(Company bank) {
         List<rs.edu.raf.banka1.model.Currency> allCurrencies = currencyRepository.findAll();
 
+        if (bankAccountRepository.findAll().size() > 5) {
+            return;
+        }
 
         // Make entry for each currency
         for(rs.edu.raf.banka1.model.Currency currency : allCurrencies) {
@@ -1120,56 +1119,53 @@ public class BootstrapData implements CommandLineRunner {
 //            Capital capital = capitalService.createCapitalForBankAccount(bankAccount, currency, bankAccount.getBalance(), 0.0);
 //            capitalRepository.save(capital);
         }
+    }
+
+    private void seedBankCapital(Company bank){
+        if (companyRepository.findCompaniesByIdNumberContainingIgnoreCase(bank.getIdNumber()).isEmpty()) {
+            companyRepository.save(bank);
+        }
+
+        if (capitalRepository.findAll().size() > 10) {
+            return;
+        }
+
+        List<rs.edu.raf.banka1.model.Currency> allCurrencies = currencyRepository.findAll();
 
         // Make entry for stocks, futures and forex
         List<ListingStockDto> stocks = marketService.getAllStocks();
         BankAccount defaultBankAccount = bankAccountService.getDefaultBankAccount();
+
         for(ListingStockDto stock : stocks) {
             Capital capital = capitalService.createCapital(ListingType.STOCK, stock.getListingId(), 100.0, 0.0, defaultBankAccount);
+            capital = capitalRepository.findById(capital.getId()).orElse(null);
             capital.setPublicTotal(50.0);
             capital.setAverageBuyingPrice(100.0);
-            if (capitalRepository.findAll()
-                    .stream()
-                    .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
-                    .toList().isEmpty()) {
-                capitalRepository.save(capital);
-            }
+            capitalRepository.save(capital);
         }
 
         List<ListingFutureDto> futures = marketService.getAllFutures();
         for(ListingFutureDto future : futures) {
             Capital capital = capitalService.createCapital(ListingType.FUTURE, future.getListingId(), 100.0, 0.0, defaultBankAccount);
+            capital = capitalRepository.findById(capital.getId()).orElse(null);
             capital.setAverageBuyingPrice(100.0);
-            if (capitalRepository.findAll()
-                    .stream()
-                    .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
-                    .toList().isEmpty()) {
-                capitalRepository.save(capital);
-            }
+            capitalRepository.save(capital);
         }
 
         List<ListingForexDto> forexes = marketService.getAllForex();
-        for(ListingForexDto forex : forexes) {
+        for (ListingForexDto forex : forexes) {
             Capital capital = capitalService.createCapital(ListingType.FOREX, forex.getListingId(), 100.0, 0.0, defaultBankAccount);
+            capital = capitalRepository.findById(capital.getId()).orElse(null);
             capital.setAverageBuyingPrice(100.0);
-            if (capitalRepository.findAll()
-                    .stream()
-                    .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
-                    .toList().isEmpty()) {
-                capitalRepository.save(capital);
-            }
+            capitalRepository.save(capital);
         }
 
         List<OptionsDto> options = marketService.getAllOptions();
-        for(OptionsDto optionsDto:options) {
+        for (OptionsDto optionsDto:options) {
             Capital capital = capitalService.createCapital(ListingType.OPTIONS, optionsDto.getListingId(), 100.0, 0.0,defaultBankAccount);
+            capital = capitalRepository.findById(capital.getId()).orElse(null);
             capital.setAverageBuyingPrice(100.0);
-            if (capitalRepository.findAll()
-                    .stream()
-                    .filter(c -> c.getListingType() == capital.getListingType() && c.getListingId() == capital.getListingId() && c.getBankAccount() == defaultBankAccount)
-                    .toList().isEmpty()) {
-                capitalRepository.save(capital);
-            }
+            capitalRepository.save(capital);
         }
     }
 
@@ -1205,7 +1201,8 @@ public class BootstrapData implements CommandLineRunner {
             // generate default bank account for company
 //            BankAccount bankAccount = bankAccountMapper.generateBankAccountCompany(bank, currencyRepository.findCurrencyByCurrencyCode(Constants.DEFAULT_CURRENCY).get());
             BankAccount bankAccount = createBankAccountByCurrency(Constants.DEFAULT_CURRENCY, bank);
-            bankAccountRepository.save(bankAccount);
+//            System.out.println("BANK ACCOUNT" + bankAccount + " " + bankAccount.getAccountNumber());
+//            bankAccountRepository.save(bankAccount);
             // generate default capital for company
             Capital capital = capitalMapper.generateCapitalForBankAccount(bankAccount);
             capital.setTotal(10000.0);
