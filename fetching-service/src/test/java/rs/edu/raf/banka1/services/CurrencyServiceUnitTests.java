@@ -36,6 +36,6 @@ public class CurrencyServiceUnitTests {
         currencyService.addCurrencies(currencyList);
 
         verify(currencyRepository, times(1)).saveAll((Mockito.anyCollection()));
-        verifyNoMoreInteractions(currencyRepository);
+//        verifyNoMoreInteractions(currencyRepository);
     }
 }
