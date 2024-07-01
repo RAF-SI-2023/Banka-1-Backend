@@ -734,7 +734,6 @@ class OrderServiceImplTest {
         verify(employeeRepository, times(1)).save(employee);
     }
 
-    @Disabled
     @Test
     public void finishOrderTest(){
         Employee employee = new Employee();
@@ -751,6 +750,7 @@ class OrderServiceImplTest {
         when(orderRepository.findById(any())).thenReturn(Optional.of(marketOrder));
         when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
 
+        orderService.getScheduledFutureMap().put(1L, mock(ScheduledFuture.class));
         orderService.finishOrder(1L);
     }
 }

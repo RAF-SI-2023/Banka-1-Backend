@@ -415,4 +415,7 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    public Map<Long, ScheduledFuture<?>> getScheduledFutureMap() {
+        return scheduledFutureMap;
+    }
 }
