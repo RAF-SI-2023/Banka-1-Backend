@@ -67,7 +67,7 @@ public class CapitalServiceImplTest {
     }
 
     @Test
-    void shouldCreateCapitalForBankAccount() {
+    void shouldCreateCapitalForBankAccount_Stock() {
         BankAccount bankAccount = new BankAccount();
         Double total = 1.00;
         Double reserved = 0.00;
@@ -88,7 +88,74 @@ public class CapitalServiceImplTest {
         Capital result = capitalService.createCapital(listingType, listingId, total, reserved, bankAccount);
         assertEquals(capital.getBankAccount(), result.getBankAccount());
     }
+    @Test
+    void shouldCreateCapitalForBankAccount_Future() {
+        BankAccount bankAccount = new BankAccount();
+        Double total = 1.00;
+        Double reserved = 0.00;
+        Long listingId = 1l;
+        ListingType listingType = ListingType.FUTURE;
+        ListingFutureDto futureDto = new ListingFutureDto();
+        futureDto.setTicker("DT");
 
+        Capital capital = new Capital();
+        capital.setBankAccount(bankAccount);
+        capital.setTotal(total);
+        capital.setReserved(reserved);
+        capital.setListingId(listingId);
+        capital.setListingType(ListingType.FUTURE);
+
+        when(marketService.getFutureById(listingId)).thenReturn(futureDto);
+
+        Capital result = capitalService.createCapital(listingType, listingId, total, reserved, bankAccount);
+        assertEquals(capital.getBankAccount(), result.getBankAccount());
+    }
+
+    @Test
+    void shouldCreateCapitalForBankAccount_Forex() {
+        BankAccount bankAccount = new BankAccount();
+        Double total = 1.00;
+        Double reserved = 0.00;
+        Long listingId = 1l;
+        ListingType listingType = ListingType.FOREX;
+        ListingForexDto forexDto = new ListingForexDto();
+        forexDto.setTicker("DT");
+
+        Capital capital = new Capital();
+        capital.setBankAccount(bankAccount);
+        capital.setTotal(total);
+        capital.setReserved(reserved);
+        capital.setListingId(listingId);
+        capital.setListingType(ListingType.FOREX);
+
+        when(marketService.getForexById(listingId)).thenReturn(forexDto);
+
+        Capital result = capitalService.createCapital(listingType, listingId, total, reserved, bankAccount);
+        assertEquals(capital.getBankAccount(), result.getBankAccount());
+    }
+
+    @Test
+    void shouldCreateCapitalForBankAccount_Options() {
+        BankAccount bankAccount = new BankAccount();
+        Double total = 1.00;
+        Double reserved = 0.00;
+        Long listingId = 1l;
+        ListingType listingType = ListingType.OPTIONS;
+        OptionsDto optionsDto = new OptionsDto();
+        optionsDto.setTicker("DT");
+
+        Capital capital = new Capital();
+        capital.setBankAccount(bankAccount);
+        capital.setTotal(total);
+        capital.setReserved(reserved);
+        capital.setListingId(listingId);
+        capital.setListingType(ListingType.OPTIONS);
+
+        when(marketService.getOptionsById(listingId)).thenReturn(optionsDto);
+
+        Capital result = capitalService.createCapital(listingType, listingId, total, reserved, bankAccount);
+        assertEquals(capital.getBankAccount(), result.getBankAccount());
+    }
     @Test
     void testGetCapitalByListingIdAndTypeAndBankAccount_CapitalExists() {
         Long listingId = 1L;
