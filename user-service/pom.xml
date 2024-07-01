@@ -302,7 +302,7 @@
 						<exclude>**/model/**</exclude>
 						<exclude>**/bootstrap/**</exclude>
 						<exclude>**/configuration/**</exclude>
-						<exclude>**/otc_trade/**</exclude>
+<!--						<exclude>**/otc_trade/**</exclude>-->
 						<exclude>**/mapper/**</exclude>
 						<exclude>**/scheduler/**</exclude>
 						<exclude>**/utils/**</exclude>
