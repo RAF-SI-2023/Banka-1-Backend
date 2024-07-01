@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.scheduling.TaskScheduler;
 import rs.edu.raf.banka1.dtos.MarginAccountCreateDto;
+import rs.edu.raf.banka1.exceptions.InvalidCapitalAmountException;
 import rs.edu.raf.banka1.exceptions.MarginAccountNotFoundException;
 import rs.edu.raf.banka1.mapper.MarginAccountMapper;
 import rs.edu.raf.banka1.model.*;
@@ -20,6 +21,7 @@ import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.MarginAccountService;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -285,6 +287,106 @@ class MarginAccountServiceImplTest {
             assertFalse(marginAccountService.supervisorForceWithdrawal(1L));
         }
 
+
+    }
+
+    @Test
+    public void triggerMarginCallTest(){
+        MarginAccount marginAccount = new MarginAccount();
+        marginAccount.setMarginCallLevel(1);
+        marginAccount.setLoanValue(10000.0);
+        MarketOrder order = new MarketOrder();
+        order.setPrice(10.0);
+        List<MarketOrder> orders = List.of(order);
+        when(orderRepository.getAllByCustomer(any())).thenReturn(orders);
+
+        marginAccountService.triggerMarginCallAutomaticLiquidation(marginAccount);
+    }
+
+    @Test
+    public void findMarginAccountsLevelOne(){
+        Customer customer = new Customer();
+
+
+        marginAccountService.findMarginAccountsMarginCallLevelOne(customer);
+    }
+
+    @Test
+    public void findMarginAccountsLevelOneCompany(){
+        Customer customer = new Customer();
+        customer.setCompany(new Company());
+
+
+        marginAccountService.findMarginAccountsMarginCallLevelOne(customer);
+    }
+
+    @Test
+    public void withdrawFromMarginInvalidAmount(){
+        assertThrows(InvalidCapitalAmountException.class, () -> marginAccountService.withdrawFromMarginAccount(new MarginAccount(), -1000.0));
+    }
+
+    @Test
+    public void withdrawFromMargin(){
+        MarginAccount marginAccount = new MarginAccount();
+        marginAccount.setLoanValue(100.0);
+        marginAccount.setBalance(1000.0);
+
+        marginAccountService.withdrawFromMarginAccount(marginAccount, 100.0);
+
+        assertEquals(900.0, marginAccount.getBalance());
+        verify(marginAccountRepository).save(marginAccount);
+    }
+
+    @Test
+    public void getAllMargin(){
+        marginAccountService.getAllMarginAccounts();
+        verify(marginAccountRepository).findAll();
+    }
+
+    @Test
+    public void updateOnMarginSummary(){
+        MarginAccount marginAccount = new MarginAccount();
+        marginAccount.setBalance(1000.0);
+        marginAccount.setLoanValue(100.0);
+        marginAccount.setMaintenanceMargin(100.0);
+
+        marginAccountService.updateOnMarginSummary(marginAccount, 100.0, 100.0);
+
+        assertEquals(100.0, marginAccount.getBalance());
+        assertEquals(100.0, marginAccount.getLoanValue());
+        assertEquals(100.0, marginAccount.getMaintenanceMargin());
+    }
+
+    @Test
+    public void triggerMarginCallLevel0(){
+
+        MarginAccount marginAccount = new MarginAccount();
+        marginAccount.setMarginCallLevel(0);
+        marginAccount.setLoanValue(100.0);
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setCustomer(new Customer());
+        marginAccount.setCustomer(bankAccount);
+        MarketOrder order = new MarketOrder();
+        order.setPrice(10.0);
+        List<MarketOrder> orders = List.of(order);
+        when(orderRepository.getAllByCustomer(any())).thenReturn(orders);
+
+        marginAccountService.triggerMarginCall(marginAccount);
+
+    }
+
+    @Test
+    public void triggerMarginCallLevelNon0(){
+
+        MarginAccount marginAccount = new MarginAccount();
+        marginAccount.setMarginCallLevel(1);
+        marginAccount.setLoanValue(100.0);
+        MarketOrder order = new MarketOrder();
+        order.setPrice(10.0);
+        List<MarketOrder> orders = List.of(order);
+        when(orderRepository.getAllByCustomer(any())).thenReturn(orders);
+
+        marginAccountService.triggerMarginCall(marginAccount);
 
     }
 }
