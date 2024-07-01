@@ -35,7 +35,7 @@ public class CardServiceImlp implements CardService {
     }
 
     @Override
-    public Card createCard(String cardType, String cardName, String accountNumber, Integer limit) {
+    public Card createCard(String cardType, String cardName, BankAccount account, Integer limit) {
         Card card = new Card();
 
         card.setCardNumber(createUniqueCardNumber());
@@ -49,7 +49,8 @@ public class CardServiceImlp implements CardService {
 
         card.setCreationDate(creationDate);
         card.setExpirationDate(expirationDate);
-        card.setAccountNumber(accountNumber);
+        card.setAccountNumber(account.getAccountNumber());
+        card.setBankAccount(account);
         card.setCvv(createCvv());
         card.setCardLimit(limit);
         card.setIsActivated(true);

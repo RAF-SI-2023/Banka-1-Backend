@@ -182,8 +182,8 @@ public class BankAccountServiceImpl implements BankAccountService {
             }
 
             bankAccountRepository.save(bankAccount);
-            cardService.saveCard(cardService.createCard("VISA", "VisaCard", bankAccount.getAccountNumber(), 1000));
-            cardService.saveCard(cardService.createCard("MASTER", "MasterCard", bankAccount.getAccountNumber(), 10000));
+            cardService.saveCard(cardService.createCard("VISA", "VisaCard", bankAccount, 1000));
+            cardService.saveCard(cardService.createCard("MASTER", "MasterCard", bankAccount, 10000));
         }
     }
 

@@ -22,6 +22,10 @@ public class Card {
 
     private String accountNumber;
 
+    @ManyToOne
+    @JoinColumn(name = "bankaccount_id", referencedColumnName = "id")
+    private BankAccount bankAccount;
+
     @Column(length = 3)
     private String cvv;
     private Integer cardLimit;
