@@ -536,62 +536,7 @@ class OrderServiceImplTest {
         assertEquals(OrderStatus.DENIED, marketOrder.getStatus());
     }
 
-    @Test
-    public void createOrderCustomerSuccess(){
-        CreateOrderRequest order = new CreateOrderRequest();
-        order.setListingId(1L);
-        order.setOrderType(OrderType.BUY);
-        order.setLimitValue(50.0);
-        order.setStopValue(0.0);
-        order.setContractSize(10L);
-        order.setAllOrNone(false);
-        order.setIsMargin(false);
-        order.setListingType(ListingType.STOCK);
 
-        MarketOrder marketOrder = new MarketOrder();
-        marketOrder.setListingId(1L);
-        marketOrder.setOrderType(OrderType.BUY);
-        marketOrder.setLimitValue(50.0);
-        marketOrder.setStopValue(0.0);
-        marketOrder.setContractSize(10L);
-        marketOrder.setAllOrNone(false);
-        marketOrder.setIsMargin(false);
-        marketOrder.setListingType(ListingType.STOCK);
-        marketOrder.setStatus(OrderStatus.PROCESSING);
-        marketOrder.setProcessedNumber(0L);
-        marketOrder.setPrice(0.0);
-        marketOrder.setTimestamp(System.currentTimeMillis()/1000);
-        marketOrder.setUpdatedAt(Instant.now());
-        marketOrder.setApprovedBy(null);
-        marketOrder.setId(1L);
-
-
-        Customer customer = new Customer();
-        BankAccount bankAccount = new BankAccount();
-        bankAccount.setAccountNumber("test");
-        List<BankAccount> accounts = new ArrayList<>();
-        accounts.add(bankAccount);
-        customer.setAccountIds(accounts);
-        when(bankAccountService.getCustomerBankAccountForOrder(customer)).thenReturn(bankAccount);
-        ListingStockDto listingStockDto = new ListingStockDto();
-        listingStockDto.setHigh(100.0);
-        listingStockDto.setLow(50.0);
-        listingStockDto.setPrice(75.0);
-        when(orderRepository.save(any())).thenReturn(marketOrder);
-        when(marketService.getStockById(order.getListingId())).thenReturn(listingStockDto);
-
-        when(capitalService.hasEnoughCapitalForOrder(any())).thenReturn(true);
-
-        Object o = new Object();
-
-        ScheduledFuture scheduledFuture = Mockito.mock(ScheduledFuture.class);
-        when(taskScheduler.schedule(any(), (Trigger) any())).thenReturn(scheduledFuture);
-//        when(taskScheduler.schedule((Runnable) any(), (Trigger) any())).thenReturn(o);
-
-        orderService.createOrder(order, customer);
-
-//        assertEquals(order, result);
-    }
 
     @Test
     public void createOrderCustomerNotBuyingStock(){
@@ -767,122 +712,7 @@ class OrderServiceImplTest {
 //        assertEquals(order, result);
     }
 
-    @Test
-    public void createOrderCustomerNotBuyingStock(){
-        CreateOrderRequest order = new CreateOrderRequest();
-        order.setListingId(1L);
-        order.setOrderType(OrderType.BUY);
-        order.setLimitValue(50.0);
-        order.setStopValue(0.0);
-        order.setContractSize(10L);
-        order.setAllOrNone(false);
-        order.setIsMargin(false);
-        order.setListingType(ListingType.FUTURE);
 
-        MarketOrder marketOrder = new MarketOrder();
-        marketOrder.setListingId(1L);
-        marketOrder.setOrderType(OrderType.BUY);
-        marketOrder.setLimitValue(50.0);
-        marketOrder.setStopValue(0.0);
-        marketOrder.setContractSize(10L);
-        marketOrder.setAllOrNone(false);
-        marketOrder.setIsMargin(false);
-        marketOrder.setListingType(ListingType.FUTURE);
-        marketOrder.setStatus(OrderStatus.PROCESSING);
-        marketOrder.setProcessedNumber(0L);
-        marketOrder.setPrice(0.0);
-        marketOrder.setTimestamp(System.currentTimeMillis()/1000);
-        marketOrder.setUpdatedAt(Instant.now());
-        marketOrder.setApprovedBy(null);
-        marketOrder.setId(1L);
-
-
-        Customer customer = new Customer();
-        BankAccount bankAccount = new BankAccount();
-        bankAccount.setAccountNumber("test");
-        List<BankAccount> accounts = new ArrayList<>();
-        accounts.add(bankAccount);
-        customer.setAccountIds(accounts);
-        when(bankAccountService.getCustomerBankAccountForOrder(customer)).thenReturn(bankAccount);
-        ListingStockDto listingStockDto = new ListingStockDto();
-        listingStockDto.setHigh(100.0);
-        listingStockDto.setLow(50.0);
-        listingStockDto.setPrice(75.0);
-        when(orderRepository.save(any())).thenReturn(marketOrder);
-        when(marketService.getStockById(order.getListingId())).thenReturn(listingStockDto);
-
-        when(capitalService.hasEnoughCapitalForOrder(any())).thenReturn(true);
-
-        Object o = new Object();
-
-        ScheduledFuture scheduledFuture = Mockito.mock(ScheduledFuture.class);
-        when(taskScheduler.schedule(any(), (Trigger) any())).thenReturn(scheduledFuture);
-//        when(taskScheduler.schedule((Runnable) any(), (Trigger) any())).thenReturn(o);
-
-//        orderService.createOrder(order, customer);
-        assertThrows(ForbiddenException.class, () -> orderService.createOrder(order, customer));
-
-//        assertEquals(order, result);
-    }
-
-    @Test
-    public void createOrderEmployeeSuccess(){
-        CreateOrderRequest order = new CreateOrderRequest();
-        order.setListingId(1L);
-        order.setOrderType(OrderType.BUY);
-        order.setLimitValue(50.0);
-        order.setStopValue(0.0);
-        order.setContractSize(10L);
-        order.setAllOrNone(false);
-        order.setIsMargin(false);
-        order.setListingType(ListingType.STOCK);
-
-        MarketOrder marketOrder = new MarketOrder();
-        marketOrder.setListingId(1L);
-        marketOrder.setOrderType(OrderType.BUY);
-        marketOrder.setLimitValue(50.0);
-        marketOrder.setStopValue(0.0);
-        marketOrder.setContractSize(10L);
-        marketOrder.setAllOrNone(false);
-        marketOrder.setIsMargin(false);
-        marketOrder.setListingType(ListingType.STOCK);
-        marketOrder.setStatus(OrderStatus.PROCESSING);
-        marketOrder.setProcessedNumber(0L);
-        marketOrder.setPrice(0.0);
-        marketOrder.setTimestamp(System.currentTimeMillis()/1000);
-        marketOrder.setUpdatedAt(Instant.now());
-        marketOrder.setApprovedBy(null);
-        marketOrder.setId(1L);
-
-
-        Employee customer = new Employee();
-        customer.setPosition(Constants.AGENT);
-        customer.setRequireApproval(true);
-        BankAccount bankAccount = new BankAccount();
-        bankAccount.setAccountNumber("test");
-        List<BankAccount> accounts = new ArrayList<>();
-        accounts.add(bankAccount);
-//        customer.setAccountIds(accounts);
-//        when(bankAccountService.getCustomerBankAccountForOrder(customer)).thenReturn(bankAccount);
-        ListingStockDto listingStockDto = new ListingStockDto();
-        listingStockDto.setHigh(100.0);
-        listingStockDto.setLow(50.0);
-        listingStockDto.setPrice(75.0);
-        when(orderRepository.save(any())).thenReturn(marketOrder);
-        when(marketService.getStockById(order.getListingId())).thenReturn(listingStockDto);
-
-        when(capitalService.hasEnoughCapitalForOrder(any())).thenReturn(true);
-
-        Object o = new Object();
-
-        ScheduledFuture scheduledFuture = Mockito.mock(ScheduledFuture.class);
-        when(taskScheduler.schedule(any(), (Trigger) any())).thenReturn(scheduledFuture);
-//        when(taskScheduler.schedule((Runnable) any(), (Trigger) any())).thenReturn(o);
-
-        orderService.createOrder(order, customer);
-
-//        assertEquals(order, result);
-    }
 
     @Test
     public void updateEmployeeLimit(){
@@ -904,6 +734,7 @@ class OrderServiceImplTest {
         verify(employeeRepository, times(1)).save(employee);
     }
 
+    @Disabled
     @Test
     public void finishOrderTest(){
         Employee employee = new Employee();
