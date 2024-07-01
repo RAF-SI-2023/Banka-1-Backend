@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+//@Disabled
 class MarketServiceImplTest {
 
     private Retry serviceRetry;
