@@ -123,39 +123,21 @@ public class BootstrapData implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-//        if (myStockRepository.count() == 0) {
-//            MyStock stok1 = new MyStock();
-//            stok1.setTicker("STK1");
-//            stok1.setAmount(100);
-//            stok1.setCurrencyMark("RSD");
-//            stok1.setPrivateAmount(50);
-//            stok1.setPublicAmount(50);
-//            stok1.setCompanyId(1L);
-//            stok1.setUserId(null);
-//            stok1.setMinimumPrice(500.0);
-//
-//            MyStock stok2 = new MyStock();
-//            stok2.setTicker("STK2");
-//            stok2.setAmount(100);
-//            stok2.setCurrencyMark("RSD");
-//            stok2.setPrivateAmount(50);
-//            stok2.setPublicAmount(50);
-//            stok2.setCompanyId(1L);
-//            stok2.setUserId(null);
-//            stok2.setMinimumPrice(1500.0);
-//
-//            MyStock stok3 = new MyStock();
-//            stok3.setTicker("STK3");
-//            stok3.setAmount(100);
-//            stok3.setCurrencyMark("RSD");
-//            stok3.setPrivateAmount(50);
-//            stok3.setPublicAmount(50);
-//            stok3.setCompanyId(1L);
-//            stok3.setUserId(null);
-//            stok3.setMinimumPrice(200.0);
-//
-//            myStockRepository.saveAll(List.of(stok1, stok2, stok3));
-//        }
+        if (myStockRepository.count() == 0){
+            List<MyStock> stocks = Arrays.asList(
+                    new MyStock(null, "DT", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "ORCL", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "WYY", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "CDLX", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "RZLT", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "APPN", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "HUYA", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "OKTA", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "YALA", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "DPSI", null, 1L, 100, "RSD", 50, 50, 20.0)
+            );
+            myStockRepository.saveAll(stocks);
+        }
 
         if(employeeRepository.findByEmail("admin").isPresent()) {
             return;

@@ -304,6 +304,7 @@
                         <exclude>**/bootstrap/**</exclude>
                         <exclude>**/configuration/**</exclude>
                         <exclude>**/services/ExchangeServiceImpl.class</exclude>
+                        <exclude>**/otc_trade/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>

@@ -137,7 +137,7 @@ public class OrderServiceImpl implements OrderService {
             order.setStatus(OrderStatus.APPROVED);
         }
 
-        orderRepository.save(order);
+        order = orderRepository.save(order);
 
         //Will automatically throw an exception if there is insufficient capital to create order
         if(order.getStatus().equals(OrderStatus.APPROVED)) {
@@ -415,4 +415,7 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    public Map<Long, ScheduledFuture<?>> getScheduledFutureMap() {
+        return scheduledFutureMap;
+    }
 }

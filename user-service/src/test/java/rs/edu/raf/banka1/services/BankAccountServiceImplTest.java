@@ -11,12 +11,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import rs.edu.raf.banka1.dtos.employee.EmployeeDto;
 import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
+import rs.edu.raf.banka1.exceptions.InvalidCapitalAmountException;
+import rs.edu.raf.banka1.exceptions.InvalidReservationAmountException;
+import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
 import rs.edu.raf.banka1.requests.BankAccountRequest;
 import rs.edu.raf.banka1.requests.CreateBankAccountRequest;
 import rs.edu.raf.banka1.services.implementations.BankAccountServiceImpl;
+import rs.edu.raf.banka1.utils.Constants;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -407,4 +412,174 @@ public class BankAccountServiceImplTest {
 
         verify(bankAccountRepository).findBankAccountByAccountNumber(eq(accountNumber));
     }
+
+    @Test
+    public void commitReserved(){
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setBalance(1000.0);
+        bankAccount.setAvailableBalance(900.0);
+
+        bankAccountService.commitReserved(bankAccount, 100.0);
+
+        verify(bankAccountRepository).save(bankAccount);
+    }
+
+    @Test
+    public void commitReservedInvalidAmount(){
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setBalance(1000.0);
+        bankAccount.setAvailableBalance(900.0);
+
+        assertThrows(InvalidCapitalAmountException.class, ()->bankAccountService.commitReserved(bankAccount, -100.0));
+
+        verify(bankAccountRepository, never()).save(bankAccount);
+    }
+
+    @Test
+    public void releaseReserved(){
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setBalance(1000.0);
+        bankAccount.setAvailableBalance(900.0);
+
+        bankAccountService.releaseReserved(bankAccount, 100.0);
+
+        verify(bankAccountRepository).save(bankAccount);
+    }
+
+    @Test
+    public void releaseReservedAmount0(){
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setBalance(1000.0);
+        bankAccount.setAvailableBalance(900.0);
+
+        bankAccountService.releaseReserved(bankAccount, 0.0);
+
+        verify(bankAccountRepository, never()).save(bankAccount);
+    }
+
+    @Test
+    public void releaseReservedAmountInvalid(){
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setBalance(1000.0);
+        bankAccount.setAvailableBalance(900.0);
+
+        assertThrows(InvalidReservationAmountException.class, ()->bankAccountService.releaseReserved(bankAccount, -10.0));
+
+        verify(bankAccountRepository, never()).save(bankAccount);
+    }
+
+    @Test
+    public void removeBalance(){
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setBalance(1000.0);
+        bankAccount.setAvailableBalance(900.0);
+
+        bankAccountService.removeBalance(bankAccount, 100.0);
+
+        verify(bankAccountRepository).save(bankAccount);
+    }
+
+    @Test
+    public void reserveBalanceInvalidAmount(){
+        assertThrows(InvalidReservationAmountException.class, ()->bankAccountService.reserveBalance(new BankAccount(), -100.0));
+    }
+
+    @Test
+    public void notEnoughForReserve(){
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setBalance(1000.0);
+        bankAccount.setAvailableBalance(900.0);
+
+        assertThrows(NotEnoughCapitalAvailableException.class, ()->bankAccountService.reserveBalance(bankAccount, 1000.1));
+    }
+
+    @Test
+    public void reserveBalance(){
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setBalance(1000.0);
+        bankAccount.setAvailableBalance(900.0);
+
+        bankAccountService.reserveBalance(bankAccount, 100.0);
+
+        verify(bankAccountRepository).save(bankAccount);
+    }
+
+    @Test
+    public void getCustomerBankAccountPrivate(){
+        Customer customer = new Customer();
+        customer.setUserId(1L);
+
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setCustomer(customer);
+        Currency currency = new Currency();
+        currency.setCurrencyCode(Constants.DEFAULT_CURRENCY);
+        bankAccount.setCurrency(currency);
+        customer.setAccountIds(List.of(bankAccount));
+
+        BankAccount out = bankAccountService.getCustomerBankAccountForOrder(customer);
+
+        assertEquals(bankAccount, out);
+
+    }
+
+    @Test
+    public void getCustomerBankAccountCompany(){
+        Customer customer = new Customer();
+        customer.setUserId(1L);
+
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setCustomer(customer);
+        Currency currency = new Currency();
+        currency.setCurrencyCode(Constants.DEFAULT_CURRENCY);
+        bankAccount.setCompany(new Company());
+        bankAccount.setCurrency(currency);
+        customer.setAccountIds(List.of(bankAccount));
+
+        BankAccount out = bankAccountService.getCustomerBankAccountForOrder(customer);
+
+        assertEquals(bankAccount, out);
+
+    }
+
+
+    @Test
+    public void getCustomerBankAccountNotFound(){
+        Customer customer = new Customer();
+        customer.setUserId(1L);
+
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setCustomer(customer);
+        Currency currency = new Currency();
+        currency.setCurrencyCode("valute koja ne postoji");
+        bankAccount.setCompany(new Company());
+        bankAccount.setCurrency(currency);
+        customer.setAccountIds(new ArrayList<>());
+
+        BankAccount out = bankAccountService.getCustomerBankAccountForOrder(customer);
+
+        assertNull(out);
+
+    }
+
+    @Test
+    public void addBalanceInvalidAmount(){
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setBalance(1000.0);
+        bankAccount.setAvailableBalance(900.0);
+
+        assertThrows(InvalidReservationAmountException.class, ()->bankAccountService.addBalance(bankAccount, -100.0));
+    }
+
+    @Test
+    public void addBalance(){
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setBalance(1000.0);
+        bankAccount.setAvailableBalance(900.0);
+
+        bankAccountService.addBalance(bankAccount, 100.0);
+
+        verify(bankAccountRepository).save(bankAccount);
+    }
+
+
 }
