@@ -1,9 +1,11 @@
 package rs.edu.raf.banka1.services.implementations;
 
 import lombok.RequiredArgsConstructor;
+import org.hibernate.query.Order;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import rs.edu.raf.banka1.dtos.MarginAccountCreateDto;
+import rs.edu.raf.banka1.dtos.OrderDto;
 import rs.edu.raf.banka1.exceptions.InvalidCapitalAmountException;
 import rs.edu.raf.banka1.exceptions.MarginAccountNotFoundException;
 import rs.edu.raf.banka1.mapper.MarginAccountMapper;
@@ -14,6 +16,8 @@ import org.tinylog.Logger;
 import rs.edu.raf.banka1.dtos.MarginAccountDto;
 import rs.edu.raf.banka1.repositories.MarginAccountRepository;
 import rs.edu.raf.banka1.repositories.MarginTransactionRepository;
+import rs.edu.raf.banka1.repositories.OrderRepository;
+import rs.edu.raf.banka1.requests.order.CreateOrderRequest;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.MarginAccountService;
@@ -37,6 +41,7 @@ public class MarginAccountServiceImpl implements MarginAccountService {
     private final MarginAccountMapper marginAccountMapper;
     private final EmailService emailService;
     private final TaskScheduler taskScheduler;
+    private final OrderRepository orderRepository;
 
     @Override
     public MarginAccount getMarginAccount(Long id, ListingType listingType, String currencyCode, boolean isCompany) {
@@ -127,7 +132,7 @@ public class MarginAccountServiceImpl implements MarginAccountService {
         }
 
         bankAccountService.removeBalance(bankAccount, amount);
-        depositToMarginAccount(marginAccount, amount);
+        depositToMarginAccount(marginAccount, amount, 0d);
 
         createTransactionMarginCall(marginAccount, amount);
         marginAccount.setMarginCallLevel(0);
@@ -161,15 +166,13 @@ public class MarginAccountServiceImpl implements MarginAccountService {
     }
 
     @Override
-    public void depositToMarginAccount(MarginAccount marginAccount, Double fullAmount) {
+    public void depositToMarginAccount(MarginAccount marginAccount, Double fullAmount, Double loanedAmount) {
         if(fullAmount < 0) {
             throw new InvalidCapitalAmountException(fullAmount);
         }
-        double initialMargin = fullAmount * Constants.MARGIN_RATE;
-        double loanedMoney = fullAmount - initialMargin;
 
-        marginAccount.setBalance(marginAccount.getBalance() + initialMargin);
-        marginAccount.setLoanValue(marginAccount.getLoanValue() + loanedMoney);
+        marginAccount.setBalance(marginAccount.getBalance() + fullAmount);
+        marginAccount.setLoanValue(marginAccount.getLoanValue() + loanedAmount);
         marginAccountRepository.save(marginAccount);
     }
 
@@ -220,6 +223,28 @@ public class MarginAccountServiceImpl implements MarginAccountService {
             return;
         }
         marginAccount.setMarginCallLevel(2);
+
+        liquidateCustomer(marginAccount);
+
         this.marginAccountRepository.save(marginAccount);
+    }
+
+    private void liquidateCustomer(MarginAccount marginAccount) {
+        double amount = marginAccount.getLoanValue();
+        float marginRate = Constants.MARGIN_RATE;
+
+        double newAmount = amount + amount * marginRate;
+
+        while(amount > newAmount) {
+            List<MarketOrder> orders = orderRepository.getAllByCustomer(marginAccount.getCustomer().getCustomer());
+            for(MarketOrder order: orders) {
+                marginAccount.setLoanValue(marginAccount.getLoanValue() - order.getPrice());
+                amount = amount - order.getPrice();
+                if( amount > newAmount ) break;
+            }
+        }
+        if(marginAccount.getLoanValue().equals(1D)) {
+            marginAccountRepository.save(marginAccount);
+        }
     }
 }

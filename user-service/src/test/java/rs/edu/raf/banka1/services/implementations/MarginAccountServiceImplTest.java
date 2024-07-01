@@ -15,6 +15,7 @@ import rs.edu.raf.banka1.mapper.MarginAccountMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.MarginAccountRepository;
 import rs.edu.raf.banka1.repositories.MarginTransactionRepository;
+import rs.edu.raf.banka1.repositories.OrderRepository;
 import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.EmailService;
 import rs.edu.raf.banka1.services.MarginAccountService;
@@ -41,6 +42,8 @@ class MarginAccountServiceImplTest {
     private TaskScheduler taskScheduler;
     @Mock
     private MarginTransactionRepository marginTransactionRepository;
+    @Mock
+    private OrderRepository orderRepository;
     private MarginAccountService marginAccountService;
 
     @BeforeEach
@@ -50,7 +53,8 @@ class MarginAccountServiceImplTest {
                 marginTransactionRepository,
                 marginAccountMapper,
                 emailService,
-                taskScheduler);
+                taskScheduler,
+                orderRepository);
     }
 
     @Nested

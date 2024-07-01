@@ -24,9 +24,10 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
     private final MarginAccountService marginAccountService;
     private final BankAccountService bankAccountService;
     private final MarketService marketService;
+    private final CapitalService capitalService;
 
     @Override
-    public void createTransaction(MarketOrder order, BankAccount userAccount, Currency currency, String description, TransactionType transactionType, Double price, Double processedNum) {
+    public void createTransaction(MarketOrder order, BankAccount userAccount, Capital securityCapital, Currency currency, String description, TransactionType transactionType, Double price, Double processedNum) {
         MarginAccount marginAccount;
         try {
             marginAccount = marginAccountService.getMarginAccount(getUserIdFromOrder(order), order.getListingType(), currency.getCurrencyCode(), userAccount.getCompany() != null);
@@ -38,7 +39,6 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
             }
             marginAccount = marginAccountService.getMarginAccount(getUserIdFromOrder(order), order.getListingType(), currency.getCurrencyCode(), userAccount.getCompany() != null);
         }
-
         double initialMargin = price * Constants.MARGIN_RATE;
         double loanValue = price - initialMargin;
         double interest = loanValue * Constants.MARGIN_INTEREST_RATE;
@@ -63,20 +63,22 @@ public class MarginTransactionServiceImpl implements MarginTransactionService {
         if(order.getOrderType().equals(OrderType.BUY)) {
             //Prebaciti initialMargin sa bankAccounta na margin
             bankAccountService.removeBalance(userAccount, initialMargin);
-            marginAccountService.depositToMarginAccount(marginAccount, initialMargin);
+            marginAccountService.depositToMarginAccount(marginAccount, initialMargin, loanValue);
+            capitalService.addBalance(securityCapital.getListingId(), securityCapital.getListingType(), userAccount, processedNum);
             transaction.setDeposit(initialMargin);
         } else {
             //Isplatiti + kamata
             marginAccountService.withdrawFromMarginAccount(marginAccount, initialMargin);
             bankAccountService.addBalance(userAccount, initialMargin - interest);
+            capitalService.removeBalance(securityCapital.getListingId(), securityCapital.getListingType(), userAccount, processedNum);
             transaction.setDeposit(initialMargin - interest);
         }
         marginTransactionRepository.save(transaction);
     }
 
     private Long getUserIdFromOrder(MarketOrder order) {
-        if(order.getOwner() == null) return order.getCustomer().getUserId();
-        return order.getOwner().getUserId();
+        User user = order.getOwner() == null ? order.getCustomer() : order.getOwner();
+        return user.getCompany() == null ? user.getUserId() : user.getCompany().getId();
     }
     @Override
     public List<MarginTransaction> getAllTransactions() {

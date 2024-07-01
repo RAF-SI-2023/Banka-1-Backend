@@ -355,6 +355,8 @@ class ContractServiceImplTest {
             contract.setBankApproval(true);
             contract.setSellerApproval(true);
 
+            Double taxedPrice = contract.getPrice() + (contract.getPrice()*Constants.TAX_OTC);
+
             when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
 
             assertTrue(contractService.acceptContract(contractId));
@@ -364,7 +366,7 @@ class ContractServiceImplTest {
             verify(capitalService).removeFromPublicCapital(eq(contract.getListingId()), eq(contract.getListingType()), eq(contract.getSeller()), eq(contract.getAmount()));
             verify(capitalService).removeBalance(eq(contract.getListingId()), eq(contract.getListingType()), eq(contract.getSeller()), eq(contract.getAmount()));
             verify(capitalService).addBalance(eq(contract.getListingId()), eq(contract.getListingType()), eq(contract.getBuyer()), eq(contract.getAmount()));
-            verify(bankAccountService).removeBalance(eq(contract.getBuyer()), eq(contract.getPrice()));
+            verify(bankAccountService).removeBalance(eq(contract.getBuyer()), eq(taxedPrice));
             verify(bankAccountService).addBalance(eq(contract.getSeller()), eq(contract.getPrice()));
         }
 
@@ -428,6 +430,8 @@ class ContractServiceImplTest {
             contract.setBankApproval(true);
             contract.setSellerApproval(true);
 
+            Double taxedPrice = contract.getPrice() + (contract.getPrice()*Constants.TAX_OTC);
+
             when(contractRepository.findById(contractId)).thenReturn(Optional.of(contract));
 
             assertTrue(contractService.approveContract(contractId));
@@ -437,7 +441,7 @@ class ContractServiceImplTest {
             verify(capitalService).removeFromPublicCapital(eq(contract.getListingId()), eq(contract.getListingType()), eq(contract.getSeller()), eq(contract.getAmount()));
             verify(capitalService).removeBalance(eq(contract.getListingId()), eq(contract.getListingType()), eq(contract.getSeller()), eq(contract.getAmount()));
             verify(capitalService).addBalance(eq(contract.getListingId()), eq(contract.getListingType()), eq(contract.getBuyer()), eq(contract.getAmount()));
-            verify(bankAccountService).removeBalance(eq(contract.getBuyer()), eq(contract.getPrice()));
+            verify(bankAccountService).removeBalance(eq(contract.getBuyer()), eq(taxedPrice));
             verify(bankAccountService).addBalance(eq(contract.getSeller()), eq(contract.getPrice()));
         }
 

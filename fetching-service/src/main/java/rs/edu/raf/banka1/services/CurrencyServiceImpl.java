@@ -64,8 +64,8 @@ public class CurrencyServiceImpl implements CurrencyService {
             currenciesToSave.add(myCurrency);
         }
 
-        currencyRepository.saveAll(currenciesToSave);
-        inflationRepository.saveAll(inflations);
+        if (currencyRepository.findAll().isEmpty()) currencyRepository.saveAll(currenciesToSave);
+        if (inflationRepository.findAll().isEmpty()) inflationRepository.saveAll(inflations);
 
     }
 }

@@ -28,6 +28,7 @@ public class MarginSummaryScheduler {
     Should check maintenance margins and set margin call to true if needed
      */
     @Scheduled(fixedRate = 3600*24*1000) //Once per day
+//    @Scheduled(fixedRate = 60*1000)
     void checkMarginCalls() {
         List<MarginAccount> accounts = marginAccountService.getAllMarginAccountEntities();
 
@@ -37,7 +38,7 @@ public class MarginSummaryScheduler {
             double capitalWorth = 0d;
 
             for(ListingBaseDto listingBaseDto : positions.keySet()) {
-                capitalWorth += positions.get(listingBaseDto) * listingBaseDto.getPrice();
+                capitalWorth += positions.get(listingBaseDto) * listingBaseDto.getPrice() * 100;
             }
 
             double equity = capitalWorth - account.getLoanValue();

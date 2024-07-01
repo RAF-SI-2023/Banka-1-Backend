@@ -6,10 +6,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import rs.edu.raf.banka1.dtos.TransferDto;
-import rs.edu.raf.banka1.model.BankAccount;
-import rs.edu.raf.banka1.model.Customer;
-import rs.edu.raf.banka1.model.TransactionStatus;
-import rs.edu.raf.banka1.model.Transfer;
+import rs.edu.raf.banka1.model.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -21,6 +18,31 @@ class TransferMapperTest {
 
     @Test
     void transferToTransferDto() {
+        Currency fromRSDToUSD = new Currency(
+                1L,
+                "United States Dollar",
+                "USD",
+                "$",
+                "United States",
+                "US Dollar",
+                true,
+                0.01, // Example conversion rate from RSD to USD
+                null
+        );
+
+        // Instance for converting from another currency (e.g., USD) to RSD
+        Currency fromUSDToRSD = new Currency(
+                2L,
+                "United States Dollar",
+                "USD",
+                "$",
+                "United States",
+                "US Dollar",
+                true,
+                null,
+                100.0 // Example conversion rate from USD to RSD
+        );
+
         BankAccount senderBankAccount = new BankAccount();
         senderBankAccount.setAccountNumber("sender");
         Customer sender = new Customer();
@@ -41,6 +63,8 @@ class TransferMapperTest {
         transfer.setExchangeRate(4.0);
         transfer.setSenderBankAccount(senderBankAccount);
         transfer.setRecipientBankAccount(recipientBankAccount);
+        transfer.setCurrencyFrom(fromRSDToUSD);
+        transfer.setCurrencyTo(fromUSDToRSD);
 
         TransferDto res = transferMapper.transferToTransferDto(transfer);
 
@@ -53,5 +77,7 @@ class TransferMapperTest {
         assertEquals(res.getSenderAccountNumber(), senderBankAccount.getAccountNumber());
         assertEquals(res.getSenderName(), sender.getFirstName() + " " + sender.getLastName());
         assertEquals(res.getRecipientAccountNumber(), recipientBankAccount.getAccountNumber());
+        assertEquals(transfer.getCurrencyFrom(), fromRSDToUSD);
+        assertEquals(transfer.getCurrencyTo(), fromUSDToRSD);
     }
 }

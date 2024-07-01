@@ -30,4 +30,5 @@ public interface CapitalService {
     CapitalDto getCapitalForForexId(Long forexId);
 
     List<AllPublicCapitalsDto> getAllPublicCapitals(Customer customer);
+    void updateAverageBuyingPrice(Long listingId, ListingType listingType, BankAccount bankAccount, Double newAverageBuyingPrice);
 }
