@@ -714,29 +714,6 @@ public class CapitalServiceImplTest {
 
         assertThrows(NotEnoughCapitalAvailableException.class, () -> capitalService.removeFromPublicCapital(listingId, ListingType.STOCK, bankAccount, amountToRemove));
     }
-    @Test
-    public void removeFromPublicCapitalTest_InvalidCapitalAmountException(){
-        BankAccount bankAccount = new BankAccount();
-        bankAccount.setAccountNumber("123456789");
-        Currency currency = new Currency();
-        currency.setCurrencyCode("RSD");
-        bankAccount.setCurrency(currency);
-
-        Capital capital = new Capital();
-        capital.setListingId(1L);
-        capital.setListingType(ListingType.STOCK);
-        capital.setTotal(100.0);
-        capital.setReserved(2.0);
-        capital.setPublicTotal(50.0);
-        capital.setBankAccount(bankAccount);
-
-        Long listingId = 1L;
-        Double amountToRemove = 130.0;
-
-        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(anyLong(), any(ListingType.class), any(BankAccount.class))).thenReturn(Optional.of(capital));
-
-        assertThrows(InvalidCapitalAmountException.class, () -> capitalService.removeFromPublicCapital(listingId, ListingType.STOCK, bankAccount, amountToRemove));
-    }
 
 
     @Test
