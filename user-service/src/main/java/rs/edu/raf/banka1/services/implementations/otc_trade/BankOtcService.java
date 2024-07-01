@@ -43,7 +43,7 @@ public class BankOtcService {
         List<MyStockDto> dtos = new ArrayList<>();
         for(MyStock myStock: myStocks){
             MyStockDto dto = new MyStockDto();
-            dto.setAmount(myStock.getPublicAmount());
+            dto.setAmount(myStock.getAmount());
             dto.setTicker(myStock.getTicker());
             dto.setPublicAmount(myStock.getPublicAmount());
             dtos.add(dto);
@@ -132,6 +132,7 @@ public class BankOtcService {
             MyStock stock = myStockRepository.findByTickerAndCompanyId(stockDto.getTicker(), 1L);
 
             stock.setPublicAmount(stockDto.getPublicAmount());
+            stock.setPrivateAmount(stock.getAmount() - stockDto.getPublicAmount());
             stock.setMinimumPrice(stockDto.getPrice());
 
             myStockRepository.save(stock);
