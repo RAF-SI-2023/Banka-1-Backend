@@ -973,7 +973,32 @@ public class CapitalServiceImplTest {
 
     @Test
     public void getAllPublicCapitalsCustomer(){
-        capitalService.getAllPublicCapitals(new Customer());
+        Capital capital = new Capital();
+        when(capitalRepository.getAllByPublicTotalGreaterThan(any())).thenReturn(List.of(capital));
+        Customer customer = new Customer();
+        BankAccount bankAccount = new BankAccount();
+        customer.setAccountIds(List.of(bankAccount));
+
+        BankAccount bankAccount1 = new BankAccount();
+        capital.setBankAccount(bankAccount1);
+        capitalService.getAllPublicCapitals(customer);
+    }
+
+    @Test
+    public void updateAverageBuyingPrice(){
+        Capital capital = new Capital();
+        capital.setTotal(100.0);
+        capital.setReserved(10.0);
+        Long listingId = 1L;
+        ListingType listingType = ListingType.STOCK;
+        Double amount = 10.0;
+        BankAccount bankAccount = new BankAccount();
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(any(),any(),any())).thenReturn(Optional.of(capital));
+
+        capitalService.updateAverageBuyingPrice(listingId,listingType,bankAccount,amount);
+
+        verify(capitalRepository).save(eq(capital));
     }
 
 //    @Test

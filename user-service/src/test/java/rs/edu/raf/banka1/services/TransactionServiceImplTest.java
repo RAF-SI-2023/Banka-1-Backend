@@ -224,6 +224,62 @@ class TransactionServiceImplTest {
             verify(transactionRepository).save(any(Transaction.class));
         }
 
+        @Test
+        void shouldCreateBuyTransactionStockNotNULL() {
+            ListingType listingType = ListingType.STOCK;
+            long listingId = 1;
+            double price = 100;
+            long securityAmount = 1;
+            String currencyCode = "RSD";
+
+            Currency currency = new Currency();
+            currency.setCurrencyCode(currencyCode);
+
+            Capital bankCapital = new Capital();
+            BankAccount bankAccount = new BankAccount();
+            bankAccount.setBalance(1000.0);
+            bankAccount.setAvailableBalance(500.0);
+            bankAccount.setCurrency(currency);
+            bankCapital.setBankAccount(bankAccount);
+            bankCapital.setTotal(1000.0);
+            bankCapital.setReserved(500.0);
+            bankCapital.setAverageBuyingPrice(0.0);
+
+            Capital securityCapital = new Capital();
+            securityCapital.setListingType(listingType);
+            securityCapital.setListingId(listingId);
+            securityCapital.setTotal(1000.0);
+            securityCapital.setReserved(100.0);
+            securityCapital.setAverageBuyingPrice(0.0);
+            securityCapital.setTicker("ticker");
+
+            MyStock myStock = new MyStock();
+            myStock.setAmount(1000);
+            myStock.setTicker("ticker");
+            myStock.setPublicAmount(500);
+            myStock.setPrivateAmount(500);
+
+            MarketOrder order = new MarketOrder();
+            order.setOrderType(OrderType.BUY);
+
+            BankAccount bankAccDefaultAcc = new BankAccount();
+            when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccDefaultAcc);
+            when(myStockRepository.findByTicker("ticker")).thenReturn(myStock);
+
+            MyStock stock = new MyStock();
+            stock.setAmount(1000);
+            stock.setPublicAmount(100);
+            stock.setPrivateAmount(900);
+
+            when(myStockRepository.findByTicker(any())).thenReturn(stock);
+
+            transactionService.createTransaction(bankAccDefaultAcc, securityCapital, price, order, securityAmount);
+
+            verify(capitalService).addBalance(eq(listingId), eq(listingType), eq(bankAccount), eq((double) securityAmount));
+            verify(bankAccountService).commitReserved(eq(bankAccount), eq(price));
+            verify(transactionRepository).save(any(Transaction.class));
+        }
+
 //        @Test
 //        void shouldCreateSellTransactionWithTax() {
 //            ListingType listingType = ListingType.STOCK;
