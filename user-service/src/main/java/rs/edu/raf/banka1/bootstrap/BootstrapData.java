@@ -1002,6 +1002,22 @@ public class BootstrapData implements CommandLineRunner {
             }
         }
 
+        if (myStockRepository.count() == 0){
+            List<MyStock> stocks = Arrays.asList(
+                    new MyStock(null, "DT", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "ORCL", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "WYY", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "CDLX", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "RZLT", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "APPN", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "HUYA", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "OKTA", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "YALA", null, 1L, 100, "RSD", 50, 50, 20.0),
+                    new MyStock(null, "DPSI", null, 1L, 100, "RSD", 50, 50, 20.0)
+            );
+            myStockRepository.saveAll(stocks);
+        }
+
         } catch (Exception e) {
             System.out.println(e.getMessage());//TODO: nzm da li ovde da zovem logger, cuo sam od nekog da se restartuje sistem onda?
         }
