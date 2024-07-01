@@ -725,7 +725,7 @@ public class CapitalServiceImplTest {
         Capital capital = new Capital();
         capital.setListingId(1L);
         capital.setListingType(ListingType.STOCK);
-        capital.setTotal(10.0);
+        capital.setTotal(100.0);
         capital.setReserved(2.0);
         capital.setPublicTotal(50.0);
         capital.setBankAccount(bankAccount);
@@ -785,30 +785,27 @@ public class CapitalServiceImplTest {
     }
 
     @Test
-    public void hasEnoughCapitalForOrder_Sell(){
+    public void testHasEnoughCapitalForOrder_Sell() {
+        // Arrange
         MarketOrder order = new MarketOrder();
         order.setOrderType(OrderType.SELL);
-        order.setPrice(50.0);
-        order.setContractSize(50l);
+        order.setContractSize(50L);
 
         BankAccount bankAccount = new BankAccount();
-        bankAccount.setAccountNumber("123");
-        Currency currency = new Currency();
-        currency.setCurrencyCode("RSD");
-        bankAccount.setCurrency(currency);
-        bankAccount.setAvailableBalance(100.0);
+        bankAccount.setAccountNumber("123456789");
 
         Capital capital = new Capital();
-        capital.setTotal(200.0);
-        capital.setReserved(100.0);
+        capital.setTotal(100.0);
+        capital.setReserved(20.0);
 
         when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
-        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(anyLong(),any(),any())).thenReturn(Optional.of(capital));
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(order.getListingId(), order.getListingType(), bankAccount)).thenReturn(Optional.of(capital));
 
+        // Act
         boolean result = capitalService.hasEnoughCapitalForOrder(order);
 
+        // Assert
         assertTrue(result);
-
     }
 
 }
