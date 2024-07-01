@@ -921,8 +921,53 @@ public class CapitalServiceImplTest {
         assertEquals(expectedResults.size(), actualResults.size());
     }
 
+    @Test
+    public void reserveBalanceTest(){
+        Capital capital = new Capital();
+        capital.setTotal(100.0);
+        capital.setReserved(10.0);
+        Long listingId = 1L;
+        ListingType listingType = ListingType.STOCK;
+        Double amount = 10.0;
+        BankAccount bankAccount = new BankAccount();
 
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(any(),any(),any())).thenReturn(Optional.of(capital));
 
+        capitalService.reserveBalance(listingId,listingType,bankAccount,amount);
+
+        verify(capitalRepository).save(eq(capital));
+    }
+
+    @Test
+    public void reserveBalanceTest_InvalidReservationAmountException(){
+        Capital capital = new Capital();
+        capital.setTotal(100.0);
+        capital.setReserved(10.0);
+        Long listingId = 1L;
+        ListingType listingType = ListingType.STOCK;
+        Double amount = -10.0;
+        BankAccount bankAccount = new BankAccount();
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(any(),any(),any())).thenReturn(Optional.of(capital));
+
+        assertThrows(InvalidReservationAmountException.class, () ->  capitalService.reserveBalance(listingId,listingType,bankAccount,amount));
+    }
+
+    @Test
+    public void reserveBalanceTest_NotEnoughCapitalAvailableException(){
+        Capital capital = new Capital();
+        capital.setTotal(100.0);
+        capital.setReserved(10.0);
+        Long listingId = 1L;
+        ListingType listingType = ListingType.STOCK;
+        Double amount = 100.0;
+        BankAccount bankAccount = new BankAccount();
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(any(),any(),any())).thenReturn(Optional.of(capital));
+
+        assertThrows(NotEnoughCapitalAvailableException.class, () ->  capitalService.reserveBalance(listingId,listingType,bankAccount,amount));
+
+    }
 
 
 //    @Test
@@ -963,85 +1008,6 @@ public class CapitalServiceImplTest {
 //        assertEquals(2, result.size());
 //    }
 }
-
-
-
-//        @Test
-//        void shouldReserveFundsForSellOrder() {
-//            ListingType listingType = ListingType.STOCK;
-//            long listingId = 1;
-//
-//            Capital capital = new Capital();
-//            capital.setListingType(listingType);
-//            capital.setListingId(listingId);
-//            capital.setTotal(1000.0);
-//            capital.setReserved(0.00);
-//
-//            double amount = 100.0;
-//
-//            when(capitalRepository.getCapitalByListingIdAndListingType(anyLong(), any(ListingType.class))).thenReturn(Optional.of(capital));
-//
-//            capitalService.reserveBalance(listingId, listingType, amount);
-//
-//            verify(capitalRepository).getCapitalByListingIdAndListingType(eq(listingId), eq(listingType));
-//            verify(capitalRepository).save(eq(capital));
-//        }
-
-
-
-//
-////        @Test
-////        void shouldThrowInvalidReservationAmountException() {
-////            Capital capital = new Capital();
-////            String currencyCode = "RSD";
-////            double amount = -100.0;
-////            when(capitalRepository.getCapitalByCurrency_CurrencyCode(anyString())).thenReturn(Optional.of(capital));
-////
-////            assertThrows(InvalidReservationAmountException.class, () -> capitalService.reserveBalance("RSD", amount));
-////            verify(capitalRepository).getCapitalByCurrency_CurrencyCode(eq(currencyCode));
-////        }
-//
-////        @Test
-////        void shouldThrowNotEnoughCapitalAvailableException() {
-////            Capital capital = new Capital();
-////            BankAccount bankAccount = new BankAccount();
-////            bankAccount.setBalance(1000.0);
-////            bankAccount.setAvailableBalance(1000.0);
-////            capital.setBankAccount(bankAccount);
-////            capital.setTotal(1000.0);
-////            capital.setReserved(0.00);
-////
-////            String currencyCode = "RSD";
-////            double amount = 100000.0;
-////
-////            when(capitalRepository.getCapitalByCurrency_CurrencyCode(anyString())).thenReturn(Optional.of(capital));
-////
-////            assertThrows(NotEnoughCapitalAvailableException.class, () -> capitalService.reserveBalance(currencyCode, amount));
-////
-////            verify(capitalRepository).getCapitalByCurrency_CurrencyCode(eq(currencyCode));
-////        }
-//
-////        @Test
-////        void shouldThrowNotEnoughCapitalAvailableExceptionInBankAccount() {
-////            Capital capital = new Capital();
-////            BankAccount bankAccount = new BankAccount();
-////            bankAccount.setBalance(10.0);
-////            bankAccount.setAvailableBalance(10.0);
-////            capital.setBankAccount(bankAccount);
-////            capital.setTotal(1000.0);
-////            capital.setReserved(0.00);
-////
-////            String currencyCode = "RSD";
-////            double amount = 100;
-////
-////            when(capitalRepository.getCapitalByCurrency_CurrencyCode(anyString())).thenReturn(Optional.of(capital));
-////
-////            assertThrows(NotEnoughCapitalAvailableException.class, () -> capitalService.reserveBalance(currencyCode, amount));
-////
-////            verify(capitalRepository).getCapitalByCurrency_CurrencyCode(eq(currencyCode));
-////        }
-//
-//    }
 
 
 
@@ -1231,88 +1197,7 @@ public class CapitalServiceImplTest {
 //        }
 //    }
 //
-//    @Nested
-//    class ProcessAddBalanceTests {
-//        @Test
-//        void shouldAddBalanceToBankAccount() {
-//            Capital capital = new Capital();
-//            BankAccount bankAccount = new BankAccount();
-//            bankAccount.setBalance(1000.0);
-//            bankAccount.setAvailableBalance(500.0);
-//            capital.setBankAccount(bankAccount);
-//            capital.setTotal(1000.0);
-//            capital.setReserved(500.0);
-//
-//            String currencyCode = "RSD";
-//            double amount = 600.0;
-//
-//            when(capitalRepository.getCapitalByCurrency_CurrencyCode(anyString())).thenReturn(Optional.of(capital));
-//
-//            capitalService.addBalance(currencyCode, amount);
-//
-//            verify(capitalRepository).getCapitalByCurrency_CurrencyCode(eq(currencyCode));
-//            verify(capitalRepository).save(eq(capital));
-//        }
-//
-//        @Test
-//        void shouldAddBalanceToSecurity() {
-//            ListingType listingType = ListingType.STOCK;
-//            long listingId = 1;
-//
-//            Capital capital = new Capital();
-//            capital.setListingType(listingType);
-//            capital.setListingId(listingId);
-//            capital.setTotal(1000.0);
-//            capital.setReserved(100.0);
-//
-//            double amount = 100.0;
-//
-//            when(capitalRepository.getCapitalByListingIdAndListingType(anyLong(), any(ListingType.class))).thenReturn(Optional.of(capital));
-//
-//            capitalService.addBalance(listingId, listingType, amount);
-//
-//            verify(capitalRepository).getCapitalByListingIdAndListingType(eq(listingId), eq(listingType));
-//            verify(capitalRepository).save(eq(capital));
-//        }
-//
-//        @Test
-//        void shouldThrowInvalidCapitalAmountException() {
-//            Capital capital = new Capital();
-//
-//            String currencyCode = "RSD";
-//            double amount = -100;
-//
-//            when(capitalRepository.getCapitalByCurrency_CurrencyCode(anyString())).thenReturn(Optional.of(capital));
-//
-//            assertThrows(InvalidCapitalAmountException.class, () -> capitalService.addBalance(currencyCode, amount));
-//
-//            verify(capitalRepository).getCapitalByCurrency_CurrencyCode(eq(currencyCode));
-//        }
-//    }
-//
-//    @Nested
-//    class ProcessRemoveBalanceTests {
-//        @Test
-//        void shouldRemoveBalanceFromBankAccount() {
-//            Capital capital = new Capital();
-//            BankAccount bankAccount = new BankAccount();
-//            bankAccount.setBalance(1000.0);
-//            bankAccount.setAvailableBalance(500.0);
-//            capital.setBankAccount(bankAccount);
-//            capital.setTotal(1000.0);
-//            capital.setReserved(500.0);
-//
-//            String currencyCode = "RSD";
-//            double amount = 100.0;
-//
-//            when(capitalRepository.getCapitalByCurrency_CurrencyCode(anyString())).thenReturn(Optional.of(capital));
-//
-//            capitalService.removeBalance(currencyCode, amount);
-//
-//            verify(capitalRepository).getCapitalByCurrency_CurrencyCode(eq(currencyCode));
-//            verify(capitalRepository).save(eq(capital));
-//        }
-//
+
 
 
 
