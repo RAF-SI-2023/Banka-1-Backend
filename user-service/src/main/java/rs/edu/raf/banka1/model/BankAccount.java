@@ -50,7 +50,7 @@ public class BankAccount {
     private String subtypeOfAccount;
     private Double maintenanceCost;
 
-    @OneToMany(cascade = CascadeType.ALL,mappedBy = "id")
+    @OneToMany(cascade = CascadeType.ALL,mappedBy = "bankAccount")
     private List<Card> cards = new ArrayList<>();
 
     @Override
