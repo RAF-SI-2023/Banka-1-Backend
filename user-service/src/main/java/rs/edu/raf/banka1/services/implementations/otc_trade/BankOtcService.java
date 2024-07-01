@@ -31,6 +31,11 @@ public class BankOtcService {
     private final BankOTCStockRepository bankOTCStockRepository;
     private final MyOfferRepository myOfferRepository;
     private final BankAccountService bankAccountService;
+    private RestTemplate restTemplate = new RestTemplate();
+
+    public void setRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     //URL
     private static final String URL_TO_BANK3 =  "https://banka-3-dev.si.raf.edu.rs/exchange-service/api/v1/otcTrade";
@@ -170,7 +175,7 @@ public class BankOtcService {
 
     private void getStocksFromBank3(){
         try {
-            RestTemplate restTemplate = new RestTemplate();
+//            RestTemplate restTemplate = new RestTemplate();
             String url = URL_TO_BANK3 + "/getOurStocks";
 
             ResponseEntity<List<MyStockDto>> response = restTemplate.exchange(
@@ -215,7 +220,7 @@ public class BankOtcService {
 
         String url = URL_TO_BANK3 + "/sendOffer/bank1";
 
-        RestTemplate restTemplate = new RestTemplate();
+//        RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
 
@@ -313,7 +318,7 @@ public class BankOtcService {
                 String url = URL_TO_BANK3 + "/offerAccepted/bank1/" + offer.getIdBank();
 
                 try {
-                    RestTemplate restTemplate = new RestTemplate();
+//                    RestTemplate restTemplate = new RestTemplate();
                     ResponseEntity<String> response = restTemplate.exchange(
                             url,
                             HttpMethod.POST,
@@ -340,7 +345,7 @@ public class BankOtcService {
             for(Offer offer : offers){
                 String url = URL_TO_BANK3 + "/offerDeclined/bank1/" + offer.getIdBank();
                 try {
-                    RestTemplate restTemplate = new RestTemplate();
+//                    RestTemplate restTemplate = new RestTemplate();
                     ResponseEntity<String> response = restTemplate.exchange(
                             url,
                             HttpMethod.POST,
