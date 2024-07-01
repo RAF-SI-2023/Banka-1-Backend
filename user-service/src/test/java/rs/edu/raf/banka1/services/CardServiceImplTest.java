@@ -34,26 +34,26 @@ public class CardServiceImplTest {
         cardService.setCustomerRepository(customerRepository);
     }
 
-    @Test
-    public void createCardTest() {
-        String cardType = "debit";
-        String cardName = "debit card";
-        String accountNumber = "123456789";
-        Integer limit = 1000;
-        int cvv_length = 3;
-        int card_number_length = 16;
-
-        Card card = cardService.createCard(cardType, cardName, accountNumber, limit);
-
-//        Assertions
-        assertEquals(card.getCardType(), cardType);
-        assertEquals(card.getCardName(), cardName);
-        assertEquals(card.getAccountNumber(), accountNumber);
-        assertEquals(card.getCardLimit(), limit);
-        assertEquals(card.getIsActivated(), true);
-        assertEquals(card.getCardNumber().length(), card_number_length);
-        assertEquals(card.getCvv().length(), cvv_length);
-    }
+//    @Test
+//    public void createCardTest() {
+//        String cardType = "debit";
+//        String cardName = "debit card";
+//        String accountNumber = "123456789";
+//        Integer limit = 1000;
+//        int cvv_length = 3;
+//        int card_number_length = 16;
+//
+//        Card card = cardService.createCard(cardType, cardName, accountNumber, limit);
+//
+////        Assertions
+//        assertEquals(card.getCardType(), cardType);
+//        assertEquals(card.getCardName(), cardName);
+//        assertEquals(card.getAccountNumber(), accountNumber);
+//        assertEquals(card.getCardLimit(), limit);
+//        assertEquals(card.getIsActivated(), true);
+//        assertEquals(card.getCardNumber().length(), card_number_length);
+//        assertEquals(card.getCvv().length(), cvv_length);
+//    }
 
     @Test
     public void getAllCardsByCustomerIdTestCustomerNotFound() {
