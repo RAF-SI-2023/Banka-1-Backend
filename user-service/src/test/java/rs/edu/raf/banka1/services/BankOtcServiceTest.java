@@ -48,11 +48,11 @@ public class BankOtcServiceTest {
         // Arrange
         MyStock stock1 = new MyStock();
         stock1.setTicker("AAPL");
-        stock1.setPublicAmount(100);
+        stock1.setAmount(100);
 
         MyStock stock2 = new MyStock();
         stock2.setTicker("GOOGL");
-        stock2.setPublicAmount(200);
+        stock2.setAmount(200);
 
         List<MyStock> stocks = Arrays.asList(stock1, stock2);
         when(myStockRepository.findAllByCompanyIdAndPublicAmountGreaterThan(1L, 0)).thenReturn(stocks);
@@ -65,6 +65,7 @@ public class BankOtcServiceTest {
         assertEquals(2, result.size());
 
         MyStockDto dto1 = result.get(0);
+        System.out.println(dto1);
         assertEquals("AAPL", dto1.getTicker());
         assertEquals((Integer) 100, dto1.getAmount());
 
