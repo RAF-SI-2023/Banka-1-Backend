@@ -145,9 +145,12 @@ public class BootstrapData implements CommandLineRunner {
 
         try {
 //            Logger.info("Loading Data...");
+            System.out.println("Bootstrap 1");
             seedPermissions();
             seedCurencies();
             transferService.seedExchangeRates();
+
+            System.out.println("Bootstrap 2");
 
             Company bank = createBankCompany();
 
@@ -212,6 +215,8 @@ public class BootstrapData implements CommandLineRunner {
             marketOrder.setFee(7.00);
             marketOrder.setTimestamp(System.currentTimeMillis()/1000);
             this.orderRepository.save(marketOrder);
+
+            System.out.println("Bootstrap 3");
 
 
             Employee supervisor = generateEmployee(
@@ -372,6 +377,8 @@ public class BootstrapData implements CommandLineRunner {
             customerCompany.setActive(true);
             customerRepository.save(customerCompany);
 
+            System.out.println("Bootstrap 4");
+
             BankAccount bankAccountCompany = new BankAccount();
             bankAccountCompany.setAccountStatus(true);
             bankAccountCompany.setAccountType(AccountType.BUSINESS);
@@ -427,6 +434,8 @@ public class BootstrapData implements CommandLineRunner {
                 bankAccountService.saveBankAccount(bankAccountCompany33);
             }
 
+            System.out.println("Bootstrap 5");
+
             Capital capital33 = new Capital();
             capital33.setPublicTotal(200D);
             capital33.setListingType(ListingType.STOCK);
@@ -463,6 +472,8 @@ public class BootstrapData implements CommandLineRunner {
             } else {
                 testCustomer2 = customerRepository.findCustomerByEmail(testCustomer2.getEmail()).get();
             }
+
+            System.out.println("Bootstrap 6");
 
             BankAccount bankAccount4test = new BankAccount();
             bankAccount4test.setAccountStatus(true);
@@ -545,6 +556,8 @@ public class BootstrapData implements CommandLineRunner {
                 bankAccount6testa = bankAccountService.findBankAccountByAccountNumber(bankAccount6testa.getAccountNumber());
             }
 
+            System.out.println("Bootstrap 7");
+
             Capital capital = new Capital();
             capital.setPublicTotal(0D);
             capital.setListingType(ListingType.STOCK);
@@ -611,6 +624,8 @@ public class BootstrapData implements CommandLineRunner {
             capital2ForTestCustomer2.setAverageBuyingPrice(marketService.getStockById(3L).getPrice());
             capitalRepository.save(capital2ForTestCustomer2);
 
+            System.out.println("Bootstrap 8");
+
             Capital capital3ForTestCustomer2 = new Capital();
             capital3ForTestCustomer2.setPublicTotal(40D);
             capital3ForTestCustomer2.setListingType(ListingType.STOCK);
@@ -653,6 +668,8 @@ public class BootstrapData implements CommandLineRunner {
             // generate default bank account for company
             BankAccount bankAccountCompany1 = bankAccountMapper.generateBankAccountCompany(company1, currencyRepository.findCurrencyByCurrencyCode(Constants.DEFAULT_CURRENCY).get());
             bankAccountRepository.save(bankAccountCompany1);
+
+            System.out.println("Bootstrap 9");
             // generate default capital for company
             Capital capitalCompany1 = capitalMapper.generateCapitalForBankAccount(bankAccountCompany1);
             capitalCompany1.setTotal(10005.0);
@@ -680,7 +697,7 @@ public class BootstrapData implements CommandLineRunner {
             bankAccount4.setMaintenanceCost(240.0);
             bankAccount4.setCreatedByAgentId(52L);
             bankAccount4.setCreationDate(new Date().getTime());
-            bankAccount4.setCurrency(this.currencyRepository.getReferenceById(1L));
+            bankAccount4.setCurrency(this.currencyRepository.findCurrencyByCurrencyCode("RSD").orElse(null));
             bankAccount4.setCustomer(customerCompany1);
             bankAccount4.setExpirationDate(new Date().getTime() + 60 * 60 * 24 * 365);
             bankAccount4.setAccountName("124141j2kraslL");
@@ -708,6 +725,8 @@ public class BootstrapData implements CommandLineRunner {
             marginAccount.setCurrency(bankAccount4.getCurrency());
             marginAccount.setListingType(ListingType.STOCK);
             this.marginAccountRepository.save(marginAccount);
+
+            System.out.println("Bootstrap 10");
 
 
             //ovo samo za test moze da se obrise
@@ -775,6 +794,8 @@ public class BootstrapData implements CommandLineRunner {
             bankAccount3 = bankAccountService.findBankAccountByAccountNumber(bankAccount3.getAccountNumber());
         }
             // dovde
+
+            System.out.println("Bootstrap 11");
 
         Capital capital111 = new Capital();
         capital111.setPublicTotal(0D);
@@ -857,6 +878,8 @@ public class BootstrapData implements CommandLineRunner {
                 bankAccountService.saveBankAccount(bankAccount2Basic);
             }
 
+            System.out.println("Bootstrap 12");
+
             MarginAccount marginAccount11 = new MarginAccount();
             marginAccount11.setCustomer(bankAccount2Basic);
             marginAccount11.setCurrency(bankAccount2Basic.getCurrency());
@@ -933,9 +956,12 @@ public class BootstrapData implements CommandLineRunner {
             // na ovaj nacin se dodaju 2 kartice za svaki bankAcc
             bankAccountService.createBankAccount(createBankAccountRequest);
 
+            System.out.println("Bootstrap 13");
 
             seedLoan();
             seedLoanRequest();
+
+            System.out.println("Bootstrap 14");
 
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime midnight = now.toLocalDate().atStartOfDay().plusDays(1);
@@ -944,6 +970,8 @@ public class BootstrapData implements CommandLineRunner {
 
 
             seedBankCapital(bank);
+
+            System.out.println("Bootstrap 15");
     //        if (currencyRepository.findAll().isEmpty()) {
 //                transferService.seedExchangeRates();
     //        }
@@ -967,6 +995,8 @@ public class BootstrapData implements CommandLineRunner {
         contract.setListingType(ListingType.STOCK);
         contractRepository.save(contract);
 
+            System.out.println("Bootstrap 16");
+
         if (myStockRepository.count() == 0){
             BankAccount rsdAcc = bankAccountService.getDefaultBankAccount();
             List<Capital> myStocks = capitalService.getCapitalStockForBank(rsdAcc);
@@ -983,6 +1013,8 @@ public class BootstrapData implements CommandLineRunner {
                 myStockRepository.save(stok1);
             }
         }
+
+            System.out.println("Bootstrap 17");
 
         } catch (Exception e) {
             System.out.println(e.getMessage());//TODO: nzm da li ovde da zovem logger, cuo sam od nekog da se restartuje sistem onda?
