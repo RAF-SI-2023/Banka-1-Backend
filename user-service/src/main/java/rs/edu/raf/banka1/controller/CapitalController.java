@@ -97,8 +97,17 @@ public class CapitalController {
             @ApiResponse(responseCode = "403", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<AllPublicCapitalsDto>> getAllPublicCapitals() {
-        return new ResponseEntity<>(capitalService.getAllPublicCapitals(), HttpStatus.OK);
+    public ResponseEntity<List<AllPublicCapitalsDto>> getAllPublicCapitals(
+            @AuthenticationPrincipal User userPrincipal
+    ) {
+        Customer currenthAuth = null;
+        try {
+            currenthAuth = customerService.getByEmail(userPrincipal.getUsername());
+        }
+        catch (Exception e) {
+
+        }
+        return new ResponseEntity<>(capitalService.getAllPublicCapitals(currenthAuth), HttpStatus.OK);
     }
 
     @PutMapping(value = "/customer/addPublic", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -168,7 +177,7 @@ public class CapitalController {
         return new ResponseEntity<>(capitalService.getCapitalForForexId(forexId), HttpStatus.OK);
     }
 
-/////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////
     @GetMapping(value = "/balance/forex/{forexId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
     @ApiResponses({
