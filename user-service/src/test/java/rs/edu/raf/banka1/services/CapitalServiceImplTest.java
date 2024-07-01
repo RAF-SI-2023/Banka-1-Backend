@@ -15,18 +15,13 @@ import static org.mockito.Mockito.*;
 
 import org.mockito.quality.Strictness;
 import rs.edu.raf.banka1.dtos.AddPublicCapitalDto;
+import rs.edu.raf.banka1.dtos.AllPublicCapitalsDto;
 import rs.edu.raf.banka1.dtos.CapitalProfitDto;
 import rs.edu.raf.banka1.dtos.PublicCapitalDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
 import rs.edu.raf.banka1.dtos.market_service.OptionsDto;
-import rs.edu.raf.banka1.exceptions.InvalidReservationAmountException;
-import rs.edu.raf.banka1.exceptions.NotEnoughCapitalAvailableException;
-import rs.edu.raf.banka1.exceptions.InvalidCapitalAmountException;
-import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
-import rs.edu.raf.banka1.exceptions.CapitalNotFoundByBankAccountException;
-import rs.edu.raf.banka1.exceptions.CapitalNotFoundByListingIdAndTypeException;
-import rs.edu.raf.banka1.exceptions.CapitalNotFoundByCodeException;
+import rs.edu.raf.banka1.exceptions.*;
 
 
 import org.junit.jupiter.api.Assertions;
@@ -386,21 +381,24 @@ public class CapitalServiceImplTest {
     @Test
     public void testEstimateBalanceForex_CapitalNotFound() {
         BankAccount bankAccount = new BankAccount();
-        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(1L, ListingType.FOREX,bankAccount)).thenReturn(Optional.empty());
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(1L, ListingType.FOREX, bankAccount)).thenReturn(Optional.empty());
         assertThrows(CapitalNotFoundByListingIdAndTypeException.class, () -> capitalService.estimateBalanceForex(1L));
     }
+
     @Test
     public void testEstimateBalanceStock_CapitalNotFound() {
         BankAccount bankAccount = new BankAccount();
-        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(1L, ListingType.STOCK,bankAccount)).thenReturn(Optional.empty());
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(1L, ListingType.STOCK, bankAccount)).thenReturn(Optional.empty());
         assertThrows(CapitalNotFoundByListingIdAndTypeException.class, () -> capitalService.estimateBalanceStock(1L));
     }
+
     @Test
     public void testEstimateBalanceOptions_CapitalNotFound() {
         BankAccount bankAccount = new BankAccount();
-        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(1L, ListingType.OPTIONS,bankAccount)).thenReturn(Optional.empty());
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(1L, ListingType.OPTIONS, bankAccount)).thenReturn(Optional.empty());
         assertThrows(CapitalNotFoundByListingIdAndTypeException.class, () -> capitalService.estimateBalanceOptions(1L));
     }
+
     @Test
     void testEstimateBalanceStock() {
         // Arrange
@@ -461,8 +459,6 @@ public class CapitalServiceImplTest {
         assertEquals(expectedBalance, result);
     }
 
-
-
     @Test
     void testEstimateBalanceForex() {
         // Arrange
@@ -492,50 +488,332 @@ public class CapitalServiceImplTest {
         Double expectedBalance = 100.0;
         assertEquals(expectedBalance, result);
     }
+
     @Test
     public void testEstimateBalanceFuture_CapitalNotFound() {
         BankAccount bankAccount = new BankAccount();
-        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(1L, ListingType.FUTURE,bankAccount)).thenReturn(java.util.Optional.empty());
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(1L, ListingType.FUTURE, bankAccount)).thenReturn(java.util.Optional.empty());
         assertThrows(CapitalNotFoundByListingIdAndTypeException.class, () -> capitalService.estimateBalanceFuture(1L));
     }
 
+    @Test
+    void testAddToPublicCapitalCompany() {
+        User userPrincipal = new User();
+        userPrincipal.setUserId(1L);
+        Company company = new Company();
+        company.setId(1L);
+        userPrincipal.setCompany(company);
+
+        AddPublicCapitalDto setPublicCapitalDto = new AddPublicCapitalDto();
+        setPublicCapitalDto.setListingId(1L);
+        setPublicCapitalDto.setListingType(ListingType.STOCK);
+        setPublicCapitalDto.setAddToPublic(10.0);
+
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("123456789");
+        Currency currency = new Currency();
+        currency.setCurrencyCode("RSD");
+        bankAccount.setCurrency(currency);
+
+        Capital capital = new Capital();
+        capital.setListingId(1L);
+        capital.setListingType(ListingType.STOCK);
+        capital.setTotal(100.0);
+        capital.setReserved(20.0);
+        capital.setPublicTotal(30.0);
+        capital.setBankAccount(bankAccount);
+
+        when(bankAccountService.getBankAccountByCompanyAndCurrencyCode(anyLong(),anyString())).thenReturn(bankAccount);
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(anyLong(), any(ListingType.class), any(BankAccount.class))).thenReturn(Optional.of(capital));
+
+        Boolean result = capitalService.addToPublicCapital(userPrincipal, setPublicCapitalDto);
+
+        assertTrue(result);
+
+    }
+    @Test
+    void testAddToPublicCapitalCompany_OTCInvalidBankAccountCurrency() {
+        User userPrincipal = new User();
+        userPrincipal.setUserId(1L);
+        Company company = new Company();
+        company.setId(1L);
+        userPrincipal.setCompany(company);
+
+        AddPublicCapitalDto setPublicCapitalDto = new AddPublicCapitalDto();
+        setPublicCapitalDto.setListingId(1L);
+        setPublicCapitalDto.setListingType(ListingType.STOCK);
+        setPublicCapitalDto.setAddToPublic(10.0);
+
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("123456789");
+        Currency currency = new Currency();
+        currency.setCurrencyCode("USD");
+        bankAccount.setCurrency(currency);
+
+        Capital capital = new Capital();
+        capital.setListingId(1L);
+        capital.setListingType(ListingType.STOCK);
+        capital.setTotal(100.0);
+        capital.setReserved(20.0);
+        capital.setPublicTotal(30.0);
+        capital.setBankAccount(bankAccount);
+
+        when(bankAccountService.getBankAccountByCompanyAndCurrencyCode(anyLong(),anyString())).thenReturn(bankAccount);
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(anyLong(), any(ListingType.class), any(BankAccount.class))).thenReturn(Optional.of(capital));
+
+        assertThrows(OTCInvalidBankAccountCurrencyException.class, () -> capitalService.addToPublicCapital(userPrincipal, setPublicCapitalDto));
+
+    }
+
+    @Test
+    void testAddToPublicCapitalCompany_NotEnoughCapitalAvailableException() {
+        User userPrincipal = new User();
+        userPrincipal.setUserId(1L);
+        Company company = new Company();
+        company.setId(1L);
+        userPrincipal.setCompany(company);
+
+        AddPublicCapitalDto setPublicCapitalDto = new AddPublicCapitalDto();
+        setPublicCapitalDto.setListingId(1L);
+        setPublicCapitalDto.setListingType(ListingType.STOCK);
+        setPublicCapitalDto.setAddToPublic(10.0);
+
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("123456789");
+        Currency currency = new Currency();
+        currency.setCurrencyCode("RSD");
+        bankAccount.setCurrency(currency);
+
+        Capital capital = new Capital();
+        capital.setListingId(1L);
+        capital.setListingType(ListingType.STOCK);
+        capital.setTotal(10.0);
+        capital.setReserved(50.0);
+        capital.setPublicTotal(30.0);
+        capital.setBankAccount(bankAccount);
+
+        when(bankAccountService.getBankAccountByCompanyAndCurrencyCode(anyLong(),anyString())).thenReturn(bankAccount);
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(anyLong(), any(ListingType.class), any(BankAccount.class))).thenReturn(Optional.of(capital));
+
+        assertThrows(NotEnoughCapitalAvailableException.class, () -> capitalService.addToPublicCapital(userPrincipal, setPublicCapitalDto));
+
+    }
+
+    @Test
+    void testAddToPublicCapitalIndividual() {
+        User userPrincipal = new User();
+        userPrincipal.setUserId(1L);
+
+        AddPublicCapitalDto setPublicCapitalDto = new AddPublicCapitalDto();
+        setPublicCapitalDto.setListingId(1L);
+        setPublicCapitalDto.setListingType(ListingType.STOCK);
+        setPublicCapitalDto.setAddToPublic(10.0);
+
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("123456789");
+        Currency currency = new Currency();
+        currency.setCurrencyCode("RSD");
+        bankAccount.setCurrency(currency);
+
+        Capital capital = new Capital();
+        capital.setListingId(1L);
+        capital.setListingType(ListingType.STOCK);
+        capital.setTotal(100.0);
+        capital.setReserved(20.0);
+        capital.setPublicTotal(30.0);
+        capital.setBankAccount(bankAccount);
+
+        when(bankAccountService.getBankAccountByCustomerAndCurrencyCode(anyLong(),anyString())).thenReturn(bankAccount);
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(anyLong(), any(ListingType.class), any(BankAccount.class))).thenReturn(Optional.of(capital));
+
+        Boolean result = capitalService.addToPublicCapital(userPrincipal, setPublicCapitalDto);
+
+        assertTrue(result);
+
+    }
+
+    @Test
+    void testAddToPublicCapitalIndividual_OTCListingTypeException() {
+        User userPrincipal = new User();
+        userPrincipal.setUserId(1L);
+
+        AddPublicCapitalDto setPublicCapitalDto = new AddPublicCapitalDto();
+        setPublicCapitalDto.setListingId(1L);
+        setPublicCapitalDto.setListingType(ListingType.FUTURE);
+        setPublicCapitalDto.setAddToPublic(10.0);
+
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("123456789");
+        Currency currency = new Currency();
+        currency.setCurrencyCode("RSD");
+        bankAccount.setCurrency(currency);
+
+        Capital capital = new Capital();
+        capital.setListingId(1L);
+        capital.setListingType(ListingType.FUTURE);
+        capital.setTotal(100.0);
+        capital.setReserved(20.0);
+        capital.setPublicTotal(30.0);
+        capital.setBankAccount(bankAccount);
+
+        when(bankAccountService.getBankAccountByCustomerAndCurrencyCode(anyLong(),anyString())).thenReturn(bankAccount);
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(anyLong(), any(ListingType.class), any(BankAccount.class))).thenReturn(Optional.of(capital));
+
+        assertThrows(OTCListingTypeException.class, () -> capitalService.addToPublicCapital(userPrincipal,setPublicCapitalDto));
+        
+    }
+
+    @Test
+    public void removeFromPublicCapitalTest(){
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("123456789");
+        Currency currency = new Currency();
+        currency.setCurrencyCode("RSD");
+        bankAccount.setCurrency(currency);
+
+        Capital capital = new Capital();
+        capital.setListingId(1L);
+        capital.setListingType(ListingType.STOCK);
+        capital.setTotal(100.0);
+        capital.setReserved(20.0);
+        capital.setPublicTotal(50.0);
+        capital.setBankAccount(bankAccount);
+
+        Long listingId = 1L;
+        Double amountToRemove = 30.0;
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(anyLong(), any(ListingType.class), any(BankAccount.class))).thenReturn(Optional.of(capital));
+
+        capitalService.removeFromPublicCapital(listingId, ListingType.STOCK, bankAccount, amountToRemove);
+
+        Double expectedPublicTotal = 20.0;
+        assertEquals(expectedPublicTotal, capital.getPublicTotal());
+
+    }
+
+    @Test
+    public void removeFromPublicCapitalTest_NotEnoughCapitalAvailableException(){
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("123456789");
+        Currency currency = new Currency();
+        currency.setCurrencyCode("RSD");
+        bankAccount.setCurrency(currency);
+
+        Capital capital = new Capital();
+        capital.setListingId(1L);
+        capital.setListingType(ListingType.STOCK);
+        capital.setTotal(10.0);
+        capital.setReserved(2.0);
+        capital.setPublicTotal(50.0);
+        capital.setBankAccount(bankAccount);
+
+        Long listingId = 1L;
+        Double amountToRemove = 30.0;
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(anyLong(), any(ListingType.class), any(BankAccount.class))).thenReturn(Optional.of(capital));
+
+        assertThrows(NotEnoughCapitalAvailableException.class, () -> capitalService.removeFromPublicCapital(listingId, ListingType.STOCK, bankAccount, amountToRemove));
+    }
+    @Test
+    public void removeFromPublicCapitalTest_InvalidCapitalAmountException(){
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("123456789");
+        Currency currency = new Currency();
+        currency.setCurrencyCode("RSD");
+        bankAccount.setCurrency(currency);
+
+        Capital capital = new Capital();
+        capital.setListingId(1L);
+        capital.setListingType(ListingType.STOCK);
+        capital.setTotal(10.0);
+        capital.setReserved(2.0);
+        capital.setPublicTotal(50.0);
+        capital.setBankAccount(bankAccount);
+
+        Long listingId = 1L;
+        Double amountToRemove = 130.0;
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(anyLong(), any(ListingType.class), any(BankAccount.class))).thenReturn(Optional.of(capital));
+
+        assertThrows(InvalidCapitalAmountException.class, () -> capitalService.removeFromPublicCapital(listingId, ListingType.STOCK, bankAccount, amountToRemove));
+    }
+
+
+    @Test
+    public void hasEnoughCapitalForOrder_Buy(){
+        MarketOrder order = new MarketOrder();
+        order.setOrderType(OrderType.BUY);
+        order.setPrice(50.0);
+
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("123");
+        Currency currency = new Currency();
+        currency.setCurrencyCode("RSD");
+        bankAccount.setCurrency(currency);
+        bankAccount.setAvailableBalance(100.0);
+
+        when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
+
+        boolean result = capitalService.hasEnoughCapitalForOrder(order);
+
+        assertTrue(result);
+
+    }
+
+    @Test
+    public void hasEnoughCapitalForOrderCustomer_Buy(){
+        MarketOrder order = new MarketOrder();
+        order.setOrderType(OrderType.BUY);
+        order.setPrice(50.0);
+        Customer customer = new Customer();
+        order.setCustomer(customer);
+        order.setBankAccountNumber("123");
+
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("123");
+        Currency currency = new Currency();
+        currency.setCurrencyCode("RSD");
+        bankAccount.setCurrency(currency);
+        bankAccount.setAvailableBalance(100.0);
+
+        when(bankAccountService.findBankAccountByAccountNumber(anyString())).thenReturn(bankAccount);
+
+        boolean result = capitalService.hasEnoughCapitalForOrder(order);
+
+        assertTrue(result);
+
+    }
+
+    @Test
+    public void hasEnoughCapitalForOrder_Sell(){
+        MarketOrder order = new MarketOrder();
+        order.setOrderType(OrderType.SELL);
+        order.setPrice(50.0);
+        order.setContractSize(50l);
+
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountNumber("123");
+        Currency currency = new Currency();
+        currency.setCurrencyCode("RSD");
+        bankAccount.setCurrency(currency);
+        bankAccount.setAvailableBalance(100.0);
+
+        Capital capital = new Capital();
+        capital.setTotal(200.0);
+        capital.setReserved(100.0);
+
+        when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(anyLong(),any(),any())).thenReturn(Optional.of(capital));
+
+        boolean result = capitalService.hasEnoughCapitalForOrder(order);
+
+        assertTrue(result);
+
+    }
 
 }
 
-//    @Test
-//    void testAddToPublicCapital() {
-//        // Arrange
-//        User userPrincipal = new User();
-//        userPrincipal.setUserId(1L);
-//
-//        AddPublicCapitalDto setPublicCapitalDto = new AddPublicCapitalDto();
-//        setPublicCapitalDto.setListingId(1L);
-//        setPublicCapitalDto.setListingType(ListingType.STOCK);
-//        setPublicCapitalDto.setAddToPublic(50.0);
-//
-//        BankAccount bankAccount = new BankAccount();
-//        bankAccount.setAccountNumber("123456789");
-//
-//        Capital capital = new Capital();
-//        capital.setListingId(1L);
-//        capital.setListingType(ListingType.STOCK);
-//        capital.setTotal(100.0);
-//        capital.setReserved(20.0);
-//        capital.setPublicTotal(30.0);
-//        capital.setBankAccount(bankAccount);
-//
-//        when(bankAccountService.getDefaultBankAccount()).thenReturn(bankAccount);
-//        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(anyLong(), any(ListingType.class), any(BankAccount.class))).thenReturn(Optional.of(capital));
-//        when(capitalRepository.save(any(Capital.class))).thenAnswer(i -> i.getArguments()[0]);
-//
-//        // Act
-//        Boolean result = capitalService.addToPublicCapital(userPrincipal, setPublicCapitalDto);
-//
-//        // Assert
-//        assertTrue(result);
-//        assertEquals(80.0, capital.getPublicTotal());
-//    }
-//
+
 
 //        @Test
 //        void shouldReserveFundsForSellOrder() {
@@ -966,64 +1244,11 @@ public class CapitalServiceImplTest {
 //        }
 //    }
 //
-//    @Test
-//    public void testGetCapital() {
-//        BankAccount bankAccount = new BankAccount();
-//        bankAccount.setAccountNumber("1234567890");
-//
-//        Capital capital = new Capital();
-//        capital.setTotal(1000.0);
-//        capital.setReserved(200.0);
-//
-//        when(bankAccountRepository.findBankAccountByAccountNumber("1234567890")).thenReturn(Optional.of(bankAccount));
-//        when(capitalRepository.getCapitalByBankAccount(bankAccount)).thenReturn(Optional.of(capital));
-//
-//        Double result = capitalService.getCapital("1234567890");
-//
-//        Assertions.assertEquals(800.0, result);
-//    }
-//
-//    @Test
-//    public void testGetCapitalBankAccountNotFound() {
-//        when(bankAccountRepository.findBankAccountByAccountNumber(anyString())).thenReturn(Optional.empty());
-//
-//        Assertions.assertThrows(BankAccountNotFoundException.class, () -> capitalService.getCapital("nonexistent"));
-//
-//        verify(bankAccountRepository).findBankAccountByAccountNumber("nonexistent");
-//        verifyNoMoreInteractions(capitalRepository);
-//    }
-//
-//    @Test
-//    public void testGetCapitalCapitalNotFound() {
-//        BankAccount bankAccount = new BankAccount();
-//        bankAccount.setAccountNumber("1234567890");
-//
-//        when(bankAccountRepository.findBankAccountByAccountNumber("1234567890")).thenReturn(Optional.of(bankAccount));
-//        when(capitalRepository.getCapitalByBankAccount(bankAccount)).thenReturn(Optional.empty());
-//
-//        Assertions.assertThrows(CapitalNotFoundByBankAccountException.class, () -> capitalService.getCapital("1234567890"));
-//
-//        verify(bankAccountRepository).findBankAccountByAccountNumber("1234567890");
-//        verify(capitalRepository).getCapitalByBankAccount(bankAccount);
-//    }
-//    @Test
-//    public void testEstimateBalanceStock() {
-//        Long stockId = 123L;
-//        ListingStockDto listingStockDto = new ListingStockDto();
-//        listingStockDto.setPrice(50.0);
-//
-//        Capital capital = new Capital();
-//        capital.setTotal(1000.0);
-//        capital.setReserved(200.0);
-//
-//        when(marketService.getStockById(stockId)).thenReturn(listingStockDto);
-//        when(capitalRepository.getCapitalByListingIdAndListingType(stockId, ListingType.STOCK)).thenReturn(Optional.of(capital));
-//
-//        Double result = capitalService.estimateBalanceStock(stockId);
-//
-//        Assertions.assertEquals(40000.0, result);
-//    }
-//
+
+
+
+
+
 //    @Test
 //    public void testEstimateBalanceStockCapitalNotFound() {
 //        Long stockId = 123L;
