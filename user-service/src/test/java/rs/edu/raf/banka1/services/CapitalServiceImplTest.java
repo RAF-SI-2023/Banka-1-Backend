@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Assertions;
 import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
 import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.model.*;
+import rs.edu.raf.banka1.model.Currency;
 import rs.edu.raf.banka1.repositories.BankAccountRepository;
 import rs.edu.raf.banka1.repositories.CapitalRepository;
 import rs.edu.raf.banka1.repositories.CompanyRepository;
@@ -36,10 +37,7 @@ import rs.edu.raf.banka1.services.MarketService;
 import rs.edu.raf.banka1.services.implementations.CapitalServiceImpl;
 import rs.edu.raf.banka1.utils.Constants;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -64,6 +62,10 @@ public class CapitalServiceImplTest {
     public void setUp() {
         //  capitalMapper = new CapitalMapper();
         capitalService = new CapitalServiceImpl(bankAccountRepository, capitalRepository, capitalMapper, bankAccountService, marketService, companyRepository);
+//        capitalService.setCapitalMapper(capitalMapper);
+//        capitalService.setCapitalRepository(capitalRepository);
+//        capitalService.setBankAccountRepository(bankAccountRepository);
+//        capitalService.setBankAccountService(bankAccountService);
     }
 
     @Test
@@ -968,6 +970,61 @@ public class CapitalServiceImplTest {
         assertThrows(NotEnoughCapitalAvailableException.class, () ->  capitalService.reserveBalance(listingId,listingType,bankAccount,amount));
 
     }
+
+    @Test
+    public void getAllPublicCapitalsCustomer(){
+        Capital capital = new Capital();
+        when(capitalRepository.getAllByPublicTotalGreaterThan(any())).thenReturn(List.of(capital));
+        Customer customer = new Customer();
+        BankAccount bankAccount = new BankAccount();
+        customer.setAccountIds(List.of(bankAccount));
+
+        BankAccount bankAccount1 = new BankAccount();
+        capital.setBankAccount(bankAccount1);
+        capitalService.getAllPublicCapitals(customer);
+    }
+
+    @Test
+    public void updateAverageBuyingPrice(){
+        Capital capital = new Capital();
+        capital.setTotal(100.0);
+        capital.setReserved(10.0);
+        Long listingId = 1L;
+        ListingType listingType = ListingType.STOCK;
+        Double amount = 10.0;
+        BankAccount bankAccount = new BankAccount();
+
+        when(capitalRepository.getCapitalByListingIdAndListingTypeAndBankAccount(any(),any(),any())).thenReturn(Optional.of(capital));
+
+        capitalService.updateAverageBuyingPrice(listingId,listingType,bankAccount,amount);
+
+        verify(capitalRepository).save(eq(capital));
+    }
+
+//    @Test
+//    public void getAllPublicCapitals(){
+//        Capital capital1 = new Capital();
+//        BankAccount bankAccount = new BankAccount();
+//        Company company = new Company();
+//        company.setCompanyName("dfsad");
+//        bankAccount.setCompany(company);
+//        capital1.setBankAccount(bankAccount);
+//
+//        Capital capital2 = new Capital();
+//        Customer customer = new Customer();
+//        customer.setFirstName("dfsad");
+//        customer.setLastName("dfsad");
+//        bankAccount.setCustomer(customer);
+//        capital2.setBankAccount(bankAccount);
+//
+//        List<Capital> capitals = new ArrayList<>();
+//        capitals.add(capital1);
+//        capitals.add(capital2);
+//
+//        when(capitalRepository.getAllByPublicTotalGreaterThan(any())).thenReturn(capitals);
+//
+//        List<AllPublicCapitalsDto> out = capitalService.getAllPublicCapitals();
+//    }
 
 
 //    @Test

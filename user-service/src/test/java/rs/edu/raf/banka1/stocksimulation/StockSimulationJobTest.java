@@ -300,4 +300,6 @@ class StockSimulationJobTest {
         verify(transactionService).createTransaction(eq(bankAccount), eq(securityCapital), eq(price), eq(order), anyLong());
         verify(orderService).setProcessedNumber(eq(orderId), anyLong());
     }
+
+
 }

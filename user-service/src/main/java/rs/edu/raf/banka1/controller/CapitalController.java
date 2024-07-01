@@ -177,7 +177,7 @@ public class CapitalController {
         return new ResponseEntity<>(capitalService.getCapitalForForexId(forexId), HttpStatus.OK);
     }
 
-/////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////
     @GetMapping(value = "/balance/forex/{forexId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Estimate balance for bank account", description = "Estimate balance for bank account")
     @ApiResponses({

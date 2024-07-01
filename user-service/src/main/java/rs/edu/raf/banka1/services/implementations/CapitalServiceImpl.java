@@ -178,6 +178,8 @@ public class CapitalServiceImpl implements CapitalService {
         return null;
     }
 
+
+
     @Override
     public List<AllPublicCapitalsDto> getAllPublicCapitals(Customer customer) {
         List<Capital> capitals = this.capitalRepository.getAllByPublicTotalGreaterThan(0d);

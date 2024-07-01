@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import rs.edu.raf.banka1.dtos.market_service.ListingForexDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingFutureDto;
 import rs.edu.raf.banka1.dtos.market_service.ListingStockDto;
+import rs.edu.raf.banka1.dtos.market_service.OptionsDto;
 import rs.edu.raf.banka1.model.WorkingHoursStatus;
 import rs.edu.raf.banka1.utils.JwtUtil;
 
@@ -27,7 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@Disabled
+//@Disabled
 class MarketServiceImplTest {
 
     private Retry serviceRetry;
@@ -79,6 +80,22 @@ class MarketServiceImplTest {
         List<Object> result = marketService.getAllListingsFromMarket(listType);
 
         assertEquals(new ArrayList<>(), result);
+    }
+
+    @Test
+    public void testGetAllListingsFromMarket_Future_BadResponse() {
+        String listType = "future";
+        ParameterizedTypeReference<List<Object>> responseType = new ParameterizedTypeReference<>() {};
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/get/" + listType),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(responseType)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
+
+        List<Object> result = marketService.getAllListingsFromMarket(listType);
+
+        assertEquals(0, result.size());
     }
 
     @Test
@@ -246,6 +263,24 @@ public void testGetAllListingsFromMarket_Forex_Successful() {
 
         assertNull(result);
     }
+
+    @Test
+    public void testGetStockByIdFromMarket_400() {
+        Long stockId = 123L;
+        ListingStockDto mockStockDto = new ListingStockDto();
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/stock/" + stockId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(ListingStockDto.class)
+        )).thenReturn(new ResponseEntity<>(mockStockDto, HttpStatus.BAD_REQUEST));
+
+        ListingStockDto result = marketService.getStockByIdFromMarket(stockId);
+
+        assertNull(result);
+    }
+
+
 ////////////////////////////////////////////////////////////
     @Test
     public void testGetAllListings_Successful() {
@@ -370,6 +405,24 @@ public void testGetAllListingsFromMarket_Forex_Successful() {
     }
 
     @Test
+    public void testGetForexByIdFromMarket_400() {
+        Long forexId = 1L;
+        ListingForexDto expectedForexDto = new ListingForexDto();
+
+        ResponseEntity<ListingForexDto> successfulResponseEntity = new ResponseEntity<>(expectedForexDto, HttpStatus.OK);
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/forex/" + forexId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(ListingForexDto.class)
+        )).thenReturn(new ResponseEntity<>(expectedForexDto, HttpStatus.BAD_REQUEST));
+
+        ListingForexDto actualForexDto = marketService.getForexByIdFromMarket(forexId);
+
+        assertNull(actualForexDto);
+    }
+
+    @Test
     public void testGetForexByIdFromMarket_NotFoundException() {
         Long forexId = 1L;
 
@@ -422,6 +475,24 @@ public void testGetAllListingsFromMarket_Forex_Successful() {
     }
 
     @Test
+    public void testGetFutureByIdFromMarket_400() {
+        Long futureId = 1L;
+        ListingFutureDto expectedFutureDto = new ListingFutureDto();
+
+        ResponseEntity<ListingFutureDto> successfulResponseEntity = new ResponseEntity<>(expectedFutureDto, HttpStatus.OK);
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/future/" + futureId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(ListingFutureDto.class)
+        )).thenReturn(new ResponseEntity<>(expectedFutureDto, HttpStatus.BAD_REQUEST));
+
+        ListingFutureDto actualFutureDto = marketService.getFutureByIdFromMarket(futureId);
+
+        assertNull(actualFutureDto);
+    }
+
+    @Test
     public void testGetFutureByIdFromMarket_NotFoundException() {
         Long futureId = 1L;
         when(marketServiceRestTemplate.exchange(
@@ -450,4 +521,198 @@ public void testGetAllListingsFromMarket_Forex_Successful() {
 
         assertNull(actualFutureDto);
     }
+
+    @Test
+    public void testGetOptionsIdFromMarket_Successful() {
+        Long optionsId = 123L;
+        OptionsDto mockOptionsDto = new OptionsDto();
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/options/" + optionsId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(OptionsDto.class)
+        )).thenReturn(new ResponseEntity<>(mockOptionsDto, HttpStatus.OK));
+
+        OptionsDto result = marketService.getOptionsByIdFromMarket(optionsId);
+
+        assertEquals(mockOptionsDto, result);
+    }
+
+    @Test
+    public void testGetOptionsIdFromMarket_400() {
+        Long optionsId = 123L;
+        OptionsDto mockOptionsDto = new OptionsDto();
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/options/" + optionsId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(OptionsDto.class)
+        )).thenReturn(new ResponseEntity<>(mockOptionsDto, HttpStatus.BAD_REQUEST));
+
+        OptionsDto result = marketService.getOptionsByIdFromMarket(optionsId);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetOptionsIdFromMarket_BadRequest() {
+        Long optionsId = 123L;
+        OptionsDto mockOptionsDto = new OptionsDto();
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/options/" + optionsId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(OptionsDto.class)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        OptionsDto result = marketService.getOptionsByIdFromMarket(optionsId);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetOptionsIdFromMarket_NotFoundt() {
+        Long optionsId = 123L;
+        OptionsDto mockOptionsDto = new OptionsDto();
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/options/" + optionsId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(OptionsDto.class)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+        OptionsDto result = marketService.getOptionsByIdFromMarket(optionsId);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetCallIdFromMarket_Successful() {
+        Long optionsId = 123L;
+        OptionsDto mockOptionsDto = new OptionsDto();
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/callOptionById/" + optionsId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(OptionsDto.class)
+        )).thenReturn(new ResponseEntity<>(mockOptionsDto, HttpStatus.OK));
+
+        OptionsDto result = marketService.getCallOptionsByIdFromMarket(optionsId);
+
+        assertEquals(mockOptionsDto, result);
+    }
+
+    @Test
+    public void testGetCallIdFromMarket_BadCode() {
+        Long optionsId = 123L;
+        OptionsDto mockOptionsDto = new OptionsDto();
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/callOptionById/" + optionsId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(OptionsDto.class)
+        )).thenReturn(new ResponseEntity<>(mockOptionsDto, HttpStatus.BAD_REQUEST));
+
+        OptionsDto result = marketService.getCallOptionsByIdFromMarket(optionsId);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetCallIdFromMarket_BadRequest() {
+        Long optionsId = 123L;
+        OptionsDto mockOptionsDto = new OptionsDto();
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/callOptionById/" + optionsId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(OptionsDto.class)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        OptionsDto result = marketService.getCallOptionsByIdFromMarket(optionsId);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetCallIdFromMarket_NotFoundt() {
+        Long optionsId = 123L;
+        OptionsDto mockOptionsDto = new OptionsDto();
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/callOptionById/" + optionsId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(OptionsDto.class)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+        OptionsDto result = marketService.getCallOptionsByIdFromMarket(optionsId);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetPutIdFromMarket_Successful() {
+        Long optionsId = 123L;
+        OptionsDto mockOptionsDto = new OptionsDto();
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/putOptionById/" + optionsId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(OptionsDto.class)
+        )).thenReturn(new ResponseEntity<>(mockOptionsDto, HttpStatus.OK));
+
+        OptionsDto result = marketService.getPutOptionsByIdFromMarket(optionsId);
+
+        assertEquals(mockOptionsDto, result);
+    }
+
+    @Test
+    public void testGetPutIdFromMarket_400() {
+        Long optionsId = 123L;
+        OptionsDto mockOptionsDto = new OptionsDto();
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/putOptionById/" + optionsId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(OptionsDto.class)
+        )).thenReturn(new ResponseEntity<>(mockOptionsDto, HttpStatus.BAD_REQUEST));
+
+        OptionsDto result = marketService.getPutOptionsByIdFromMarket(optionsId);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetPutIdFromMarket_BadRequest() {
+        Long optionsId = 123L;
+        OptionsDto mockOptionsDto = new OptionsDto();
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/putOptionById/" + optionsId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(OptionsDto.class)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+        OptionsDto result = marketService.getPutOptionsByIdFromMarket(optionsId);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetPutIdFromMarket_NotFoundt() {
+        Long optionsId = 123L;
+        OptionsDto mockOptionsDto = new OptionsDto();
+        when(marketServiceRestTemplate.exchange(
+                eq("market/listing/putOptionById/" + optionsId),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(OptionsDto.class)
+        )).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+        OptionsDto result = marketService.getPutOptionsByIdFromMarket(optionsId);
+
+        assertNull(result);
+    }
+
+
 }
