@@ -852,6 +852,43 @@ public class CapitalServiceImplTest {
         assertTrue(result);
     }
 
+//    @Test
+//    void testGetAllPublicCapitals() {
+//        Customer customer = new Customer();
+//        customer.setUserId(1L);
+//
+//        BankAccount bankAccount1 = new BankAccount();
+//        bankAccount1.setAccountNumber("123456789");
+//
+//        BankAccount bankAccount2 = new BankAccount();
+//        bankAccount2.setAccountNumber("123");
+//
+//        customer.setAccountIds(List.of(bankAccount1,bankAccount2));
+//
+//        Capital capital1 = new Capital();
+//        capital1.setListingId(1L);
+//        capital1.setListingType(ListingType.STOCK);
+//        capital1.setTotal(100.0);
+//        capital1.setReserved(20.0);
+//        capital1.setBankAccount(bankAccount1);
+//
+//        Capital capital2 = new Capital();
+//        capital2.setListingId(2L);
+//        capital2.setListingType(ListingType.FOREX);
+//        capital2.setTotal(200.0);
+//        capital2.setReserved(40.0);
+//        capital2.setBankAccount(bankAccount2);
+//
+//        List<Capital> capitals = Arrays.asList(capital1, capital2);
+//
+//        when(capitalRepository.getAllByPublicTotalGreaterThan(0d)).thenReturn(capitals);
+//
+//        // Act
+//        List<AllPublicCapitalsDto> result = capitalService.getAllPublicCapitals(customer);
+//
+//        // Assert
+//        assertEquals(2, result.size());
+//    }
 }
 
 
