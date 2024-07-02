@@ -1,19 +1,40 @@
 version: "3"
 services:
-  mysql:
-    image: mysql:latest
+  postgres:
+    image: postgres:latest
     restart: always
-    container_name: mysql
+    container_name: postgres
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      - POSTGRES_USER=myusername
+      - POSTGRES_PASSWORD=mypassword
+      - PGUSER=myusername
+    ports:
+      - 5432:5432
     healthcheck:
       # set myusername and mypassword to desired username and password
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "myusername", "-pmypassword"]
+      test: ["CMD-SHELL", "pg_isready"]
       interval: 5s
-      timeout: 5s
-      retries: 5
+      timeout: 10s
+      retries: 10
     volumes:
-      - ./init.sql.example:/docker-entrypoint-initdb.d/init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  redis:
+    image: redis:7.2.4-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+  
+  chrome:
+    image: selenium/standalone-chrome:latest
+    hostname: chrome
+    privileged: true
+    shm_size: 2g
 
   user-service:
     build:
@@ -22,19 +43,19 @@ services:
       args:
         JAR_FILE: user-service/target/*.jar
         CACHEBUST: ${CI_COMMIT_SHA}  # Use a unique value to bust the cache
-    image: user-service
     container_name: user-service-container
     restart: always
     ports:
       - "8080:8080"
     environment:
       SPRING_APPLICATION_JSON: '{
-        "spring.datasource.url": "jdbc:mysql://mysql:3306/bank_userservice",
+        "spring.datasource.url": "jdbc:postgresql://postgres:5432/bank_userservice",
         "spring.datasource.username": "myusername",
         "spring.datasource.password": "mypassword",
-        "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL8Dialect",
-        "spring.jpa.hibernate.ddl-auto" : "update",
-        "oauth.jwt.secret": "my_secret",
+        "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.PostgreSQLDialect",
+        "spring.datasource.driver-class-name": "org.postgresql.Driver",
+        "spring.jpa.hibernate.ddl-auto" : "create",
+        "oauth.jwt.secret": "secret_key",
         "spring.mail.host":"smtp.gmail.com",
         "spring.mail.port":587,
         "spring.mail.username":"noreply.rafbanka1@gmail.com",
@@ -44,12 +65,13 @@ services:
         "server.port": 8080,
         "front.port": 4200,
         "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
-        "exchangeRateAPIToken": "6f2fe71358f82f6f372edee7",
+        "exchangeRateAPIToken": "92ec44421acf79b896d969cc",
         "exchangeRateApiUrl": "https://v6.exchangerate-api.com/v6/",
-        "marketServiceUrl" = "http://market-service:8081"
+        "marketServiceUrl": "http://market-service:8081",
+        "spring.devtools.restart.additional.exclude": "logs/**"
       }'
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
 
   market-service:
@@ -59,73 +81,77 @@ services:
       args:
         JAR_FILE: market-service/target/*.jar
         CACHEBUST: ${CI_COMMIT_SHA}  # Use a unique value to bust the cache
-    image: market-service
     container_name: market-service-container
     restart: always
     ports:
       - "8081:8081"  # Adjust the port as needed
     environment:
       SPRING_APPLICATION_JSON: '{
-      "spring.datasource.url": "jdbc:mysql://mysql:3306/bank_marketservice",
-      "spring.datasource.username": "myusername",
-      "spring.datasource.password": "mypassword",
-      "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL8Dialect",
-      "spring.jpa.hibernate.ddl-auto" : "update",
-      "oauth.jwt.secret": "secret_key",
-      "listingAPItoken": "pk_f87286e075c94cc484405da70691c030",
-      "alphaVantageAPIToken":"OF6BVKZOCXWHD9NS",
-      "forexAPItoken": "cnr3i41r01qs2jr5d5bgcnr3i41r01qs2jr5d5c0",
-      "listingNameApiUrl":"https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=",
-      "updateListingApiUrl":"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=",
-      "basicStockInfoApiUrl":"https://www.alphavantage.co/query?function=OVERVIEW&symbol=",
-      "HistoryListingApiUrl":"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=",
-      "forexExchangePlaceApiUrl":"https://finnhub.io/api/v1/forex/exchange?token=",
-      "forexSymbolsApiUrl":"https://finnhub.io/api/v1/forex/symbol?exchange=",
-      "forexExchangeRateApiUrl":"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE",
-      "forexDailyApiUrl":"https://www.alphavantage.co/query?function=FX_DAILY",
-      "optionsUrl":"https://query2.finance.yahoo.com/v7/finance/options/",
-      "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
-      "dev.environment": false
+        "spring.datasource.url": "jdbc:postgresql://postgres:5432/bank_marketservice",
+        "spring.datasource.username": "myusername",
+        "spring.datasource.password": "mypassword",
+        "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.PostgreSQLDialect",
+        "spring.datasource.driver-class-name": "org.postgresql.Driver",
+        "spring.jpa.hibernate.ddl-auto" : "update",
+        "oauth.jwt.secret": "secret_key",
+        "listingAPItoken": "pk_f87286e075c94cc484405da70691c030",
+        "alphaVantageAPIToken":"OF6BVKZOCXWHD9NS",
+        "forexAPItoken": "cnr3i41r01qs2jr5d5bgcnr3i41r01qs2jr5d5c0",
+        "listingNameApiUrl":"https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=",
+        "updateListingApiUrl":"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=",
+        "basicStockInfoApiUrl":"https://www.alphavantage.co/query?function=OVERVIEW&symbol=",
+        "HistoryListingApiUrl":"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=",
+        "forexExchangePlaceApiUrl":"https://finnhub.io/api/v1/forex/exchange?token=",
+        "forexSymbolsApiUrl":"https://finnhub.io/api/v1/forex/symbol?exchange=",
+        "forexExchangeRateApiUrl":"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE",
+        "forexDailyApiUrl":"https://www.alphavantage.co/query?function=FX_DAILY",
+        "optionsUrl":"https://query2.finance.yahoo.com/v7/finance/options/",
+        "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
+        "dev.environment": false,
+        "spring.devtools.restart.additional.exclude": "logs/**"
       }'
     depends_on:
-      mysql:
+      postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   fetching-service:
-    build:
-          context: market-service/
-          dockerfile: Dockerfile
-          args:
-            JAR_FILE: market-service/target/*.jar
-            CACHEBUST: ${CI_COMMIT_SHA}  # Use a unique value to bust the cache
-    image: fetching-service
-    container_name: fetching-service-container
-    restart: always
-    ports:
-      - "8082:8082"  # Adjust the port as needed
-    environment:
-      SPRING_APPLICATION_JSON: '{
-      "spring.datasource.url": "jdbc:mysql://mysql:3306/bank_marketservice",
-      "spring.datasource.username": "myusername",
-      "spring.datasource.password": "mypassword",
-      "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL8Dialect",
-      "spring.jpa.hibernate.ddl-auto" : "update",
-      "oauth.jwt.secret": "secret_key",
-      "listingAPItoken": "pk_f87286e075c94cc484405da70691c030",
-      "alphaVantageAPIToken":"OF6BVKZOCXWHD9NS",
-      "forexAPItoken": "cnr3i41r01qs2jr5d5bgcnr3i41r01qs2jr5d5c0",
-      "listingNameApiUrl":"https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=",
-      "updateListingApiUrl":"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=",
-      "basicStockInfoApiUrl":"https://www.alphavantage.co/query?function=OVERVIEW&symbol=",
-      "HistoryListingApiUrl":"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=",
-      "forexExchangePlaceApiUrl":"https://finnhub.io/api/v1/forex/exchange?token=",
-      "forexSymbolsApiUrl":"https://finnhub.io/api/v1/forex/symbol?exchange=",
-      "forexExchangeRateApiUrl":"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE",
-      "forexDailyApiUrl":"https://www.alphavantage.co/query?function=FX_DAILY",
-      "optionsUrl":"https://query2.finance.yahoo.com/v7/finance/options/",
-      "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
-      "dev.environment": false
-      }'
-    depends_on:
-      mysql:
-        condition: service_healthy
+      build:
+        context: fetching-service/
+        dockerfile: Dockerfile
+        args:
+          JAR_FILE: fetching-service/target/*.jar
+          CACHEBUST: ${CI_COMMIT_SHA}  # Use a unique value to bust the cache
+      container_name: fetching-service-container
+      restart: always
+      ports:
+        - "8082:8082"  # Adjust the port as needed
+      environment:
+        SPRING_APPLICATION_JSON: '{
+          "spring.datasource.url": "jdbc:postgresql://postgres:5432/bank_marketservice",
+          "spring.datasource.username": "myusername",
+          "spring.datasource.password": "mypassword",
+          "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.PostgreSQLDialect",
+          "spring.datasource.driver-class-name": "org.postgresql.Driver",
+          "spring.jpa.hibernate.ddl-auto" : "update",
+          "oauth.jwt.secret": "secret_key",
+          "listingAPItoken": "pk_f87286e075c94cc484405da70691c030",
+          "alphaVantageAPIToken":"OF6BVKZOCXWHD9NS",
+          "forexAPItoken": "cnr3i41r01qs2jr5d5bgcnr3i41r01qs2jr5d5c0",
+          "listingNameApiUrl":"https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=",
+          "updateListingApiUrl":"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=",
+          "basicStockInfoApiUrl":"https://www.alphavantage.co/query?function=OVERVIEW&symbol=",
+          "HistoryListingApiUrl":"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=",
+          "forexExchangePlaceApiUrl":"https://finnhub.io/api/v1/forex/exchange?token=",
+          "forexSymbolsApiUrl":"https://finnhub.io/api/v1/forex/symbol?exchange=",
+          "forexExchangeRateApiUrl":"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE",
+          "forexDailyApiUrl":"https://www.alphavantage.co/query?function=FX_DAILY",
+          "optionsUrl":"https://query2.finance.yahoo.com/v7/finance/options/",
+          "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
+          "dev.environment": false,
+          "spring.devtools.restart.additional.exclude": "logs/**"
+        }'
+      depends_on:
+        postgres:
+          condition: service_healthy
