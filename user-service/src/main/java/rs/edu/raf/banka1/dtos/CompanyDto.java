@@ -1,11 +1,13 @@
 package rs.edu.raf.banka1.dtos;
 
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@EqualsAndHashCode
 public class CompanyDto {
     private Long id;
     private String companyName;

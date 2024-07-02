@@ -20,6 +20,7 @@ public class TransferMapper {
         dto.setConvertedAmount(transfer.getConvertedAmount());
         dto.setDateOfPayment(transfer.getDateOfPayment());
         dto.setExchangeRate(transfer.getExchangeRate());
+
         if (transfer.getSenderBankAccount() != null) {
             dto.setSenderAccountNumber(transfer.getSenderBankAccount().getAccountNumber());
             dto.setSenderName(transfer.getSenderBankAccount().getCustomer().getFirstName() + " " + transfer.getSenderBankAccount().getCustomer().getLastName());
@@ -27,8 +28,12 @@ public class TransferMapper {
         if (transfer.getRecipientBankAccount() != null) {
             dto.setRecipientAccountNumber(transfer.getRecipientBankAccount().getAccountNumber());
         }
-        dto.setPreviousCurrency(transfer.getCurrencyFrom().getCurrencyCode());
-        dto.setExchangedTo(transfer.getCurrencyTo().getCurrencyCode());
+        if(transfer.getCurrencyFrom() != null) {
+            dto.setPreviousCurrency(transfer.getCurrencyFrom().getCurrencyCode());
+        }
+        if(transfer.getCurrencyTo() != null) {
+            dto.setExchangedTo(transfer.getCurrencyTo().getCurrencyCode());
+        }
         dto.setProfit(transfer.getCommission());
 
         return dto;
