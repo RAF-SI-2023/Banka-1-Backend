@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import rs.edu.raf.banka1.dtos.CompanyDto;
 import rs.edu.raf.banka1.dtos.CreateCompanyDto;
 import rs.edu.raf.banka1.dtos.JoinCompanyDto;
 import rs.edu.raf.banka1.exceptions.CompanyNotFoundException;
@@ -15,11 +16,14 @@ import rs.edu.raf.banka1.exceptions.CustomerNotFoundException;
 import rs.edu.raf.banka1.mapper.BankAccountMapper;
 import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.mapper.CompanyMapper;
+import rs.edu.raf.banka1.model.BankAccount;
 import rs.edu.raf.banka1.model.Company;
 import rs.edu.raf.banka1.model.Currency;
 import rs.edu.raf.banka1.model.Customer;
 import rs.edu.raf.banka1.repositories.*;
+import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CompanyService;
+import rs.edu.raf.banka1.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -160,6 +164,44 @@ class CompanyServiceImplTest {
             when(customerRepository.findCustomerByEmail("customerEmail")).thenThrow(CustomerNotFoundException.class);
 
             assertThrows(CustomerNotFoundException.class, () -> companyService.joinCompany(joinCompanyDto));
+        }
+    }
+
+    @Nested
+    class GetBankCompanyTests {
+        @Test
+        void shouldGetBank() {
+            Company company = new Company();
+            company.setCompanyName("company name");
+            company.setPib("123456789");
+            company.setAdress("company address");
+            company.setJobId("jobId");
+            company.setFaxNumber("faxNumber");
+            company.setIdNumber("idNumber");
+            company.setRegistrationNumber("regNumber");
+            company.setTelephoneNumber("telephoneNumber");
+
+
+            CompanyDto companyDto = new CompanyDto();
+            companyDto.setCompanyName("company name");
+            companyDto.setPib("123456789");
+            companyDto.setAddress("company address");
+            companyDto.setJobId("jobId");
+            companyDto.setFaxNumber("faxNumber");
+            companyDto.setIdNumber("idNumber");
+            companyDto.setRegistrationNumber("regNumber");
+            companyDto.setTelephoneNumber("telephoneNumber");
+
+            BankAccount bankAccount = new BankAccount();
+            bankAccount.setCompany(company);
+
+            when(bankAccountRepository.findBankByCurrencyCode(anyString())).thenReturn(Optional.of(bankAccount));
+
+            CompanyDto result = companyService.getBankCompany();
+
+            assertEquals(companyDto, result);
+
+            verify(bankAccountRepository).findBankByCurrencyCode(eq(Constants.DEFAULT_CURRENCY));
         }
     }
 
