@@ -1,5 +1,7 @@
 # Backend Banka 1
 
+Junski rok CI
+
 ## Running the application
 
 ### Locally
