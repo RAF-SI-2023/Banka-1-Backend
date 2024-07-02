@@ -319,6 +319,7 @@ public class TransferServiceImpl implements TransferService {
 
         for (Transfer t:allTransfers){
 //            double commisison = Transfer.calculateCommission(t.getAmount());
+            if(t.getCommission() == null) continue;
             totalProfit+=t.getCommission();
         }
         transfersReportDto.setProfit(totalProfit);
