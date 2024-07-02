@@ -112,3 +112,5 @@ rm .git/hooks/pre-commit
 
 
 izmene
+
+
