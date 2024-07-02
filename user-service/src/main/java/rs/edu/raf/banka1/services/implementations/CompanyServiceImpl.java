@@ -1,8 +1,10 @@
 package rs.edu.raf.banka1.services.implementations;
 
 import org.springframework.stereotype.Service;
+import rs.edu.raf.banka1.dtos.CompanyDto;
 import rs.edu.raf.banka1.dtos.CreateCompanyDto;
 import rs.edu.raf.banka1.dtos.JoinCompanyDto;
+import rs.edu.raf.banka1.exceptions.BankAccountNotFoundException;
 import rs.edu.raf.banka1.exceptions.CompanyNotFoundException;
 import rs.edu.raf.banka1.exceptions.CustomerNotFoundException;
 import rs.edu.raf.banka1.mapper.BankAccountMapper;
@@ -10,6 +12,7 @@ import rs.edu.raf.banka1.mapper.CapitalMapper;
 import rs.edu.raf.banka1.mapper.CompanyMapper;
 import rs.edu.raf.banka1.model.*;
 import rs.edu.raf.banka1.repositories.*;
+import rs.edu.raf.banka1.services.BankAccountService;
 import rs.edu.raf.banka1.services.CompanyService;
 import rs.edu.raf.banka1.utils.Constants;
 
@@ -88,5 +91,10 @@ public class CompanyServiceImpl implements CompanyService {
         customer.setCompany(company);
         customerRepository.save(customer);
         return true;
+    }
+
+    @Override
+    public CompanyDto getBankCompany() {
+        return companyMapper.toDto(bankAccountRepository.findBankByCurrencyCode(Constants.DEFAULT_CURRENCY).orElseThrow(BankAccountNotFoundException::new).getCompany());
     }
 }

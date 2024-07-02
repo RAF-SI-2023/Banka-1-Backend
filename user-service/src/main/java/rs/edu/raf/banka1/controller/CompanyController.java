@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import rs.edu.raf.banka1.dtos.CompanyDto;
 import rs.edu.raf.banka1.dtos.CreateCompanyDto;
 import rs.edu.raf.banka1.dtos.JoinCompanyDto;
 import rs.edu.raf.banka1.model.Company;
@@ -42,6 +43,21 @@ public class CompanyController {
     public ResponseEntity<List<Company>> getPublicStockCapitals() {
         // vraca za SVE companies
         return new ResponseEntity<>(companyService.getCompanies(null, null, null), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/bank", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get bank", description = "Get bank")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class,
+                                    subTypes = {Company.class}))}),
+            @ApiResponse(responseCode = "403", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<CompanyDto> getBank() {
+        // vraca banku
+        return new ResponseEntity<>(companyService.getBankCompany(), HttpStatus.OK);
     }
 
     @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
