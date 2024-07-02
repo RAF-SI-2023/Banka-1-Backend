@@ -1,5 +1,4 @@
 # Backend Banka 1
-test
 ## Running the application
 
 ### Locally
