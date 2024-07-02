@@ -106,3 +106,11 @@ icacls .git\hooks\pre-commit /inheritance:r /grant:r "$($env:UserName):(RX)"
 rm .git/hooks/pre-commit
 ```
 
+
+
+
+
+
+izmene
+
+
