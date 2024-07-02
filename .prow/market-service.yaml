@@ -38,11 +38,7 @@ presubmits:
 
               start-docker.sh
 
-              docker compose -f docker.compose.yaml.example up -d mysql
-              
-              docker compose -f docker.compose.yaml.example up -d user-service
-              docker compose -f docker.compose.yaml.example up -d market-service
-              docker compose -f docker.compose.yaml.example up -d fetching-service
+              docker compose -f docker.compose.yaml.example up -d
               
               sleep 120
 
