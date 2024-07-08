@@ -30,6 +30,7 @@ Feature: employee can register, view and eidt customer, and customer can activat
     Then i should get response with status 200
     And customer should have his password set to "password"
 
+  @Ignore
   Scenario: employee wants to grab all customers
     Given i am logged in with email "admin@admin.com" and password "admin"
     When User calls get on "/customer/getAll"

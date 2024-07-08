@@ -32,7 +32,29 @@ services:
         CACHEBUST: ${CI_COMMIT_SHA}  # Use a unique value to bust the cache
     image: user-service
     environment:
-      - "SPRING_PROFILES_ACTIVE=test"
+      SPRING_APPLICATION_JSON: '{
+              "spring.datasource.url": "jdbc:mysql://mysql:3306/bank_userservice",
+              "spring.datasource.username": "root",
+              "spring.datasource.password": "root",
+              "spring.jpa.database-platform":"org.hibernate.dialect.MySQL8Dialect",
+              "spring.datasource.driver-class-name": "com.mysql.cj.jdbc.Driver",
+              "spring.jpa.hibernate.ddl-auto" : "update",
+              "oauth.jwt.secret": "secret_key",
+              "spring.mail.host":"smtp.gmail.com",
+              "spring.mail.port":587,
+              "spring.mail.username":"noreply.rafbanka1@gmail.com",
+              "spring.mail.password":"fony nhtw hlah vzul",
+              "spring.mail.properties.mail.smtp.auth":true,
+              "spring.mail.properties.mail.smtp.starttls.enable":true,
+              "server.port": 8080,
+              "front.port": 4200,
+              "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
+              "exchangeRateAPIToken": "6f2fe71358f82f6f372edee7",
+              "exchangeRateApiUrl": "https://v6.exchangerate-api.com/v6/",
+              "marketServiceUrl": "http://market-service:8081",
+              "spring.devtools.restart.additional.exclude": "logs/**",
+              "spring.profiles.active":"test"
+            }'
     #container_name: user-service-container
     restart: always
     ports:
@@ -50,6 +72,31 @@ services:
         CACHEBUST: ${CI_COMMIT_SHA}  # Use a unique value to bust the cache
     image: market-service
     #container_name: market-service-container
+    environment:
+      SPRING_APPLICATION_JSON: '{
+            "spring.datasource.url": "jdbc:mysql://mysql:3306/bank_marketservice",
+            "spring.datasource.username": "root",
+            "spring.datasource.password": "root",
+            "spring.jpa.database-platform" : "org.hibernate.dialect.MySQL8Dialect",
+            "spring.datasource.driver-class-name": "com.mysql.cj.jdbc.Driver",
+            "spring.jpa.hibernate.ddl-auto" : "update",
+            "oauth.jwt.secret": "secret_key",
+            "listingAPItoken": "pk_f87286e075c94cc484405da70691c030",
+            "alphaVantageAPIToken":"OF6BVKZOCXWHD9NS",
+            "forexAPItoken": "cnr3i41r01qs2jr5d5bgcnr3i41r01qs2jr5d5c0",
+            "listingNameApiUrl":"https://api.iex.cloud/v1/data/core/stock_collection/sector?collectionName=",
+            "updateListingApiUrl":"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=",
+            "basicStockInfoApiUrl":"https://www.alphavantage.co/query?function=OVERVIEW&symbol=",
+            "HistoryListingApiUrl":"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=",
+            "forexExchangePlaceApiUrl":"https://finnhub.io/api/v1/forex/exchange?token=",
+            "forexSymbolsApiUrl":"https://finnhub.io/api/v1/forex/symbol?exchange=",
+            "forexExchangeRateApiUrl":"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE",
+            "forexDailyApiUrl":"https://www.alphavantage.co/query?function=FX_DAILY",
+            "optionsUrl":"https://query2.finance.yahoo.com/v7/finance/options/",
+            "springdoc.packagesToScan": "rs.edu.raf.banka1.controller",
+            "dev.environment": false,
+            "spring.devtools.restart.additional.exclude": "logs/**"
+          }'
     restart: always
     ports:
       - "8081:8081"  # Adjust the port as needed
